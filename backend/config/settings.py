@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    #'apps.users',
-    #What ta hell
+    'apps.users.apps.UsersConfig',
+    #What ta hell, its supposed to fix it. WTF.
 ]
 
 MIDDLEWARE = [
@@ -97,6 +97,8 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -124,6 +126,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = "users.User"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
