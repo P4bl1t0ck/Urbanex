@@ -37,11 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    'rest_framework', #Some Errors inside the Installed apps
     'rest_framework_simplejwt',
     'corsheaders',
     'apps.users.apps.UsersConfig',
-    #What ta hell, its supposed to fix it. WTF.
+    
 ]
 
 MIDDLEWARE = [
@@ -59,7 +59,7 @@ CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':(
-        'rest_framework_simplejwt.authentication.JWTuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         ),
     }
 
