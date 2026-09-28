@@ -37,3 +37,32 @@ class LoginView(APIView):
             "refresh": str(refresh),
             "role": user.role,
         })
+        
+class PropertyListCreateView(generics.ListCreateAPIView):
+    serializer_class = PropertySerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = sself.request.user
+        if user.role == 'admin'
+            return Property.objects.all()
+        return Property.objects.filter(agent=user)
+    def perfomr_create(self, serializer):
+        serializer.save(agent=self.request.user, status='captacion')
+        
+class PropertyPublishView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        try:
+            property_obj = Property.objects.get(pk=pk)
+        except Property.DoesNotExist:
+            return Response ({"detail":"Propiedad no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+    
+    property_obj.status = 'disponible'
+    property_obj.save()
+    
+    return Response({
+        "detail": "Propiedad publicada con éxito. Ahora es visible en el catálogo público.",
+        "status": property_obj.status
+    }), status= status.HTTP_200_OK

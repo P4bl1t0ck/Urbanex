@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'apps.users.apps.UsersConfig',
+    'apss.properties.apps.PropertiesConfig',
     
 ]
 

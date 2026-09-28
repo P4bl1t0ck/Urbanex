@@ -22,7 +22,7 @@ from apps.users.views import LoginView
 urlpatterns = [
     #path('admin/', admin.site.urls),
     path("api/auth/", include("apps.users.urls")),
-    # Som URLS for testing
-    path("login/",LoginView.as_view(), name="login"),
-    #Trying to fix some bugs.
+    path("api/properties/", include("apps.properties.urls")),
+    #Solo deberia de estar llamando a la URl de Next.js
+    #Only is supposed to call the url from next.js
 ]
