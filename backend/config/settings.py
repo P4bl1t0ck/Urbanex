@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,12 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework', #Some Errors inside the Installed apps
+    'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
     'apps.users.apps.UsersConfig',
-    'apss.properties.apps.PropertiesConfig',
-    
+    'apps.users.properties.apps.PropertiesConfig',  # <-- Se corrigió 'apss' a 'apps'
 ]
 
 MIDDLEWARE = [
@@ -56,7 +56,11 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+    #"http://127.0.0.1:3000" #IN case that doesnt sense the original url
+    #It doesnt work. 
+    ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':(
@@ -144,3 +148,10 @@ MAILERS = {
     },
 }
 
+APPEND_SLASH = False  # Nos permitira el pasar la información si tiene el slash al final de la api que hace fecth.
+
+## Quitar esto para pruebas y produccion. 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME':timedelta(days=1), # El token durara con una vida de un dia. 
+    'REFRESH_TOKEN_LIFETIME':timedelta(days=7), #El token se actualizara cada siete dias. 
+}

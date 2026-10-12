@@ -35,9 +35,9 @@ class Property(models.Model):
     #HU-01 Y HU-02 : Asesor captador y responsable inicial
     agent = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete = models.SET_NULL,
-        null = True,
-        realted_name='properties'
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='properties'  # <-- Se corrigió 'realted_name'
     )
     
     # HU-09: Motivo  de salida del mercado si pasa a No Disponible

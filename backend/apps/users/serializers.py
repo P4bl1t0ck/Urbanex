@@ -10,8 +10,8 @@ class LoginSerializer(serializers.Serializer):
 
 #Now we create the class thats going to handle the property Serializer
 class PropertySerializer(serializers.ModelSerializer):
-    agent_name = serializers.ReadOnlyField(source='agent.get_full_name')
-    
+    agent_name = serializers.SerializerMethodField()
+    #agent_name = serializers.ReadOnlyField(source='agent.get_full_name') #It doesnt give the name and lastname of the agents
     class Meta:
         model = Property
         fields = '__all__'
@@ -28,5 +28,10 @@ class PropertySerializer(serializers.ModelSerializer):
             })
             
         return data
-            
     
+    def get_agent_name(self, obj):
+        if obj.agent:
+            # Intenta con el nombre completo; si está vacío, devuelve el username o el email
+            full_name = f"{obj.agent.first_name} {obj.agent.last_name}".strip()
+            return full_name if full_name else (obj.agent.username or obj.agent.email)
+        return ""

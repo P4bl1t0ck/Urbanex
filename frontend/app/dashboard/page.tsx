@@ -9,7 +9,7 @@ export default function DashboardPage(){
     useEffect(() => {
         const token = localStorage.getItem("access");
         if(!token){
-            router.push("/login");
+            router.push("/login"); //I have to configured this to be an exit for the backend.
             return;
         }
         setLoading(false);

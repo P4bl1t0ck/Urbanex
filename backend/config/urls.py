@@ -1,7 +1,7 @@
 """
 URL configuration for config project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
+The `urlpatterns` list routes URLs to views. For more info rmation please see:
     https://docs.djangoproject.com/en/6.1/topics/http/urls/
 Examples:
 Function views
@@ -22,7 +22,5 @@ from apps.users.views import LoginView
 urlpatterns = [
     #path('admin/', admin.site.urls),
     path("api/auth/", include("apps.users.urls")),
-    path("api/properties/", include("apps.properties.urls")),
-    #Solo deberia de estar llamando a la URl de Next.js
-    #Only is supposed to call the url from next.js
+    #path("api/properties/", include("apps.properties.urls")),
 ]

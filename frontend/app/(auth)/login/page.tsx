@@ -15,7 +15,7 @@ export default function LoginPage(){
     e.preventDefault();
     setError("");
     try{
-      const data = await apiFetch("/api/auth/login",
+      const data = await apiFetch("/api/auth/login/", //Fecths the info from the :8. and then pass the view 
         {
           method: "POST",
           body: JSON.stringify({email, password}),
@@ -32,7 +32,7 @@ export default function LoginPage(){
 
   //This JSX form is going to take our data, like the email, and the password.
 
-  return (
+  return ( //This is the view that it show when we fecth the info
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto mt-20">
       <h1 className="text-2xl font-semibold">Iniciar sesión</h1>
       <input
