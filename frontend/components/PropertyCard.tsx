@@ -15,26 +15,25 @@ export default function PropertyCard({ property }: { property: Property }) {
   return (
     <div >
       <div >
-        /*We bring literally the image */
         <img
         
           src={mainImage}
           alt={property.title}
           className="w-full h-full object-cover"
         />
-        /*Agregamos el status */
         <span>
-          {property.status.replace('_', ' ')}
+          {property?.status ? property.status.replace('_', ' '): 'Sin estado'}
+          /*That actully expasins a lot. It doesn´t finds the image. */
         </span>
       </div>
     
-      /*The put the title the bedrooms and the area_m2 */
+      
       <div >
         <h3 >{property.title}</h3>
         <p >{property.location}</p>
         
         <div >
-          <span> {property.bedrooms} hab</span>
+          <span> {property.bedrooms} habitación</span>
           <span> {property.bathrooms} baños</span>
           <span> {property.area_m2} m2</span>
         </div>
