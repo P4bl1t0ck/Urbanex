@@ -1,17 +1,44 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
-from .serializers import LoginSerializer, PropertySerializer
-from .models import Property
-# Create your views here.
+from rest_framework.decorators import action
+from .serializers import LoginSerializer, PropertySerializer, PropertyImageSerializer
+from .models import Property, PropertyImage
 
 User = get_user_model()
 
+'''
+The Views work to enrute, fetch, grab, get and retrive the information from the database and send it to the Template. 
+MVT (Model-View-Template): User -> (View <-> Database) --> Template ->> User.
+MVC (Model-View.Controller): User -> (View -> Model -> Database) --> View ->> User.
+
+The main difference between this two patterns designs is a bit tricky, not because they are different, its because they dothe same thing.
+Fetch data -> Send it to a Urls, or HTML template and then send it again on a template to the user again (template.)
+Same MVC patter as the MVT pattern on django and on comparassion with  laravel(.php)
+
+So that´s why some of the functions and methods inside the classes, are so similar to a query to the database.
+
+'''
+class PropertyImageViewSet(viewsets.ModelViewSet): #We pass the viewsets
+    queryset  = PropertyImage.objects.all() # Mismas funciones que las de un controlador.
+    serializer_class = PropertyImageSerializer
+    permissions_classes = (MultiPartParser, FormParser) # Nesecario para procesas imagenes
+    
+    def create(self, request, *arsg, **kwargs):
+        #Permite crear un objeto para la imagen y subir la imagen.
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    '''
+    As you can see, this method its the great example of the fecth, get, or query the database. 
+    '''
 class LoginView(APIView):
-    def post(self, request):
+    def post(self, request): #Post Function WEB
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
@@ -44,7 +71,7 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     serializer_class = PropertySerializer
     permission_classes = [permissions.IsAuthenticated]
     
-    def get_queryset(self):
+    def get_queryset(self): #
         user = self.request.user
         if user.role == 'admin':
             return Property.objects.all()
@@ -79,3 +106,4 @@ class PropertyDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     permission_classes = [permissions.IsAuthenticated]
+    

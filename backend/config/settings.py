@@ -155,3 +155,8 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':timedelta(days=1), # El token durara con una vida de un dia. 
     'REFRESH_TOKEN_LIFETIME':timedelta(days=7), #El token se actualizara cada siete dias. 
 }
+
+import os 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -18,12 +18,13 @@ class Property(models.Model):
     #The class about every property.
     # We create 
     OPERATION_CHOICES = [('venta','Venta'),('arriendo','Arriendo'),]
-    PROPERTY_TYPES = [('casa','Casa'),('departamento','Deparrtamento'),('local','Local Comercial'),]
+    PROPERTY_TYPES = [('casa','Casa'),('departamento','Departamento'),('local','Local Comercial'),]
     STATUS_CHOICES = [('captacion','En captación'),('disponible','Disponible'),('reservador','Reservado'),('vendido', 'Vendido'),('arrendado', 'Arrendado'),('no_disponible', 'No disponible'),]
     
     title = models.CharField(max_length=200)
     description = models.TextField()
     property_type = models.CharField(max_length=20, choices=STATUS_CHOICES, default='captacion')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='no_disponible') # We add the status field to our model, for better handle errors
     
     price = models.DecimalField(max_digits=12, decimal_places=2)
     area_m2 = models.FloatField()
@@ -50,3 +51,20 @@ class Property(models.Model):
         # Definimos nuestra respuesta en string con un simple estatus y titulo.
         return f"{self.title} ({self.status})"
     
+class PropertyImage(models.Model): #We create the model for the images of our properties
+    '''
+    Modelo para guardar multiples imagnees por cada propiedad por medio de una FK a Property
+    '''
+    property = models.ForeignKey( #La conexion directa de Property(model) con las imagenes como FK.
+        Property,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+    
+    image = models.ImageField(upload_to='properties/images/')#Folder de guardado de imagenes
+    caption = models.CharField(max_length=150, blank=True, null=True) # Descripcion
+    uploaded_at = models.DateTimeField(auto_now_add=True) #Info de carga.
+    
+    def __str__(self):
+        return f"Imagen de {self.property.title}" 
+    #Nuestro ToString de nuestra clase

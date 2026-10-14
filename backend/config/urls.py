@@ -19,8 +19,15 @@ from django.urls import path , include
 from apps.users.views import LoginView
 
 
+from django.conf import settings #Nesecitamos esas configuraciones de los archivos de la maquina
+from django.conf.urls.static import static
+
+
 urlpatterns = [
     #path('admin/', admin.site.urls),
     path("api/auth/", include("apps.users.urls")),
     #path("api/properties/", include("apps.properties.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
