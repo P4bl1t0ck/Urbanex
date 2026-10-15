@@ -31,8 +31,9 @@ export async function getProperties(): Promise<Property[]>  {
 
 //More specific Function of seacrhing the Property.
 export async function getPropertyById(id:string): Promise<Property> {
-  const res = await fetch(`${API_URL}/properties/${id}`, {
+  const res = await fetch(`${API_URL}/properties/${id}/`, {
     cache: 'no-store',
+    //Para que no se guarde dentro del cache.
   })
   
   if(!res.ok){

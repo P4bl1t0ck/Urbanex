@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
+    'corsheaders', #Already installed
     'apps.users.apps.UsersConfig',
     'apps.users.properties.apps.PropertiesConfig',  # <-- Se corrigió 'apss' a 'apps'
 ]
@@ -59,10 +59,11 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000"
-    #"http://127.0.0.1:3000" #IN case that doesnt sense the original url
+    "http://localhost:3000",
+    "http://127.0.0.1:3000", #IN case that doesnt sense the original url
     #It doesnt work. 
     ]
+CORS_ALLOWED_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':(

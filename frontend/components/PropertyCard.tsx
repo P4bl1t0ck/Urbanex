@@ -26,28 +26,24 @@ export default function PropertyCard({ property }: { property: Property }) {
           /*That actully expasins a lot. It doesn´t finds the image. */
         </span>
       </div>
-    
-      
-      <div >
-        <h3 >{property.title}</h3>
-        <p >{property.location}</p>
-        
+      <div>
+        <h3>{property.title}</h3>
+        <p>{property.location}</p>
         <div >
           <span> {property.bedrooms} habitación</span>
           <span> {property.bathrooms} baños</span>
           <span> {property.area_m2} m2</span>
         </div>
-
         <div >
           <span >\${property.price}</span>
           <Link 
             href={`/properties/${property.id}`}
-            className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700"
-          >
+            className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700">
             Ver Detalle
           </Link>
         </div>
       </div>
     </div>
+
   );
 }

@@ -91,6 +91,7 @@ class PropertyListCreateView(generics.ListCreateAPIView):
         
 class PropertyPublishView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticatedOrReadOnly] #Deseeperate options.
 
     def post(self, request, pk):
         try:
@@ -114,7 +115,10 @@ class PropertyPublishView(APIView):
             status=status.HTTP_200_OK
         )
 class PropertyDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Property.objects.all()
+    queryset = Property.objects.all() #Query
     serializer_class = PropertySerializer
-    permission_classes = [permissions.IsAuthenticated]
     
+    
+    ## What the permmissions are capable of do lol.
+    # EL ERROR ESTÁ AQUÍ. Probablemente diga: [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
