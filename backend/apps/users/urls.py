@@ -12,7 +12,6 @@ urlpatterns = [
 ]
 
 router = DefaultRouter()
-router.register(r'properties', PropertyImageViewSet, basename='property')
 router.register(r'property-images', PropertyImageViewSet, basename='property-image')
 
-urlpatterns = router.urls
+urlpatterns += router.urls

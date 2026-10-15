@@ -23,13 +23,14 @@ Same MVC patter as the MVT pattern on django and on comparassion with  laravel(.
 So that´s why some of the functions and methods inside the classes, are so similar to a query to the database.
 
 '''
-class PropertyImageViewSet(viewsets.ModelViewSet): #We pass the viewsets
-    queryset  = PropertyImage.objects.all() # Mismas funciones que las de un controlador.
+class PropertyImageViewSet(viewsets.ModelViewSet):
+    queryset = PropertyImage.objects.all()
     serializer_class = PropertyImageSerializer
-    permissions_classes = (MultiPartParser, FormParser) # Nesecario para procesas imagenes
+    # Corrección de nombres de variables
+    parser_classes = [MultiPartParser, FormParser] 
+    permission_classes = [permissions.IsAuthenticated]
     
-    def create(self, request, *arsg, **kwargs):
-        #Permite crear un objeto para la imagen y subir la imagen.
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -81,7 +82,8 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer): # Revisar sobre un inesperado error al momento de intentar crear una propiedad.
         # TODO: Verificar en las historias de usuario si se requiere un campo 'status' o 'property_type' para la etapa de captación.
         # serializer.save(agent=self.request.user, status='captacion')
-        serializer.save(agent=self.request.user, property_type='captacion') #It must have to be captacion
+        #serializer.save(agent=self.request.user, property_type='captacion') #Already has the captacion validation on the model.
+        serializer.save(agent=self.request.user)
         
 class PropertyPublishView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -92,6 +94,11 @@ class PropertyPublishView(APIView):
         except Property.DoesNotExist:
             return Response({"detail": "Propiedad no encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
+        #Validacion de seguridad 
+        if request.user != property_obj.agent and request.user.role != 'admin':
+            return Response({"detail":"No tienes permiso para publicar esta propiedad."}, status=status.HTTP_403_FORBIDDEN)
+        
+        #Si pasa la verificaciónh Para a disponible y guardara la propiedad. Esto nos asegura que solo sea los usuarios permitidos, Pronto definiremos cuales.
         property_obj.status = 'disponible'
         property_obj.save()
 

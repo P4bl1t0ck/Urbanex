@@ -23,8 +23,8 @@ class Property(models.Model):
     
     title = models.CharField(max_length=200)
     description = models.TextField()
-    property_type = models.CharField(max_length=20, choices=STATUS_CHOICES, default='captacion')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='no_disponible') # We add the status field to our model, for better handle errors
+    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES, default='departamento')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='captacion') # We add the status field to our model, for better handle errors
     
     price = models.DecimalField(max_digits=12, decimal_places=2)
     area_m2 = models.FloatField()

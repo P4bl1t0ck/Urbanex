@@ -17,14 +17,16 @@ class PropertyImageSerializer(serializers.ModelSerializer):
 #Now we create the class thats going to handle the property Serializer
 class PropertySerializer(serializers.ModelSerializer):
     agent_name = serializers.SerializerMethodField()
-    #agent_name = serializers.ReadOnlyField(source='agent.get_full_name') #It doesnt give the name and lastname of the agents
+    #Agregamos las imagenes vinculadas.
+    images = PropertyImageSerializer(many=True, read_only=True)
     class Meta:
         model = Property
         #fields = '__all__' # No hace caso a las peticiones y comrpobaciones durante las modificaciones de json files.
         fields = [
             'id', 'agent', 'agent_name', 'title', 'description', 
             'property_type', 'status', 'price', 'area_m2', 
-            'bedrooms', 'bathrooms', 'parking_spaces', 'location', 
+            'bedrooms', 'bathrooms', 'parking_spaces', 'location',
+            'images',
             'unavailability_reason', 'created_at', 'updated_at'
         ]
         read_only_fields = ('agent','created_at','updated_at')
