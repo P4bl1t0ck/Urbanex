@@ -1,6 +1,7 @@
 import { Property } from '@/types/property';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/auth';
-//New Path for out project. Its the same as Setting on Django
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
 //We create the modular function for handle the infor from the DANJO API.
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
@@ -16,7 +17,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
 //The asyncronic function that we are gonna use for fetch the images and the database info.
 
 export async function getProperties(): Promise<Property[]>  {
-  const res = await fetch(`${API_URL}/properties/`,{
+  const res = await fetch(`${API_URL}/api/auth/properties/`,{
     cache: 'no-store', // SWe didnt store any type of data inside the we html based.
   }); //We pass all the info from the backend.
   
