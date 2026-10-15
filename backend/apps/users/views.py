@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
 from .serializers import LoginSerializer, PropertySerializer, PropertyImageSerializer
 from .models import Property, PropertyImage
+from rest_framework import permissions
 
 User = get_user_model()
 
@@ -69,20 +70,23 @@ class LoginView(APIView):
         })
         
 class PropertyListCreateView(generics.ListCreateAPIView):
+    queryset = Property.objects.all()
     serializer_class = PropertySerializer
-    permission_classes = [permissions.IsAuthenticated]
     
+    #The reason why it doesnt fetch all the properties.
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    ''' I hate you.
     def get_queryset(self): #
-        user = self.request.user
-        if user.role == 'admin':
-            return Property.objects.all()
-        return Property.objects.filter(agent=user)
+            user = self.request.user
+            if user.role == 'admin':
+                return Property.objects.all()
+            return Property.objects.filter(agent=user)
+        
+    '''
     
-    ##This function have a change on status = 'captacion', check it out if it part of the bussiness nesecity.
     def perform_create(self, serializer): # Revisar sobre un inesperado error al momento de intentar crear una propiedad.
-        # TODO: Verificar en las historias de usuario si se requiere un campo 'status' o 'property_type' para la etapa de captación.
-        # serializer.save(agent=self.request.user, status='captacion')
-        #serializer.save(agent=self.request.user, property_type='captacion') #Already has the captacion validation on the model.
+        #Verificado.
         serializer.save(agent=self.request.user)
         
 class PropertyPublishView(APIView):
