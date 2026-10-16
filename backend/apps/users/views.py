@@ -51,7 +51,7 @@ class LoginView(APIView):
         if user and user.is_locked:
             return Response({"detail": "Cuenta bloqueada. Contacta al administrador."}, status=403)
 
-        if not user or not user.check_password(password):
+        if not user or not user.check_password(password): #Regla de negocio.
             if user:
                 user.failed_attempts += 1
                 if user.failed_attempts >= 5:
@@ -75,15 +75,6 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     
     #The reason why it doesnt fetch all the properties.
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    ''' I hate you.
-    def get_queryset(self): #
-            user = self.request.user
-            if user.role == 'admin':
-                return Property.objects.all()
-            return Property.objects.filter(agent=user)
-        
-    '''
     
     def perform_create(self, serializer): # Revisar sobre un inesperado error al momento de intentar crear una propiedad.
         #Verificado.

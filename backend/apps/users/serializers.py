@@ -7,6 +7,8 @@ User = get_user_model()
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+    #Maybe this is the reason why the login is not working, because the serializer is not returning the token. 
+    #YEAH that what i think ! 
     
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:

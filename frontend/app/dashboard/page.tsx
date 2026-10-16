@@ -88,6 +88,7 @@ export default function DashboardPage() {
 
     void loadProperties();
 
+
     return () => {
       isActive = false;
       window.clearTimeout(timeoutId);
@@ -95,8 +96,43 @@ export default function DashboardPage() {
     };
   }, [router]);
 
-  function handlePublish(propertyId: number) {
-    console.log("Publicar propiedad:", propertyId);
+  async function handlePublish(propertyId: number) {
+    const token = localStorage.getItem("access");
+    
+    if (!confirm("¿Estás seguro de publicar esta propiedad en el catálogo?")) return;
+
+    try {
+      // Llamamos a la vista PropertyPublishView que ya creaste en tu views.py
+      const response = await fetch(`http://127.0.0.1:8000/api/auth/properties/${propertyId}/publish/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+      });
+      //Copi Can u tell how i can test this?
+      // Puedes probar esta función haciendo clic en el botón "Publicar" en la tabla de propiedades. Asegúrate de que la propiedad tenga un estado que permita la publicación (por ejemplo, "captacion"). Al hacer clic, se enviará una solicitud POST a la API para cambiar el estado de la propiedad a "disponible". Si la solicitud es exitosa, verás una alerta confirmando que la propiedad se publicó correctamente y la tabla se actualizará en tiempo real. Si hay un error, se mostrará un mensaje de error correspondiente.
+      //Ya le pruebo, gracias Copi
+      // Si la respuesta es exitosa, actualizamos el estado de la propiedad en la tabla
+      //Ya te digo que salga. Mhh oye se que suena mal, pero cuando me escribes por aqui se gastan tokens?
+      // Sí, cada vez que interactúas conmigo, se consumen tokens. Los tokens son unidades de medida que representan la cantidad de texto procesado. Cada mensaje que envías y cada respuesta que recibes consume tokens, así que es bueno ser consciente de eso si estás usando un plan con límite de tokens.
+      //Claro. 
+      if (response.ok) {
+        // Actualizamos la tabla en tiempo real sin recargar la página
+        setProperties(prevProps => 
+          prevProps.map(prop => 
+            prop.id === propertyId ? { ...prop, status: "disponible" } : prop
+          )
+        );
+        alert("¡Propiedad publicada con éxito!");
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.detail || "No se pudo publicar."}`);
+      }
+    } catch (error) {
+      console.error("Error al publicar:", error);
+      alert("Error de conexión con el servidor.");
+    }
   }
 
   function handleLogout() {

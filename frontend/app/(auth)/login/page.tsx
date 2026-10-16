@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 
 export default function LoginPage(){
@@ -8,24 +7,39 @@ export default function LoginPage(){
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const router = useRouter();
+
+
+    useEffect(() => { 
+    //Revisa si el usuario ya esta iniciado sesion y lo redirige al /dashboard
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access");
+      if (token) {
+        window.location.href = "/dashboard";
+      }
+    }
+  }, [])
 
   //Funcion para manejar el error, y el inicio de sesion para el dashboard comun
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     try{
-      const data = await apiFetch("/api/auth/login/", //Fecths the info from the :8. and then pass the view 
+      const data = await apiFetch("/api/auth/login/", //Fetchs the info from the :8. and then pass the view 
         {
+          //Ya debe de estar en formato json, es por eso el error al intentar interpretar un json(json)
           method: "POST",
           body: JSON.stringify({email, password}),
+        });
+
+        if (data?.access) {
+          localStorage.setItem("access", data.access);
+          window.location.href = "/dashboard";
+        } else {
+          setError("No se recibió el token de acceso.");
         }
-      );
-      localStorage.setItem("access", data.access);
-      router.push("/dashboard");
-      //Our try what it wants to fetch, is the email and password inside the path /api/auth/login
-    }catch{
-      setError("Credenciales inválidas o cuenta bloqueda. ");
+    }catch (err: any){
+      console.error("Error al iniciar sesión:", err); //Mas detalle en caso de error de login.
+      setError( err.message || "Credenciales inválidas o cuenta bloqueda. ");
       //Obviusly the main error of what happens if one of the email or password is not correct.
     }
   }
