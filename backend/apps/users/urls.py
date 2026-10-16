@@ -1,5 +1,12 @@
 from django.urls import path
-from .views import LoginView, PropertyListCreateView, PropertyDetailView, PropertyPublishView, PropertyImageViewSet , PropertyImageViewSet
+from .views import (
+    LoginView,
+    MyPropertiesView,
+    PropertyDetailView,
+    PropertyImageViewSet,
+    PropertyListCreateView,
+    PropertyPublishView,
+)
 from rest_framework.routers import DefaultRouter
 
 
@@ -7,6 +14,7 @@ from rest_framework.routers import DefaultRouter
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("properties/", PropertyListCreateView.as_view(), name="property-list-create"),  # <-- Agregada esta ruta
+    path("properties/mine/", MyPropertiesView.as_view(), name="my-properties"),
     path("properties/<int:pk>/", PropertyDetailView.as_view(), name="property-detail"), #No aparece la ruta por error
     path("properties/<int:pk>/publish/", PropertyPublishView.as_view(), name="property-publish"),
 ]

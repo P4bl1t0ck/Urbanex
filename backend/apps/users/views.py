@@ -88,6 +88,25 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer): # Revisar sobre un inesperado error al momento de intentar crear una propiedad.
         #Verificado.
         serializer.save(agent=self.request.user)
+
+class PropertyOwnerOrAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or bool(request.user and request.user.is_authenticated)
+        )
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.agent_id == request.user.id or request.user.role == "admin"
+
+class MyPropertiesView(generics.ListAPIView):
+    serializer_class = PropertySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Property.objects.filter(agent=self.request.user)
         
 class PropertyPublishView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -117,8 +136,4 @@ class PropertyPublishView(APIView):
 class PropertyDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Property.objects.all() #Query
     serializer_class = PropertySerializer
-    
-    
-    ## What the permmissions are capable of do lol.
-    # EL ERROR ESTÁ AQUÍ. Probablemente diga: [permissions.IsAuthenticated]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [PropertyOwnerOrAdminOrReadOnly]

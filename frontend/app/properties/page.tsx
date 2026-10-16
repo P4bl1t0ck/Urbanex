@@ -1,41 +1,56 @@
-// app/properties/page.tsx
-import { getProperties } from "@/lib/api";
 import PropertyCard from "@/components/PropertyCard";
-import { Property } from "@/types/property";
+import SiteNav from "@/components/SiteNav";
+import { getProperties } from "@/lib/api";
+import type { Property } from "@/types/property";
 
-/*  We handle the main View  of our properties.*/
 export default async function PropertiesPage() {
-  try{
-  //An try just in case.
-   const properties = await getProperties();
-    /**Despues manejramos los estilos, por el momento solo creremos la pagina principal. */
-    return(
-        <main className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
-        Catálogo de Propiedades - Urbanex</h1>
-      
-      {properties.length === 0 ? (
-        <p className="text-gray-500">No hay propiedades registradas aún.</p>
-      ) : (
-        <div >
-          {properties.map((prop) => (
-            <PropertyCard key={prop.id} property={prop} />
-          ))}
-        </div>
-      )}
-    </main>
-    );
-  }catch (error){
-    return(
-      <div className="container mx-auto px-4 py-20 text-center flex flex-col items-center">
-        <div className="bg-red-50 p-6 rounded-lg border border-red-200">
-          <h2 className="text-red-700 text-2xl font-bold mb-2">Error de conexión</h2>
-          <p className="text-red-600">No pudimos cargar el catálogo. Verifica que el servidor backend esté en ejecución.</p>
-        </div>
-      </div>
-    );
+  let properties: Property[] = [];
+  let loadFailed = false;
+
+  try {
+    properties = await getProperties();
+  } catch {
+    loadFailed = true;
   }
+
+  return (
+    <>
+      <SiteNav />
+      <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <header className="mb-8">
+            <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">
+              Encuentra tu próximo hogar
+            </p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">
+              Catálogo de propiedades
+            </h1>
+            <p className="mt-2 text-slate-600">
+              Explora las propiedades disponibles en Urbanex.
+            </p>
+          </header>
+
+          {loadFailed ? (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-800"
+            >
+              No pudimos cargar el catálogo. Verifica que Django esté en
+              ejecución e intenta nuevamente.
+            </div>
+          ) : properties.length === 0 ? (
+            <p className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-600">
+              No hay propiedades registradas aún.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {properties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </>
+  );
 }
-
-
-   

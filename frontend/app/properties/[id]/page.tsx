@@ -1,88 +1,127 @@
 import Image from "next/image";
 import Link from "next/link";
+import SiteNav from "@/components/SiteNav";
 import { getPropertyById } from "@/lib/api";
 
-//We import our images, the router and the function for move between ids
-export default async function PropertyDetailPage({params}: {params: Promise<{id: string}>}) {
-    try{
-        //Resolvemos el params debe ser todo un promise. Al momento de el fetch
-        const waitparams= await params;
-        const property = await getPropertyById(waitparams.id);
+export default async function PropertyDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  let property: Awaited<ReturnType<typeof getPropertyById>>;
 
-         
-        const mainImage = property.images && property.images.lenght > 0
-            ? property.images[0].image : '/placeholder-property.jpg';
-        
-        return (
-            <main className="container mx-auto px-4 py-8 bg-white min-h-screen">
-        {/* Botón para regresar al catálogo */}
-        <div className="mb-6">
-          <Link href="/properties" className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2">
-            <span>&larr;</span> Volver al catálogo
+  try {
+    property = await getPropertyById(id);
+  } catch {
+    return (
+      <>
+        <SiteNav />
+        <main className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4 text-center">
+          <h1 className="text-2xl font-bold text-slate-900">
+            No se pudo cargar esta propiedad
+          </h1>
+          <p className="mt-2 text-slate-600">
+            Verifica la conexión con el servidor e intenta nuevamente.
+          </p>
+          <Link
+            href="/properties"
+            className="mt-6 rounded-lg bg-blue-700 px-4 py-2 font-semibold text-white hover:bg-blue-800"
+          >
+            Volver al catálogo
           </Link>
-        </div>
+        </main>
+      </>
+    );
+  }
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Columna Izquierda: Imagen Principal */}
-          <div className="relative h-[400px] lg:h-[500px] w-full rounded-2xl overflow-hidden shadow-lg">
-            <Image 
-              src={mainImage} 
-              alt={property.title} 
-              fill 
-              className="object-cover"
-              unoptimized
-            />
-            
+  const mainImage = property.images?.[0]?.image;
+
+  return (
+    <>
+      <SiteNav />
+      <main className="min-h-screen bg-white px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6">
+            <Link
+              href="/properties"
+              className="font-medium text-blue-700 hover:text-blue-900"
+            >
+              &larr; Volver al catálogo
+            </Link>
           </div>
 
-          {/* Columna Derecha: Detalles de la Propiedad */}
-          <div className="flex flex-col justify-center">
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-2">{property.title}</h1>
-            <p className="text-lg text-gray-500 mb-6">{property.location}</p>
-            
-            <div className="text-4xl font-bold text-blue-700 mb-8">
-              ${Number(property.price).toLocaleString('es-EC')}
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
+            <div className="relative h-[400px] w-full overflow-hidden rounded-2xl bg-slate-100 shadow-lg lg:h-[500px]">
+              {mainImage ? (
+                <Image
+                  src={mainImage}
+                  alt={property.title}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-slate-500">
+                  Imagen no disponible
+                </div>
+              )}
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Características principales</h3>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="p-3 bg-white rounded-lg shadow-sm">
-                  <span className="block text-2xl mb-1">🛏️</span>
-                  <span className="font-bold text-gray-900">{property.bedrooms}</span>
-                  <p className="text-xs text-gray-500">Habitaciones</p>
-                </div>
-                <div className="p-3 bg-white rounded-lg shadow-sm">
-                  <span className="block text-2xl mb-1">🛁</span>
-                  <span className="font-bold text-gray-900">{property.bathrooms}</span>
-                  <p className="text-xs text-gray-500">Baños</p>
-                </div>
-                <div className="p-3 bg-white rounded-lg shadow-sm">
-                  <span className="block text-2xl mb-1">📐</span>
-                  <span className="font-bold text-gray-900">{property.area_m2}</span>
-                  <p className="text-xs text-gray-500">Metros²</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Descripción</h3>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                {property.description}
+            <div className="flex flex-col justify-center">
+              <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">
+                {property.property_type}
               </p>
+              <h1 className="mt-2 text-3xl font-extrabold text-slate-900 sm:text-4xl">
+                {property.title}
+              </h1>
+              <p className="mt-2 text-lg text-slate-600">{property.location}</p>
+
+              <p className="mt-6 text-3xl font-bold text-blue-800">
+                {Number(property.price).toLocaleString("es-EC", {
+                  style: "currency",
+                  currency: "USD",
+                })}
+              </p>
+
+              <section className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-6">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Características principales
+                </h2>
+                <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+                  <div className="rounded-lg bg-white p-3">
+                    <p className="text-xl font-bold text-slate-900">
+                      {property.bedrooms}
+                    </p>
+                    <p className="text-xs text-slate-600">Habitaciones</p>
+                  </div>
+                  <div className="rounded-lg bg-white p-3">
+                    <p className="text-xl font-bold text-slate-900">
+                      {property.bathrooms}
+                    </p>
+                    <p className="text-xs text-slate-600">Baños</p>
+                  </div>
+                  <div className="rounded-lg bg-white p-3">
+                    <p className="text-xl font-bold text-slate-900">
+                      {property.area_m2}
+                    </p>
+                    <p className="text-xs text-slate-600">Metros²</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className="mt-8">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Descripción
+                </h2>
+                <p className="mt-3 whitespace-pre-line leading-relaxed text-slate-600">
+                  {property.description}
+                </p>
+              </section>
             </div>
           </div>
         </div>
       </main>
-        ); 
-
-    }catch(error){
-        return(
-            //Main error if its not working the main Card for each propertie on his respective detail.
-            <div>
-                <h2 className="text-red-600 text-2xl font-bold mb-4" >Propiedad no encontrada</h2>
-                <Link href="/properties" className="text-blue-600 underline"> Regresar al catalogo </Link>
-            </div>
-        );
-    }
+    </>
+  );
 }
