@@ -8,11 +8,16 @@ export default function LoginPage(){
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+    //Use Effect se ejecuta una sola veez cuando la pagina termina de cargar
+    //Su trabajo aqui es "Mirar la libreta de esta pestaña" (SessionStorage)
+    //If there´s already an saved token,  the blank pus the direct dashboard for not ask for the login again. 
 
     useEffect(() => { 
     //Revisa si el usuario ya esta iniciado sesion y lo redirige al /dashboard
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access");
+      //const token = localStorage.getItem("access");
+      const token = sessionStorage.getItem("access");
+      //Change: sessionStorage for insolated session. 
       if (token) {
         window.location.href = "/dashboard";
       }
@@ -32,7 +37,9 @@ export default function LoginPage(){
         });
 
         if (data?.access) {
-          localStorage.setItem("access", data.access);
+          //localStorage.setItem("access", data.access);
+          //We save the token in the sessionStorage, so when the user close the tab, the token is lost.
+          sessionStorage.setItem("access", data.access);
           window.location.href = "/dashboard";
         } else {
           setError("No se recibió el token de acceso.");

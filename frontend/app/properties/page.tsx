@@ -6,7 +6,7 @@ import type { Property } from "@/types/property";
 export default async function PropertiesPage() {
   let properties: Property[] = [];
   let loadFailed = false;
-
+  /*This is the main page. */
   try {
     properties = await getProperties();
   } catch {
