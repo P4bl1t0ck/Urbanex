@@ -1,7 +1,7 @@
 """
 URL configuration for config project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
+The `urlpatterns` list routes URLs to views. For more info rmation please see:
     https://docs.djangoproject.com/en/6.1/topics/http/urls/
 Examples:
 Function views
@@ -15,8 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path , include
+from apps.users.views import LoginView
+
+
+from django.conf import settings #Nesecitamos esas configuraciones de los archivos de la maquina
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/auth/", include("apps.users.urls")),
+    #path("api/properties/", include("apps.properties.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

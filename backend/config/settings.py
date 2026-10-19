@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/6.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +22,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7klcbbyp3fv!=#iv!o#i+58t2htm3&nb6mkv&4k-onv3y111au'
+SECRET_KEY = config('SECRET_KEY', default='clave-insegura-de-respaldo')
+if not SECRET_KEY:
+    raise ValueError("ERROR DE SEGURIDAD: Debes definir SECRET_KEY en tu archivo .env")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+DEBUG = os.getenv("DEBUG","True").lower() in ["true","1","yes"]
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("ALLOWED_HOSTS","127.0.0.1,localhost").split(",")if host]
 
 
 # Application definition
@@ -39,9 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
-    #'apps.users',
-    #What ta hell
+    'corsheaders', #Already installed
+    'apps.users.apps.UsersConfig',
+    'apps.users.properties.apps.PropertiesConfig',  # <-- Se corrigió 'apss' a 'apps'
 ]
 
 MIDDLEWARE = [
@@ -53,13 +59,19 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    #'django_extensions',
 ]
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000", #IN case that doesnt sense the original url
+    #It doesnt work. 
+    ]
+CORS_ALLOWED_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':(
-        'rest_framework_simplejwt.authentication.JWTuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         ),
     }
 
@@ -97,6 +109,8 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -124,6 +138,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = "users.User"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
@@ -140,3 +155,15 @@ MAILERS = {
     },
 }
 
+APPEND_SLASH = False  # Nos permitira el pasar la información si tiene el slash al final de la api que hace fecth.
+
+## Quitar esto para pruebas y produccion. 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME':timedelta(days=1), # El token durara con una vida de un dia. 
+    'REFRESH_TOKEN_LIFETIME':timedelta(days=7), #El token se actualizara cada siete dias. 
+}
+
+import os 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
