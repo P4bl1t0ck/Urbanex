@@ -1,0 +1,29 @@
+# Urbanex — Progreso
+- **Sprint actual:** Sprint 1
+- **Historia activa (URB / HU):** 
+  - URB-04 / HU-46 (Autenticación y ciclo de sesión en cliente)
+  - URB-05 / HU-01 (Registrar propiedad en captación)
+  - URB-08 / HU-05 (Registrar características y ubicación exacta)
+- **Rama / PR:** `develop` (fusionado y respaldado en `test`)
+- **Terminado:**
+  - Aislamiento de sesiones en el frontend utilizando `sessionStorage` para guardar token, email y rol (`HU-46`).
+  - Identificador visual de sesión global inyectado en el `RootLayout` (`SiteNav`) y en el Dashboard.
+  - Creación del Modal inteligente (detecta automáticamente si usar `POST` para crear o `PATCH` para editar).
+  - Integración de carga de archivos (imágenes) vinculadas al ID de la propiedad (`HU-01`).
+  - Implementación de mapas interactivos con `Leaflet` (OpenStreetMap) para capturar `latitude` y `longitude` exactas sin depender de APIs de pago (`HU-05`).
+- **En curso:**
+  - Traspaso de responsabilidades al backend para iniciar el modelado de Expediente Digital y Avalúos.
+- **Pruebas ejecutadas y resultado:**
+  - Pruebas manuales de UI/UX en Dashboard: Renderizado correcto de tarjetas y etiquetas de estado.
+  - Corrección del error de desincronización de HTML (`Expected </, got jsx text`) al anidar el mapa en el formulario.
+  - Pruebas de renderizado en cliente (`ssr: false` en Next.js) para evitar caídas con la librería del mapa.
+  - Manejo de token expirado (Error 401) validado visualmente.
+- **Migraciones / endpoints nuevos:**
+  - Frontend consume correctamente `/api/auth/properties/` y `/api/auth/property-images/`.
+- **Decisiones aprobadas:**
+  - Uso de Leaflet en el frontend en lugar de Google Maps para optimizar costos.
+  - Mantener la edición de variables en inglés (`latitude`, `longitude`) para alinear estrictamente el JSON del frontend con el modelo de Django.
+- **Bloqueos:**
+  - Ninguno actualmente en el repositorio Frontend.
+- **Próxima tarea:** 
+  - **(Responsabilidad Backend):** Desarrollo e inicialización de las apps `apps.appraisals` y `apps.documents` en Django con sus respectivos modelos y reglas de inmutabilidad (HU-03, HU-04, HU-06).
