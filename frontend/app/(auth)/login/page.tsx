@@ -36,14 +36,16 @@ export default function LoginPage(){
           body: JSON.stringify({email, password}),
         });
 
-        if (data?.access) {
-          //localStorage.setItem("access", data.access);
-          //We save the token in the sessionStorage, so when the user close the tab, the token is lost.
+        if (data?.access) {     
           sessionStorage.setItem("access", data.access);
+          //Guardamos el rol (si el backend lo envia) y el email que tipéo el susuario
+          sessionStorage.setItem("userRole",data.role || "asesor" );
+          sessionStorage.setItem("userEmail",email);
           window.location.href = "/dashboard";
         } else {
           setError("No se recibió el token de acceso.");
         }
+
     }catch (err: any){
       console.error("Error al iniciar sesión:", err); //Mas detalle en caso de error de login.
       setError( err.message || "Credenciales inválidas o cuenta bloqueda. ");

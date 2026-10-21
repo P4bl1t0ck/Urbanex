@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SiteNav from "@/components/SiteNav";
+import dynamic from "next/dynamic";
+
+//Importamos el mapa desactivando el SSR
+const MapPicker = dynamic(() => import("@/components/MapPicker"),{
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full animate-pulse bg-slate-200 rounded-lg">Cargando Mapa. Por favor espere...</div>
+})
 
 type Property = {
   id: number;
@@ -14,6 +21,7 @@ type Property = {
   description?: string;
   property_type?: string;
   area_m2?: string | number;
+  agent_name?: string; // Atrapamo el nombre del asesorq ue viene de la API de dajngo-
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -32,6 +40,9 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
+  const [selectedImages, setSelectedImages]  = useState<File[]>([]);
+  const [userInfo, setUserInfo] = useState({ email: "", role: "" });
+
   //Estado para saber si estabamos editando (guarda el ID) o si esta creadno es null.
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -42,17 +53,25 @@ export default function DashboardPage() {
     property_type: "departamento",
     price: "",
     area_m2: "",
-    location: "",
+    location: "",//Conservamos esto como direccion en texto (Nayon quito por ejemplo.)
+    //Ediciones pedidas por el profesor.
+    //latitude y longitude
+    latitude: -0.180653,
+    longitude: -78.467834,
     bedrooms: 1,
     bathrooms: 1,
     parking_spaces: 0,
+
   });
 
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  
 
   useEffect(() => {
     const token = sessionStorage.getItem("access");
-    //const token = localStorage.getItem("access");
+    // NUEVO: Leer quién soy desde la memoria de la pestaña
+    const userEmail = sessionStorage.getItem("userEmail") || "Usuario";
+    const userRole = sessionStorage.getItem("userRole") || "Asesor";
+    setUserInfo({ email: userEmail, role: userRole });
 
     if (!token) {
       router.replace("/login");
@@ -129,6 +148,10 @@ export default function DashboardPage() {
       price: property.price.toString(),
       area_m2 : property.area_m2 ? property.area_m2.toString() : "",
       location: property.location,
+      // Nuvos valores para que  nose borren al recargar la pagina.
+      //latitude y longitude
+      latitude: -0.180653,
+      longitude: -78.467834,
       bedrooms: 1, 
       bathrooms: 1,
       parking_spaces: 0,
@@ -142,7 +165,9 @@ export default function DashboardPage() {
     setFormData({
       title: "", description: "", property_type: "departamento",
       price: "", area_m2: "", location: "", bedrooms: 1, bathrooms: 1, parking_spaces: 0,
-
+      //latitude y longitude
+      latitude: -0.180653,
+      longitude: -78.467834,
     });
     setSelectedImages([]);
     setShowModal(true);
@@ -282,6 +307,9 @@ export default function DashboardPage() {
         bedrooms: 1,
         bathrooms: 1,
         parking_spaces: 0,
+        //latitude y longitude
+        latitude: -0.180653,
+        longitude: -78.467834,
       });
     } catch (err) {
       alert("Error al registrar la propiedad. Revisa que los campos estén completos.");
@@ -289,11 +317,6 @@ export default function DashboardPage() {
   }
 
   function handleLogout() {
-    /**
-     localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    router.replace("/login");
-     */
     sessionStorage.removeItem("access");
     sessionStorage.removeItem("refresh");
     router.replace("/login");
@@ -316,12 +339,13 @@ export default function DashboardPage() {
        <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
          <div className="mx-auto max-w-6xl">
            <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-             <div>
-               <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">Urbanex</p>
-               <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">Mis propiedades</h1>
-               <p className="mt-2 text-slate-600">Consulta y administra las propiedades asociadas a tu cuenta.</p>
-             </div>
-             
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">Urbanex</p>
+              <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">Mis propiedades</h1>
+              <p className="mt-2 flex items-center gap-2 text-slate-600 font-medium bg-slate-200/50 inline-block px-3 py-1 rounded-full">
+                {userInfo.email} <span className="text-slate-400">|</span> <span className="capitalize text-blue-700">Rol: {userInfo.role}</span>
+              </p>
+            </div>
              <div className="flex items-center gap-3">
                <button onClick={openCreateModal} className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800">
                  + Registrar propiedad
@@ -349,6 +373,7 @@ export default function DashboardPage() {
                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Precio</th>
                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Estado</th>
                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Acción</th>
+                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Asesor a cargo</th>
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-100">
@@ -364,26 +389,27 @@ export default function DashboardPage() {
                              {STATUS_LABELS[property.status] ?? property.status.replace("_", " ")}
                            </span>
                          </td>
-                         <td className="whitespace-nowrap px-6 py-4 flex gap-2">
+                         <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                              {property.agent_name || userInfo.email}
+                         </td>
+                        <td>
                            <button
                              type="button"
                              onClick={() => openEditModal(property)}
-                             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                           >
+                             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
                              Editar
                            </button>
                            {property.status !== "disponible" && (
                              <button
                                type="button"
                                onClick={() => handlePublish(property.id)}
-                               className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
-                             >
+                               className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800">
                                Publicar
                              </button>
                            )}
                          </td>
-                       </tr>
-                     ))}
+                        </tr>
+                      ))} 
                    </tbody>
                  </table>
                </div>
@@ -399,56 +425,76 @@ export default function DashboardPage() {
                {editingId ? "Editar Propiedad" : "Registrar Nueva Propiedad"}
              </h2>
              <form onSubmit={handleSaveProperty} className="space-y-4">
-               <div>
-                 <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Título</label>
-                 <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-               </div>
- 
-               <div className="grid grid-cols-2 gap-4">
-                 <div>
-                   <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Tipo</label>
-                   <select value={formData.property_type} onChange={(e) => setFormData({ ...formData, property_type: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
-                     <option value="departamento">Departamento</option>
-                     <option value="casa">Casa</option>
-                     <option value="terreno">Terreno</option>
-                     <option value="oficina">Oficina</option>
-                   </select>
-                 </div>
-                 <div>
-                   <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Precio (\$)</label>
-                   <input type="number" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-                 </div>
-               </div>
- 
-               <div className="grid grid-cols-2 gap-4">
-                 <div>
-                   <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Área (m²)</label>
-                   <input type="number" required value={formData.area_m2} onChange={(e) => setFormData({ ...formData, area_m2: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-                 </div>
-                 <div>
-                   <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Ubicación</label>
-                   <input type="text" required value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-                 </div>
-               </div>
- 
-               <div>
-                 <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Descripción</label>
-                 <textarea required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" rows={3} />
-               </div>
- 
-               <div>
-                 <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Imágenes</label>
-                 <input type="file" multiple accept="image/*" onChange={handleImageChange} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-               </div>
- 
-               <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-                 <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Cancelar</button>
-                 <button type="submit" className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Guardar</button>
-               </div>
-             </form>
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Título</label>
+                  <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Tipo</label>
+                    <select value={formData.property_type} onChange={(e) => setFormData({ ...formData, property_type: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
+                      <option value="departamento">Departamento</option>
+                      <option value="casa">Casa</option>
+                      <option value="terreno">Terreno</option>
+                      <option value="oficina">Oficina</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Precio ($)</label>
+                    <input type="number" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
+                  </div>
+                </div>
+
+                {/* BLOQUE CORREGIDO: Área, Dirección y Mapa */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Área (m²)</label>
+                    <input type="number" required value={formData.area_m2} onChange={(e) => setFormData({ ...formData, area_m2: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
+                  </div>
+                  
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Dirección Referencial</label>
+                      <input type="text" required value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} placeholder="Ej. Sector La Carolina..." className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Ubicación Exacta en el Mapa</label>
+                      <p className="text-xs text-slate-500 mb-2">Haz clic en el mapa para posicionar el marcador rojo.</p>
+                      
+                      <MapPicker 
+                        position={{ lat: formData.latitude, lng: formData.longitude }} 
+                        setPosition={(pos: any) => setFormData({ ...formData, latitude: pos.lat, longitude: pos.lng })} 
+                      />
+                      
+                      <div className="mt-2 flex gap-4 text-xs text-slate-500 font-mono">
+                        <span>Lat: {formData.latitude.toFixed(6)}</span>
+                        <span>Lng: {formData.longitude.toFixed(6)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* FIN BLOQUE CORREGIDO */}
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Descripción</label>
+                  <textarea required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" rows={3} />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Imágenes</label>
+                  <input type="file" multiple accept="image/*" onChange={handleImageChange} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                  <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Cancelar</button>
+                  <button type="submit" className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Guardar</button>
+                </div>
+              </form>
            </div>
          </div>
        )}
      </>
    );
- }
+}
