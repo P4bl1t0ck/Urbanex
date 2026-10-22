@@ -11,7 +11,9 @@ class UrbanexCoreTests(TestCase):
         self.client = APIClient()
         
         # Usuario Asesor para pruebas
+        # User hereda de AbstractUser: username es obligatorio en create_user()
         self.agent = User.objects.create_user(
+            username="asesor.test",
             email="asesor.test@urbanex.ec",
             password="Password123!",
             role="asesor"
@@ -19,6 +21,7 @@ class UrbanexCoreTests(TestCase):
         
         # Usuario Cliente público para pruebas
         self.client_user = User.objects.create_user(
+            username="cliente.test",
             email="cliente.test@urbanex.ec",
             password="Password123!",
             role="cliente"
@@ -68,4 +71,7 @@ class UrbanexCoreTests(TestCase):
             "password": "PasswordIncorrecta"
         }
         response = self.client.post("/api/auth/login/", data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # LoginView responde 401 (no autenticado) y suma el intento fallido (RF-13)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.agent.refresh_from_db()
+        self.assertEqual(self.agent.failed_attempts, 1)

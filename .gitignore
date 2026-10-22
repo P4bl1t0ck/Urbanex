@@ -1,6 +1,35 @@
-"venv/\nnode_modules/\n.env\n__pycache__/\n.next/" 
+# Dependencias y entornos
+venv/
+.venv/
+node_modules/
+
+# Variables de entorno (nunca subir secretos). La plantilla sin secretos sí se versiona.
+.env
 .env*
+!.env.example
+
+# Artefactos de Python
+__pycache__/
+*.pyc
+
+# Artefactos de Next.js
+.next/
+*.tsbuildinfo
+
+# Base de datos local y archivos subidos por usuarios.
+# OJO: backend/db.sqlite3 y algunas imágenes de backend/media/ ya están rastreados en Git;
+# esta regla no los deja de rastrear. Para eso hace falta `git rm --cached` (decisión del equipo).
+backend/db.sqlite3
+backend/media/
+
+# Expediente digital privado (RF-10): nunca versionar documentos de clientes
+backend/private_media/
+
+# Archivos temporales del editor
+*.swp
+
+# Documentos y notas locales
 Understanding.txt
-ProyectoCapstoneV4 (3).mdfrontend/CLAUDE.md
-frontend/AGENTS.md
 ProyectoCapstoneV4 (3).md
+frontend/CLAUDE.md
+frontend/AGENTS.md
