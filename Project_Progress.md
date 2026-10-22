@@ -11,14 +11,23 @@
   - Creación del Modal inteligente (detecta automáticamente si usar `POST` para crear o `PATCH` para editar).
   - Integración de carga de archivos (imágenes) vinculadas al ID de la propiedad (`HU-01`).
   - Implementación de mapas interactivos con `Leaflet` (OpenStreetMap) para capturar `latitude` y `longitude` exactas sin depender de APIs de pago (`HU-05`).
+  - Modal de propiedad rediseñado en 4 viñetas (Datos generales, Ubicación, Multimedia, Expediente) con validación por viñeta y previsualización de fotos (`HU-01`, `HU-05`).
+  - Buscador de sectores sobre el mapa con Nominatim (OpenStreetMap) + `flyTo` (`HU-05`).
+  - Corrección: `Property` no tenía `latitude`/`longitude`; las coordenadas no se guardaban. Agregado `terreno` a tipos de propiedad.
+  - Modelo `apps.documents.Document` con versionado inmutable, prohibición de borrado, límite 20 MB/PDF-imagen y validación solo Admin (`HU-03` modelo, `HU-37` regla).
 - **En curso:**
-  - Traspaso de responsabilidades al backend para iniciar el modelado de Expediente Digital y Avalúos.
+  - `URB-07 / HU-03`: API `/api/documents/` (listar vigentes/todas las versiones, subir nueva versión, detalle, descarga protegida; sin PUT/PATCH/DELETE) conectada a la viñeta Expediente. Tipo real del archivo detectado por firma binaria. **Pendiente: validación visual en navegador.**
+  - Endpoint de validación Admin (`HU-37`) no expuesto aún: corresponde al Sprint 7; la regla ya existe en `Document.validate_document()`.
+  - Relación `Document.opportunity` pendiente hasta que exista `apps.crm.Opportunity` (HU-36, Sprint 7).
 - **Pruebas ejecutadas y resultado:**
   - Pruebas manuales de UI/UX en Dashboard: Renderizado correcto de tarjetas y etiquetas de estado.
   - Corrección del error de desincronización de HTML (`Expected </, got jsx text`) al anidar el mapa en el formulario.
   - Pruebas de renderizado en cliente (`ssr: false` en Next.js) para evitar caídas con la librería del mapa.
   - Manejo de token expirado (Error 401) validado visualmente.
+  - `python manage.py test apps.documents.tests`: 19/19 OK (10 de modelo + 9 de API: autenticación, permisos por propiedad, versión 2, MIME falsificado, 20 MB, fechas, 405 en PATCH/DELETE, descarga).
+  - `apps.users.tests`: 4 errores preexistentes (`create_user()` sin `username`).
 - **Migraciones / endpoints nuevos:**
+  - `users/0006` (latitude, longitude, tipo terreno) y `documents/0001_initial`.
   - Frontend consume correctamente `/api/auth/properties/` y `/api/auth/property-images/`.
 - **Decisiones aprobadas:**
   - Uso de Leaflet en el frontend en lugar de Google Maps para optimizar costos.
