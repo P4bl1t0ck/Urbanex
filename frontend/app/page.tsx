@@ -4,7 +4,7 @@ import SiteNav from "@/components/SiteNav";
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <SiteNav />
+      
       
       <main className="flex-grow flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">

@@ -16,7 +16,7 @@ export default async function PropertyDetailPage({
   } catch {
     return (
       <>
-        <SiteNav />
+        
         <main className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4 text-center">
           <h1 className="text-2xl font-bold text-slate-900">
             No se pudo cargar esta propiedad
