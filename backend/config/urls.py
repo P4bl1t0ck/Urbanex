@@ -26,6 +26,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/auth/", include("apps.users.urls")),
+    path("api/documents/", include("apps.documents.urls")),  # Expediente digital (HU-03)
     #path("api/properties/", include("apps.properties.urls")),
 ]
 
