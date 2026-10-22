@@ -18,7 +18,7 @@ class Property(models.Model):
     #The class about every property.
     # We create 
     OPERATION_CHOICES = [('venta','Venta'),('arriendo','Arriendo'),]
-    PROPERTY_TYPES = [('casa','Casa'),('departamento','Departamento'),('local','Local Comercial'),]
+    PROPERTY_TYPES = [('casa','Casa'),('departamento','Departamento'),('local','Local Comercial'),('terreno','Terreno'),]
     STATUS_CHOICES = [('captacion','En captación'),('disponible','Disponible'),('reservador','Reservado'),('vendido', 'Vendido'),('arrendado', 'Arrendado'),('no_disponible', 'No disponible'),]
     
     title = models.CharField(max_length=200)
@@ -32,7 +32,10 @@ class Property(models.Model):
     bathrooms = models.PositiveIntegerField(default=0)
     parking_spaces = models.PositiveIntegerField(default=0)
     location = models.CharField(max_length=500)
-    
+    # HU-05: Coordenadas exactas capturadas con el mapa (6 decimales ~ 10 cm)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
     #HU-01 Y HU-02 : Asesor captador y responsable inicial
     agent = models.ForeignKey(
         settings.AUTH_USER_MODEL,

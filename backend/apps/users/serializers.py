@@ -28,6 +28,7 @@ class PropertySerializer(serializers.ModelSerializer):
             'id', 'agent', 'agent_name', 'title', 'description', 
             'property_type', 'status', 'price', 'area_m2', 
             'bedrooms', 'bathrooms', 'parking_spaces', 'location',
+            'latitude', 'longitude',
             'images',
             'unavailability_reason', 'created_at', 'updated_at'
         ]
