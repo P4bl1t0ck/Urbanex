@@ -1,28 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import SiteNav from "@/components/SiteNav";
 import dynamic from "next/dynamic";
+import type { LatLng } from "@/components/MapPicker";
+import type { Property, PropertyImage } from "@/types/property";
 
 //Importamos el mapa desactivando el SSR
 const MapPicker = dynamic(() => import("@/components/MapPicker"),{
   ssr: false,
-  loading: () => <div className="h-[300px] w-full animate-pulse bg-slate-200 rounded-lg">Cargando Mapa. Por favor espere...</div>
+  loading: () => <div className="h-[320px] w-full animate-pulse bg-slate-200 rounded-lg">Cargando Mapa. Por favor espere...</div>
 })
 
-type Property = {
-  id: number;
+type PropertyForm = {
   title: string;
-  location: string;
-  price: string | number;
-  status: string;
-  // Agregamos estos campos al tipo para poder leerlos al editar
-  description?: string;
-  property_type?: string;
-  area_m2?: string | number;
-  agent_name?: string; // Atrapamo el nombre del asesorq ue viene de la API de dajngo-
+  description: string;
+  property_type: string;
+  price: string;
+  area_m2: string;
+  location: string; //Conservamos esto como direccion en texto (Nayon quito por ejemplo.)
+  latitude: number;
+  longitude: number;
+  bedrooms: number;
+  bathrooms: number;
+  parking_spaces: number;
 };
+
+type StagedImage = { file: File; preview: string };
+
+type StagedDocument = {
+  key: string;
+  doc_type: string;
+  issue_date: string;
+  expiration_date: string;
+  is_critical: boolean;
+  file: File;
+};
+
+// Respuesta de GET /api/documents/ (apps.documents.serializers.DocumentSerializer)
+type SavedDocument = {
+  id: string;
+  doc_type: string;
+  doc_type_display: string;
+  is_critical: boolean;
+  original_filename: string;
+  file_size_bytes: number;
+  version: number;
+  expiration_date: string;
+  is_expired: boolean;
+  is_expiring_soon: boolean;
+  validation_status: string;
+  validation_status_display: string;
+};
+
+type TabId = "general" | "location" | "media" | "docs";
 
 const STATUS_LABELS: Record<string, string> = {
   captacion: "En captación",
@@ -33,6 +64,91 @@ const STATUS_LABELS: Record<string, string> = {
   no_disponible: "No disponible",
 };
 
+// Deben coincidir con Property.PROPERTY_TYPES en Django
+const PROPERTY_TYPES = [
+  { value: "departamento", label: "Departamento" },
+  { value: "casa", label: "Casa" },
+  { value: "local", label: "Local comercial" },
+  { value: "terreno", label: "Terreno" },
+];
+
+// Deben coincidir con Document.DocType en apps.documents
+const DOC_TYPES: Record<string, string> = {
+  CORRETAJE: "Contrato de corretaje",
+  CEDULA_CATASTRAL: "Cédula catastral",
+  ESCRITURA: "Escrituras",
+  GRAVAMENES: "Certificado de gravámenes",
+  PREDIAL: "Comprobante predial / tributario",
+  CERT_LABORAL: "Certificado laboral",
+  CERT_BANCARIO: "Certificado bancario",
+  OTRO: "Otro",
+};
+const DOCUMENTS_URL = "http://127.0.0.1:8000/api/documents/";
+const DOC_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp";
+const MAX_DOC_BYTES = 20 * 1024 * 1024; // RF-10
+
+const TABS: { id: TabId; label: string; hint: string }[] = [
+  { id: "general", label: "Datos generales", hint: "Tipo, precio y características" },
+  { id: "location", label: "Ubicación", hint: "Dirección y punto en el mapa" },
+  { id: "media", label: "Multimedia", hint: "Fotografías del inmueble" },
+  { id: "docs", label: "Expediente", hint: "Documentación inicial" },
+];
+
+const DEFAULT_COORDS: LatLng = { lat: -0.180653, lng: -78.467834 };
+
+const EMPTY_FORM: PropertyForm = {
+  title: "",
+  description: "",
+  property_type: "departamento",
+  price: "",
+  area_m2: "",
+  location: "",
+  latitude: DEFAULT_COORDS.lat,
+  longitude: DEFAULT_COORDS.lng,
+  bedrooms: 1,
+  bathrooms: 1,
+  parking_spaces: 0,
+};
+
+const EMPTY_DOC_DRAFT = { doc_type: "CORRETAJE", issue_date: "", expiration_date: "", is_critical: true };
+
+const inputClass =
+  "w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100";
+
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="block text-xs font-semibold uppercase text-slate-700 mb-1">{label}</span>
+      {children}
+      {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
+    </label>
+  );
+}
+
+function formatBytes(bytes: number) {
+  return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`;
+}
+
+// Validación por viñeta: solo se monta la viñeta activa, así que el "required" de HTML
+// no alcanza a las demás. Cada error indica en qué viñeta corregirlo.
+function validateForm(form: PropertyForm, imageCount: number): Partial<Record<TabId, string[]>> {
+  const errors: Partial<Record<TabId, string[]>> = {};
+  const add = (tab: TabId, message: string) => (errors[tab] ??= []).push(message);
+
+  if (!form.title.trim()) add("general", "El título es obligatorio.");
+  if (!(Number(form.price) > 0)) add("general", "El precio referencial debe ser mayor a 0.");
+  if (!(Number(form.area_m2) > 0)) add("general", "El área debe ser mayor a 0 m².");
+  if (!form.description.trim()) add("general", "La descripción es obligatoria.");
+  if ([form.bedrooms, form.bathrooms, form.parking_spaces].some((n) => n < 0 || !Number.isInteger(n)))
+    add("general", "Habitaciones, baños y parqueaderos deben ser enteros positivos.");
+
+  if (!form.location.trim()) add("location", "La dirección referencial es obligatoria.");
+
+  if (imageCount < 1) add("media", "Se requiere al menos 1 fotografía (RF-01).");
+
+  return errors;
+}
+
 export default function DashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,31 +156,27 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
-  const [selectedImages, setSelectedImages]  = useState<File[]>([]);
   const [userInfo, setUserInfo] = useState({ email: "", role: "" });
 
   //Estado para saber si estabamos editando (guarda el ID) o si esta creadno es null.
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>("general");
+  const [formErrors, setFormErrors] = useState<Partial<Record<TabId, string[]>>>({});
+  const [saving, setSaving] = useState(false);
 
   // Estado del formulario para nueva propiedad
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    property_type: "departamento",
-    price: "",
-    area_m2: "",
-    location: "",//Conservamos esto como direccion en texto (Nayon quito por ejemplo.)
-    //Ediciones pedidas por el profesor.
-    //latitude y longitude
-    latitude: -0.180653,
-    longitude: -78.467834,
-    bedrooms: 1,
-    bathrooms: 1,
-    parking_spaces: 0,
+  const [formData, setFormData] = useState<PropertyForm>(EMPTY_FORM);
+  const [existingImages, setExistingImages] = useState<PropertyImage[]>([]);
+  const [selectedImages, setSelectedImages] = useState<StagedImage[]>([]);
 
-  });
-
-  
+  // Expediente (HU-03): los documentos se preparan aquí y se suben al guardar la propiedad.
+  const [savedDocs, setSavedDocs] = useState<SavedDocument[]>([]);
+  const [savedDocsError, setSavedDocsError] = useState("");
+  const [stagedDocs, setStagedDocs] = useState<StagedDocument[]>([]);
+  const [docDraft, setDocDraft] = useState(EMPTY_DOC_DRAFT);
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docError, setDocError] = useState("");
+  const [docInputKey, setDocInputKey] = useState(0); // Para limpiar el <input type="file">
 
   useEffect(() => {
     const token = sessionStorage.getItem("access");
@@ -139,60 +251,140 @@ export default function DashboardPage() {
     };
   }, [router]);
 
+  function updateField<K extends keyof PropertyForm>(key: K, value: PropertyForm[K]) {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function resetModalState(form: PropertyForm, images: PropertyImage[]) {
+    selectedImages.forEach((img) => URL.revokeObjectURL(img.preview));
+    setFormData(form);
+    setExistingImages(images);
+    setSelectedImages([]);
+    setSavedDocs([]);
+    setSavedDocsError("");
+    setStagedDocs([]);
+    setDocDraft(EMPTY_DOC_DRAFT);
+    setDocFile(null);
+    setDocError("");
+    setFormErrors({});
+    setActiveTab("general");
+    setShowModal(true);
+  }
+
   function openEditModal(property: Property) {
     setEditingId(property.id);
-    setFormData({
-      title: property.title,  
-      description: property.description || "",
-      property_type: property.property_type || "departamento",
-      price: property.price.toString(),
-      area_m2 : property.area_m2 ? property.area_m2.toString() : "",
-      location: property.location,
-      // Nuvos valores para que  nose borren al recargar la pagina.
-      //latitude y longitude
-      latitude: -0.180653,
-      longitude: -78.467834,
-      bedrooms: 1, 
-      bathrooms: 1,
-      parking_spaces: 0,
-    });
-    setSelectedImages([]);
-    setShowModal(true);
+    resetModalState(
+      {
+        title: property.title,
+        description: property.description || "",
+        property_type: property.property_type || "departamento",
+        price: property.price.toString(),
+        area_m2: property.area_m2 ? property.area_m2.toString() : "",
+        location: property.location,
+        // Leemos los valores guardados para que no se pierdan al editar.
+        latitude: property.latitude != null ? Number(property.latitude) : DEFAULT_COORDS.lat,
+        longitude: property.longitude != null ? Number(property.longitude) : DEFAULT_COORDS.lng,
+        bedrooms: property.bedrooms ?? 0,
+        bathrooms: property.bathrooms ?? 0,
+        parking_spaces: property.parking_spaces ?? 0,
+      },
+      property.images ?? [],
+    );
+    void loadSavedDocuments(property.id);
+  }
+
+  async function loadSavedDocuments(propertyId: number) {
+    const token = sessionStorage.getItem("access");
+    try {
+      const response = await fetch(`${DOCUMENTS_URL}?property=${propertyId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error(`error ${response.status}`);
+      setSavedDocs(await response.json());
+    } catch {
+      setSavedDocsError("No se pudo cargar el expediente guardado de esta propiedad.");
+    }
+  }
+
+  // Sube cada documento preparado; devuelve los mensajes de los que el servidor rechazó.
+  async function uploadStagedDocuments(propertyId: number, token: string | null) {
+    const failures: string[] = [];
+    for (const doc of stagedDocs) {
+      const docFormData = new FormData();
+      docFormData.append("property", propertyId.toString());
+      docFormData.append("doc_type", doc.doc_type);
+      docFormData.append("file", doc.file);
+      docFormData.append("issue_date", doc.issue_date);
+      docFormData.append("expiration_date", doc.expiration_date);
+      docFormData.append("is_critical", String(doc.is_critical));
+
+      try {
+        const response = await fetch(DOCUMENTS_URL, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: docFormData,
+        });
+        if (!response.ok) {
+          const details = await response.json().catch(() => ({}));
+          failures.push(`${DOC_TYPES[doc.doc_type]} (${doc.file.name}): ${Object.values(details).flat().join(" ") || `error ${response.status}`}`);
+        }
+      } catch {
+        failures.push(`${DOC_TYPES[doc.doc_type]} (${doc.file.name}): sin conexión con el servidor`);
+      }
+    }
+    return failures;
   }
 
   function openCreateModal(){
     setEditingId(null);
-    setFormData({
-      title: "", description: "", property_type: "departamento",
-      price: "", area_m2: "", location: "", bedrooms: 1, bathrooms: 1, parking_spaces: 0,
-      //latitude y longitude
-      latitude: -0.180653,
-      longitude: -78.467834,
-    });
+    resetModalState(EMPTY_FORM, []);
+  }
+
+  function closeModal() {
+    selectedImages.forEach((img) => URL.revokeObjectURL(img.preview));
     setSelectedImages([]);
-    setShowModal(true);
+    setShowModal(false);
   }
 
   //Esta funcion es inteligente, decide s i hace POST o Patch ante una propiedad.
   async function handleSaveProperty(e: React.FormEvent){
     e.preventDefault();
+    if (saving) return;
+
+    const errors = validateForm(formData, existingImages.length + selectedImages.length);
+    setFormErrors(errors);
+    const firstTabWithErrors = TABS.find((tab) => errors[tab.id]?.length);
+    if (firstTabWithErrors) {
+      setActiveTab(firstTabWithErrors.id);
+      return;
+    }
+
     const token = sessionStorage.getItem("access");
 
     // Lógica dinámica: PATCH para actualizar, POST para crear
-    const url = editingId 
-      ? `http://127.0.0.1:8000/api/auth/properties/${editingId}/` 
+    const url = editingId
+      ? `http://127.0.0.1:8000/api/auth/properties/${editingId}/`
       : "http://127.0.0.1:8000/api/auth/properties/";
-    
+
     const method = editingId ? "PATCH" : "POST";
-    
-     try {
+
+    // Django guarda 6 decimales; Leaflet entrega más y DRF rechazaría el valor.
+    const payload = {
+      ...formData,
+      latitude: Number(formData.latitude.toFixed(6)),
+      longitude: Number(formData.longitude.toFixed(6)),
+    };
+
+    setSaving(true);
+    try {
       const responseProp = await fetch(url, {
         method: method,
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!responseProp.ok) {
@@ -202,43 +394,77 @@ export default function DashboardPage() {
         alert(`Error desde el servidor: ${JSON.stringify(errorDetails)}`);
         return; // Detenemos la ejecución aquí
       }
-      
-      const savedProperty: Property = await responseProp.json();
 
-      // Subida de imágenes (Solo útil si estamos creando o agregando nuevas)
-      if (selectedImages.length > 0) {
-        for (const file of selectedImages) {
-          const imageFormData = new FormData();
-          imageFormData.append("property", savedProperty.id.toString());
-          imageFormData.append("image", file);
+      let savedProperty: Property = await responseProp.json();
 
-          await fetch("http://127.0.0.1:8000/api/auth/property-images/", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: imageFormData,
-          });
-        }
+      // Subida de imágenes nuevas
+      const uploadedImages: PropertyImage[] = [];
+      for (const { file } of selectedImages) {
+        const imageFormData = new FormData();
+        imageFormData.append("property", savedProperty.id.toString());
+        imageFormData.append("image", file);
+
+        const imageResponse = await fetch("http://127.0.0.1:8000/api/auth/property-images/", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: imageFormData,
+        });
+        if (imageResponse.ok) uploadedImages.push(await imageResponse.json());
       }
+      savedProperty = { ...savedProperty, images: [...(savedProperty.images ?? []), ...uploadedImages] };
 
       // Actualizar la tabla visualmente sin recargar
       if (editingId) {
         // Modo edición: Reemplaza la propiedad modificada en la lista
         setProperties(prev => prev.map(p => p.id === editingId ? savedProperty : p));
-        alert("¡Propiedad actualizada con éxito!");
       } else {
         // Modo creación: Agrega la nueva propiedad al inicio de la lista
         setProperties(prev => [savedProperty, ...prev]);
-        alert("¡Propiedad registrada con éxito!");
       }
-      
-      setShowModal(false);
-    } catch (err) {
+
+      const failedDocs = await uploadStagedDocuments(savedProperty.id, token);
+      const failedImages = selectedImages.length - uploadedImages.length;
+      const notes = [editingId ? "¡Propiedad actualizada con éxito!" : "¡Propiedad registrada en estado de captación!"];
+      if (failedImages > 0) notes.push(`${failedImages} imagen(es) no se pudieron subir.`);
+      if (stagedDocs.length > failedDocs.length)
+        notes.push(`${stagedDocs.length - failedDocs.length} documento(s) agregados al expediente.`);
+      if (failedDocs.length > 0)
+        notes.push(`Documentos rechazados por el servidor:\n- ${failedDocs.join("\n- ")}`);
+      alert(notes.join("\n"));
+
+      closeModal();
+    } catch {
       alert("Error al procesar la solicitud. Verifica los datos.");
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) setSelectedImages(Array.from(e.target.files));
+    const files = Array.from(e.target.files ?? []).filter((file) => file.type.startsWith("image/"));
+    setSelectedImages((prev) => [...prev, ...files.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+    e.target.value = ""; // Permite volver a elegir el mismo archivo
+  }
+
+  function removeSelectedImage(index: number) {
+    setSelectedImages((prev) => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  }
+
+  function handleAddDocument() {
+    if (!docFile) return setDocError("Selecciona un archivo.");
+    if (!DOC_ACCEPT.split(",").includes(docFile.type)) return setDocError("Solo se admiten PDF o imágenes (JPG, PNG, WEBP).");
+    if (docFile.size > MAX_DOC_BYTES) return setDocError("El archivo supera el máximo de 20 MB.");
+    if (!docDraft.issue_date || !docDraft.expiration_date) return setDocError("Indica la fecha de emisión y la de vigencia.");
+    if (docDraft.expiration_date < docDraft.issue_date) return setDocError("La vigencia no puede ser anterior a la emisión.");
+
+    setStagedDocs((prev) => [...prev, { ...docDraft, file: docFile, key: crypto.randomUUID() }]);
+    setDocDraft(EMPTY_DOC_DRAFT);
+    setDocFile(null);
+    setDocError("");
+    setDocInputKey((k) => k + 1);
   }
 
   async function handlePublish(propertyId: number) {
@@ -273,54 +499,11 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleCreateProperty(e: React.FormEvent) {
-    e.preventDefault();
-    const token = localStorage.getItem("access");
-
-    try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/properties/", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("No se pudo crear la propiedad");
-      }
-
-      const newProperty: Property = await response.json();
-      setProperties((prev) => [newProperty, ...prev]);
-      setShowModal(false);
-      alert("¡Propiedad registrada en estado de captación!");
-
-      // Limpiar formulario
-      setFormData({
-        title: "",
-        description: "",
-        property_type: "departamento",
-        price: "",
-        area_m2: "",
-        location: "",
-        bedrooms: 1,
-        bathrooms: 1,
-        parking_spaces: 0,
-        //latitude y longitude
-        latitude: -0.180653,
-        longitude: -78.467834,
-      });
-    } catch (err) {
-      alert("Error al registrar la propiedad. Revisa que los campos estén completos.");
-    }
-  }
-
   function handleLogout() {
     sessionStorage.removeItem("access");
     sessionStorage.removeItem("refresh");
     router.replace("/login");
-    
+
   }
 
   if (loading) {
@@ -333,9 +516,14 @@ export default function DashboardPage() {
     );
   }
 
- return (
+  const activeIndex = TABS.findIndex((tab) => tab.id === activeTab);
+  const imageCount = existingImages.length + selectedImages.length;
+  const savedCorretaje = savedDocs.some((doc) => doc.doc_type === "CORRETAJE");
+  const stagedCorretaje = stagedDocs.some((doc) => doc.doc_type === "CORRETAJE");
+
+  return (
      <>
-       <SiteNav />
+
        <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
          <div className="mx-auto max-w-6xl">
            <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -355,7 +543,7 @@ export default function DashboardPage() {
                </button>
              </div>
            </header>
- 
+
            {error ? (
              <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">{error}</div>
            ) : properties.length === 0 ? (
@@ -372,8 +560,8 @@ export default function DashboardPage() {
                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Ubicación</th>
                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Precio</th>
                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Estado</th>
-                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Acción</th>
                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Asesor a cargo</th>
+                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Acción</th>
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-100">
@@ -392,7 +580,8 @@ export default function DashboardPage() {
                          <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
                               {property.agent_name || userInfo.email}
                          </td>
-                        <td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="flex gap-2">
                            <button
                              type="button"
                              onClick={() => openEditModal(property)}
@@ -407,9 +596,10 @@ export default function DashboardPage() {
                                Publicar
                              </button>
                            )}
+                          </div>
                          </td>
                         </tr>
-                      ))} 
+                      ))}
                    </tbody>
                  </table>
                </div>
@@ -417,82 +607,319 @@ export default function DashboardPage() {
            )}
          </div>
        </main>
- 
+
        {showModal && (
          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl border border-slate-200">
-             <h2 className="text-xl font-bold text-slate-900 mb-4">
-               {editingId ? "Editar Propiedad" : "Registrar Nueva Propiedad"}
-             </h2>
-             <form onSubmit={handleSaveProperty} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Título</label>
-                  <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-                </div>
+           <form
+             onSubmit={handleSaveProperty}
+             noValidate
+             className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+           >
+             {/* Encabezado */}
+             <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 pt-5 pb-4">
+               <div>
+                 <p className="text-xs font-semibold uppercase tracking-wider text-blue-700">
+                   {editingId ? "Edición de ficha" : "Nueva captación"}
+                 </p>
+                 <h2 className="text-xl font-bold text-slate-900">
+                   {editingId ? formData.title || "Editar propiedad" : "Registrar nueva propiedad"}
+                 </h2>
+               </div>
+               <button type="button" onClick={closeModal} aria-label="Cerrar" className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
+                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                   <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                 </svg>
+               </button>
+             </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Tipo</label>
-                    <select value={formData.property_type} onChange={(e) => setFormData({ ...formData, property_type: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
-                      <option value="departamento">Departamento</option>
-                      <option value="casa">Casa</option>
-                      <option value="terreno">Terreno</option>
-                      <option value="oficina">Oficina</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Precio ($)</label>
-                    <input type="number" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-                  </div>
-                </div>
+             {/* Viñetas */}
+             <div role="tablist" aria-label="Secciones de la propiedad" className="grid grid-cols-2 gap-1 border-b border-slate-200 bg-slate-50 px-3 py-2 sm:grid-cols-4">
+               {TABS.map((tab, index) => {
+                 const isActive = tab.id === activeTab;
+                 const hasErrors = Boolean(formErrors[tab.id]?.length);
+                 return (
+                   <button
+                     key={tab.id}
+                     type="button"
+                     role="tab"
+                     aria-selected={isActive}
+                     onClick={() => setActiveTab(tab.id)}
+                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-left transition ${
+                       isActive ? "bg-white shadow-sm ring-1 ring-slate-200" : "hover:bg-white/60"
+                     }`}
+                   >
+                     <span
+                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                         hasErrors
+                           ? "bg-red-100 text-red-700"
+                           : isActive
+                             ? "bg-blue-700 text-white"
+                             : "bg-slate-200 text-slate-600"
+                       }`}
+                     >
+                       {hasErrors ? "!" : index + 1}
+                     </span>
+                     <span className="min-w-0">
+                       <span className={`block truncate text-sm font-semibold ${isActive ? "text-slate-900" : "text-slate-600"}`}>{tab.label}</span>
+                       <span className="hidden truncate text-xs text-slate-500 lg:block">{tab.hint}</span>
+                     </span>
+                   </button>
+                 );
+               })}
+             </div>
 
-                {/* BLOQUE CORREGIDO: Área, Dirección y Mapa */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Área (m²)</label>
-                    <input type="number" required value={formData.area_m2} onChange={(e) => setFormData({ ...formData, area_m2: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-                  </div>
-                  
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Dirección Referencial</label>
-                      <input type="text" required value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} placeholder="Ej. Sector La Carolina..." className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Ubicación Exacta en el Mapa</label>
-                      <p className="text-xs text-slate-500 mb-2">Haz clic en el mapa para posicionar el marcador rojo.</p>
-                      
-                      <MapPicker 
-                        position={{ lat: formData.latitude, lng: formData.longitude }} 
-                        setPosition={(pos: any) => setFormData({ ...formData, latitude: pos.lat, longitude: pos.lng })} 
-                      />
-                      
-                      <div className="mt-2 flex gap-4 text-xs text-slate-500 font-mono">
-                        <span>Lat: {formData.latitude.toFixed(6)}</span>
-                        <span>Lng: {formData.longitude.toFixed(6)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* FIN BLOQUE CORREGIDO */}
+             {/* Contenido de la viñeta activa */}
+             <div role="tabpanel" className="flex-1 overflow-y-auto px-6 py-5">
+               {formErrors[activeTab]?.length ? (
+                 <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                   <ul className="list-disc space-y-0.5 pl-4">
+                     {formErrors[activeTab]!.map((message) => <li key={message}>{message}</li>)}
+                   </ul>
+                 </div>
+               ) : null}
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Descripción</label>
-                  <textarea required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" rows={3} />
-                </div>
+               {activeTab === "general" && (
+                 <div className="space-y-5">
+                   <Field label="Título">
+                     <input type="text" value={formData.title} onChange={(e) => updateField("title", e.target.value)} placeholder="Ej. Departamento con vista al parque La Carolina" className={inputClass} />
+                   </Field>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">Imágenes</label>
-                  <input type="file" multiple accept="image/*" onChange={handleImageChange} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                </div>
+                   <div>
+                     <span className="block text-xs font-semibold uppercase text-slate-700 mb-2">Tipo de propiedad</span>
+                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                       {PROPERTY_TYPES.map((type) => (
+                         <button
+                           key={type.value}
+                           type="button"
+                           onClick={() => updateField("property_type", type.value)}
+                           className={`rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
+                             formData.property_type === type.value
+                               ? "border-blue-600 bg-blue-50 text-blue-800 ring-2 ring-blue-100"
+                               : "border-slate-300 text-slate-600 hover:border-slate-400"
+                           }`}
+                         >
+                           {type.label}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
-                  <button type="button" onClick={() => setShowModal(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Cancelar</button>
-                  <button type="submit" className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Guardar</button>
-                </div>
-              </form>
-           </div>
+                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                     <Field label="Precio referencial (USD)">
+                       <input type="number" min="0" step="0.01" value={formData.price} onChange={(e) => updateField("price", e.target.value)} className={inputClass} />
+                     </Field>
+                     <Field label="Área total (m²)">
+                       <input type="number" min="0" step="0.01" value={formData.area_m2} onChange={(e) => updateField("area_m2", e.target.value)} className={inputClass} />
+                     </Field>
+                   </div>
+
+                   <div className="grid grid-cols-3 gap-4">
+                     <Field label="Habitaciones">
+                       <input type="number" min="0" value={formData.bedrooms} onChange={(e) => updateField("bedrooms", Number(e.target.value))} className={inputClass} />
+                     </Field>
+                     <Field label="Baños">
+                       <input type="number" min="0" value={formData.bathrooms} onChange={(e) => updateField("bathrooms", Number(e.target.value))} className={inputClass} />
+                     </Field>
+                     <Field label="Parqueaderos">
+                       <input type="number" min="0" value={formData.parking_spaces} onChange={(e) => updateField("parking_spaces", Number(e.target.value))} className={inputClass} />
+                     </Field>
+                   </div>
+
+                   <Field label="Descripción" hint="Destaca acabados, entorno y servicios cercanos.">
+                     <textarea value={formData.description} onChange={(e) => updateField("description", e.target.value)} className={inputClass} rows={4} />
+                   </Field>
+                 </div>
+               )}
+
+               {activeTab === "location" && (
+                 <div className="space-y-5">
+                   <Field label="Dirección referencial" hint="Se muestra en el catálogo. Puedes completarla con el buscador del mapa.">
+                     <input type="text" value={formData.location} onChange={(e) => updateField("location", e.target.value)} placeholder="Ej. Sector La Carolina, Quito" className={inputClass} />
+                   </Field>
+
+                   <div>
+                     <span className="block text-xs font-semibold uppercase text-slate-700 mb-1">Ubicación exacta</span>
+                     <p className="text-xs text-slate-500 mb-2">Busca el sector o haz clic en el mapa para posicionar el marcador.</p>
+                     <MapPicker
+                       position={{ lat: formData.latitude, lng: formData.longitude }}
+                       setPosition={(pos) => setFormData((prev) => ({ ...prev, latitude: pos.lat, longitude: pos.lng }))}
+                       onAddressFound={(address) => setFormData((prev) => (prev.location.trim() ? prev : { ...prev, location: address }))}
+                     />
+                     <div className="mt-2 flex flex-wrap gap-2 font-mono text-xs">
+                       <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600">Lat {formData.latitude.toFixed(6)}</span>
+                       <span className="rounded-md bg-slate-100 px-2 py-1 text-slate-600">Lng {formData.longitude.toFixed(6)}</span>
+                     </div>
+                   </div>
+                 </div>
+               )}
+
+               {activeTab === "media" && (
+                 <div className="space-y-5">
+                   <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center transition hover:border-blue-400 hover:bg-blue-50/40">
+                     <svg className="mb-2 h-8 w-8 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                       <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.16-5.16a2.25 2.25 0 0 1 3.18 0l5.16 5.16m-1.5-1.5 1.41-1.41a2.25 2.25 0 0 1 3.18 0l2.91 2.91M3.75 21h16.5A1.5 1.5 0 0 0 21.75 19.5v-15A1.5 1.5 0 0 0 20.25 3H3.75A1.5 1.5 0 0 0 2.25 4.5v15A1.5 1.5 0 0 0 3.75 21Z" />
+                     </svg>
+                     <span className="text-sm font-semibold text-slate-700">Haz clic para agregar fotografías</span>
+                     <span className="mt-1 text-xs text-slate-500">JPG, PNG o WEBP · Se requiere al menos 1 fotografía</span>
+                     <input type="file" multiple accept="image/*" onChange={handleImageChange} className="sr-only" />
+                   </label>
+
+                   {imageCount === 0 ? (
+                     <p className="text-center text-sm text-slate-500">Aún no hay fotografías para esta propiedad.</p>
+                   ) : (
+                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                       {existingImages.map((img, index) => (
+                         <figure key={img.id} className="relative aspect-[4/3] overflow-hidden rounded-lg border border-slate-200">
+                           {/* eslint-disable-next-line @next/next/no-img-element */}
+                           <img src={img.image} alt={img.caption || "Fotografía guardada"} className="h-full w-full object-cover" />
+                           <span className="absolute left-2 top-2 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                             {index === 0 ? "Portada" : "Guardada"}
+                           </span>
+                         </figure>
+                       ))}
+                       {selectedImages.map((img, index) => (
+                         <figure key={img.preview} className="relative aspect-[4/3] overflow-hidden rounded-lg border-2 border-blue-300">
+                           {/* eslint-disable-next-line @next/next/no-img-element */}
+                           <img src={img.preview} alt={img.file.name} className="h-full w-full object-cover" />
+                           <span className="absolute left-2 top-2 rounded bg-blue-700 px-1.5 py-0.5 text-[10px] font-semibold text-white">Nueva</span>
+                           <button type="button" onClick={() => removeSelectedImage(index)} aria-label={`Quitar ${img.file.name}`} className="absolute right-2 top-2 rounded-full bg-white/90 px-2 text-sm font-bold text-slate-700 shadow hover:bg-white">
+                             ×
+                           </button>
+                         </figure>
+                       ))}
+                     </div>
+                   )}
+                 </div>
+               )}
+
+               {activeTab === "docs" && (
+                 <div className="space-y-5">
+                   <div className="rounded-xl border border-slate-200 p-4">
+                     <p className="mb-3 text-xs font-semibold uppercase text-slate-700">Requisitos para publicar</p>
+                     <ul className="space-y-2 text-sm">
+                       <li className="flex items-center gap-2">
+                         <span className={`h-2.5 w-2.5 rounded-full ${imageCount > 0 ? "bg-emerald-500" : "bg-slate-300"}`} />
+                         <span className="text-slate-700">Al menos 1 fotografía</span>
+                         <span className="ml-auto text-xs text-slate-500">{imageCount > 0 ? `${imageCount} cargada(s)` : "Falta"}</span>
+                       </li>
+                       <li className="flex items-center gap-2">
+                         <span className={`h-2.5 w-2.5 rounded-full ${savedCorretaje ? "bg-emerald-500" : stagedCorretaje ? "bg-amber-400" : "bg-slate-300"}`} />
+                         <span className="text-slate-700">Contrato de corretaje</span>
+                         <span className="ml-auto text-xs text-slate-500">
+                           {savedCorretaje ? "Cargado" : stagedCorretaje ? "Se subirá al guardar" : "Falta"}
+                         </span>
+                       </li>
+                       <li className="flex items-center gap-2">
+                         <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                         <span className="text-slate-700">Avalúo aprobado</span>
+                         <span className="ml-auto text-xs text-slate-500">Módulo de avalúos (Sprint 2)</span>
+                       </li>
+                     </ul>
+                   </div>
+
+                   {savedDocsError && (
+                     <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{savedDocsError}</div>
+                   )}
+
+                   {savedDocs.length > 0 && (
+                     <div>
+                       <p className="mb-2 text-xs font-semibold uppercase text-slate-700">Expediente guardado (versiones vigentes)</p>
+                       <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200">
+                         {savedDocs.map((doc) => (
+                           <li key={doc.id} className="flex items-center gap-3 px-4 py-3 text-sm">
+                             <div className="min-w-0 flex-1">
+                               <p className="font-semibold text-slate-800">
+                                 {doc.doc_type_display}
+                                 <span className="ml-2 text-xs font-normal text-slate-500">v{doc.version}</span>
+                                 {doc.is_critical && <span className="ml-2 rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-700">Crítico</span>}
+                               </p>
+                               <p className="truncate text-xs text-slate-500">
+                                 {doc.original_filename} · {formatBytes(doc.file_size_bytes)} · vigente hasta {doc.expiration_date}
+                                 {doc.is_expired && <span className="ml-1 font-semibold text-red-600">(vencido)</span>}
+                                 {doc.is_expiring_soon && <span className="ml-1 font-semibold text-amber-600">(vence pronto)</span>}
+                               </p>
+                             </div>
+                             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">{doc.validation_status_display}</span>
+                           </li>
+                         ))}
+                       </ul>
+                       <p className="mt-1 text-xs text-slate-500">Para reemplazar un documento, súbelo de nuevo: se guardará como una nueva versión.</p>
+                     </div>
+                   )}
+
+                   <div className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 p-4 sm:grid-cols-2">
+                     <Field label="Tipo de documento">
+                       <select value={docDraft.doc_type} onChange={(e) => setDocDraft({ ...docDraft, doc_type: e.target.value })} className={inputClass}>
+                         {Object.entries(DOC_TYPES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                       </select>
+                     </Field>
+                     <Field label="Archivo" hint="PDF o imagen, máximo 20 MB.">
+                       <input key={docInputKey} type="file" accept={DOC_ACCEPT} onChange={(e) => setDocFile(e.target.files?.[0] ?? null)} className="w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100" />
+                     </Field>
+                     <Field label="Fecha de emisión">
+                       <input type="date" value={docDraft.issue_date} onChange={(e) => setDocDraft({ ...docDraft, issue_date: e.target.value })} className={inputClass} />
+                     </Field>
+                     <Field label="Fecha de vigencia">
+                       <input type="date" value={docDraft.expiration_date} min={docDraft.issue_date || undefined} onChange={(e) => setDocDraft({ ...docDraft, expiration_date: e.target.value })} className={inputClass} />
+                     </Field>
+                     <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2">
+                       <input type="checkbox" checked={docDraft.is_critical} onChange={(e) => setDocDraft({ ...docDraft, is_critical: e.target.checked })} className="h-4 w-4 rounded border-slate-300" />
+                       Documento crítico (bloquea el avance si falta o vence)
+                     </label>
+                     {docError && <p role="alert" className="text-sm text-red-600 sm:col-span-2">{docError}</p>}
+                     <div className="sm:col-span-2">
+                       <button type="button" onClick={handleAddDocument} className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">
+                         + Agregar al expediente
+                       </button>
+                     </div>
+                   </div>
+
+                   {stagedDocs.length > 0 && (
+                     <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200">
+                       {stagedDocs.map((doc) => (
+                         <li key={doc.key} className="flex items-center gap-3 px-4 py-3 text-sm">
+                           <div className="min-w-0 flex-1">
+                             <p className="font-semibold text-slate-800">
+                               {DOC_TYPES[doc.doc_type]}
+                               {doc.is_critical && <span className="ml-2 rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-700">Crítico</span>}
+                             </p>
+                             <p className="truncate text-xs text-slate-500">
+                               {doc.file.name} · {formatBytes(doc.file.size)} · vigente hasta {doc.expiration_date}
+                             </p>
+                           </div>
+                           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">Por subir</span>
+                           <button type="button" onClick={() => setStagedDocs((prev) => prev.filter((d) => d.key !== doc.key))} aria-label={`Quitar ${doc.file.name}`} className="text-slate-400 hover:text-red-600">
+                             ×
+                           </button>
+                         </li>
+                       ))}
+                     </ul>
+                   )}
+                 </div>
+               )}
+             </div>
+
+             {/* Pie: navegación entre viñetas y guardado */}
+             <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+               <span className="text-xs font-medium text-slate-500">Paso {activeIndex + 1} de {TABS.length}</span>
+               <div className="flex gap-2">
+                 <button type="button" onClick={closeModal} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200">Cancelar</button>
+                 {activeIndex > 0 && (
+                   <button type="button" onClick={() => setActiveTab(TABS[activeIndex - 1].id)} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                     Anterior
+                   </button>
+                 )}
+                 {activeIndex < TABS.length - 1 && (
+                   <button type="button" onClick={() => setActiveTab(TABS[activeIndex + 1].id)} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                     Siguiente
+                   </button>
+                 )}
+                 <button type="submit" disabled={saving} className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60">
+                   {saving ? "Guardando..." : editingId ? "Guardar cambios" : "Registrar propiedad"}
+                 </button>
+               </div>
+             </div>
+           </form>
          </div>
        )}
      </>
