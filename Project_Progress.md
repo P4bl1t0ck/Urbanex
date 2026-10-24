@@ -1,38 +1,119 @@
 # Urbanex — Progreso
-- **Sprint actual:** Sprint 1
-- **Historia activa (URB / HU):** 
-  - URB-04 / HU-46 (Autenticación y ciclo de sesión en cliente)
-  - URB-05 / HU-01 (Registrar propiedad en captación)
-  - URB-08 / HU-05 (Registrar características y ubicación exacta)
-- **Rama / PR:** `develop` (fusionado y respaldado en `test`)
+
+---
+
+## ⚠️ DIRECTIVA DE CONTINUIDAD (GPS) — Regla estricta y obligatoria
+
+> **La carpeta `docs/handoff/` es el ecosistema central de navegación del proyecto y la única fuente de verdad.**
+> Ningún desarrollador ni asistente de IA debe escribir código, implementar una HU, alterar modelos compartidos ni modificar flujos de negocio **sin antes consultar obligatoriamente** estos tres documentos:
+>
+> 1. [`URBANEX_ESTADO_PROCESOS.md`](docs/handoff/URBANEX_ESTADO_PROCESOS.md): qué hace hoy cada HU frente al proceso real de la inmobiliaria.
+> 2. [`URBANEX_DEUDA_TECNICA.md`](docs/handoff/URBANEX_DEUDA_TECNICA.md): riesgos abiertos (P0 primero), decisiones pendientes que **no se inventan** y decisiones ya tomadas que **no se rediscuten**.
+> 3. [`URBANEX_GPS_ARCHIVOS.md`](docs/handoff/URBANEX_GPS_ARCHIVOS.md): qué archivo implementa qué HU, su riesgo y qué coordinar antes de tocarlo.
+
+### Por qué existe
+Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expediente + avalúo → publicación → …), no solo un CRUD. Cada vez que se programó sin mirar el handoff aparecieron fallas de proceso: catálogo con fichas internas (DT-07), publicación sin requisitos (DT-08). Esta directiva evita perder el hilo entre sesiones, entre personas y entre asistentes de IA.
+
+### Protocolo de inicio (cada sesión, antes de cualquier cambio)
+1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos.
+2. Leer este archivo completo (sobre todo **Próxima tarea**).
+3. Leer **Estado de procesos** → la HU objetivo y sus criterios.
+4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
+5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
+6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **50 OK**.
+
+### Reglas
+- **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
+- **Si el código y el handoff se contradicen, se detiene el trabajo** y se pregunta al responsable; se corrige el que esté mal y se registra.
+- **Archivos compartidos** (`backend/apps/users/models.py`, `users/migrations/`, `backend/config/settings.py`, `frontend/types/property.ts`, `frontend/app/dashboard/page.tsx`): avisar antes de tocarlos (GPS §3).
+- **Las transiciones de estado no son un PATCH genérico**: cada una es una acción explícita con sus precondiciones verificadas en el servidor (contexto maestro §11).
+- **Un cambio no está terminado** hasta que, en el mismo PR/commit, se actualicen Estado de procesos, Deuda técnica, GPS, Avance de épicas y este archivo, con evidencia (comando + resultado).
+- Estándares de código y checklist DoD: [`URBANEX_ESTANDARES_DOD.md`](docs/handoff/URBANEX_ESTANDARES_DOD.md). Requisitos: [`URBANEX_MASTER_CONTEXT.md`](docs/handoff/URBANEX_MASTER_CONTEXT.md) (la copia de `docs/handoff/` es la de referencia).
+
+---
+
+## Estado actual (2026-10-24)
+
+- **Sprint según el backlog definitivo:** trabajo de EP-2 que adelanta el Sprint 2 (HU-08) y el Sprint 3 (HU-53).
+- **Rama:** `feat/URB-15-HU-53-proceso-publicacion` (desde `develop`, **sin push ni PR todavía**).
+- **Historias trabajadas en la sesión:**
+  - URB-05 / HU-01: cierre de **DT-07** (catálogo público).
+  - URB-13 / HU-08: **modelo base inmutable** de avalúos (sin motor, D-04).
+  - URB-15 / HU-53: **bloqueo de publicación** sin requisitos (cierre de DT-08).
+
+### Terminado en la sesión 2026-10-24
+
+| Commit | Cambio | Evidencia |
+|---|---|---|
+| `2817dcd` | **DT-07:** un anónimo solo ve `disponible`/`reservador` en la lista; el detalle de una ficha en captación responde 404. El dueño y el admin siguen viéndola | 3 pruebas nuevas en `apps.users.tests` |
+| `58b968c` | **HU-08:** app `apps.appraisals` con `Appraisal` (§7 + `status` BORRADOR→APROBADO + `approved_at`), inmutabilidad idéntica a `Document`, 3 restricciones de BD, placeholder manual (`# TODO: Implementar motor de cálculo HITL`), API `/api/appraisals/` (list, retrieve, create, PATCH de calibración, `approve/`; sin PUT ni DELETE), admin de solo lectura | 18 pruebas en `apps.appraisals.tests`; `makemigrations --check` sin cambios |
+| `cca371e` | **HU-53:** `PropertyPublishView` solo publica desde `captacion` (409 en otro caso) y responde 400 con `missing_requirements` si falta foto, `CORRETAJE` vigente no rechazado o avalúo `APROBADO`; todo en transacción con `select_for_update` | `test_publish_property_permission` reescrita + 7 pruebas de rechazo |
+| (docs) | Handoff actualizado: Estado de procesos, Deuda técnica, GPS, Avance de épicas, Guía de continuidad, DoD (comando de pruebas) y esta directiva | Este commit |
+
+### Pruebas ejecutadas y resultado
+- `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **50/50 OK** (13 users + 19 documents + 18 appraisals).
+- Línea base al iniciar la sesión: `apps.users.tests apps.documents.tests` → 22/22 OK.
+- `pipenv run python manage.py makemigrations --check --dry-run` → sin cambios.
+- **No ejecutado:** validación visual en el navegador de ninguno de los tres cambios (pendiente; ver abajo).
+
+### Migraciones / endpoints nuevos
+- Migración `appraisals/0001_initial`. **No aplicada en la BD local** (`db.sqlite3` está rastreado, DT-02): ejecutar `pipenv run python manage.py migrate appraisals` (DT-43).
+- `GET/POST /api/appraisals/`, `GET/PATCH /api/appraisals/<uuid>/`, `POST /api/appraisals/<uuid>/approve/`.
+- Cambio de contrato: `POST /api/auth/properties/<id>/publish/` ahora puede responder **400** `{detail, missing_requirements[{code, message}]}` o **409** (no está en captación).
+- Archivos compartidos tocados: `backend/config/settings.py` (`INSTALLED_APPS`) y `backend/config/urls.py`, una línea cada uno. **Avisar a Sebas.**
+
+### Decisiones aprobadas en la sesión (detalle en Deuda técnica §4)
+- **DS-01** `Appraisal` con ciclo BORRADOR → APROBADO; aprobado = inmutable.
+- **DS-02** Sin motor (D-04): `suggested_value = NULL`, `is_manual_fallback = True`, confianza `BAJO`. Nunca un valor ficticio.
+- **DS-03** Todos los campos del §7 creados ya.
+- **DS-04** Corretaje válido para publicar = versión vigente, no vencida y no `RECHAZADO` (`PENDIENTE` sí sirve). **Cierra N-01.**
+- **DS-05** Avalúo: lo crean, calibran y aprueban el asesor dueño o el admin.
+- **DS-06** Se permiten avalúos nuevos sobre propiedades publicadas (reevaluación); un solo borrador abierto por propiedad.
+- **DS-07** Publicar es solo `captacion → disponible`.
+- **DS-08** El filtro público usa `'reservador'` (errata DT-16) sin tocar `models.py`.
+
+### Hallazgos nuevos registrados en Deuda técnica
+- **DT-09 subió a P0:** `status` sigue escribible en `PropertySerializer`; un `POST`/`PATCH` con `"status": "disponible"` **se salta HU-53**.
+- **DT-39 (P1):** un usuario autenticado con rol `cliente` todavía ve propiedades en captación.
+- **DT-40 (P1):** **bloqueo funcional esperado de HU-53**: sin pantallas I-11/I-12 un avalúo solo se aprueba por la API, así que hoy **no se puede publicar desde la interfaz**. Es el comportamiento correcto del proceso.
+- **DT-41:** el comando de pruebas ahora incluye `apps.appraisals.tests`.
+- **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración pendiente en la BD local.
+
+### Validaciones pendientes (requieren a una persona)
+- [ ] Sin sesión, `/properties` no muestra una propiedad recién creada y `/properties/<id>` no la abre.
+- [ ] En el dashboard, "Publicar" sobre una propiedad sin requisitos muestra el mensaje con lo que falta.
+- [ ] Con avalúo aprobado por la API + foto + corretaje, "Publicar" funciona y la propiedad aparece en el catálogo público.
+
+### Bloqueos
+- **D-04** (fórmula del motor) sigue abierta: bloquea HU-06 y el cálculo de HU-08.
+- **DT-09** impide dar HU-53 y HU-01 por terminadas.
+
+### Próxima tarea
+1. **Revisar y fusionar** la rama `feat/URB-15-HU-53-proceso-publicacion` en `develop` por PR (autorización del responsable de integración).
+2. **Cerrar DT-09 (P0):** `status` de solo lectura en `PropertySerializer` + pruebas (POST y PATCH no cambian el estado). Coordinar: toca `apps/users`.
+3. **Pantalla I-12** (calibrar y aprobar avalúo) + `frontend/types/appraisal.ts` en una ruta nueva; conectar la fila "Avalúo aprobado" del Expediente y mostrar `missing_requirements` al publicar (DT-40).
+4. Resolver DT-39 junto con C-08 (¿se mantiene el rol `cliente`?).
+
+---
+
+## Historial
+
+### Sesión anterior (registro hasta 2026-10-22)
+- **Sprint:** Sprint 1
+- **Historias:** URB-04 / HU-46 (sesión en cliente), URB-05 / HU-01 (registrar propiedad en captación), URB-08 / HU-05 (características y ubicación exacta).
+- **Rama:** `develop` (fusionado y respaldado en `test`).
 - **Terminado:**
-  - Aislamiento de sesiones en el frontend utilizando `sessionStorage` para guardar token, email y rol (`HU-46`).
-  - Identificador visual de sesión global inyectado en el `RootLayout` (`SiteNav`) y en el Dashboard.
-  - Creación del Modal inteligente (detecta automáticamente si usar `POST` para crear o `PATCH` para editar).
-  - Integración de carga de archivos (imágenes) vinculadas al ID de la propiedad (`HU-01`).
-  - Implementación de mapas interactivos con `Leaflet` (OpenStreetMap) para capturar `latitude` y `longitude` exactas sin depender de APIs de pago (`HU-05`).
-  - Modal de propiedad rediseñado en 4 viñetas (Datos generales, Ubicación, Multimedia, Expediente) con validación por viñeta y previsualización de fotos (`HU-01`, `HU-05`).
-  - Buscador de sectores sobre el mapa con Nominatim (OpenStreetMap) + `flyTo` (`HU-05`).
-  - Corrección: `Property` no tenía `latitude`/`longitude`; las coordenadas no se guardaban. Agregado `terreno` a tipos de propiedad.
-  - Modelo `apps.documents.Document` con versionado inmutable, prohibición de borrado, límite 20 MB/PDF-imagen y validación solo Admin (`HU-03` modelo, `HU-37` regla).
-- **En curso:**
-  - `URB-07 / HU-03`: API `/api/documents/` (listar vigentes/todas las versiones, subir nueva versión, detalle, descarga protegida; sin PUT/PATCH/DELETE) conectada a la viñeta Expediente. Tipo real del archivo detectado por firma binaria. **Pendiente: validación visual en navegador.**
-  - Endpoint de validación Admin (`HU-37`) no expuesto aún: corresponde al Sprint 7; la regla ya existe en `Document.validate_document()`.
-  - Relación `Document.opportunity` pendiente hasta que exista `apps.crm.Opportunity` (HU-36, Sprint 7).
-- **Pruebas ejecutadas y resultado:**
-  - Pruebas manuales de UI/UX en Dashboard: Renderizado correcto de tarjetas y etiquetas de estado.
-  - Corrección del error de desincronización de HTML (`Expected </, got jsx text`) al anidar el mapa en el formulario.
-  - Pruebas de renderizado en cliente (`ssr: false` en Next.js) para evitar caídas con la librería del mapa.
-  - Manejo de token expirado (Error 401) validado visualmente.
-  - `python manage.py test apps.documents.tests`: 19/19 OK (10 de modelo + 9 de API: autenticación, permisos por propiedad, versión 2, MIME falsificado, 20 MB, fechas, 405 en PATCH/DELETE, descarga).
-  - `apps.users.tests`: 4 errores preexistentes (`create_user()` sin `username`).
-- **Migraciones / endpoints nuevos:**
-  - `users/0006` (latitude, longitude, tipo terreno) y `documents/0001_initial`.
-  - Frontend consume correctamente `/api/auth/properties/` y `/api/auth/property-images/`.
-- **Decisiones aprobadas:**
-  - Uso de Leaflet en el frontend en lugar de Google Maps para optimizar costos.
-  - Mantener la edición de variables en inglés (`latitude`, `longitude`) para alinear estrictamente el JSON del frontend con el modelo de Django.
-- **Bloqueos:**
-  - Ninguno actualmente en el repositorio Frontend.
-- **Próxima tarea:** 
-  - **(Responsabilidad Backend):** Desarrollo e inicialización de las apps `apps.appraisals` y `apps.documents` en Django con sus respectivos modelos y reglas de inmutabilidad (HU-03, HU-04, HU-06).
+  - Aislamiento de sesiones en el frontend con `sessionStorage` para token, email y rol (`HU-46`).
+  - Identificador visual de sesión global en el `RootLayout` (`SiteNav`) y en el Dashboard.
+  - Modal inteligente (detecta si usar `POST` para crear o `PATCH` para editar).
+  - Carga de imágenes vinculadas al ID de la propiedad (`HU-01`).
+  - Mapas interactivos con `Leaflet` (OpenStreetMap) para capturar `latitude` y `longitude` sin APIs de pago (`HU-05`).
+  - Modal en 4 viñetas (Datos generales, Ubicación, Multimedia, Expediente) con validación por viñeta y previsualización de fotos (`HU-01`, `HU-05`).
+  - Buscador de sectores con Nominatim + `flyTo` (`HU-05`).
+  - Corrección: `Property` no tenía `latitude`/`longitude`. Agregado `terreno` a los tipos.
+  - Modelo `apps.documents.Document` con versionado inmutable, sin borrado, 20 MB/PDF-imagen y validación solo Admin (`HU-03` modelo, `HU-37` regla).
+  - API `/api/documents/` conectada a la viñeta Expediente (`URB-07 / HU-03`). Validación visual pendiente.
+- **Pruebas de entonces:** pruebas manuales de UI en el Dashboard; corrección del error de hidratación al anidar el mapa; `ssr: false` para el mapa; manejo visual del 401; `apps.documents.tests` 19/19 OK; `apps.users.tests` con 4 errores preexistentes (corregidos después: FX-02).
+- **Migraciones de entonces:** `users/0006` (latitude, longitude, terreno) y `documents/0001_initial`.
+- **Decisiones aprobadas:** Leaflet en lugar de Google Maps (costos); nombres de campos en inglés (`latitude`, `longitude`) para alinear JSON y modelo.

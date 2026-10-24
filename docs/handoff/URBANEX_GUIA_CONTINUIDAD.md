@@ -5,6 +5,7 @@
 | Propósito | Retomar el desarrollo, empezando por Avalúos (HU-04, HU-06, HU-08), sin depender de explicaciones orales |
 | Fecha de auditoría | 2026-10-22 · rama `develop` |
 | Estado | Instantánea. **Actualízala** al cerrar cada HU (ver Paso 5) |
+| Última actualización | 2026-10-24 · Pasos 1, 2, 3 y 4 ajustados tras crear `apps.appraisals` y bloquear la publicación (HU-53). Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
 
 ---
 
@@ -35,8 +36,8 @@ Orden de lectura:
 - Monorepo con `backend/` (Django 6.1, DRF, JWT, SQLite) y `frontend/` (Next.js 16, React 19, Tailwind 4).
 - `Property` vive en `backend/apps/users/models.py` y el expediente en `backend/apps/documents/`.
 - El proceso que importa: **captación → expediente + avalúo → publicación**.
-- Hoy la captación y el expediente funcionan a nivel técnico; el avalúo no existe; publicar no valida requisitos.
-- El catálogo público muestra propiedades que no debería (DT-07).
+- (2026-10-24) La captación y el expediente funcionan a nivel técnico; el avalúo existe como modelo inmutable **sin motor** (D-04) y **sin pantallas**; publicar exige foto + corretaje + avalúo aprobado.
+- El catálogo ya no muestra la captación a anónimos (DT-07 resuelto), pero `status` sigue escribible por PATCH/POST y permite saltarse HU-53 (**DT-09, P0**).
 - Nada está desplegado; no hay CI.
 
 ## Paso 2. Preparar el entorno
@@ -53,8 +54,8 @@ cd backend
 pipenv install                     # (no ejecutado en la auditoría; el entorno ya existía)
 #   Crea backend/.env con las variables SECRET_KEY, DEBUG y ALLOWED_HOSTS
 #   (pide los valores a Pablo; no hay .env.example — DT-21). Pipenv carga .env solo.
-pipenv run python manage.py migrate
-pipenv run python manage.py test apps.users.tests apps.documents.tests   # esperado: 22 tests OK
+pipenv run python manage.py migrate                # crea también la tabla de avalúos (DT-43)
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 50 tests OK (2026-10-24)
 pipenv run python manage.py runserver          # (no ejecutado) http://127.0.0.1:8000
 
 # 2. Frontend (Node 25 / npm 10)
@@ -93,9 +94,10 @@ Detalle completo en el [GPS §2](URBANEX_GPS_ARCHIVOS.md#2-mapa-de-dependencias-
 | Regla de 1–2 comparables | **Contradictoria** | C-02 |
 | Permisos | Sí | Patrón `role == 'admin' or property.agent_id == user.id` |
 | Autenticación desde el frontend | Sí | `sessionStorage.getItem("access")` + `Authorization: Bearer` |
-| Contrato de corretaje para publicar | Sí | `Document.objects.current().filter(property=p, doc_type='CORRETAJE')` |
-| Patrón de registro inmutable | Sí | `backend/apps/documents/models.py` (para HU-08) |
-| App `apps.appraisals`, modelo `Appraisal`, endpoints y pantallas I-11/I-12 | **No** | Es tu trabajo |
+| Contrato de corretaje para publicar | Sí (en uso) | `get_missing_publication_requirements()` en `backend/apps/users/views.py` (DS-04) |
+| Patrón de registro inmutable | Sí | `backend/apps/documents/models.py` y `backend/apps/appraisals/models.py` |
+| App `apps.appraisals`, modelo `Appraisal` y endpoints | **Sí (2026-10-24)** | `/api/appraisals/`; placeholder manual hasta D-04 (DS-02). Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md) |
+| Pantallas I-11/I-12 y `frontend/types/appraisal.ts` | **No** | Es tu trabajo (DT-40) |
 | Servicio de IA (HU-07) | **No** | Fuera de tu alcance; HU-08 debe aceptar la justificación manual |
 
 ## Paso 4. Siguiente paso seguro
@@ -103,15 +105,14 @@ Detalle completo en el [GPS §2](URBANEX_GPS_ARCHIVOS.md#2-mapa-de-dependencias-
 Orden recomendado según las dependencias reales:
 
 1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor D-04 (fórmula, factores, umbrales), C-02 (1–2 comparables), N-02 (qué propiedades son comparables) y N-03 (cómo se define la zona). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
-2. **Comprobar la línea base:** ejecutar las 22 pruebas y `tsc` (Paso 2) y anotar el resultado.
-3. **Primer incremento de código, que no depende de D-04:** crear `backend/apps/appraisals/` con el modelo `Appraisal` del contexto maestro §7.3 y su inmutabilidad (HU-08: "se conservan el valor del motor, el calibrado y su diferencia"; "el avalúo aprobado no se sobrescribe"). Seguir el patrón de `Document` y escribir sus pruebas.
-   - Archivos: `backend/apps/appraisals/*`, `backend/config/settings.py` (`INSTALLED_APPS`), `backend/config/urls.py`.
-   - Validar con `manage.py test apps.appraisals.tests apps.users.tests apps.documents.tests` + `makemigrations --check`.
+2. **Comprobar la línea base:** ejecutar las 50 pruebas y `tsc` (Paso 2) y anotar el resultado.
+3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). **Siguiente incremento sin D-04: cerrar DT-09** (`status` de solo lectura en `PropertySerializer`), porque hoy anula el bloqueo de HU-53. Coordinar con Pablo: toca `apps/users`.
+   - Después, pantalla I-12 (calibrar y aprobar) + `frontend/types/appraisal.ts`, en una ruta nueva (DT-40).
 4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una sola migración `users.0007` con los campos acordados. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.
 5. **HU-04:** endpoint de candidatos a comparables (mismo tipo y zona) y selección de 3 a 5 con registro manual de respaldo. Pantalla I-11 en una **ruta nueva**, no dentro del modal, para evitar conflictos en `dashboard/page.tsx`.
 6. **HU-06**, solo con D-04 aprobada: cálculo determinista en un servicio aislado y con pruebas para 0, 1–2 y 3+ comparables y para dispersión alta (contexto maestro §12.4).
-7. **HU-08:** calibración y aprobación (pantalla I-12).
-8. **Después**, HU-53 (Sprint 3): exigir el avalúo aprobado y el corretaje en `PropertyPublishView` y reescribir `test_publish_property_permission`.
+7. **HU-08:** el backend ya existe; falta la pantalla I-12 (ver paso 3).
+8. ~~HU-53: exigir el avalúo aprobado y el corretaje en `PropertyPublishView`~~ **Hecho el 2026-10-24** (commit `cca371e`). Falta: `slug` + metaetiquetas (segundo criterio de HU-53) y mostrar `missing_requirements` en la UI.
 
 **Validación funcional por incremento:** como asesor de prueba, crear una propiedad, abrir su avalúo, seleccionar comparables, ver el valor y calibrarlo. Registrar quién lo probó, cuándo y qué se vio.
 
@@ -148,4 +149,6 @@ Instrucciones previas para el asistente:
 - No inventes D-04 ni ninguna otra decisión pendiente.
 - Ejecuta las pruebas con etiquetas explícitas (DT-06) y reporta la salida real.
 
+> Esta directiva se complementa con la **DIRECTIVA DE CONTINUIDAD (GPS)** de `PROJECT_PROGRESS.md`, que es obligatoria y prevalece.
+>
 > Directiva de IA: Antes de escribir código nuevo, lee el URBANEX_MASTER_CONTEXT.md y los 7 documentos en docs/handoff/. Trabaja en pasos pequeños, respeta los archivos ya estabilizados, y antes de avanzar pregúntame siempre: '¿Pasaron las pruebas unitarias y visuales del paso anterior antes de que procedamos a implementar esto?'.

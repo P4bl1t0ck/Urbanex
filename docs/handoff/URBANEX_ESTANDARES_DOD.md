@@ -70,11 +70,14 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] Listo para revisión por el otro desarrollador
 ```
 
-**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06):
+**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-24 con `apps.appraisals` (DT-41); resultado esperado: **50 pruebas OK**:
 
 ```bash
-pipenv run python manage.py test apps.users.tests apps.documents.tests
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests
+pipenv run python manage.py makemigrations --check --dry-run
 ```
+
+Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 
 Desde `frontend/`:
 
