@@ -37,7 +37,7 @@ Orden de lectura:
 - `Property` vive en `backend/apps/users/models.py` y el expediente en `backend/apps/documents/`.
 - El proceso que importa: **captación → expediente + avalúo → publicación**.
 - (2026-10-24) La captación y el expediente funcionan a nivel técnico; el avalúo existe como modelo inmutable **sin motor** (D-04) y **sin pantallas**; publicar exige foto + corretaje + avalúo aprobado.
-- El catálogo ya no muestra la captación a anónimos (DT-07 resuelto), pero `status` sigue escribible por PATCH/POST y permite saltarse HU-53 (**DT-09, P0**).
+- El catálogo ya no muestra la captación a anónimos (DT-07 resuelto) y `status` es de solo lectura (DT-09 resuelto): la única vía para publicar es `POST …/publish/`.
 - Nada está desplegado; no hay CI.
 
 ## Paso 2. Preparar el entorno
@@ -55,7 +55,7 @@ pipenv install                     # (no ejecutado en la auditoría; el entorno 
 #   Crea backend/.env con las variables SECRET_KEY, DEBUG y ALLOWED_HOSTS
 #   (pide los valores a Pablo; no hay .env.example — DT-21). Pipenv carga .env solo.
 pipenv run python manage.py migrate                # crea también la tabla de avalúos (DT-43)
-pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 50 tests OK (2026-10-24)
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 52 tests OK (2026-10-24)
 pipenv run python manage.py runserver          # (no ejecutado) http://127.0.0.1:8000
 
 # 2. Frontend (Node 25 / npm 10)
@@ -105,9 +105,9 @@ Detalle completo en el [GPS §2](URBANEX_GPS_ARCHIVOS.md#2-mapa-de-dependencias-
 Orden recomendado según las dependencias reales:
 
 1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor D-04 (fórmula, factores, umbrales), C-02 (1–2 comparables), N-02 (qué propiedades son comparables) y N-03 (cómo se define la zona). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
-2. **Comprobar la línea base:** ejecutar las 50 pruebas y `tsc` (Paso 2) y anotar el resultado.
-3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). **Siguiente incremento sin D-04: cerrar DT-09** (`status` de solo lectura en `PropertySerializer`), porque hoy anula el bloqueo de HU-53. Coordinar con Pablo: toca `apps/users`.
-   - Después, pantalla I-12 (calibrar y aprobar) + `frontend/types/appraisal.ts`, en una ruta nueva (DT-40).
+2. **Comprobar la línea base:** ejecutar las 52 pruebas y `tsc` (Paso 2) y anotar el resultado.
+3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). ~~Cerrar DT-09~~ **Hecho el 2026-10-24** (FX-11).
+   - **Siguiente incremento sin D-04:** pantalla I-12 (calibrar y aprobar) + `frontend/types/appraisal.ts`, en una ruta nueva (DT-40).
 4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una sola migración `users.0007` con los campos acordados. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.
 5. **HU-04:** endpoint de candidatos a comparables (mismo tipo y zona) y selección de 3 a 5 con registro manual de respaldo. Pantalla I-11 en una **ruta nueva**, no dentro del modal, para evitar conflictos en `dashboard/page.tsx`.
 6. **HU-06**, solo con D-04 aprobada: cálculo determinista en un servicio aislado y con pruebas para 0, 1–2 y 3+ comparables y para dispersión alta (contexto maestro §12.4).

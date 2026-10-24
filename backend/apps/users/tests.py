@@ -116,6 +116,33 @@ class UrbanexCoreTests(TestCase):
         response = self.client.get(f"/api/auth/properties/{captacion.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    # TEST DT-09: status no se cambia por POST/PATCH genéricos (solo por HU-53)
+    def test_patch_cannot_change_status(self):
+        property_obj = self._create_property("captacion")
+        self.client.force_authenticate(user=self.agent)
+        response = self.client.patch(
+            f"/api/auth/properties/{property_obj.id}/", {"status": "disponible"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        property_obj.refresh_from_db()
+        self.assertEqual(property_obj.status, "captacion")
+
+    def test_create_ignores_status(self):
+        self.client.force_authenticate(user=self.agent)
+        data = {
+            "title": "Intento de publicar al crear",
+            "description": "DT-09",
+            "property_type": "casa",
+            "price": "120000.00",
+            "area_m2": 90,
+            "location": "Quito",
+            "status": "disponible",
+        }
+        response = self.client.post("/api/auth/properties/", data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["status"], "captacion")
+        self.assertEqual(Property.objects.get(pk=response.data["id"]).status, "captacion")
+
     # TEST HU-53 / DT-08: la publicación se rechaza si falta algún requisito
     def _add_image(self, property_obj):
         # Solo la ruta: la prueba no necesita escribir el archivo en media/

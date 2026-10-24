@@ -64,7 +64,7 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | HU | Criterio | Impl. | Verif. | Valid. | Motivo |
 |---|---|:-:|:-:|:-:|---|
 | HU-01 | Campos obligatorios y al menos una fotografía | ✗ | ✗ | ✗ | La foto solo se exige en el frontend |
-| HU-01 | En captación, sin exhibirse al público | ✗ | ✗ | ✗ | (2026-10-24) Oculta para anónimos y probado; sigue ✗ porque el POST acepta `status` (DT-09) y un `cliente` autenticado la ve (DT-39) |
+| HU-01 | En captación, sin exhibirse al público | ✗ | ✗ | ✗ | (2026-10-24) Oculta para anónimos y `POST` siempre en captación (DT-07 y DT-09 resueltos, probado); sigue ✗ porque un `cliente` autenticado la ve (DT-39) |
 | HU-01 | Asesor como captador y responsable inicial | ✔ | ✔ | ✗ | `test_create_property_as_agent`; falta validación visual posterior al refactor |
 | HU-02 | Asignación automática al asesor autenticado | ✔ | ✔ | ✗ | Misma prueba |
 | HU-02 | El captador no es editable | ✗ | ✗ | ✗ | Editable desde el admin de Django |
@@ -73,7 +73,7 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | HU-03 | Registra fecha de vigencia | ✔ | ✔ | ✗ | Pruebas de API y modelo |
 | HU-03 | Asociado a la propiedad | ✔ | ✔ | ✗ | Pruebas de API |
 | HU-04 | Entre 3 y 5 comparables | ✗ | ✗ | ✗ | No iniciado |
-| HU-04 | Avalúo requisito para publicar | ✗ | ✗ | ✗ | (2026-10-24) Exigido y probado en `PropertyPublishView`; sigue ✗ porque DT-09 permite saltarlo |
+| HU-04 | Avalúo requisito para publicar | ✔ | ✔ | ✗ | (2026-10-24) Exigido en `PropertyPublishView`, única vía de publicación tras FX-11; `test_publish_rejected_with_draft_appraisal_only` |
 | HU-04 | Registro manual sin comparables suficientes | ✗ | ✗ | ✗ | No iniciado |
 | HU-05 | Valores numéricos o selectores | ✔ | ✗ | ✗ | Los campos existentes cumplen; no hay prueba específica |
 | HU-05 | Obligatorios validados antes de calcular | ✗ | ✗ | ✗ | No hay cálculo |
@@ -85,34 +85,34 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | HU-08 | El avalúo aprobado no se sobrescribe | ✗ | ✗ | ✗ | (2026-10-24) Backend verificado; falta la pantalla I-12 (DT-40) |
 | HU-09 | Cambiar entre estados; No disponible con motivo | ✗ | ✗ | ✗ | La regla del motivo está en el serializer, pero la UI no permite cambiar el estado y el PATCH acepta estados no previstos (DT-09) |
 | HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✗ | ✗ | En el serializer; sin prueba |
-| HU-53 | Requiere avalúo y contrato de corretaje | ✗ | ✗ | ✗ | (2026-10-24) Exigido y probado (8 pruebas); sigue ✗ por DT-09 |
+| HU-53 | Requiere avalúo y contrato de corretaje | ✔ | ✔ | ✗ | (2026-10-24) 8 pruebas de publicación + 2 de `status` de solo lectura (FX-11). Falta la validación funcional en la UI (DT-40) |
 | HU-53 | Pasa a Disponible y genera URL con metaetiquetas | ✗ | ✗ | ✗ | Sin `slug` ni OpenGraph |
 
 | Métrica | Valor |
 |---|---|
 | Total de criterios | 24 |
-| Implementado | 7/24 = **29,2 %** |
-| Verificado | 4/24 = **16,7 %** |
+| Implementado | 9/24 = **37,5 %** (antes 7/24; +HU-04 y HU-53 el 2026-10-24) |
+| Verificado | 6/24 = **25 %** (antes 4/24) |
 | Validado | 0/24 = **0 %** |
 | HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** |
 
 ```mermaid
 pie showData title EP-2 — criterios de aceptación (24)
-  "Verificados (test aprobado)" : 4
+  "Verificados (test aprobado)" : 6
   "Implementados sin test" : 3
-  "No implementados" : 17
+  "No implementados" : 15
 ```
 
 **Lectura:** el trabajo hecho se concentra en el registro de propiedades y el expediente. Las HU de avalúo (HU-04, 06, 07, 08), que suman 16 de 33 puntos, están sin iniciar. HU-53 (publicar) y la parte "sin exhibirse al público" de HU-01 fallan respecto del proceso de negocio.
 
-**Actualización 2026-10-24.** Las métricas oficiales siguen en 7/24 implementados y 4/24 verificados, porque el método no cuenta criterios parciales. Pero **5 criterios tienen ya el backend verificado** y esperan una sola condición cada uno:
+**Actualización 2026-10-24.** Con DT-09 cerrado (FX-11), HU-04 "requisito para publicar" y HU-53 "avalúo y corretaje" pasan a verificados: EP-2 sube a **6/24 verificados (25 %)**. Quedan 3 criterios con el backend verificado que esperan una sola condición:
 
 | Criterios | Condición que falta para contarlos ✔ |
 |---|---|
-| HU-01 "sin exhibirse", HU-04 "requisito para publicar", HU-53 "avalúo y corretaje" | Cerrar **DT-09** (y DT-39 para HU-01) |
+| HU-01 "sin exhibirse" | Cerrar **DT-39** (rol `cliente`) |
 | HU-08 (los 2 criterios) | Pantalla **I-12** (DT-40) |
 
-Cerrar DT-09 subiría el verificado de EP-2 a **6/24 (25 %)** como mínimo; con I-12, a **8/24 (33,3 %)**.
+Con I-12, el verificado subiría a **8/24 (33,3 %)**; con DT-39, a **9/24 (37,5 %)**.
 
 ## 5. Bloqueos y dependencias que afectan al avance
 
@@ -127,6 +127,6 @@ Cerrar DT-09 subiría el verificado de EP-2 a **6/24 (25 %)** como mínimo; con 
 ## 6. Siguientes pasos para mover los porcentajes
 1. **Validado (barato):** que una persona pruebe en el navegador HU-03 (subida de PDF e imagen, versión v2) y HU-01 (creación y asignación al asesor) y lo registre. Puede subir el avance validado de EP-2 a 3/24 sin escribir código.
 2. **Verificado:** agregar una prueba que suba una imagen (HU-03) y otra para el bloqueo a los 5 intentos (HU-45).
-3. ~~**Implementado:** filtrar el catálogo público (HU-01) y comenzar `apps.appraisals`~~ Hecho el 2026-10-24 (backend). **Siguiente:** cerrar DT-09 y construir I-12.
+3. ~~**Implementado:** filtrar el catálogo público (HU-01) y comenzar `apps.appraisals`~~ Hecho el 2026-10-24 (backend), junto con DT-09. **Siguiente:** construir I-12 y cerrar DT-39.
 
 Cada vez que cambie un criterio, actualizar esta tabla y anotar la fecha y la evidencia (commit, prueba o captura).

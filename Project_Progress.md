@@ -15,13 +15,13 @@
 Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expediente + avalúo → publicación → …), no solo un CRUD. Cada vez que se programó sin mirar el handoff aparecieron fallas de proceso: catálogo con fichas internas (DT-07), publicación sin requisitos (DT-08). Esta directiva evita perder el hilo entre sesiones, entre personas y entre asistentes de IA.
 
 ### Protocolo de inicio (cada sesión, antes de cualquier cambio)
-1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos.
+1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos. Si el pull trae migraciones nuevas, ejecutar `pipenv run python manage.py migrate` (`showmigrations` para verificar).
 2. Leer este archivo completo (sobre todo **Próxima tarea**).
 3. Leer **Estado de procesos** → la HU objetivo y sus criterios.
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **50 OK**.
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **52 OK**.
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -36,7 +36,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## Estado actual (2026-10-24)
 
 - **Sprint según el backlog definitivo:** trabajo de EP-2 que adelanta el Sprint 2 (HU-08) y el Sprint 3 (HU-53).
-- **Rama:** `feat/URB-15-HU-53-proceso-publicacion` (desde `develop`, **sin push ni PR todavía**).
+- **Rama:** `feat/URB-15-HU-53-proceso-publicacion` (desde `develop`; **subida a `origin` el 2026-10-24, PR todavía sin abrir**).
 - **Historias trabajadas en la sesión:**
   - URB-05 / HU-01: cierre de **DT-07** (catálogo público).
   - URB-13 / HU-08: **modelo base inmutable** de avalúos (sin motor, D-04).
@@ -49,16 +49,17 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 | `2817dcd` | **DT-07:** un anónimo solo ve `disponible`/`reservador` en la lista; el detalle de una ficha en captación responde 404. El dueño y el admin siguen viéndola | 3 pruebas nuevas en `apps.users.tests` |
 | `58b968c` | **HU-08:** app `apps.appraisals` con `Appraisal` (§7 + `status` BORRADOR→APROBADO + `approved_at`), inmutabilidad idéntica a `Document`, 3 restricciones de BD, placeholder manual (`# TODO: Implementar motor de cálculo HITL`), API `/api/appraisals/` (list, retrieve, create, PATCH de calibración, `approve/`; sin PUT ni DELETE), admin de solo lectura | 18 pruebas en `apps.appraisals.tests`; `makemigrations --check` sin cambios |
 | `cca371e` | **HU-53:** `PropertyPublishView` solo publica desde `captacion` (409 en otro caso) y responde 400 con `missing_requirements` si falta foto, `CORRETAJE` vigente no rechazado o avalúo `APROBADO`; todo en transacción con `select_for_update` | `test_publish_property_permission` reescrita + 7 pruebas de rechazo |
-| (docs) | Handoff actualizado: Estado de procesos, Deuda técnica, GPS, Avance de épicas, Guía de continuidad, DoD (comando de pruebas) y esta directiva | Este commit |
+| `d33b698` | Handoff actualizado: Estado de procesos, Deuda técnica, GPS, Avance de épicas, Guía de continuidad, DoD (comando de pruebas) y esta directiva | — |
+| (commit de DT-09, ver `git log`) | **DT-09 (P0) resuelto (FX-11):** `status` en `read_only_fields` de `PropertySerializer`; `POST` crea siempre en `captacion` y `PATCH` ignora `status`. `PropertyPublishView` queda como única vía hacia `disponible` | `test_patch_cannot_change_status`, `test_create_ignores_status`; 52/52 OK |
 
 ### Pruebas ejecutadas y resultado
-- `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **50/50 OK** (13 users + 19 documents + 18 appraisals).
+- `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **52/52 OK** (15 users + 19 documents + 18 appraisals), tras cerrar DT-09.
 - Línea base al iniciar la sesión: `apps.users.tests apps.documents.tests` → 22/22 OK.
 - `pipenv run python manage.py makemigrations --check --dry-run` → sin cambios.
 - **No ejecutado:** validación visual en el navegador de ninguno de los tres cambios (pendiente; ver abajo).
 
 ### Migraciones / endpoints nuevos
-- Migración `appraisals/0001_initial`. **No aplicada en la BD local** (`db.sqlite3` está rastreado, DT-02): ejecutar `pipenv run python manage.py migrate appraisals` (DT-43).
+- Migración `appraisals/0001_initial`. **Aplicada en la BD local de Pablo el 2026-10-24** (`showmigrations appraisals` → `[X] 0001_initial`). Su `db.sqlite3` cambió pero **no se sube** (DT-02). ⚠️ **Para el próximo desarrollo:** quien haga pull de esta rama (Sebas incluido) debe ejecutar `pipenv run python manage.py migrate` antes de levantar el servidor, o `/api/appraisals/` y la publicación fallarán con `no such table: appraisals_appraisal` (DT-43).
 - `GET/POST /api/appraisals/`, `GET/PATCH /api/appraisals/<uuid>/`, `POST /api/appraisals/<uuid>/approve/`.
 - Cambio de contrato: `POST /api/auth/properties/<id>/publish/` ahora puede responder **400** `{detail, missing_requirements[{code, message}]}` o **409** (no está en captación).
 - Archivos compartidos tocados: `backend/config/settings.py` (`INSTALLED_APPS`) y `backend/config/urls.py`, una línea cada uno. **Avisar a Sebas.**
@@ -74,11 +75,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **DS-08** El filtro público usa `'reservador'` (errata DT-16) sin tocar `models.py`.
 
 ### Hallazgos nuevos registrados en Deuda técnica
-- **DT-09 subió a P0:** `status` sigue escribible en `PropertySerializer`; un `POST`/`PATCH` con `"status": "disponible"` **se salta HU-53**.
+- ~~**DT-09 subió a P0**~~ **Resuelto el mismo día (FX-11).** Efecto colateral registrado: HU-09 (retirar con motivo) ya no puede hacerse por PATCH y necesitará su propia acción; reglas de `status` en `validate()` quedan latentes (DT-44).
 - **DT-39 (P1):** un usuario autenticado con rol `cliente` todavía ve propiedades en captación.
 - **DT-40 (P1):** **bloqueo funcional esperado de HU-53**: sin pantallas I-11/I-12 un avalúo solo se aprueba por la API, así que hoy **no se puede publicar desde la interfaz**. Es el comportamiento correcto del proceso.
 - **DT-41:** el comando de pruebas ahora incluye `apps.appraisals.tests`.
-- **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración pendiente en la BD local.
+- **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración aplicada en la copia de Pablo; las demás copias deben ejecutar `migrate`.
 
 ### Validaciones pendientes (requieren a una persona)
 - [ ] Sin sesión, `/properties` no muestra una propiedad recién creada y `/properties/<id>` no la abre.
@@ -87,11 +88,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ### Bloqueos
 - **D-04** (fórmula del motor) sigue abierta: bloquea HU-06 y el cálculo de HU-08.
-- **DT-09** impide dar HU-53 y HU-01 por terminadas.
+- HU-53 y HU-01 ya no tienen bloqueos técnicos de backend; falta validación en la UI (DT-40) y DT-39.
 
 ### Próxima tarea
-1. **Revisar y fusionar** la rama `feat/URB-15-HU-53-proceso-publicacion` en `develop` por PR (autorización del responsable de integración).
-2. **Cerrar DT-09 (P0):** `status` de solo lectura en `PropertySerializer` + pruebas (POST y PATCH no cambian el estado). Coordinar: toca `apps/users`.
+1. **Abrir el PR** de `feat/URB-15-HU-53-proceso-publicacion` (ya en `origin`) hacia `develop`, revisarlo y fusionarlo con autorización del responsable de integración. Tras fusionar, cada copia ejecuta `migrate`.
+2. ~~Cerrar DT-09 (P0)~~ Hecho el 2026-10-24 (FX-11).
 3. **Pantalla I-12** (calibrar y aprobar avalúo) + `frontend/types/appraisal.ts` en una ruta nueva; conectar la fila "Avalúo aprobado" del Expediente y mostrar `missing_requirements` al publicar (DT-40).
 4. Resolver DT-39 junto con C-08 (¿se mantiene el rol `cliente`?).
 
