@@ -64,6 +64,48 @@ class UrbanexCoreTests(TestCase):
         property_obj.refresh_from_db()
         self.assertEqual(property_obj.status, "disponible")
 
+    # TEST DT-07: el catálogo público no expone propiedades en captación
+    def _create_property(self, status_value):
+        return Property.objects.create(
+            agent=self.agent,
+            title=f"Propiedad {status_value}",
+            description="Catálogo público",
+            property_type="casa",
+            price=150000,
+            area_m2=120,
+            location="Cumbayá",
+            status=status_value,
+        )
+
+    def test_anonymous_list_only_shows_public_statuses(self):
+        captacion = self._create_property("captacion")
+        disponible = self._create_property("disponible")
+        reservado = self._create_property("reservador")  # errata DT-16
+        vendido = self._create_property("vendido")
+
+        response = self.client.get("/api/auth/properties/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ids = {item["id"] for item in response.data}
+        self.assertEqual(ids, {disponible.id, reservado.id})
+        self.assertNotIn(captacion.id, ids)
+        self.assertNotIn(vendido.id, ids)
+
+    def test_anonymous_cannot_read_captacion_detail(self):
+        captacion = self._create_property("captacion")
+        disponible = self._create_property("disponible")
+
+        response = self.client.get(f"/api/auth/properties/{captacion.id}/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        response = self.client.get(f"/api/auth/properties/{disponible.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_owner_still_reads_captacion_detail(self):
+        captacion = self._create_property("captacion")
+        self.client.force_authenticate(user=self.agent)
+        response = self.client.get(f"/api/auth/properties/{captacion.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     # TEST 3: Rechazo de autenticación con credenciales erróneas
     def test_login_failed_with_invalid_credentials(self):
         data = {

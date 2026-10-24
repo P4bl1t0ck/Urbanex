@@ -12,6 +12,10 @@ from rest_framework import permissions
 
 User = get_user_model()
 
+# DT-07 / HU-01: estados visibles en el catalogo publico. 'reservador' es el valor
+# real guardado hoy (errata DT-16); cambiar a 'reservado' cuando se migre.
+PUBLIC_STATUSES = ("disponible", "reservador")
+
 '''
 The Views work to enrute, fetch, grab, get and retrive the information from the database and send it to the Template. 
 MVT (Model-View-Template): User -> (View <-> Database) --> Template ->> User.
@@ -75,7 +79,14 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     
     #The reason why it doesnt fetch all the properties.
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
+
+    def get_queryset(self):
+        # DT-07: un anonimo solo ve el catalogo publico, nunca fichas en captacion.
+        queryset = super().get_queryset()
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(status__in=PUBLIC_STATUSES)
+        return queryset
+
     def perform_create(self, serializer): # Revisar sobre un inesperado error al momento de intentar crear una propiedad.
         #Verificado.
         serializer.save(agent=self.request.user)
@@ -128,3 +139,10 @@ class PropertyDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Property.objects.all() #Query
     serializer_class = PropertySerializer
     permission_classes = [PropertyOwnerOrAdminOrReadOnly]
+
+    def get_queryset(self):
+        # DT-07: una ficha fuera del catalogo responde 404 a un anonimo.
+        queryset = super().get_queryset()
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(status__in=PUBLIC_STATUSES)
+        return queryset
