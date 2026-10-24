@@ -5,16 +5,64 @@ from rest_framework import generics, permissions, status, viewsets
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils import timezone
 from rest_framework.decorators import action
 from .serializers import LoginSerializer, PropertySerializer, PropertyImageSerializer
 from .models import Property, PropertyImage
 from rest_framework import permissions
+from apps.appraisals.models import Appraisal
+from apps.documents.models import Document
 
 User = get_user_model()
 
 # DT-07 / HU-01: estados visibles en el catalogo publico. 'reservador' es el valor
 # real guardado hoy (errata DT-16); cambiar a 'reservado' cuando se migre.
 PUBLIC_STATUSES = ("disponible", "reservador")
+
+
+def get_missing_publication_requirements(property_obj):
+    '''
+    HU-53 / RF-01: requisitos para pasar de captacion a disponible (contexto maestro §11).
+    Devuelve una lista vacia si la propiedad se puede publicar.
+    '''
+    missing = []
+
+    if not property_obj.images.exists():
+        missing.append({
+            "code": "image",
+            "message": "Debe cargar al menos una fotografía.",
+        })
+
+    # Solo existe una version vigente por tipo; si esa esta vencida o rechazada no cuenta
+    # aunque una version anterior haya sido valida. PENDIENTE si permite publicar (N-01).
+    corretaje = Document.objects.current().filter(
+        property=property_obj,
+        doc_type=Document.DocType.CORRETAJE,
+    ).first()
+    if corretaje is None:
+        missing.append({
+            "code": "brokerage_contract",
+            "message": "Falta el contrato de corretaje.",
+        })
+    elif corretaje.validation_status == Document.ValidationStatus.RECHAZADO:
+        missing.append({
+            "code": "brokerage_contract",
+            "message": "El contrato de corretaje fue rechazado por el Administrador; suba una nueva versión.",
+        })
+    elif corretaje.expiration_date < timezone.localdate():
+        missing.append({
+            "code": "brokerage_contract",
+            "message": "El contrato de corretaje está vencido; suba una nueva versión.",
+        })
+
+    if not Appraisal.objects.approved().filter(property=property_obj).exists():
+        missing.append({
+            "code": "appraisal",
+            "message": "La propiedad necesita un avalúo aprobado.",
+        })
+
+    return missing
 
 '''
 The Views work to enrute, fetch, grab, get and retrive the information from the database and send it to the Template. 
@@ -115,18 +163,38 @@ class PropertyPublishView(APIView):
     #permission_classes = [permissions.IsAuthenticatedOrReadOnly] #Deseeperate options.
 
     def post(self, request, pk):
-        try:
-            property_obj = Property.objects.get(pk=pk)
-        except Property.DoesNotExist:
-            return Response({"detail": "Propiedad no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+        # HU-53: la verificacion y el cambio de estado van en la misma transaccion;
+        # select_for_update evita publicar dos veces en paralelo.
+        with transaction.atomic():
+            try:
+                property_obj = Property.objects.select_for_update().get(pk=pk)
+            except Property.DoesNotExist:
+                return Response({"detail": "Propiedad no encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
-        #Validacion de seguridad 
-        if request.user != property_obj.agent and request.user.role != 'admin':
-            return Response({"detail":"No tienes permiso para publicar esta propiedad."}, status=status.HTTP_403_FORBIDDEN)
-        
-        #Si pasa la verificaciónh Para a disponible y guardara la propiedad. Esto nos asegura que solo sea los usuarios permitidos, Pronto definiremos cuales.
-        property_obj.status = 'disponible'
-        property_obj.save()
+            #Validacion de seguridad
+            if request.user != property_obj.agent and request.user.role != 'admin':
+                return Response({"detail":"No tienes permiso para publicar esta propiedad."}, status=status.HTTP_403_FORBIDDEN)
+
+            # Publicar es solo EN_CAPTACION -> DISPONIBLE (contexto maestro §11).
+            if property_obj.status != 'captacion':
+                return Response(
+                    {"detail": "Solo se puede publicar una propiedad en captación.",
+                     "status": property_obj.status},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            missing = get_missing_publication_requirements(property_obj)
+            if missing:
+                return Response(
+                    {
+                        "detail": "No se puede publicar: " + " ".join(item["message"] for item in missing),
+                        "missing_requirements": missing,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            property_obj.status = 'disponible'
+            property_obj.save(update_fields=['status', 'updated_at'])
 
         return Response(
             {
