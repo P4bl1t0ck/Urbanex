@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/auth/", include("apps.users.urls")),
     path("api/documents/", include("apps.documents.urls")),  # Expediente digital (HU-03)
+    path("api/appraisals/", include("apps.appraisals.urls")),  # Avalúos (RF-11, HU-08)
     #path("api/properties/", include("apps.properties.urls")),
 ]
 
