@@ -73,9 +73,11 @@ Urbanex/
 │       └── documents/               Document (expediente digital)
 └── frontend/
     ├── app/  layout.tsx, page.tsx, (auth)/login, dashboard, properties, properties/[id]
+    │         dashboard/properties/[id]/appraisal   (I-12, añadida el 2026-10-25)
     ├── components/  MapPicker.tsx, PropertyCard.tsx, SiteNav.tsx
-    ├── lib/api.ts
-    ├── types/property.ts
+    ├── lib/api.ts                   (authFetch/ApiError añadidos el 2026-10-25)
+    ├── types/property.ts, appraisal.ts (appraisal.ts añadido el 2026-10-25)
+    ├── CLAUDE.md  (apunta a @AGENTS.md, que no existe: DT-45)
     ├── next.config.mjs  (el que usa Next)   next.config.ts (ignorado por Next, DT-23)
     └── package.json
 ```
@@ -188,7 +190,9 @@ Configuración DRF (`settings.py`): solo `JWTAuthentication`; **sin `DEFAULT_PER
 | `frontend/app/properties/page.tsx` | Catálogo público (P-02) | Muestra lo que devuelve `/api/auth/properties/`, es decir, **también propiedades en captación** |
 | `frontend/app/properties/[id]/page.tsx` | Ficha de detalle (P-03) | Renderiza `<SiteNav />` además del layout: **navbar duplicada** (por lectura de código; validación visual pendiente) |
 | `frontend/components/PropertyCard.tsx` | Tarjeta del catálogo | Usa `@/types/property` |
-| `frontend/lib/api.ts` | `apiFetch`, `getProperties`, `getPropertyById` | Usa `NEXT_PUBLIC_API_URL` con *fallback* a `http://127.0.0.1:8000` |
+| `frontend/lib/api.ts` | `apiFetch`, `getProperties`, `getPropertyById`; desde 2026-10-25 también `authFetch` y `ApiError` | Usa `NEXT_PUBLIC_API_URL` con *fallback* a `http://127.0.0.1:8000` |
+| `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` (2026-10-25) | Pantalla I-12: iniciar, calibrar y aprobar el avalúo | Sin valor sugerido hasta D-04 (DS-02); precio de publicación como referencia (DS-12). Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md) |
+| `frontend/types/appraisal.ts` (2026-10-25) | Tipos `Appraisal`, `AppraisalCalibratePayload`, `MissingRequirement`, `PublishErrorResponse` | Reflejan `AppraisalSerializer` y el 400 de publicar |
 | `frontend/types/property.ts` | Tipos `Property`, `PropertyImage`, `PropertyType`, `PropertyStatus` | Reflejan `PropertySerializer` |
 
 ### 5.1 Modal con pestañas (`frontend/app/dashboard/page.tsx`)

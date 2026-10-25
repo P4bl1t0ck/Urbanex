@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **52 OK**.
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **52 OK**. Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -33,7 +33,60 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## Estado actual (2026-10-24)
+## Estado actual (2026-10-25)
+
+- **Sprint según el backlog definitivo:** EP-2, Sprint 2 (URB-13 / HU-08, pantalla I-12) para desbloquear HU-53 (DT-40).
+- **Rama:** `feat/URB-13-HU-08-pantalla-avaluo`, creada desde `feat/URB-15-HU-53-proceso-publicacion` (commit `4b9e52b`) por decisión de Pablo (**DS-09**), porque `develop` aún no tiene `apps.appraisals`. **Sin subir a `origin`.** Orden de integración: primero la PR de URB-15 y después la de URB-13.
+- **Línea base al iniciar:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **52/52 OK**; `npx tsc --noEmit -p .` → exit 0.
+
+### Terminado en la sesión 2026-10-25
+
+| Commit | Fase | Cambio | Evidencia |
+|---|---|---|---|
+| `161f845` | 1 | `frontend/types/appraisal.ts` (contrato de `Appraisal` y del 400 de publicar) + `authFetch`/`ApiError` en `frontend/lib/api.ts` (FX-12) | `tsc` exit 0; `eslint` sobre los 2 archivos exit 0; backend 52/52 OK |
+| `af9b416` | 2 | Pantalla **I-12** en `/dashboard/properties/[id]/appraisal` (FX-13): "Iniciar avalúo" explícito, "Precio actual de publicación" gris deshabilitado, tarjeta del motor sin valor sugerido, calibración (PATCH), aprobación con confirmación, solo lectura, reevaluación e historial. `dashboard/page.tsx` **sin tocar** | `tsc` exit 0; `eslint` sobre la página exit 0; `npx next build` exit 0 con `ƒ /dashboard/properties/[id]/appraisal`; backend 52/52 OK |
+| (este commit) | — | Handoff actualizado: Deuda técnica, GPS, Estado de procesos, Avance de épicas, Guía, Estándares, Auditoría y este archivo | — |
+
+- **No ejecutado:** validación visual de I-12 (la hace Pablo en paralelo) ni prueba en el navegador; los servidores no estaban levantados durante la sesión (`localhost:3000` y `127.0.0.1:8000` sin respuesta).
+- **Sin migraciones ni cambios de backend** en esta sesión.
+
+### Decisiones aprobadas por Pablo (detalle en Deuda técnica §4)
+- **DS-09** Rama apilada sobre URB-15 (excepción a "ramas desde `develop`").
+- **DS-10** Ruta `/dashboard/properties/[id]/appraisal`: el avalúo pertenece a la propiedad.
+- **DS-11** Botón explícito "Iniciar avalúo" (crea un registro con folio que no se borra).
+- **DS-12** "Precio actual de publicación" visible como referencia en un campo gris deshabilitado, para no confundirlo con el motor (D-04).
+- **DS-13** Página nueva (fase 2) y archivo compartido (fase 3) en commits separados; la fase 3 va después de la fase 2.
+- Corrección de Pablo registrada en Estándares §3: en Client Components `useParams()` devuelve el objeto directamente, sin `await`.
+
+### Hallazgos nuevos registrados en Deuda técnica
+- **DT-45 (P2):** `frontend/CLAUDE.md` apunta a `@AGENTS.md`, que se eliminó: la IA del frontend no recibe instrucciones.
+- **DT-46 (P2):** el dashboard muestra "Publicar" en estados que el servidor rechaza con 409 (solo `captacion` es válido). Se corrige en la fase 3.
+- **DT-47 (P3):** `STATUS_LABELS` del dashboard usa `reservado`; el backend guarda `reservador`.
+- **DT-48 (P3):** I-12 muestra "Iniciar avalúo" aunque la propiedad no sea tuya (el servidor responde 400; no hay fuga de datos).
+- **DT-49 (P3):** en PowerShell 5.1, `git commit -m` con comillas dobles falla; usar `git commit -F`.
+- Actualizados: **DT-23** (el build confirma que se usa `next.config.mjs`; el `.ts` está vacío), **DT-26** y **DT-22** (en parte resueltos con `authFetch`), **DT-37** (I-12 sin pruebas automáticas), **DT-40** (fases 1 y 2 hechas).
+
+### Validaciones pendientes (requieren a una persona)
+Pablo confirmó el 2026-10-25 que **todavía no ha hecho** ninguna de las validaciones visuales de la sesión anterior. Hará la de I-12 **en paralelo** a la fase 3.
+- [ ] **I-12 (nuevo):** como asesor dueño, abrir `/dashboard/properties/<id>/appraisal` y seguir los 5 pasos de [Estado de procesos → HU-08](docs/handoff/URBANEX_ESTADO_PROCESOS.md#hu-08).
+- [ ] Sin sesión, `/properties` no muestra una propiedad recién creada y `/properties/<id>` no la abre.
+- [ ] En el dashboard, "Publicar" sobre una propiedad sin requisitos muestra lo que falta (mejor tras la fase 3).
+- [ ] Con avalúo aprobado (ya se puede hacer en I-12) + foto + corretaje, "Publicar" funciona y la propiedad aparece en el catálogo público.
+
+### Próxima tarea
+1. **Fase 3 de DT-40** en `frontend/app/dashboard/page.tsx` (archivo compartido: avisar a Sebas), en un commit propio:
+   - un enlace o botón "Avalúo" por propiedad hacia I-12;
+   - la fila "Avalúo aprobado" del Expediente con datos reales (`GET /api/appraisals/?property=<id>`);
+   - la lista de `missing_requirements` al fallar la publicación (tipo `PublishErrorResponse`);
+   - "Publicar" solo en `captacion` (DT-46) y la clave `reservador` en `STATUS_LABELS` (DT-47).
+2. Registrar el resultado de la validación visual de I-12 que haga Pablo.
+3. Abrir las PR en orden: URB-15 → `develop` y después URB-13 (DS-09). Tras fusionar, cada copia ejecuta `migrate`.
+4. Decidir DT-45 (qué hacer con `frontend/CLAUDE.md`) y DT-23 (borrar `next.config.ts`).
+5. Resolver DT-39 junto con C-08.
+
+---
+
+## Sesión anterior (2026-10-24)
 
 - **Sprint según el backlog definitivo:** trabajo de EP-2 que adelanta el Sprint 2 (HU-08) y el Sprint 3 (HU-53).
 - **Rama:** `feat/URB-15-HU-53-proceso-publicacion` (desde `develop`; **subida a `origin` el 2026-10-24, PR todavía sin abrir**).
@@ -90,7 +143,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **D-04** (fórmula del motor) sigue abierta: bloquea HU-06 y el cálculo de HU-08.
 - HU-53 y HU-01 ya no tienen bloqueos técnicos de backend; falta validación en la UI (DT-40) y DT-39.
 
-### Próxima tarea
+### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
 1. **Abrir el PR** de `feat/URB-15-HU-53-proceso-publicacion` (ya en `origin`) hacia `develop`, revisarlo y fusionarlo con autorización del responsable de integración. Tras fusionar, cada copia ejecuta `migrate`.
 2. ~~Cerrar DT-09 (P0)~~ Hecho el 2026-10-24 (FX-11).
 3. **Pantalla I-12** (calibrar y aprobar avalúo) + `frontend/types/appraisal.ts` en una ruta nueva; conectar la fila "Avalúo aprobado" del Expediente y mostrar `missing_requirements` al publicar (DT-40).

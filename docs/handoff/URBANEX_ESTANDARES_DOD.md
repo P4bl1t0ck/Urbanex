@@ -4,6 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
+| Última actualización | 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -45,7 +46,9 @@ Principio rector (DoD del equipo): *"Ninguna funcionalidad se considera completa
 - **Estados de UI obligatorios:** carga, éxito, error y vacío. Ejemplo: el dashboard muestra "Cargando…", la lista, el error o "Aún no tienes propiedades".
 - **Nunca simular éxito:** la UI solo confirma lo que el servidor aceptó. Ejemplo: tras guardar, el modal informa qué imágenes o documentos rechazó el servidor.
 - **Accesibilidad básica:** `label` asociado, `role="alert"` en errores, `aria-selected` en pestañas, botones con `type` explícito dentro de formularios.
-- URL de la API desde `NEXT_PUBLIC_API_URL` (DT-22).
+- URL de la API desde `NEXT_PUBLIC_API_URL` (DT-22). (2026-10-25) En pantallas nuevas, usar `authFetch` de `frontend/lib/api.ts`: añade el token y lanza `ApiError` con el cuerpo de DRF para mostrar los errores por campo.
+- **Acciones irreversibles** (aprobar un avalúo, y en el futuro validar o cerrar): pedir confirmación indicando que no se puede deshacer, y desactivar el botón mientras haya cambios sin guardar. Ejemplo: `handleApprove()` en la pantalla I-12.
+- Next 16: en Client Components, `useParams()` devuelve el objeto de parámetros directamente (sin `await`); en Server Components, `params` es una `Promise`.
 
 ## 4. Pruebas y Definition of Done por HU
 
@@ -110,3 +113,5 @@ Reglas mínimas:
 5. Ejecutar las pruebas pertinentes antes de integrar y pegar el resultado en el PR.
 6. No hacer commit, push ni merge sin la autorización del responsable de la integración.
 7. No hacer commit de `backend/.env`, `backend/private_media/` ni datos reales de clientes.
+8. (2026-10-25) **Windows / PowerShell 5.1:** si el mensaje del commit tiene comillas dobles, escríbelo en un archivo y usa `git commit -F <archivo>`; con `-m @'…'@` PowerShell parte el mensaje y el commit falla (DT-49).
+9. (2026-10-25) Si una HU toca una página nueva y un archivo compartido, van en **commits separados** (primero la página y después el compartido), para aislar regresiones (DS-13).

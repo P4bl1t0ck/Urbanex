@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-24 · rama `feat/URB-15-HU-53-proceso-publicacion` · HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
+| Última actualización | 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 (fases 1 y 2 de DT-40). Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 (pedidas) + HU-02, HU-09, HU-53 (EP-2, relevantes para Avalúos) + HU-04, HU-06, HU-08 (punto de partida de Sebas) |
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
@@ -41,7 +41,7 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-53](#hu-53) | Publicar una propiedad | EP-2 | 3 | En Curso | Aprobado (requisitos de publicación) | Pendiente (DT-40; falta `slug`/metaetiquetas) | Pendiente |
 | [HU-04](#hu-04) | Seleccionar comparables para el avalúo | EP-2 | 2 | Por hacer | Pendiente | Pendiente | Pendiente |
 | [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Bloqueado** (D-04) | Pendiente | Pendiente | Pendiente |
-| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | En Curso (modelo base + API) | Aprobado (backend) | Pendiente (sin I-12) | Pendiente |
+| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12, 2026-10-25) | Aprobado (backend 52/52; frontend `tsc`/`eslint`/`build`) | Pendiente (falta fase 3 de DT-40 para publicar) | Pendiente (Pablo, en paralelo) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | Por hacer | **Fallido** | **Fallido** | Pendiente |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Pendiente | **Fallido** | Pendiente |
@@ -80,7 +80,7 @@ flowchart TD
 | Avalúo | No existía | `apps.appraisals`: borrador → calibración → aprobación inmutable. Sin motor (D-04) y sin pantallas (DT-40) |
 | Publicar | Sin requisitos | `POST …/publish/` exige foto + corretaje vigente no rechazado + avalúo aprobado, solo desde captación |
 | ~~**Hueco 1 — DT-09 (P0)**~~ | — | **Resuelto (FX-11):** `POST` crea siempre en `captacion`; `PATCH` ignora `status` (`test_create_ignores_status`, `test_patch_cannot_change_status`) |
-| **Hueco 2 — DT-40** | — | Desde la UI no se puede aprobar un avalúo, así que **ninguna propiedad se puede publicar desde el navegador**. Es el comportamiento de negocio esperado hasta que exista I-12 |
+| **Hueco 2 — DT-40** | — | Desde la UI no se puede aprobar un avalúo, así que **ninguna propiedad se puede publicar desde el navegador**. Es el comportamiento de negocio esperado hasta que exista I-12. **2026-10-25:** I-12 ya existe (`/dashboard/properties/[id]/appraisal`) y aprueba desde la UI; falta la fase 3 (llegar a I-12 desde el dashboard y ver `missing_requirements` al publicar) |
 
 ---
 
@@ -167,7 +167,7 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 **Bloqueo funcional esperado (DT-40):** como no existen las pantallas I-11/I-12, un avalúo solo se aprueba por la API. Por eso **hoy no se puede publicar ninguna propiedad desde la interfaz**. Es el comportamiento correcto del proceso, no un error. La reutilizable `get_missing_publication_requirements()` debe alimentar la Vista 360° (I-10B) y la fila "Avalúo aprobado" de la pestaña Expediente, que sigue siendo un marcador fijo.
 
-**Validación funcional pendiente:** con un asesor de prueba, aprobar un avalúo por la API, cargar foto y corretaje y publicar desde el dashboard; luego, sin sesión, comprobar que aparece en `/properties`.
+**Validación funcional pendiente:** con un asesor de prueba, aprobar un avalúo (desde 2026-10-25 se puede hacer en la pantalla I-12 en lugar de la API), cargar foto y corretaje y publicar desde el dashboard; luego, sin sesión, comprobar que aparece en `/properties`. **Pablo confirmó el 2026-10-25 que todavía no ha hecho esta validación ni la del catálogo anónimo.**
 
 ## HU-04
 
@@ -190,12 +190,24 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 | Criterio | Implementación (2026-10-24, commit `58b968c`) | Prueba | Resultado |
 |---|---|---|---|
-| Conservar el valor del motor, el calibrado y su diferencia | `Appraisal` guarda `suggested_value`, `calibrated_value`, `difference_amount` y `difference_percentage`; `approve()` calcula la diferencia (nula si no hay valor del motor) | `test_approve_computes_differences_when_engine_value_exists`, `test_approve_without_suggested_value_leaves_differences_null` | Aprobado (backend). Sin pantalla I-12 |
+| Conservar el valor del motor, el calibrado y su diferencia | `Appraisal` guarda `suggested_value`, `calibrated_value`, `difference_amount` y `difference_percentage`; `approve()` calcula la diferencia (nula si no hay valor del motor). **I-12 (2026-10-25)** muestra el valor del motor ("No disponible (D-04)"), el calibrado y la diferencia ("No aplica (sin valor del motor)") | `test_approve_computes_differences_when_engine_value_exists`, `test_approve_without_suggested_value_leaves_differences_null` | Aprobado (backend). I-12 implementada; visual pendiente |
 | Un avalúo aprobado no se sobrescribe | Inmutabilidad igual que `Document`: `delete()` y `QuerySet.delete()` bloqueados; `save()` y `QuerySet.update()` validan `MUTABLE_FIELDS`; aprobado = ningún campo cambia. Restricciones de BD: un borrador abierto por propiedad, aprobado exige calibración y justificación. Admin de Django de solo lectura | `test_approved_appraisal_cannot_be_saved`, `…_bulk_updated`, `…_recalibrated_or_reapproved`, `test_appraisals_cannot_be_deleted`, `test_draft_engine_fields_are_immutable`, API: PATCH/approve tras aprobar → 400, PUT/DELETE → 405 | Aprobado (backend) |
 
 - **Ciclo:** `POST /api/appraisals/` (borrador) → `PATCH /api/appraisals/<id>/` (`calibrated_value`, `final_justification`) → `POST /api/appraisals/<id>/approve/`. Permisos: asesor dueño o admin (DS-05). Reevaluar = nuevo avalúo (DS-06).
 - **Placeholder (DS-02):** sin motor (D-04), cada avalúo nace con `suggested_value = NULL`, `is_manual_fallback = True` y confianza `BAJO`. Marcado con `# TODO: Implementar motor de cálculo HITL` en `Appraisal.create_draft()`.
-- **Falta:** pantalla I-12 y `frontend/types/appraisal.ts` (DT-40); HU-07 (borrador IA) llenará `ai_draft_justification`; HU-06 llenará `suggested_value` y `confidence_level`.
+- **Pantalla I-12 (2026-10-25, commits `161f845` y `af9b416`):** ruta `/dashboard/properties/[id]/appraisal` (DS-10).
+  - Sin avalúos: botón explícito **"Iniciar avalúo"** (DS-11).
+  - Tarjeta "Referencia": **"Precio actual de publicación"** en un campo gris deshabilitado, solo como referencia (DS-12).
+  - Tarjeta "Resultado del motor": valor sugerido "No disponible (D-04)", confianza `BAJO`, origen "Registro manual" (DS-02).
+  - Calibración: valor calibrado (> 0, 2 decimales) y justificación; "Guardar borrador" (PATCH) y "Aprobar avalúo", que pide confirmar que es irreversible y se desactiva si hay cambios sin guardar.
+  - Aprobado: vista de solo lectura, "Crear reevaluación" (DS-06) e historial de aprobados.
+- **Validación visual pendiente (Pablo, en paralelo a la fase 3).** Pasos sugeridos, como asesor dueño de una propiedad en captación, abriendo `/dashboard/properties/<id>/appraisal`:
+  1. Ves el precio en el campo gris y el botón "Iniciar avalúo"; al pulsarlo aparece el folio y el formulario.
+  2. "Aprobar avalúo" está desactivado hasta guardar valor y justificación.
+  3. Un valor `0` o `12,5` muestra el error del campo; un valor válido se guarda.
+  4. Al aprobar sale la confirmación; después el formulario desaparece y queda la vista de solo lectura y el historial.
+  5. "Crear reevaluación" abre un borrador nuevo sin borrar el aprobado.
+- **Falta:** fase 3 (enlace desde el dashboard, fila "Avalúo aprobado", `missing_requirements`); HU-07 (borrador IA) llenará `ai_draft_justification`; HU-06 llenará `suggested_value` y `confidence_level`.
 - **BD local:** migración aplicada en la copia de Pablo el 2026-10-24 (`showmigrations appraisals` → `[X] 0001_initial`). Cualquier otra copia debe ejecutar `pipenv run python manage.py migrate` (DT-43).
 
 ## HU-37

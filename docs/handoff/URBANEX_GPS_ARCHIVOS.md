@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Saber qué archivo implementa qué HU, qué riesgo tiene tocarlo y de qué depende Avalúos |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-24 · nueva app `apps.appraisals`; cambios en `users/views.py` y `users/tests.py` (DT-07, HU-53) |
+| Última actualización | 2026-10-25 · pantalla I-12 (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx`), `frontend/types/appraisal.ts` y `authFetch` en `frontend/lib/api.ts` (DT-40, fases 1 y 2). Antes: 2026-10-24, app `apps.appraisals` y cambios en `users/views.py` y `users/tests.py` |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 + dependencias de HU-04, HU-06, HU-08 |
 
 > **Este GPS es una guía de precauciones, no una lista de archivos intocables.** Sebas puede modificar lo necesario para Avalúos, siempre que revise las dependencias indicadas y ejecute las pruebas listadas.
@@ -70,7 +70,10 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 | `backend/apps/appraisals/migrations/0001_initial.py` | Migración | Tabla + 3 restricciones | Generada; aplicada en la BD de Pablo el 2026-10-24 (`[X] 0001_initial`). Cada copia debe ejecutar `migrate` (DT-43) | Listo | Medio | No editar una vez compartida |
 | `backend/apps/appraisals/tests.py` | Test | 18 pruebas | 18/18 aprobadas | — | — | Incluir `apps.appraisals.tests` en el comando (DT-41) |
 | `backend/config/settings.py` (`INSTALLED_APPS`) | Config | Registro de `apps.appraisals.apps.AppraisalsConfig` | `manage.py check` | Listo | Alto (compartido) | — |
-| — | UI (I-11, I-12) y `frontend/types/appraisal.ts` | **No existen** (DT-40) | — | — | — | Crear en ruta nueva, no dentro del modal del dashboard |
+| `frontend/types/appraisal.ts` (2026-10-25) | Tipos | Contrato TS de `Appraisal`, `AppraisalCalibratePayload` y del 400 de publicar (`MissingRequirement`, `PublishErrorResponse`) | `tsc` OK (commit `161f845`) | Listo | Medio | Espejo de `AppraisalSerializer` y de `get_missing_publication_requirements()`: si cambia un campo o un `code`, cambiar ambos en el mismo commit. Los Decimal llegan como `string` |
+| `frontend/lib/api.ts` (`authFetch`, `ApiError`, 2026-10-25) | Cliente HTTP | Fetch autenticado (token de `sessionStorage`), `NEXT_PUBLIC_API_URL`, error con `status` y cuerpo | `tsc` + `eslint` OK (commit `161f845`) | Listo | Medio | Usarlo en pantallas nuevas en vez de `fetch` con `127.0.0.1` (DT-22). `apiFetch` sigue igual para no romper el login |
+| `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` (2026-10-25) | UI (I-12) | Iniciar, calibrar, aprobar y ver el avalúo; precio de publicación como referencia; historial de aprobados | `tsc`, `eslint`, `next build` OK (commit `af9b416`); **visual pendiente** | Pruebas | Medio | No mostrar ni calcular un valor sugerido hasta D-04 (DS-02, DS-12). El campo "Precio actual de publicación" es solo referencia: el valor del motor irá en la tarjeta "Resultado del motor". Usa `useParams()` (devuelve el objeto, sin `await`). Botón "Iniciar avalúo" sin guarda de dueño (DT-48) |
+| — | UI (I-11) | **No existe** (HU-04) | — | — | — | Crear en ruta nueva, por ejemplo `/dashboard/properties/[id]/appraisal/comparables` |
 
 ### HU-53 · Publicar una propiedad (2026-10-24) → [estado](URBANEX_ESTADO_PROCESOS.md#hu-53)
 
@@ -78,7 +81,7 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 |---|---|---|---|---|---|---|
 | `backend/apps/users/views.py` (`get_missing_publication_requirements`, `PropertyPublishView`) | Vista / regla de dominio | Requisitos (foto, corretaje vigente no rechazado, avalúo aprobado) y transición `captacion → disponible` en transacción | 8 pruebas en `apps.users.tests` | Pruebas | **Alto** | Cualquier requisito nuevo va en `get_missing_publication_requirements()` con su `code`. El contrato del 400 (`detail` + `missing_requirements`) lo consumirá la UI |
 | `backend/apps/users/serializers.py` (`PropertySerializer`) | Serializer | `status` en `read_only_fields` (DT-09 resuelto, FX-11) | `test_patch_cannot_change_status`, `test_create_ignores_status` | Listo | **Alto** | **No volver a hacer `status` escribible.** Nuevas transiciones (HU-09, reserva, cierre) = acciones explícitas en vistas propias |
-| `frontend/app/dashboard/page.tsx` (`handlePublish`) | UI | Llama a `…/publish/` y muestra `detail` en un `alert` | Código | En Curso | Alto | Mostrar `missing_requirements` como lista (DT-40) |
+| `frontend/app/dashboard/page.tsx` (`handlePublish`) | UI | Llama a `…/publish/` y muestra `detail` en un `alert` | Código | En Curso | Alto | **Fase 3 de DT-40 (pendiente):** mostrar `missing_requirements` como lista (tipo `PublishErrorResponse`), enlazar cada propiedad a I-12, conectar la fila "Avalúo aprobado" y mostrar "Publicar" solo en `captacion` (DT-46) |
 
 ### HU-44, HU-45, HU-46 · Acceso → estado [HU-44](URBANEX_ESTADO_PROCESOS.md#hu-44) · [HU-45](URBANEX_ESTADO_PROCESOS.md#hu-45) · [HU-46](URBANEX_ESTADO_PROCESOS.md#hu-46)
 
@@ -88,7 +91,7 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 | `backend/apps/users/views.py` (`LoginView`) | Vista | Login JWT, bloqueo a los 5 intentos | `test_login_failed_with_invalid_credentials` | En Curso | **Alto** | No comprueba `is_active` (DT-12) |
 | `backend/apps/users/admin.py` | Admin | `UserAdmin` genérico | Código | En Curso | Bajo | No muestra `role` ni `is_locked` (DT-15) |
 | `frontend/app/(auth)/login/page.tsx` | UI (I-01) | Formulario de login; guarda el token en `sessionStorage` | Código | En Curso | Medio | No guarda `refresh`; error de lint `any` |
-| `frontend/lib/api.ts` (`apiFetch`) | Cliente HTTP | Fetch genérico | Código | Listo | Medio | Lanza `Error ${status}` sin el detalle del backend |
+| `frontend/lib/api.ts` (`apiFetch`) | Cliente HTTP | Fetch genérico | Código | Listo | Medio | Lanza `Error ${status}` sin el detalle del backend (DT-26). Desde 2026-10-25 existe `authFetch`/`ApiError` en el mismo archivo, que sí lo conserva |
 | — | Recuperación de contraseña (I-02), gestión de usuarios (A-01) | **No existen** | — | — | — | — |
 
 ## 2. Mapa de dependencias de Avalúos (HU-04, HU-06, HU-08)
@@ -104,13 +107,14 @@ flowchart LR
     PUB[PropertyPublishView<br/>exige requisitos HU-53]
     IMM[Patrón de inmutabilidad<br/>Document]
     A[apps.appraisals<br/>Appraisal base, sin motor]
+    UI[Pantalla I-12<br/>/dashboard/properties/id/appraisal]
   end
   subgraph Falta["Falta / por decidir"]
     Z[Property.zone y demás<br/>campos de RF-01]
     D04[Decisión D-04<br/>fórmula y umbrales]
     C02[Contradicción C-02<br/>1–2 comparables]
     SEED[Datos de comparables<br/>sintéticos]
-    UI[Pantallas I-11 / I-12]
+    UI11[Pantalla I-11<br/>comparables]
   end
   P -->|FK property| A
   U -->|agent, permisos| A
@@ -123,7 +127,8 @@ flowchart LR
   D -->|corretaje vigente| PUB
   A --> UI
   T --> UI
-  A -.estado del requisito.-> DB
+  UI11 -.HU-04.-> A
+  A -.estado del requisito, fase 3.-> DB
 ```
 
 | Dependencia | Tipo | Detalle | Archivo |
@@ -139,8 +144,9 @@ flowchart LR
 | Permisos | **Confirmada** | Patrón `role == 'admin' or property.agent_id == user.id` (en `PropertyOwnerOrAdminOrReadOnly` y `user_can_access_property`). En la BD de desarrollo **no hay asesores ni admins** | `backend/apps/users/views.py`, `backend/apps/documents/serializers.py` |
 | Autenticación | **Confirmada** | JWT Bearer; el frontend lee `sessionStorage.getItem("access")` | `frontend/app/dashboard/page.tsx` |
 | Inmutabilidad del avalúo (HU-08) | **Implementada (2026-10-24)** | Mismo enfoque que `Document` + ciclo BORRADOR → APROBADO | `backend/apps/appraisals/models.py` |
-| Tipos TS | **Confirmada** | Crear `frontend/types/appraisal.ts` (aún no existe); no duplicar `Property` | `frontend/types/property.ts` |
-| Indicador en la UI | **Confirmada** | La fila "Avalúo aprobado" de la pestaña Expediente es un marcador fijo que hay que conectar | `frontend/app/dashboard/page.tsx` |
+| Tipos TS | **Implementada (2026-10-25)** | `frontend/types/appraisal.ts`; importa `Property` de `types/property.ts` sin duplicarlo | `frontend/types/appraisal.ts` |
+| Pantalla I-12 | **Implementada (2026-10-25), visual pendiente** | Ruta `/dashboard/properties/[id]/appraisal` (DS-10) | `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` |
+| Indicador en la UI | **Confirmada, pendiente (fase 3)** | La fila "Avalúo aprobado" de la pestaña Expediente es un marcador fijo que hay que conectar | `frontend/app/dashboard/page.tsx` |
 | Zona horaria | **Confirmada** | `TIME_ZONE='UTC'`: las fechas del avalúo se guardarán en UTC (DT-01) | `backend/config/settings.py` |
 | Borrador IA (HU-07) | Fuera del alcance de Sebas | No hay servicio LLM configurado; HU-08 necesita un campo de justificación aunque HU-07 no exista | — |
 
@@ -156,3 +162,5 @@ flowchart LR
 | `frontend/app/dashboard/page.tsx` | Modal de propiedad + Expediente + lista | Si Avalúos se integra aquí, evitar que dos personas editen el archivo a la vez; mejor crear rutas nuevas (`/dashboard/properties/[id]/appraisal`) |
 | `frontend/types/property.ts` | Contrato usado por 5 archivos | Cambiar el tipo y el serializer en el mismo commit |
 | `backend/db.sqlite3` | Rastreado en Git | Cada desarrollador modifica su copia y aparecen conflictos binarios (DT-02) |
+| `frontend/lib/api.ts` (2026-10-25) | Cliente HTTP de todas las pantallas (`apiFetch`, `authFetch`) | No cambiar la firma de `apiFetch` (lo usa el login); los cambios de `authFetch` afectan a I-12 y a la fase 3 |
+| `frontend/CLAUDE.md` (2026-10-25) | Instrucciones que lee cualquier asistente de IA en `frontend/` | Hoy apunta a `@AGENTS.md`, que no existe (DT-45). Acordar su contenido antes de cambiarlo |
