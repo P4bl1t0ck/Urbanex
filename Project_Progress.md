@@ -70,7 +70,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - Actualizados: **DT-23** (el build confirma que se usa `next.config.mjs`; el `.ts` está vacío), **DT-26** y **DT-22** (en parte resueltos con `authFetch`), **DT-37** (I-12 sin pruebas automáticas), **DT-40** (fases 1 y 2 hechas).
 
 ### Validaciones pendientes (requieren a una persona)
-Pablo confirmó el 2026-10-25 que **todavía no ha hecho** ninguna de las validaciones visuales de la sesión anterior. Valida I-12 y el dashboard en paralelo.
+Pablo confirmó el 2026-10-25 que **todavía no ha hecho** ninguna de las validaciones visuales de la sesión anterior. **Al cerrar la sesión del 2026-10-25 seguían todas pendientes; Pablo las hará la mañana del 2026-10-26** con los servidores levantados (`runserver` + `npm run dev`). La próxima sesión empieza preguntando por su resultado.
 - [ ] **I-12:** como asesor dueño, entrar con el botón "Avalúo" del dashboard y seguir los 6 pasos de [Estado de procesos → HU-08](docs/handoff/URBANEX_ESTADO_PROCESOS.md#hu-08).
 - [ ] Sin sesión, `/properties` no muestra una propiedad recién creada y `/properties/<id>` no la abre.
 - [ ] En el dashboard, "Publicar" sobre una propiedad sin requisitos muestra la lista de lo que falta (fase 3).
