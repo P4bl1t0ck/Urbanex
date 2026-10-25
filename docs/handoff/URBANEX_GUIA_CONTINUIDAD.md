@@ -37,7 +37,7 @@ Orden de lectura:
 - `Property` vive en `backend/apps/users/models.py` y el expediente en `backend/apps/documents/`.
 - El proceso que importa: **captación → expediente + avalúo → publicación**.
 - (2026-10-24) La captación y el expediente funcionan a nivel técnico; el avalúo existe como modelo inmutable **sin motor** (D-04); publicar exige foto + corretaje + avalúo aprobado.
-- (2026-10-25) La pantalla I-12 (`/dashboard/properties/[id]/appraisal`) inicia, calibra y aprueba avalúos; todavía no se llega a ella desde el dashboard (fase 3) y su validación visual está pendiente.
+- (2026-10-25) La pantalla I-12 (`/dashboard/properties/[id]/appraisal`) inicia, calibra y aprueba avalúos; el dashboard enlaza a ella y lista lo que falta al publicar. Validación visual pendiente.
 - El catálogo ya no muestra la captación a anónimos (DT-07 resuelto) y `status` es de solo lectura (DT-09 resuelto): la única vía para publicar es `POST …/publish/`.
 - Nada está desplegado; no hay CI.
 
@@ -110,12 +110,12 @@ Orden recomendado según las dependencias reales:
 1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor D-04 (fórmula, factores, umbrales), C-02 (1–2 comparables), N-02 (qué propiedades son comparables) y N-03 (cómo se define la zona). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
 2. **Comprobar la línea base:** ejecutar las 52 pruebas y `tsc` (Paso 2) y anotar el resultado.
 3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). ~~Cerrar DT-09~~ **Hecho el 2026-10-24** (FX-11).
-   - ~~Siguiente incremento sin D-04: pantalla I-12 + `frontend/types/appraisal.ts`~~ **Fases 1 y 2 hechas el 2026-10-25** (commits `161f845`, `af9b416`). **Siguiente:** fase 3 en `dashboard/page.tsx` (archivo compartido: avisar antes), en su propio commit (DS-13).
+   - ~~Siguiente incremento sin D-04: pantalla I-12 + `frontend/types/appraisal.ts`~~ **Fases 1, 2 y 3 hechas el 2026-10-25** (commits `161f845`, `af9b416`, `3783919`; la fase 3 tocó `dashboard/page.tsx` en un commit propio, DS-13). **Siguiente:** validación visual y funcional de Pablo.
 4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una sola migración `users.0007` con los campos acordados. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.
 5. **HU-04:** endpoint de candidatos a comparables (mismo tipo y zona) y selección de 3 a 5 con registro manual de respaldo. Pantalla I-11 en una **ruta nueva**, no dentro del modal, para evitar conflictos en `dashboard/page.tsx`.
 6. **HU-06**, solo con D-04 aprobada: cálculo determinista en un servicio aislado y con pruebas para 0, 1–2 y 3+ comparables y para dispersión alta (contexto maestro §12.4).
-7. **HU-08:** backend y pantalla I-12 hechos; faltan la fase 3 y la validación visual (ver paso 3).
-8. ~~HU-53: exigir el avalúo aprobado y el corretaje en `PropertyPublishView`~~ **Hecho el 2026-10-24** (commit `cca371e`). Falta: `slug` + metaetiquetas (segundo criterio de HU-53) y mostrar `missing_requirements` en la UI.
+7. **HU-08:** backend, pantalla I-12 e integración en el dashboard hechos; falta la validación visual (ver paso 3).
+8. ~~HU-53: exigir el avalúo aprobado y el corretaje en `PropertyPublishView`~~ **Hecho el 2026-10-24** (commit `cca371e`). ~~Mostrar `missing_requirements` en la UI~~ hecho el 2026-10-25 (`3783919`). Falta: `slug` + metaetiquetas (segundo criterio de HU-53).
 
 **Validación funcional por incremento:** como asesor de prueba, crear una propiedad, abrir su avalúo, seleccionar comparables, ver el valor y calibrarlo. Registrar quién lo probó, cuándo y qué se vio.
 

@@ -36,7 +36,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## Estado actual (2026-10-25)
 
 - **Sprint según el backlog definitivo:** EP-2, Sprint 2 (URB-13 / HU-08, pantalla I-12) para desbloquear HU-53 (DT-40).
-- **Rama:** `feat/URB-13-HU-08-pantalla-avaluo`, creada desde `feat/URB-15-HU-53-proceso-publicacion` (commit `4b9e52b`) por decisión de Pablo (**DS-09**), porque `develop` aún no tiene `apps.appraisals`. **Sin subir a `origin`.** Orden de integración: primero la PR de URB-15 y después la de URB-13.
+- **Rama:** `feat/URB-13-HU-08-pantalla-avaluo`, creada desde `feat/URB-15-HU-53-proceso-publicacion` (commit `4b9e52b`) por decisión de Pablo (**DS-09**), porque `develop` aún no tiene `apps.appraisals`. **Subida a `origin` el 2026-10-25** (`git push -u`, con las fases 1 y 2, antes de empezar la fase 3). PR sin abrir. Orden de integración: primero la PR de URB-15 y después la de URB-13.
 - **Línea base al iniciar:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **52/52 OK**; `npx tsc --noEmit -p .` → exit 0.
 
 ### Terminado en la sesión 2026-10-25
@@ -45,9 +45,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 |---|---|---|---|
 | `161f845` | 1 | `frontend/types/appraisal.ts` (contrato de `Appraisal` y del 400 de publicar) + `authFetch`/`ApiError` en `frontend/lib/api.ts` (FX-12) | `tsc` exit 0; `eslint` sobre los 2 archivos exit 0; backend 52/52 OK |
 | `af9b416` | 2 | Pantalla **I-12** en `/dashboard/properties/[id]/appraisal` (FX-13): "Iniciar avalúo" explícito, "Precio actual de publicación" gris deshabilitado, tarjeta del motor sin valor sugerido, calibración (PATCH), aprobación con confirmación, solo lectura, reevaluación e historial. `dashboard/page.tsx` **sin tocar** | `tsc` exit 0; `eslint` sobre la página exit 0; `npx next build` exit 0 con `ƒ /dashboard/properties/[id]/appraisal`; backend 52/52 OK |
-| (este commit) | — | Handoff actualizado: Deuda técnica, GPS, Estado de procesos, Avance de épicas, Guía, Estándares, Auditoría y este archivo | — |
+| `4c9b699` | — | Handoff tras las fases 1 y 2: Deuda técnica, GPS, Estado de procesos, Avance de épicas, Guía, Estándares, Auditoría y este archivo | — |
+| `3783919` | 3 | `dashboard/page.tsx` (archivo compartido, commit propio, FX-14): botón "Avalúo" hacia I-12; fila "Avalúo aprobado" del Expediente con datos reales; `missing_requirements` como lista sobre la tabla (con "Ir al avalúo"); "Publicar" solo en `captacion` (DT-46); clave `reservador` (DT-47) | `tsc` exit 0; `eslint` solo con el error previo de DT-24 (también presente en `HEAD`); `next build` exit 0; backend 52/52 OK |
+| (este commit) | — | Handoff tras la fase 3 | — |
 
-- **No ejecutado:** validación visual de I-12 (la hace Pablo en paralelo) ni prueba en el navegador; los servidores no estaban levantados durante la sesión (`localhost:3000` y `127.0.0.1:8000` sin respuesta).
+- **No ejecutado:** validación visual ni prueba en el navegador; los servidores no estaban levantados durante la sesión (`localhost:3000` y `127.0.0.1:8000` sin respuesta, comprobado antes de la fase 2 y después de la fase 3).
 - **Sin migraciones ni cambios de backend** en esta sesión.
 
 ### Decisiones aprobadas por Pablo (detalle en Deuda técnica §4)
@@ -60,27 +62,25 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ### Hallazgos nuevos registrados en Deuda técnica
 - **DT-45 (P2):** `frontend/CLAUDE.md` apunta a `@AGENTS.md`, que se eliminó: la IA del frontend no recibe instrucciones.
-- **DT-46 (P2):** el dashboard muestra "Publicar" en estados que el servidor rechaza con 409 (solo `captacion` es válido). Se corrige en la fase 3.
-- **DT-47 (P3):** `STATUS_LABELS` del dashboard usa `reservado`; el backend guarda `reservador`.
+- **DT-46 (P2):** el dashboard mostraba "Publicar" en estados que el servidor rechaza con 409. **Resuelto en la fase 3.**
+- **DT-47 (P3):** `STATUS_LABELS` del dashboard usaba `reservado`; el backend guarda `reservador`. **Resuelto en la fase 3.**
+- **DT-50 (P3, fase 3):** los enlaces "Abrir avalúo" / "Ir al avalúo" salen de la página y descartan los cambios sin guardar del modal.
 - **DT-48 (P3):** I-12 muestra "Iniciar avalúo" aunque la propiedad no sea tuya (el servidor responde 400; no hay fuga de datos).
 - **DT-49 (P3):** en PowerShell 5.1, `git commit -m` con comillas dobles falla; usar `git commit -F`.
 - Actualizados: **DT-23** (el build confirma que se usa `next.config.mjs`; el `.ts` está vacío), **DT-26** y **DT-22** (en parte resueltos con `authFetch`), **DT-37** (I-12 sin pruebas automáticas), **DT-40** (fases 1 y 2 hechas).
 
 ### Validaciones pendientes (requieren a una persona)
-Pablo confirmó el 2026-10-25 que **todavía no ha hecho** ninguna de las validaciones visuales de la sesión anterior. Hará la de I-12 **en paralelo** a la fase 3.
-- [ ] **I-12 (nuevo):** como asesor dueño, abrir `/dashboard/properties/<id>/appraisal` y seguir los 5 pasos de [Estado de procesos → HU-08](docs/handoff/URBANEX_ESTADO_PROCESOS.md#hu-08).
+Pablo confirmó el 2026-10-25 que **todavía no ha hecho** ninguna de las validaciones visuales de la sesión anterior. Valida I-12 y el dashboard en paralelo.
+- [ ] **I-12:** como asesor dueño, entrar con el botón "Avalúo" del dashboard y seguir los 6 pasos de [Estado de procesos → HU-08](docs/handoff/URBANEX_ESTADO_PROCESOS.md#hu-08).
 - [ ] Sin sesión, `/properties` no muestra una propiedad recién creada y `/properties/<id>` no la abre.
-- [ ] En el dashboard, "Publicar" sobre una propiedad sin requisitos muestra lo que falta (mejor tras la fase 3).
-- [ ] Con avalúo aprobado (ya se puede hacer en I-12) + foto + corretaje, "Publicar" funciona y la propiedad aparece en el catálogo público.
+- [ ] En el dashboard, "Publicar" sobre una propiedad sin requisitos muestra la lista de lo que falta (fase 3).
+- [ ] "Publicar" no aparece en propiedades que no están en captación (DT-46).
+- [ ] Con avalúo aprobado en I-12 + foto + corretaje, "Publicar" funciona y la propiedad aparece en el catálogo público (cierra DT-40). Pasos en [Estado de procesos → HU-53](docs/handoff/URBANEX_ESTADO_PROCESOS.md#hu-53).
 
 ### Próxima tarea
-1. **Fase 3 de DT-40** en `frontend/app/dashboard/page.tsx` (archivo compartido: avisar a Sebas), en un commit propio:
-   - un enlace o botón "Avalúo" por propiedad hacia I-12;
-   - la fila "Avalúo aprobado" del Expediente con datos reales (`GET /api/appraisals/?property=<id>`);
-   - la lista de `missing_requirements` al fallar la publicación (tipo `PublishErrorResponse`);
-   - "Publicar" solo en `captacion` (DT-46) y la clave `reservador` en `STATUS_LABELS` (DT-47).
-2. Registrar el resultado de la validación visual de I-12 que haga Pablo.
-3. Abrir las PR en orden: URB-15 → `develop` y después URB-13 (DS-09). Tras fusionar, cada copia ejecuta `migrate`.
+1. ~~Fase 3 de DT-40~~ Hecha el 2026-10-25 (`3783919`).
+2. Registrar el resultado de las validaciones de Pablo (quién, cuándo, qué se vio) y, si pasan, cerrar DT-40 y marcar como validados los criterios de HU-08 y HU-53 en Avance de épicas.
+3. Abrir las PR en orden: URB-15 → `develop` y después URB-13 (DS-09). Tras fusionar, cada copia ejecuta `migrate`. **Avisar a Sebas** de que la fase 3 modificó `dashboard/page.tsx`.
 4. Decidir DT-45 (qué hacer con `frontend/CLAUDE.md`) y DT-23 (borrar `next.config.ts`).
 5. Resolver DT-39 junto con C-08.
 

@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Saber qué archivo implementa qué HU, qué riesgo tiene tocarlo y de qué depende Avalúos |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-25 · pantalla I-12 (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx`), `frontend/types/appraisal.ts` y `authFetch` en `frontend/lib/api.ts` (DT-40, fases 1 y 2). Antes: 2026-10-24, app `apps.appraisals` y cambios en `users/views.py` y `users/tests.py` |
+| Última actualización | 2026-10-25 · fase 3 en `dashboard/page.tsx` (`3783919`); pantalla I-12 (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx`), `frontend/types/appraisal.ts` y `authFetch` en `frontend/lib/api.ts` (DT-40, fases 1 y 2). Antes: 2026-10-24, app `apps.appraisals` y cambios en `users/views.py` y `users/tests.py` |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 + dependencias de HU-04, HU-06, HU-08 |
 
 > **Este GPS es una guía de precauciones, no una lista de archivos intocables.** Sebas puede modificar lo necesario para Avalúos, siempre que revise las dependencias indicadas y ejecute las pruebas listadas.
@@ -81,7 +81,7 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 |---|---|---|---|---|---|---|
 | `backend/apps/users/views.py` (`get_missing_publication_requirements`, `PropertyPublishView`) | Vista / regla de dominio | Requisitos (foto, corretaje vigente no rechazado, avalúo aprobado) y transición `captacion → disponible` en transacción | 8 pruebas en `apps.users.tests` | Pruebas | **Alto** | Cualquier requisito nuevo va en `get_missing_publication_requirements()` con su `code`. El contrato del 400 (`detail` + `missing_requirements`) lo consumirá la UI |
 | `backend/apps/users/serializers.py` (`PropertySerializer`) | Serializer | `status` en `read_only_fields` (DT-09 resuelto, FX-11) | `test_patch_cannot_change_status`, `test_create_ignores_status` | Listo | **Alto** | **No volver a hacer `status` escribible.** Nuevas transiciones (HU-09, reserva, cierre) = acciones explícitas en vistas propias |
-| `frontend/app/dashboard/page.tsx` (`handlePublish`) | UI | Llama a `…/publish/` y muestra `detail` en un `alert` | Código | En Curso | Alto | **Fase 3 de DT-40 (pendiente):** mostrar `missing_requirements` como lista (tipo `PublishErrorResponse`), enlazar cada propiedad a I-12, conectar la fila "Avalúo aprobado" y mostrar "Publicar" solo en `captacion` (DT-46) |
+| `frontend/app/dashboard/page.tsx` (`handlePublish`, `publishFeedback`, `loadAppraisalRequirement`, botón "Avalúo"; 2026-10-25) | UI | Publica con `authFetch` y muestra `missing_requirements` como lista sobre la tabla (con "Ir al avalúo"); "Publicar" solo en `captacion`; botón "Avalúo" hacia I-12; fila "Avalúo aprobado" del Expediente con datos reales | `tsc`, `next build` OK; `eslint` sin errores nuevos (commit `3783919`); **visual pendiente** | Pruebas | Alto | Los `code` de `missing_requirements` vienen del backend: si se agrega uno, el aviso lo muestra solo, pero el enlace solo existe para `appraisal`. Los enlaces del modal descartan cambios sin guardar (DT-50) |
 
 ### HU-44, HU-45, HU-46 · Acceso → estado [HU-44](URBANEX_ESTADO_PROCESOS.md#hu-44) · [HU-45](URBANEX_ESTADO_PROCESOS.md#hu-45) · [HU-46](URBANEX_ESTADO_PROCESOS.md#hu-46)
 
@@ -128,7 +128,8 @@ flowchart LR
   A --> UI
   T --> UI
   UI11 -.HU-04.-> A
-  A -.estado del requisito, fase 3.-> DB
+  A -.estado del requisito.-> DB
+  DB -->|botón Avalúo| UI
 ```
 
 | Dependencia | Tipo | Detalle | Archivo |
@@ -146,7 +147,7 @@ flowchart LR
 | Inmutabilidad del avalúo (HU-08) | **Implementada (2026-10-24)** | Mismo enfoque que `Document` + ciclo BORRADOR → APROBADO | `backend/apps/appraisals/models.py` |
 | Tipos TS | **Implementada (2026-10-25)** | `frontend/types/appraisal.ts`; importa `Property` de `types/property.ts` sin duplicarlo | `frontend/types/appraisal.ts` |
 | Pantalla I-12 | **Implementada (2026-10-25), visual pendiente** | Ruta `/dashboard/properties/[id]/appraisal` (DS-10) | `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` |
-| Indicador en la UI | **Confirmada, pendiente (fase 3)** | La fila "Avalúo aprobado" de la pestaña Expediente es un marcador fijo que hay que conectar | `frontend/app/dashboard/page.tsx` |
+| Indicador en la UI | **Implementada (2026-10-25, fase 3), visual pendiente** | La fila "Avalúo aprobado" de la pestaña Expediente consulta `GET /api/appraisals/?property=<id>` al editar | `frontend/app/dashboard/page.tsx` |
 | Zona horaria | **Confirmada** | `TIME_ZONE='UTC'`: las fechas del avalúo se guardarán en UTC (DT-01) | `backend/config/settings.py` |
 | Borrador IA (HU-07) | Fuera del alcance de Sebas | No hay servicio LLM configurado; HU-08 necesita un campo de justificación aunque HU-07 no exista | — |
 
