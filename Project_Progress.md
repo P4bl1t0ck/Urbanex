@@ -33,7 +33,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## 🧪 Validaciones pendientes de Pablo (o Aaron)
+## 🧪 Validaciones pendientes de Pablo
 
 > **Por qué existe esta sección:** el DoD del equipo exige que cada flujo se compruebe **en la interfaz** ("no basta con Postman"). Estas pruebas se acumularon desde el 2026-10-22 sin hacerse. Mientras sigan en **Pendiente**, DT-40 no se cierra y HU-01, HU-03, HU-05, HU-08 y HU-53 no pueden marcarse como validadas en la parte funcional ni en la visual.
 >
@@ -229,7 +229,7 @@ Las tareas 3 a 6 **no empiezan** hasta que Pablo haga la validación visual.
 - Actualizados: **DT-23** (el build confirma que se usa `next.config.mjs`; el `.ts` está vacío), **DT-26** y **DT-22** (en parte resueltos con `authFetch`), **DT-37** (I-12 sin pruebas automáticas), **DT-40** (fases 1 y 2 hechas).
 
 ### Validaciones pendientes (requieren a una persona)
-Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a la sección **"Validaciones pendientes de Pablo (o Aaron)"** al inicio de este archivo (V-01 a V-12). Al 2026-10-27 **seguían sin hacerse**: no se hicieron el 2026-10-26 porque no hay usuario asesor (DT-14).
+Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a la sección **"Validaciones pendientes de Pablo"** al inicio de este archivo (V-01 a V-12). Al 2026-10-27 **seguían sin hacerse**: no se hicieron el 2026-10-26 porque no hay usuario asesor (DT-14).
 
 ### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
 1. ~~Fase 3 de DT-40~~ Hecha el 2026-10-25 (`3783919`).
@@ -289,7 +289,7 @@ Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a 
 - **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración aplicada en la copia de Pablo; las demás copias deben ejecutar `migrate`.
 
 ### Validaciones pendientes (requieren a una persona)
-Movidas a la sección **"Validaciones pendientes de Pablo (o Aaron)"** al inicio de este archivo (V-01, V-02, V-11 y V-12).
+Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este archivo (V-01, V-02, V-11 y V-12).
 
 ### Bloqueos
 - **D-04** (fórmula del motor) sigue abierta: bloquea HU-06 y el cálculo de HU-08.
