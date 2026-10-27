@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Medir el avance real de EP-1 y EP-2 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-24 · filas de HU-01, HU-04, HU-08 y HU-53 revisadas; **las métricas oficiales no cambian** (ver §4) |
+| Última actualización | 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
 | Fuentes | Composición de épicas: tesis, Anexo 4 (columna "Épica"), y contexto maestro §9.1 y §10. Criterios: tesis, Anexo 2. Evidencia: [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) |
 | No disponible | Tablero de Jira y planillas Excel (no están en el repositorio). El estado en Jira es **POR CONFIRMAR** |
 
@@ -81,26 +81,26 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | HU-06 | Cálculo registrado | ✗ | ✗ | ✗ | No iniciado |
 | HU-07 | Borrador editable desde el cálculo | ✗ | ✗ | ✗ | No iniciado |
 | HU-07 | Justificación manual si el servicio falla | ✗ | ✗ | ✗ | No iniciado |
-| HU-08 | Conserva valor del motor, calibrado y diferencia | ✗ | ✗ | ✗ | (2026-10-24) Backend verificado (`apps.appraisals.tests`); falta la pantalla I-12 (DT-40) |
-| HU-08 | El avalúo aprobado no se sobrescribe | ✗ | ✗ | ✗ | (2026-10-24) Backend verificado; falta la pantalla I-12 (DT-40) |
+| HU-08 | Conserva valor del motor, calibrado y diferencia | ✔ | ✔ | ✗ | (2026-10-25) Backend verificado (`apps.appraisals.tests`, 52/52) + pantalla I-12 (`af9b416`: `tsc`, `eslint`, `build`). La UI no tiene prueba automática (DT-37). Falta la validación visual de Pablo |
+| HU-08 | El avalúo aprobado no se sobrescribe | ✔ | ✔ | ✗ | (2026-10-25) Backend verificado; I-12 oculta el formulario tras aprobar y ofrece "Crear reevaluación". Falta la validación visual |
 | HU-09 | Cambiar entre estados; No disponible con motivo | ✗ | ✗ | ✗ | La regla del motivo está en el serializer, pero la UI no permite cambiar el estado y el PATCH acepta estados no previstos (DT-09) |
 | HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✗ | ✗ | En el serializer; sin prueba |
-| HU-53 | Requiere avalúo y contrato de corretaje | ✔ | ✔ | ✗ | (2026-10-24) 8 pruebas de publicación + 2 de `status` de solo lectura (FX-11). Falta la validación funcional en la UI (DT-40) |
+| HU-53 | Requiere avalúo y contrato de corretaje | ✔ | ✔ | ✗ | (2026-10-24) 8 pruebas de publicación + 2 de `status` de solo lectura (FX-11). (2026-10-25) La UI ya muestra `missing_requirements` y permite aprobar el avalúo (FX-14): solo falta la validación funcional de Pablo |
 | HU-53 | Pasa a Disponible y genera URL con metaetiquetas | ✗ | ✗ | ✗ | Sin `slug` ni OpenGraph |
 
 | Métrica | Valor |
 |---|---|
 | Total de criterios | 24 |
-| Implementado | 9/24 = **37,5 %** (antes 7/24; +HU-04 y HU-53 el 2026-10-24) |
-| Verificado | 6/24 = **25 %** (antes 4/24) |
+| Implementado | 11/24 = **45,8 %** (2026-10-25: +2 de HU-08; antes 9/24) |
+| Verificado | 8/24 = **33,3 %** (2026-10-25: +2 de HU-08; antes 6/24) |
 | Validado | 0/24 = **0 %** |
 | HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** |
 
 ```mermaid
 pie showData title EP-2 — criterios de aceptación (24)
-  "Verificados (test aprobado)" : 6
+  "Verificados (test aprobado)" : 8
   "Implementados sin test" : 3
-  "No implementados" : 15
+  "No implementados" : 13
 ```
 
 **Lectura:** el trabajo hecho se concentra en el registro de propiedades y el expediente. Las HU de avalúo (HU-04, 06, 07, 08), que suman 16 de 33 puntos, están sin iniciar. HU-53 (publicar) y la parte "sin exhibirse al público" de HU-01 fallan respecto del proceso de negocio.
@@ -113,6 +113,8 @@ pie showData title EP-2 — criterios de aceptación (24)
 | HU-08 (los 2 criterios) | Pantalla **I-12** (DT-40) |
 
 Con I-12, el verificado subiría a **8/24 (33,3 %)**; con DT-39, a **9/24 (37,5 %)**.
+
+**Actualización 2026-10-25.** I-12 existe (commits `161f845` y `af9b416`): los 2 criterios de HU-08 pasan a ✔ implementado y ✔ verificado → **8/24 verificados (33,3 %)**. Criterio aplicado: la regla de negocio está probada en el backend (52/52) y la pantalla compila sin errores (`tsc`, `eslint`, `next build`); la UI no tiene pruebas automáticas (DT-37), así que **la validación visual de Pablo es la que confirmará el flujo**. HU-08 completa (5 pts) exige esa validación. El validado de EP-2 sigue en 0/24.
 
 ## 5. Bloqueos y dependencias que afectan al avance
 
@@ -127,6 +129,7 @@ Con I-12, el verificado subiría a **8/24 (33,3 %)**; con DT-39, a **9/24 (37,5 
 ## 6. Siguientes pasos para mover los porcentajes
 1. **Validado (barato):** que una persona pruebe en el navegador HU-03 (subida de PDF e imagen, versión v2) y HU-01 (creación y asignación al asesor) y lo registre. Puede subir el avance validado de EP-2 a 3/24 sin escribir código.
 2. **Verificado:** agregar una prueba que suba una imagen (HU-03) y otra para el bloqueo a los 5 intentos (HU-45).
-3. ~~**Implementado:** filtrar el catálogo público (HU-01) y comenzar `apps.appraisals`~~ Hecho el 2026-10-24 (backend), junto con DT-09. **Siguiente:** construir I-12 y cerrar DT-39.
+3. ~~**Implementado:** filtrar el catálogo público (HU-01) y comenzar `apps.appraisals`~~ Hecho el 2026-10-24 (backend), junto con DT-09. ~~Construir I-12~~ Hecho el 2026-10-25. **Siguiente:** fase 3 de DT-40 (dashboard) y cerrar DT-39.
+4. **Validado (en curso, 2026-10-25):** las 3 fases de DT-40 están implementadas (la fase 3 no cambia las métricas: HU-53 ya estaba verificado). Pablo valida I-12 y el dashboard. La validación de extremo a extremo (aprobar → publicar → ver en el catálogo anónimo) puede subir a la vez HU-08 (2 criterios), HU-04 "requisito para publicar" y HU-53 "avalúo y corretaje".
 
 Cada vez que cambie un criterio, actualizar esta tabla y anotar la fecha y la evidencia (commit, prueba o captura).

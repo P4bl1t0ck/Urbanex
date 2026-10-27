@@ -73,9 +73,11 @@ Urbanex/
 │       └── documents/               Document (expediente digital)
 └── frontend/
     ├── app/  layout.tsx, page.tsx, (auth)/login, dashboard, properties, properties/[id]
+    │         dashboard/properties/[id]/appraisal   (I-12, añadida el 2026-10-25)
     ├── components/  MapPicker.tsx, PropertyCard.tsx, SiteNav.tsx
-    ├── lib/api.ts
-    ├── types/property.ts
+    ├── lib/api.ts                   (authFetch/ApiError añadidos el 2026-10-25)
+    ├── types/property.ts, appraisal.ts (appraisal.ts añadido el 2026-10-25)
+    ├── CLAUDE.md  (apunta a @AGENTS.md, que no existe: DT-45)
     ├── next.config.mjs  (el que usa Next)   next.config.ts (ignorado por Next, DT-23)
     └── package.json
 ```
@@ -183,12 +185,14 @@ Configuración DRF (`settings.py`): solo `JWTAuthentication`; **sin `DEFAULT_PER
 | `frontend/app/layout.tsx` | Layout raíz; incluye `SiteNav` | |
 | `frontend/app/page.tsx` | Landing | Importa `SiteNav` sin usarlo (warning) |
 | `frontend/app/(auth)/login/page.tsx` | Login (I-01) | Guarda `access`, `userRole` y `userEmail` en `sessionStorage`; **no guarda `refresh`**; usa `catch (err: any)` (error de lint) |
-| `frontend/app/dashboard/page.tsx` | Panel del asesor (lista de propiedades) + modal de registro/edición con 4 pestañas | 6 URLs `http://127.0.0.1:8000` hardcodeadas; error de lint por `setState` dentro de `useEffect` (código previo) |
+| `frontend/app/dashboard/page.tsx` | Panel del asesor (lista de propiedades) + modal de registro/edición con 4 pestañas. Desde 2026-10-25: botón "Avalúo", fila "Avalúo aprobado" real y `missing_requirements` al publicar (FX-14) | 6 URLs `http://127.0.0.1:8000` hardcodeadas (5 desde 2026-10-25, DT-22); error de lint por `setState` dentro de `useEffect` (código previo) |
 | `frontend/components/MapPicker.tsx` | Mapa Leaflet + buscador Nominatim | Ver §5.2 |
 | `frontend/app/properties/page.tsx` | Catálogo público (P-02) | Muestra lo que devuelve `/api/auth/properties/`, es decir, **también propiedades en captación** |
 | `frontend/app/properties/[id]/page.tsx` | Ficha de detalle (P-03) | Renderiza `<SiteNav />` además del layout: **navbar duplicada** (por lectura de código; validación visual pendiente) |
 | `frontend/components/PropertyCard.tsx` | Tarjeta del catálogo | Usa `@/types/property` |
-| `frontend/lib/api.ts` | `apiFetch`, `getProperties`, `getPropertyById` | Usa `NEXT_PUBLIC_API_URL` con *fallback* a `http://127.0.0.1:8000` |
+| `frontend/lib/api.ts` | `apiFetch`, `getProperties`, `getPropertyById`; desde 2026-10-25 también `authFetch` y `ApiError` | Usa `NEXT_PUBLIC_API_URL` con *fallback* a `http://127.0.0.1:8000` |
+| `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` (2026-10-25) | Pantalla I-12: iniciar, calibrar y aprobar el avalúo | Sin valor sugerido hasta D-04 (DS-02); precio de publicación como referencia (DS-12). Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md) |
+| `frontend/types/appraisal.ts` (2026-10-25) | Tipos `Appraisal`, `AppraisalCalibratePayload`, `MissingRequirement`, `PublishErrorResponse` | Reflejan `AppraisalSerializer` y el 400 de publicar |
 | `frontend/types/property.ts` | Tipos `Property`, `PropertyImage`, `PropertyType`, `PropertyStatus` | Reflejan `PropertySerializer` |
 
 ### 5.1 Modal con pestañas (`frontend/app/dashboard/page.tsx`)

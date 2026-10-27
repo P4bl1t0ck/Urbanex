@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import type { LatLng } from "@/components/MapPicker";
+import { ApiError, authFetch } from "@/lib/api";
+import type { Appraisal, MissingRequirement, PublishErrorResponse } from "@/types/appraisal";
 import type { Property, PropertyImage } from "@/types/property";
 
 //Importamos el mapa desactivando el SSR
@@ -55,10 +58,18 @@ type SavedDocument = {
 
 type TabId = "general" | "location" | "media" | "docs";
 
+// Estado del requisito "Avalúo aprobado" en la pestaña Expediente (HU-53).
+type AppraisalRequirement = "loading" | "approved" | "draft" | "none" | "error";
+
+// Resultado de la última publicación, mostrado sobre la tabla (DT-40).
+type PublishFeedback =
+  | { kind: "success"; title: string }
+  | { kind: "error"; title: string; propertyId: number; detail: string; missing: MissingRequirement[] };
+
 const STATUS_LABELS: Record<string, string> = {
   captacion: "En captación",
   disponible: "Disponible",
-  reservado: "Reservado",
+  reservador: "Reservado", // Valor real en Django (errata DT-16, DT-47)
   vendido: "Vendido",
   arrendado: "Arrendado",
   no_disponible: "No disponible",
@@ -178,6 +189,11 @@ export default function DashboardPage() {
   const [docError, setDocError] = useState("");
   const [docInputKey, setDocInputKey] = useState(0); // Para limpiar el <input type="file">
 
+  // Avalúo (HU-08): solo se consulta al editar; el avalúo se gestiona en su propia pantalla (I-12).
+  const [appraisalRequirement, setAppraisalRequirement] = useState<AppraisalRequirement | null>(null);
+  const [publishFeedback, setPublishFeedback] = useState<PublishFeedback | null>(null);
+  const [publishingId, setPublishingId] = useState<number | null>(null);
+
   useEffect(() => {
     const token = sessionStorage.getItem("access");
     // NUEVO: Leer quién soy desde la memoria de la pestaña
@@ -266,6 +282,7 @@ export default function DashboardPage() {
     setDocDraft(EMPTY_DOC_DRAFT);
     setDocFile(null);
     setDocError("");
+    setAppraisalRequirement(null);
     setFormErrors({});
     setActiveTab("general");
     setShowModal(true);
@@ -291,6 +308,23 @@ export default function DashboardPage() {
       property.images ?? [],
     );
     void loadSavedDocuments(property.id);
+    void loadAppraisalRequirement(property.id);
+  }
+
+  async function loadAppraisalRequirement(propertyId: number) {
+    setAppraisalRequirement("loading");
+    try {
+      const appraisals = await authFetch<Appraisal[]>(`/api/appraisals/?property=${propertyId}`);
+      setAppraisalRequirement(
+        appraisals.some((a) => a.status === "APROBADO")
+          ? "approved"
+          : appraisals.some((a) => a.status === "BORRADOR")
+            ? "draft"
+            : "none",
+      );
+    } catch {
+      setAppraisalRequirement("error");
+    }
   }
 
   async function loadSavedDocuments(propertyId: number) {
@@ -467,35 +501,39 @@ export default function DashboardPage() {
     setDocInputKey((k) => k + 1);
   }
 
-  async function handlePublish(propertyId: number) {
-    //const token = localStorage.getItem("access");
-    const token = sessionStorage.getItem("access");
+  // HU-53: el servidor decide si se puede publicar. Un 400 trae la lista de requisitos
+  // faltantes (missing_requirements) y un 409 indica que la propiedad no está en captación.
+  async function handlePublish(property: Property) {
+    if (!confirm(`¿Publicar "${property.title}" en el catálogo?`)) return;
 
-    if (!confirm("¿Estás seguro de publicar esta propiedad en el catálogo?")) return;
-
+    setPublishingId(property.id);
+    setPublishFeedback(null);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/auth/properties/${propertyId}/publish/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-      });
-
-      if (response.ok) {
-        setProperties(prevProps =>
-          prevProps.map(prop =>
-            prop.id === propertyId ? { ...prop, status: "disponible" } : prop
-          )
-        );
-        alert("¡Propiedad publicada con éxito!");
-      } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.detail || "No se pudo publicar."}`);
-      }
+      await authFetch(`/api/auth/properties/${property.id}/publish/`, { method: "POST" });
+      setProperties((prevProps) =>
+        prevProps.map((prop) => (prop.id === property.id ? { ...prop, status: "disponible" } : prop)),
+      );
+      setPublishFeedback({ kind: "success", title: property.title });
     } catch (error) {
-      console.error("Error al publicar:", error);
-      alert("Error de conexión con el servidor.");
+      if (error instanceof ApiError && error.status === 401) {
+        router.replace("/login");
+        return;
+      }
+      const body = error instanceof ApiError ? (error.body as Partial<PublishErrorResponse> | null) : null;
+      setPublishFeedback({
+        kind: "error",
+        title: property.title,
+        propertyId: property.id,
+        detail:
+          error instanceof ApiError
+            ? body?.missing_requirements?.length
+              ? "No se puede publicar todavía. Falta:"
+              : error.message
+            : "Error de conexión con el servidor.",
+        missing: body?.missing_requirements ?? [],
+      });
+    } finally {
+      setPublishingId(null);
     }
   }
 
@@ -544,6 +582,40 @@ export default function DashboardPage() {
              </div>
            </header>
 
+           {publishFeedback && (
+             <div
+               role={publishFeedback.kind === "error" ? "alert" : "status"}
+               className={`mb-4 flex items-start justify-between gap-4 rounded-lg border p-4 text-sm ${
+                 publishFeedback.kind === "error" ? "border-red-200 bg-red-50 text-red-800" : "border-green-200 bg-green-50 text-green-800"
+               }`}
+             >
+               {publishFeedback.kind === "success" ? (
+                 <p>&quot;{publishFeedback.title}&quot; se publicó y ya está disponible en el catálogo.</p>
+               ) : (
+                 <div>
+                   <p className="font-semibold">&quot;{publishFeedback.title}&quot;: {publishFeedback.detail}</p>
+                   {publishFeedback.missing.length > 0 && (
+                     <ul className="mt-2 list-disc space-y-1 pl-5">
+                       {publishFeedback.missing.map((item) => (
+                         <li key={`${item.code}-${item.message}`}>
+                           {item.message}
+                           {item.code === "appraisal" && (
+                             <Link href={`/dashboard/properties/${publishFeedback.propertyId}/appraisal`} className="ml-2 font-semibold underline">
+                               Ir al avalúo
+                             </Link>
+                           )}
+                         </li>
+                       ))}
+                     </ul>
+                   )}
+                 </div>
+               )}
+               <button type="button" onClick={() => setPublishFeedback(null)} aria-label="Cerrar aviso" className="font-bold opacity-60 hover:opacity-100">
+                 ×
+               </button>
+             </div>
+           )}
+
            {error ? (
              <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">{error}</div>
            ) : properties.length === 0 ? (
@@ -588,12 +660,19 @@ export default function DashboardPage() {
                              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
                              Editar
                            </button>
-                           {property.status !== "disponible" && (
+                           <Link
+                             href={`/dashboard/properties/${property.id}/appraisal`}
+                             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                             Avalúo
+                           </Link>
+                           {/* El servidor solo publica desde captación (DS-07, DT-46) */}
+                           {property.status === "captacion" && (
                              <button
                                type="button"
-                               onClick={() => handlePublish(property.id)}
-                               className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800">
-                               Publicar
+                               onClick={() => handlePublish(property)}
+                               disabled={publishingId !== null}
+                               className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
+                               {publishingId === property.id ? "Publicando..." : "Publicar"}
                              </button>
                            )}
                           </div>
@@ -810,9 +889,30 @@ export default function DashboardPage() {
                          </span>
                        </li>
                        <li className="flex items-center gap-2">
-                         <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                         <span
+                           className={`h-2.5 w-2.5 rounded-full ${
+                             appraisalRequirement === "approved" ? "bg-emerald-500" : appraisalRequirement === "draft" ? "bg-amber-400" : "bg-slate-300"
+                           }`}
+                         />
                          <span className="text-slate-700">Avalúo aprobado</span>
-                         <span className="ml-auto text-xs text-slate-500">Módulo de avalúos (Sprint 2)</span>
+                         <span className="ml-auto text-right text-xs text-slate-500">
+                           {!editingId
+                             ? "Se registra después de guardar la propiedad"
+                             : appraisalRequirement === "loading"
+                               ? "Consultando..."
+                               : appraisalRequirement === "approved"
+                                 ? "Aprobado"
+                                 : appraisalRequirement === "draft"
+                                   ? "En borrador"
+                                   : appraisalRequirement === "error"
+                                     ? "No se pudo consultar"
+                                     : "Falta"}
+                           {editingId && (
+                             <Link href={`/dashboard/properties/${editingId}/appraisal`} className="ml-2 font-semibold text-blue-700 hover:underline">
+                               Abrir avalúo
+                             </Link>
+                           )}
+                         </span>
                        </li>
                      </ul>
                    </div>

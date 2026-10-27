@@ -5,7 +5,7 @@
 | Propósito | Retomar el desarrollo, empezando por Avalúos (HU-04, HU-06, HU-08), sin depender de explicaciones orales |
 | Fecha de auditoría | 2026-10-22 · rama `develop` |
 | Estado | Instantánea. **Actualízala** al cerrar cada HU (ver Paso 5) |
-| Última actualización | 2026-10-24 · Pasos 1, 2, 3 y 4 ajustados tras crear `apps.appraisals` y bloquear la publicación (HU-53). Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
+| Última actualización | 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
 
 ---
 
@@ -36,7 +36,8 @@ Orden de lectura:
 - Monorepo con `backend/` (Django 6.1, DRF, JWT, SQLite) y `frontend/` (Next.js 16, React 19, Tailwind 4).
 - `Property` vive en `backend/apps/users/models.py` y el expediente en `backend/apps/documents/`.
 - El proceso que importa: **captación → expediente + avalúo → publicación**.
-- (2026-10-24) La captación y el expediente funcionan a nivel técnico; el avalúo existe como modelo inmutable **sin motor** (D-04) y **sin pantallas**; publicar exige foto + corretaje + avalúo aprobado.
+- (2026-10-24) La captación y el expediente funcionan a nivel técnico; el avalúo existe como modelo inmutable **sin motor** (D-04); publicar exige foto + corretaje + avalúo aprobado.
+- (2026-10-25) La pantalla I-12 (`/dashboard/properties/[id]/appraisal`) inicia, calibra y aprueba avalúos; el dashboard enlaza a ella y lista lo que falta al publicar. Validación visual pendiente.
 - El catálogo ya no muestra la captación a anónimos (DT-07 resuelto) y `status` es de solo lectura (DT-09 resuelto): la única vía para publicar es `POST …/publish/`.
 - Nada está desplegado; no hay CI.
 
@@ -97,7 +98,9 @@ Detalle completo en el [GPS §2](URBANEX_GPS_ARCHIVOS.md#2-mapa-de-dependencias-
 | Contrato de corretaje para publicar | Sí (en uso) | `get_missing_publication_requirements()` en `backend/apps/users/views.py` (DS-04) |
 | Patrón de registro inmutable | Sí | `backend/apps/documents/models.py` y `backend/apps/appraisals/models.py` |
 | App `apps.appraisals`, modelo `Appraisal` y endpoints | **Sí (2026-10-24)** | `/api/appraisals/`; placeholder manual hasta D-04 (DS-02). Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md) |
-| Pantallas I-11/I-12 y `frontend/types/appraisal.ts` | **No** | Es tu trabajo (DT-40) |
+| `frontend/types/appraisal.ts` y `authFetch` | **Sí (2026-10-25)** | Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md). Usa `authFetch` de `frontend/lib/api.ts` en pantallas nuevas |
+| Pantalla I-12 | **Sí (2026-10-25)**, visual pendiente | `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` |
+| Pantalla I-11 (comparables) | **No** | Es tu trabajo (HU-04); ruta nueva bajo `/dashboard/properties/[id]/appraisal/` |
 | Servicio de IA (HU-07) | **No** | Fuera de tu alcance; HU-08 debe aceptar la justificación manual |
 
 ## Paso 4. Siguiente paso seguro
@@ -107,12 +110,12 @@ Orden recomendado según las dependencias reales:
 1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor D-04 (fórmula, factores, umbrales), C-02 (1–2 comparables), N-02 (qué propiedades son comparables) y N-03 (cómo se define la zona). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
 2. **Comprobar la línea base:** ejecutar las 52 pruebas y `tsc` (Paso 2) y anotar el resultado.
 3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). ~~Cerrar DT-09~~ **Hecho el 2026-10-24** (FX-11).
-   - **Siguiente incremento sin D-04:** pantalla I-12 (calibrar y aprobar) + `frontend/types/appraisal.ts`, en una ruta nueva (DT-40).
+   - ~~Siguiente incremento sin D-04: pantalla I-12 + `frontend/types/appraisal.ts`~~ **Fases 1, 2 y 3 hechas el 2026-10-25** (commits `161f845`, `af9b416`, `3783919`; la fase 3 tocó `dashboard/page.tsx` en un commit propio, DS-13). **Siguiente:** validación visual y funcional de Pablo.
 4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una sola migración `users.0007` con los campos acordados. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.
 5. **HU-04:** endpoint de candidatos a comparables (mismo tipo y zona) y selección de 3 a 5 con registro manual de respaldo. Pantalla I-11 en una **ruta nueva**, no dentro del modal, para evitar conflictos en `dashboard/page.tsx`.
 6. **HU-06**, solo con D-04 aprobada: cálculo determinista en un servicio aislado y con pruebas para 0, 1–2 y 3+ comparables y para dispersión alta (contexto maestro §12.4).
-7. **HU-08:** el backend ya existe; falta la pantalla I-12 (ver paso 3).
-8. ~~HU-53: exigir el avalúo aprobado y el corretaje en `PropertyPublishView`~~ **Hecho el 2026-10-24** (commit `cca371e`). Falta: `slug` + metaetiquetas (segundo criterio de HU-53) y mostrar `missing_requirements` en la UI.
+7. **HU-08:** backend, pantalla I-12 e integración en el dashboard hechos; falta la validación visual (ver paso 3).
+8. ~~HU-53: exigir el avalúo aprobado y el corretaje en `PropertyPublishView`~~ **Hecho el 2026-10-24** (commit `cca371e`). ~~Mostrar `missing_requirements` en la UI~~ hecho el 2026-10-25 (`3783919`). Falta: `slug` + metaetiquetas (segundo criterio de HU-53).
 
 **Validación funcional por incremento:** como asesor de prueba, crear una propiedad, abrir su avalúo, seleccionar comparables, ver el valor y calibrarlo. Registrar quién lo probó, cuándo y qué se vio.
 
@@ -120,7 +123,8 @@ Orden recomendado según las dependencias reales:
 
 ## Paso 5. Coordinar el trabajo y mantener la trazabilidad
 
-- **Ramas:** una por HU desde `develop` (convención en [Estándares §5](URBANEX_ESTANDARES_DOD.md#5-gitflow-y-colaboración)).
+- **Ramas:** una por HU desde `develop` (convención en [Estándares §5](URBANEX_ESTANDARES_DOD.md#5-gitflow-y-colaboración)). **Excepción vigente (DS-09):** `feat/URB-13-HU-08-pantalla-avaluo` sale de `feat/URB-15-HU-53-proceso-publicacion`; su PR se integra **después** de la de URB-15.
+- **Asistentes de IA en `frontend/`:** `frontend/CLAUDE.md` apunta a `@AGENTS.md`, que ya no existe (DT-45). Hasta corregirlo, la IA del frontend no recibe instrucciones propias: dale tú la directiva GPS.
 - **Aviso previo** en el canal del equipo antes de tocar `backend/apps/users/models.py`, `backend/apps/users/migrations/`, `backend/config/settings.py`, `frontend/types/property.ts` o `frontend/app/dashboard/page.tsx`.
 - **Migraciones:** hacer pull antes de `makemigrations`. Si dos personas crean `users.0007`, resolver con `makemigrations --merge` y avisar.
 

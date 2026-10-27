@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **52 OK**.
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **52 OK**. Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -33,7 +33,214 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## Estado actual (2026-10-24)
+## 🧪 Validaciones pendientes de Pablo
+
+> **Por qué existe esta sección:** el DoD del equipo exige que cada flujo se compruebe **en la interfaz** ("no basta con Postman"). Estas pruebas se acumularon desde el 2026-10-22 sin hacerse. Mientras sigan en **Pendiente**, DT-40 no se cierra y HU-01, HU-03, HU-05, HU-08 y HU-53 no pueden marcarse como validadas en la parte funcional ni en la visual.
+>
+> **Cómo usarla:** sigue los pasos de cada prueba y responde la pregunta del resultado esperado. Después llena la fila: **quién** la hizo, **cuándo** (fecha y hora), **qué viste** (textos, estados, capturas si las hay) y el resultado (**Aprobado** / **Fallido**). Si algo falla, anota exactamente qué apareció; con eso se abre o actualiza el DT correspondiente. Ninguna fila se marca como Aprobada por inferencia.
+
+**Preparación (antes de empezar):**
+1. Desde `backend/`: `pipenv run python manage.py migrate` y luego `pipenv run python manage.py runserver`.
+2. Desde `frontend/`: `npm run dev` y abrir `http://localhost:3000`.
+3. Hace falta un usuario con rol **`asesor`**; hoy la BD no tiene ninguno (DT-14). Lo creará el comando `setup_demo_data` (rama del seeder, siguiente paso). Mientras tanto estas pruebas **no se pueden ejecutar**.
+4. Ten a mano un PDF cualquiera (para el corretaje) y una foto JPG o PNG.
+
+**Pruebas que cierran DT-40:** V-11 y V-12 (requieren antes V-05 a V-08).
+
+### V-01 · HU-01 / DT-07 — Una propiedad en captación no es pública
+1. Inicia sesión como asesor y registra una propiedad nueva con "+ Registrar propiedad" (título: `Prueba V-01`). Anota su id (aparece en la URL al pulsar "Avalúo").
+2. Cierra sesión, o abre una ventana privada.
+3. Abre `http://localhost:3000/properties`.
+4. Abre `http://localhost:3000/properties/<id>`.
+
+**Resultado esperado:** ¿`Prueba V-01` **no** aparece en el catálogo y su ficha **no** se abre? Hoy la ficha muestra "No se pudo cargar esta propiedad" con el aviso "Verifica la conexión con el servidor", aunque el servidor sí responde (404). Ese mensaje engañoso está registrado como DT-52: para esta prueba cuenta como **Aprobado** si no ves los datos de la propiedad.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-02 · HU-53 — Publicar sin requisitos muestra lo que falta
+1. Como asesor, en el dashboard, busca una propiedad **En captación** sin fotos, sin corretaje y sin avalúo (por ejemplo `Prueba V-01`).
+2. Pulsa "Publicar" y acepta la confirmación.
+
+**Resultado esperado:** ¿aparece sobre la tabla un aviso rojo con el texto `"<título>": No se puede publicar todavía. Falta:` y la lista de los 3 requisitos (foto, contrato de corretaje y avalúo), el del avalúo con el enlace "Ir al avalúo", y la propiedad **sigue En captación**?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-03 · HU-03 — El expediente versiona el contrato de corretaje
+1. En el dashboard, pulsa "Editar" en una propiedad tuya y ve a la pestaña **Expediente**.
+2. Sube un PDF como contrato de corretaje con fechas de emisión y de vigencia (vigencia posterior a hoy) y pulsa Guardar.
+3. Vuelve a abrir "Editar" → Expediente.
+4. Sube otro PDF como contrato de corretaje y guarda. Vuelve a abrir.
+
+**Resultado esperado:** ¿tras el paso 3 el contrato aparece como **v1**, estado "Pendiente" y **sin** opción de borrar? ¿Tras el paso 4 ves **v2** como vigente, y la v1 ya no figura como vigente?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-04 · HU-05 — La ubicación del mapa se guarda
+1. "Editar" en una propiedad → pestaña **Ubicación**.
+2. Busca un sector en el buscador (por ejemplo, `Cumbayá`) y haz clic en un punto del mapa.
+3. Guarda, cierra el modal y vuelve a abrir "Editar" → Ubicación.
+
+**Resultado esperado:** ¿el marcador aparece en el **mismo punto** que elegiste (y no en el centro por defecto de Quito)?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-05 · HU-08 (I-12, paso 1) — Iniciar el avalúo es una acción explícita
+1. En el dashboard, pulsa "Avalúo" en una propiedad en captación que nunca tuvo avalúo.
+
+**Resultado esperado:** ¿ves el **"Precio actual de publicación"** en un campo gris que no se puede editar, el botón **"Iniciar avalúo"** y **ningún** avalúo creado todavía? Al pulsar "Iniciar avalúo", ¿aparece un folio con el formato `AV-AAAAMMDD-XXXXXX` y el formulario de calibración?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-06 · HU-08 (I-12, paso 2) — No se aprueba sin guardar
+1. En el borrador recién iniciado, no escribas nada todavía.
+2. Escribe un valor y una justificación, pero **no** pulses "Guardar borrador".
+
+**Resultado esperado:** ¿"Aprobar avalúo" está **desactivado** en los dos casos y solo se activa después de "Guardar borrador" con un valor y una justificación?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-07 · HU-08 (I-12, paso 3) — Validación del valor calibrado
+1. Escribe `0` como valor calibrado y pulsa "Guardar borrador".
+2. Escribe `12,5` y pulsa "Guardar borrador".
+3. Escribe `150000.50` y una justificación, y pulsa "Guardar borrador". Recarga la página.
+
+**Resultado esperado:** ¿en los pasos 1 y 2 aparece bajo el campo el mensaje "Ingresa un valor mayor a 0, con máximo 2 decimales y sin separadores de miles."? ¿Tras el paso 3, al recargar, siguen el valor `150000.50` y la justificación?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-08 · HU-08 (I-12, paso 4) — La aprobación es irreversible
+1. Pulsa "Aprobar avalúo".
+2. Lee la confirmación y acéptala. Recarga la página.
+
+**Resultado esperado:** ¿la confirmación dice que la acción es **irreversible**? Tras aceptar, ¿desaparece el formulario, queda una vista de **solo lectura** y el avalúo aparece en "Historial de avalúos aprobados", también después de recargar?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-09 · HU-08 (I-12, paso 5) — Reevaluar no borra el aprobado
+1. En la misma pantalla, pulsa "Crear reevaluación".
+
+**Resultado esperado:** ¿aparece un borrador **nuevo con otro folio**, y el avalúo aprobado de V-08 **sigue** en el historial?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-10 · HU-08 / HU-53 (I-12, paso 6) — El expediente refleja el avalúo
+1. Vuelve al dashboard, pulsa "Editar" en esa propiedad y ve a la pestaña **Expediente**.
+
+**Resultado esperado:** ¿la fila "Avalúo aprobado" dice **"Aprobado"** en verde y tiene el enlace "Abrir avalúo", que lleva a I-12?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-11 · HU-53 / DT-46 — Publicar con todos los requisitos (cierra DT-40, parte 1)
+1. Con la propiedad de V-05 a V-10: en "Editar", sube al menos **una foto** (Multimedia) y un **contrato de corretaje vigente** (Expediente, como en V-03). Guarda.
+2. En el dashboard, pulsa "Publicar" y acepta la confirmación.
+
+**Resultado esperado:** ¿aparece el aviso verde `"<título>" se publicó y ya está disponible en el catálogo.`, el estado pasa a **"Disponible"** y el botón "Publicar" **desaparece** de esa fila?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-12 · HU-53 / HU-01 — La propiedad publicada es pública (cierra DT-40, parte 2)
+1. Cierra sesión, o abre una ventana privada.
+2. Abre `http://localhost:3000/properties` y luego la ficha de la propiedad de V-11.
+
+**Resultado esperado:** ¿la propiedad de V-11 **aparece** en el catálogo y su ficha **se abre** sin sesión?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+---
+
+## Estado actual (2026-10-27)
+
+- **PR #2 (`feat/URB-15-HU-53-proceso-publicacion` → `develop`) fusionada el 2026-10-27 a las 13:19 (hora local, `ddf4223`).** Evidencia del PR: 52/52 pruebas automáticas y pruebas manuales por **Postman** (publicar sin avalúo → 400; borrador → calibrar → aprobar). **No hubo validación en la interfaz:** HU-08 y HU-53 siguen con la parte funcional y la visual **Pendientes** (ver la sección de validaciones de arriba).
+- El último commit de ese PR (`ef43c52`) versionó `backend/db.sqlite3` y 3 `.pyc`: registrado en **DT-02**. No se ejecutó `git rm --cached` (depende de N-04).
+- **Rama actual:** `feat/URB-13-HU-08-pantalla-avaluo`. Con URB-15 ya en `develop`, se integra ahora por PR (DS-09). La fusión de prueba con `origin/develop` no tiene conflictos (`git merge-tree` → exit 0; `develop` solo trae los 4 binarios de `ef43c52`, que esta rama no toca).
+- **Línea base 2026-10-27:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **52/52 OK**.
+- **Respuestas de Pablo a las 7 preguntas del 2026-10-27:** registradas como DS-14 a DS-18 en [Deuda técnica §4](docs/handoff/URBANEX_DEUDA_TECNICA.md#4-decisiones-tomadas-sesión-2026-10-24-aprobadas-por-pablo).
+
+### Orden acordado (2026-10-27)
+1. **PR de URB-13 → `develop`** (esta rama). Pablo revisa y fusiona.
+2. **Seeder** `setup_demo_data` en una rama nueva desde `develop` (DT-14, DS-17).
+3. **Validación visual de Pablo:** V-01 a V-12 de la sección de arriba.
+4. **Tarea 3:** modales/avisos con Tailwind en `dashboard/page.tsx` + `GET …/publication-requirements/` en el Expediente (DS-15).
+5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42).
+6. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16).
+
+Las tareas 3 a 6 **no empiezan** hasta que Pablo haga la validación visual.
+
+---
+
+## Sesión anterior (2026-10-25)
+
+- **Sprint según el backlog definitivo:** EP-2, Sprint 2 (URB-13 / HU-08, pantalla I-12) para desbloquear HU-53 (DT-40).
+- **Rama:** `feat/URB-13-HU-08-pantalla-avaluo`, creada desde `feat/URB-15-HU-53-proceso-publicacion` (commit `4b9e52b`) por decisión de Pablo (**DS-09**), porque `develop` aún no tiene `apps.appraisals`. **Subida a `origin` el 2026-10-25** (`git push -u`, con las fases 1 y 2, antes de empezar la fase 3). PR sin abrir. Orden de integración: primero la PR de URB-15 y después la de URB-13.
+- **Línea base al iniciar:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **52/52 OK**; `npx tsc --noEmit -p .` → exit 0.
+
+### Terminado en la sesión 2026-10-25
+
+| Commit | Fase | Cambio | Evidencia |
+|---|---|---|---|
+| `161f845` | 1 | `frontend/types/appraisal.ts` (contrato de `Appraisal` y del 400 de publicar) + `authFetch`/`ApiError` en `frontend/lib/api.ts` (FX-12) | `tsc` exit 0; `eslint` sobre los 2 archivos exit 0; backend 52/52 OK |
+| `af9b416` | 2 | Pantalla **I-12** en `/dashboard/properties/[id]/appraisal` (FX-13): "Iniciar avalúo" explícito, "Precio actual de publicación" gris deshabilitado, tarjeta del motor sin valor sugerido, calibración (PATCH), aprobación con confirmación, solo lectura, reevaluación e historial. `dashboard/page.tsx` **sin tocar** | `tsc` exit 0; `eslint` sobre la página exit 0; `npx next build` exit 0 con `ƒ /dashboard/properties/[id]/appraisal`; backend 52/52 OK |
+| `4c9b699` | — | Handoff tras las fases 1 y 2: Deuda técnica, GPS, Estado de procesos, Avance de épicas, Guía, Estándares, Auditoría y este archivo | — |
+| `3783919` | 3 | `dashboard/page.tsx` (archivo compartido, commit propio, FX-14): botón "Avalúo" hacia I-12; fila "Avalúo aprobado" del Expediente con datos reales; `missing_requirements` como lista sobre la tabla (con "Ir al avalúo"); "Publicar" solo en `captacion` (DT-46); clave `reservador` (DT-47) | `tsc` exit 0; `eslint` solo con el error previo de DT-24 (también presente en `HEAD`); `next build` exit 0; backend 52/52 OK |
+| (este commit) | — | Handoff tras la fase 3 | — |
+
+- **No ejecutado:** validación visual ni prueba en el navegador; los servidores no estaban levantados durante la sesión (`localhost:3000` y `127.0.0.1:8000` sin respuesta, comprobado antes de la fase 2 y después de la fase 3).
+- **Sin migraciones ni cambios de backend** en esta sesión.
+
+### Decisiones aprobadas por Pablo (detalle en Deuda técnica §4)
+- **DS-09** Rama apilada sobre URB-15 (excepción a "ramas desde `develop`").
+- **DS-10** Ruta `/dashboard/properties/[id]/appraisal`: el avalúo pertenece a la propiedad.
+- **DS-11** Botón explícito "Iniciar avalúo" (crea un registro con folio que no se borra).
+- **DS-12** "Precio actual de publicación" visible como referencia en un campo gris deshabilitado, para no confundirlo con el motor (D-04).
+- **DS-13** Página nueva (fase 2) y archivo compartido (fase 3) en commits separados; la fase 3 va después de la fase 2.
+- Corrección de Pablo registrada en Estándares §3: en Client Components `useParams()` devuelve el objeto directamente, sin `await`.
+
+### Hallazgos nuevos registrados en Deuda técnica
+- **DT-45 (P2):** `frontend/CLAUDE.md` apunta a `@AGENTS.md`, que se eliminó: la IA del frontend no recibe instrucciones.
+- **DT-46 (P2):** el dashboard mostraba "Publicar" en estados que el servidor rechaza con 409. **Resuelto en la fase 3.**
+- **DT-47 (P3):** `STATUS_LABELS` del dashboard usaba `reservado`; el backend guarda `reservador`. **Resuelto en la fase 3.**
+- **DT-50 (P3, fase 3):** los enlaces "Abrir avalúo" / "Ir al avalúo" salen de la página y descartan los cambios sin guardar del modal.
+- **DT-48 (P3):** I-12 muestra "Iniciar avalúo" aunque la propiedad no sea tuya (el servidor responde 400; no hay fuga de datos).
+- **DT-49 (P3):** en PowerShell 5.1, `git commit -m` con comillas dobles falla; usar `git commit -F`.
+- Actualizados: **DT-23** (el build confirma que se usa `next.config.mjs`; el `.ts` está vacío), **DT-26** y **DT-22** (en parte resueltos con `authFetch`), **DT-37** (I-12 sin pruebas automáticas), **DT-40** (fases 1 y 2 hechas).
+
+### Validaciones pendientes (requieren a una persona)
+Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a la sección **"Validaciones pendientes de Pablo"** al inicio de este archivo (V-01 a V-12). Al 2026-10-27 **seguían sin hacerse**: no se hicieron el 2026-10-26 porque no hay usuario asesor (DT-14).
+
+### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
+1. ~~Fase 3 de DT-40~~ Hecha el 2026-10-25 (`3783919`).
+2. Registrar el resultado de las validaciones de Pablo (quién, cuándo, qué se vio) y, si pasan, cerrar DT-40 y marcar como validados los criterios de HU-08 y HU-53 en Avance de épicas.
+3. ~~Abrir las PR en orden: URB-15 → `develop`~~ (fusionada el 2026-10-27) y después URB-13 (DS-09). Tras fusionar, cada copia ejecuta `migrate`. **Avisar a Sebas** de que la fase 3 modificó `dashboard/page.tsx`.
+4. Decidir DT-45 (qué hacer con `frontend/CLAUDE.md`) y DT-23 (borrar `next.config.ts`).
+5. Resolver DT-39 junto con C-08.
+
+---
+
+## Sesión anterior (2026-10-24)
 
 - **Sprint según el backlog definitivo:** trabajo de EP-2 que adelanta el Sprint 2 (HU-08) y el Sprint 3 (HU-53).
 - **Rama:** `feat/URB-15-HU-53-proceso-publicacion` (desde `develop`; **subida a `origin` el 2026-10-24, PR todavía sin abrir**).
@@ -82,15 +289,13 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración aplicada en la copia de Pablo; las demás copias deben ejecutar `migrate`.
 
 ### Validaciones pendientes (requieren a una persona)
-- [ ] Sin sesión, `/properties` no muestra una propiedad recién creada y `/properties/<id>` no la abre.
-- [ ] En el dashboard, "Publicar" sobre una propiedad sin requisitos muestra el mensaje con lo que falta.
-- [ ] Con avalúo aprobado por la API + foto + corretaje, "Publicar" funciona y la propiedad aparece en el catálogo público.
+Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este archivo (V-01, V-02, V-11 y V-12).
 
 ### Bloqueos
 - **D-04** (fórmula del motor) sigue abierta: bloquea HU-06 y el cálculo de HU-08.
 - HU-53 y HU-01 ya no tienen bloqueos técnicos de backend; falta validación en la UI (DT-40) y DT-39.
 
-### Próxima tarea
+### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
 1. **Abrir el PR** de `feat/URB-15-HU-53-proceso-publicacion` (ya en `origin`) hacia `develop`, revisarlo y fusionarlo con autorización del responsable de integración. Tras fusionar, cada copia ejecuta `migrate`.
 2. ~~Cerrar DT-09 (P0)~~ Hecho el 2026-10-24 (FX-11).
 3. **Pantalla I-12** (calibrar y aprobar avalúo) + `frontend/types/appraisal.ts` en una ruta nueva; conectar la fila "Avalúo aprobado" del Expediente y mostrar `missing_requirements` al publicar (DT-40).
