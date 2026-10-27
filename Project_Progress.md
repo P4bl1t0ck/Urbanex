@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **52 OK**. Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **58 OK** (desde el seeder, 2026-10-27). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -42,8 +42,14 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 **Preparación (antes de empezar):**
 1. Desde `backend/`: `pipenv run python manage.py migrate` y luego `pipenv run python manage.py runserver`.
 2. Desde `frontend/`: `npm run dev` y abrir `http://localhost:3000`.
-3. Hace falta un usuario con rol **`asesor`**; hoy la BD no tiene ninguno (DT-14). Lo creará el comando `setup_demo_data` (rama del seeder, siguiente paso). Mientras tanto estas pruebas **no se pueden ejecutar**.
-4. Ten a mano un PDF cualquiera (para el corretaje) y una foto JPG o PNG.
+3. Carga los datos demo (DT-14, FX-15). Agrega a `backend/.env` (no se versiona) la línea `DEMO_PASSWORD=<una contraseña de 8+ caracteres, no solo números>` y ejecuta desde `backend/`: `pipenv run python manage.py setup_demo_data`. El comando imprime el id de cada propiedad y lo que le falta para publicar. Se puede repetir sin duplicar nada.
+   - Inicia sesión como **`asesor.demo@urbanex.test`** con esa contraseña (el admin es `admin.demo@urbanex.test`).
+   - `[DEMO] Terreno en Tumbaco - sin requisitos` → **V-02** (faltan los 3 requisitos). En **V-01** registra una propiedad nueva, como dicen sus pasos; el terreno sirve de alternativa (tampoco debe verse sin sesión).
+   - `[DEMO] Departamento en La Carolina - sin avalúo` (tiene foto y corretaje) → **V-05 a V-11** (iniciar, calibrar y aprobar en I-12 y después publicar) y **V-12**.
+   - `[DEMO] Local en La Mariscal - sin corretaje` → **V-03** (sube ahí el corretaje v1 y v2).
+   - `[DEMO] Casa en Cumbayá - lista para publicar` → atajo de **V-11/V-12** si quieres probar la publicación sin pasar por I-12.
+   - **Ojo:** los avalúos y documentos demo son inmutables y **no se pueden borrar** de tu BD local. Tu `db.sqlite3` cambiará: **no la incluyas en ningún commit** (DT-02).
+4. Para V-03 ten a mano un PDF cualquiera; para V-04, ninguna preparación extra.
 
 **Pruebas que cierran DT-40:** V-11 y V-12 (requieren antes V-05 a V-08).
 
@@ -180,9 +186,16 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Línea base 2026-10-27:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **52/52 OK**.
 - **Respuestas de Pablo a las 7 preguntas del 2026-10-27:** registradas como DS-14 a DS-18 en [Deuda técnica §4](docs/handoff/URBANEX_DEUDA_TECNICA.md#4-decisiones-tomadas-sesión-2026-10-24-aprobadas-por-pablo).
 
+### Seeder (2026-10-27, rama `chore/DT-14-seeder-datos-demo`)
+- La PR #3 (URB-13) se fusionó en `develop` el 2026-10-27 a las 21:18 UTC (`45250ec`). La rama del seeder sale de ese `develop`.
+- **`817da84` (FX-15):** comando `pipenv run python manage.py setup_demo_data` (`backend/apps/users/management/commands/setup_demo_data.py`) según DS-17. Uso y propiedades en la **Preparación** de la sección de validaciones.
+- **Pruebas:** 6 nuevas (`SetupDemoDataCommandTests`): sin `DEMO_PASSWORD` falla; con `DEBUG=False` se niega; roles, `is_staff` y contraseña; las 4 propiedades en captación con los requisitos esperados (`get_missing_publication_requirements`) y sin valor sugerido; repetir no duplica y actualiza la contraseña; no aprueba un borrador abierto. `manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **58/58 OK**; `makemigrations --check` → sin cambios.
+- **No ejecutado** sobre la BD local de Pablo: crea registros que no se pueden borrar y modifica `db.sqlite3` (rastreado, DT-02). Lo ejecuta Pablo al preparar la validación.
+- Hallazgo nuevo: **DT-54** (Pillow no está en el `Pipfile`).
+
 ### Orden acordado (2026-10-27)
-1. **PR de URB-13 → `develop`** (esta rama). Pablo revisa y fusiona.
-2. **Seeder** `setup_demo_data` en una rama nueva desde `develop` (DT-14, DS-17).
+1. ~~**PR de URB-13 → `develop`**~~ Fusionada (PR #3).
+2. **Seeder** `setup_demo_data` (DT-14, DS-17): **hecho** en `chore/DT-14-seeder-datos-demo` (`817da84`); falta la PR hacia `develop`.
 3. **Validación visual de Pablo:** V-01 a V-12 de la sección de arriba.
 4. **Tarea 3:** modales/avisos con Tailwind en `dashboard/page.tsx` + `GET …/publication-requirements/` en el Expediente (DS-15).
 5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42).
