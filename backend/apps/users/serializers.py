@@ -32,7 +32,9 @@ class PropertySerializer(serializers.ModelSerializer):
             'images',
             'unavailability_reason', 'created_at', 'updated_at'
         ]
-        read_only_fields = ('agent','created_at','updated_at')
+        # DT-09: status solo cambia por acciones de negocio (PropertyPublishView, HU-53),
+        # nunca por un POST/PATCH generico.
+        read_only_fields = ('agent', 'status', 'created_at', 'updated_at')
     
     def get_agent_name(self,obj): #This function it made for get the full name and user name of who make or add the proerty.
         if obj.agent:

@@ -4,6 +4,7 @@
 |---|---|
 | Propósito | Saber qué archivo implementa qué HU, qué riesgo tiene tocarlo y de qué depende Avalúos |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
+| Última actualización | 2026-10-24 · nueva app `apps.appraisals`; cambios en `users/views.py` y `users/tests.py` (DT-07, HU-53) |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 + dependencias de HU-04, HU-06, HU-08 |
 
 > **Este GPS es una guía de precauciones, no una lista de archivos intocables.** Sebas puede modificar lo necesario para Avalúos, siempre que revise las dependencias indicadas y ejecute las pruebas listadas.
@@ -20,9 +21,9 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 |---|---|---|---|---|---|---|
 | `backend/apps/users/models.py` (`Property`, `PropertyImage`) | Modelo | Datos de la propiedad e imágenes | Código + `test_create_property_as_agent` | En Curso | **Alto** | Cualquier campo nuevo exige migración en la app `users`; `documents` tiene FK `PROTECT` hacia `Property` |
 | `backend/apps/users/serializers.py` (`PropertySerializer`) | Serializer | Contrato JSON de propiedades; regla de `no_disponible` y prohibición de `vendido`/`arrendado` | Código | En Curso | **Alto** | Mantener sincronizado con `frontend/types/property.ts`. `get_agent_name` está duplicado |
-| `backend/apps/users/views.py` (`PropertyListCreateView`, `MyPropertiesView`, `PropertyDetailView`, `PropertyImageViewSet`) | Vista | CRUD de propiedades e imágenes | Código + tests | En Curso | **Alto** | Catálogo público sin filtro (DT-07); imágenes sin control (DT-10) |
+| `backend/apps/users/views.py` (`PUBLIC_STATUSES`, `PropertyListCreateView`, `MyPropertiesView`, `PropertyDetailView`, `PropertyImageViewSet`) | Vista | CRUD de propiedades e imágenes; filtro del catálogo público para anónimos (lista y detalle) | Código + tests | En Curso | **Alto** | `PUBLIC_STATUSES` usa `'reservador'` (DT-16): cambiarlo cuando se migre. Un `cliente` autenticado aún ve la captación (DT-39); imágenes sin control (DT-10) |
 | `backend/apps/users/urls.py` | Rutas | `/api/auth/properties/…`, `/api/auth/property-images/` | Código | Listo | Medio | El frontend tiene estas URLs hardcodeadas |
-| `backend/apps/users/tests.py` | Test | 3 pruebas (crear, publicar, login fallido) | 3/3 aprobadas | — | Medio | `test_publish_property_permission` cambiará con HU-53 |
+| `backend/apps/users/tests.py` | Test | 15 pruebas: crear, `status` de solo lectura (2), catálogo público (3), publicación HU-53 (8), login fallido | 15/15 aprobadas (2026-10-24) | — | Medio | Los helpers `_add_corretaje` parchean el storage de `Document` a una carpeta temporal y `_add_image` guarda solo la ruta: no escriben en `private_media/` ni en `media/` |
 | `frontend/app/dashboard/page.tsx` | UI (I-03 + modal I-10) | Lista "Mis propiedades" + modal de 4 pestañas + guardado de propiedad, imágenes y documentos | `tsc` OK; validación visual parcial del usuario | En Curso | **Alto** | Archivo de 927 líneas: si se modifica, revisar las 4 pestañas. `validateForm()` es la única validación de la foto |
 | `frontend/types/property.ts` | Tipos | Contrato TS de `Property` | `tsc` OK | Listo | **Alto** | Lo usan el dashboard, el catálogo, la ficha, `PropertyCard` y `lib/api` |
 | `frontend/app/properties/page.tsx`, `frontend/components/PropertyCard.tsx` | UI (P-02) | Catálogo público | `next build` OK | En Curso | Medio | Muestra lo que devuelva el backend, incluida la captación (DT-07) |
@@ -57,6 +58,28 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 | `backend/apps/documents/models.py` (`validate_document`) | Modelo | Solo admin, solo versión vigente, rechazo con motivo | 3 pruebas | En Curso | Bajo | Endpoint y UI corresponden al Sprint 7 |
 | — | Endpoint / UI | **No existe** | — | — | — | — |
 
+### HU-08 · Calibrar y aprobar el avalúo (modelo base, 2026-10-24) → [estado](URBANEX_ESTADO_PROCESOS.md#hu-08)
+
+| Ruta | Capa | Responsabilidad | Evidencia | Estado | Riesgo | Precauciones |
+|---|---|---|---|---|---|---|
+| `backend/apps/appraisals/models.py` | Modelo | `Appraisal` (§7 + `status`/`approved_at`), `MUTABLE_FIELDS`, `create_draft()` (placeholder + `# TODO: Implementar motor de cálculo HITL`), `calibrate()`, `approve()` | 11 pruebas de modelo | Pruebas | Medio | No ampliar `MUTABLE_FIELDS` ni quitar restricciones sin actualizar pruebas y [DS-01](URBANEX_DEUDA_TECNICA.md#4-decisiones-tomadas-sesión-2026-10-24-aprobadas-por-pablo). HU-06 debe escribir `suggested_value`/`confidence_level` **al crear**, nunca después. `@builtins.property` dentro de la clase |
+| `backend/apps/appraisals/serializers.py` | Serializer | Lectura (todo solo lectura), creación de borrador, calibración PATCH | 7 pruebas de API | Pruebas | Bajo | Reutiliza `user_can_access_property()` de `documents` |
+| `backend/apps/appraisals/views.py` | Vista | `AppraisalViewSet`: list, retrieve, create, PATCH, `approve/`; sin PUT ni DELETE | 7 pruebas de API | Pruebas | Bajo | `http_method_names` excluye PUT/DELETE: no quitarlo |
+| `backend/apps/appraisals/urls.py`, `backend/config/urls.py` | Rutas | `/api/appraisals/` | Pruebas de API | Listo | Bajo | — |
+| `backend/apps/appraisals/admin.py` | Admin | Solo lectura (auditoría A-05) | Código | Listo | Bajo | — |
+| `backend/apps/appraisals/migrations/0001_initial.py` | Migración | Tabla + 3 restricciones | Generada; aplicada en la BD de Pablo el 2026-10-24 (`[X] 0001_initial`). Cada copia debe ejecutar `migrate` (DT-43) | Listo | Medio | No editar una vez compartida |
+| `backend/apps/appraisals/tests.py` | Test | 18 pruebas | 18/18 aprobadas | — | — | Incluir `apps.appraisals.tests` en el comando (DT-41) |
+| `backend/config/settings.py` (`INSTALLED_APPS`) | Config | Registro de `apps.appraisals.apps.AppraisalsConfig` | `manage.py check` | Listo | Alto (compartido) | — |
+| — | UI (I-11, I-12) y `frontend/types/appraisal.ts` | **No existen** (DT-40) | — | — | — | Crear en ruta nueva, no dentro del modal del dashboard |
+
+### HU-53 · Publicar una propiedad (2026-10-24) → [estado](URBANEX_ESTADO_PROCESOS.md#hu-53)
+
+| Ruta | Capa | Responsabilidad | Evidencia | Estado | Riesgo | Precauciones |
+|---|---|---|---|---|---|---|
+| `backend/apps/users/views.py` (`get_missing_publication_requirements`, `PropertyPublishView`) | Vista / regla de dominio | Requisitos (foto, corretaje vigente no rechazado, avalúo aprobado) y transición `captacion → disponible` en transacción | 8 pruebas en `apps.users.tests` | Pruebas | **Alto** | Cualquier requisito nuevo va en `get_missing_publication_requirements()` con su `code`. El contrato del 400 (`detail` + `missing_requirements`) lo consumirá la UI |
+| `backend/apps/users/serializers.py` (`PropertySerializer`) | Serializer | `status` en `read_only_fields` (DT-09 resuelto, FX-11) | `test_patch_cannot_change_status`, `test_create_ignores_status` | Listo | **Alto** | **No volver a hacer `status` escribible.** Nuevas transiciones (HU-09, reserva, cierre) = acciones explícitas en vistas propias |
+| `frontend/app/dashboard/page.tsx` (`handlePublish`) | UI | Llama a `…/publish/` y muestra `detail` en un `alert` | Código | En Curso | Alto | Mostrar `missing_requirements` como lista (DT-40) |
+
 ### HU-44, HU-45, HU-46 · Acceso → estado [HU-44](URBANEX_ESTADO_PROCESOS.md#hu-44) · [HU-45](URBANEX_ESTADO_PROCESOS.md#hu-45) · [HU-46](URBANEX_ESTADO_PROCESOS.md#hu-46)
 
 | Ruta | Capa | Responsabilidad | Evidencia | Estado | Riesgo | Precauciones |
@@ -78,15 +101,15 @@ flowchart LR
     D[Document CORRETAJE<br/>apps/documents]
     T[types/property.ts]
     DB[dashboard/page.tsx<br/>pestaña Expediente]
-    PUB[PropertyPublishView]
+    PUB[PropertyPublishView<br/>exige requisitos HU-53]
     IMM[Patrón de inmutabilidad<br/>Document]
+    A[apps.appraisals<br/>Appraisal base, sin motor]
   end
   subgraph Falta["Falta / por decidir"]
     Z[Property.zone y demás<br/>campos de RF-01]
     D04[Decisión D-04<br/>fórmula y umbrales]
     C02[Contradicción C-02<br/>1–2 comparables]
     SEED[Datos de comparables<br/>sintéticos]
-    A[apps.appraisals<br/>Appraisal]
     UI[Pantallas I-11 / I-12]
   end
   P -->|FK property| A
@@ -111,11 +134,11 @@ flowchart LR
 | Segmentación por zona | **Falta** | No existe `zone`; las coordenadas existen pero las 28 propiedades de desarrollo tienen `latitude = NULL` | DT-19 |
 | Otras variables del motor (antigüedad, conservación, área útil, operación) | **Falta / D-04** | No existen; cuáles se usan depende de D-04 | DT-19 |
 | Qué propiedades sirven de comparables (¿estados? ¿solo vendidas?) | **POR CONFIRMAR** | RF-11 dice "base interna" sin precisar estados | Decisión de negocio |
-| Requisito de publicación | **Confirmada** | `PropertyPublishView` debe exigir el avalúo aprobado (HU-53) y `test_publish_property_permission` debe actualizarse | `backend/apps/users/views.py`, `backend/apps/users/tests.py` |
-| Contrato de corretaje | **Confirmada** | `Document.objects.current().filter(property=p, doc_type='CORRETAJE').exists()` | `backend/apps/documents/models.py` |
+| Requisito de publicación | **Implementada (2026-10-24)** | `get_missing_publication_requirements()` usa `Appraisal.objects.approved()`; `test_publish_property_permission` reescrita | `backend/apps/users/views.py`, `backend/apps/users/tests.py` |
+| Contrato de corretaje | **Implementada (2026-10-24)** | Versión vigente, no vencida y no `RECHAZADO` (DS-04) | `backend/apps/users/views.py` |
 | Permisos | **Confirmada** | Patrón `role == 'admin' or property.agent_id == user.id` (en `PropertyOwnerOrAdminOrReadOnly` y `user_can_access_property`). En la BD de desarrollo **no hay asesores ni admins** | `backend/apps/users/views.py`, `backend/apps/documents/serializers.py` |
 | Autenticación | **Confirmada** | JWT Bearer; el frontend lee `sessionStorage.getItem("access")` | `frontend/app/dashboard/page.tsx` |
-| Inmutabilidad del avalúo (HU-08) | **Patrón disponible** | Copiar el enfoque de `Document` (`save`/`delete`/`QuerySet` bloqueados + restricciones) | `backend/apps/documents/models.py` |
+| Inmutabilidad del avalúo (HU-08) | **Implementada (2026-10-24)** | Mismo enfoque que `Document` + ciclo BORRADOR → APROBADO | `backend/apps/appraisals/models.py` |
 | Tipos TS | **Confirmada** | Crear `frontend/types/appraisal.ts` (aún no existe); no duplicar `Property` | `frontend/types/property.ts` |
 | Indicador en la UI | **Confirmada** | La fila "Avalúo aprobado" de la pestaña Expediente es un marcador fijo que hay que conectar | `frontend/app/dashboard/page.tsx` |
 | Zona horaria | **Confirmada** | `TIME_ZONE='UTC'`: las fechas del avalúo se guardarán en UTC (DT-01) | `backend/config/settings.py` |
@@ -128,7 +151,8 @@ flowchart LR
 | `backend/apps/users/models.py` | `User` + `Property` + `PropertyImage` en un solo archivo | Avisar antes de agregar campos; dos migraciones `users.0007` paralelas generan conflicto (`makemigrations --merge`) |
 | `backend/apps/users/migrations/` | Numeración secuencial | Hacer pull antes de `makemigrations`; nunca editar migraciones aplicadas |
 | `backend/config/settings.py` | `INSTALLED_APPS`, zona horaria, DRF | Un cambio de `TIME_ZONE` o de los permisos por defecto afecta a todas las apps |
-| `backend/config/urls.py` | Rutas raíz | Agregar `path("api/appraisals/", …)` sin tocar las demás |
+| `backend/config/urls.py` | Rutas raíz | Ya incluye `api/appraisals/` (2026-10-24); agregar rutas nuevas sin tocar las demás |
+| `backend/apps/users/views.py` | Catálogo, detalle y publicación | `PUBLIC_STATUSES` y `get_missing_publication_requirements()` son reglas de negocio: cambiarlas exige actualizar pruebas, Estado de procesos y Deuda |
 | `frontend/app/dashboard/page.tsx` | Modal de propiedad + Expediente + lista | Si Avalúos se integra aquí, evitar que dos personas editen el archivo a la vez; mejor crear rutas nuevas (`/dashboard/properties/[id]/appraisal`) |
 | `frontend/types/property.ts` | Contrato usado por 5 archivos | Cambiar el tipo y el serializer en el mismo commit |
 | `backend/db.sqlite3` | Rastreado en Git | Cada desarrollador modifica su copia y aparecen conflictos binarios (DT-02) |

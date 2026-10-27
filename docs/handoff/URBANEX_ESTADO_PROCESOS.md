@@ -4,6 +4,7 @@
 |---|---|
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
+| Última actualización | 2026-10-24 · rama `feat/URB-15-HU-53-proceso-publicacion` · HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 (pedidas) + HU-02, HU-09, HU-53 (EP-2, relevantes para Avalúos) + HU-04, HU-06, HU-08 (punto de partida de Sebas) |
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
@@ -32,15 +33,15 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 
 | HU | Nombre (tesis, Anexo 2) | Épica | Sprint (backlog definitivo) | Estado | Técnica | Funcional | Visual |
 |---|---|---|---|---|---|---|---|
-| [HU-01](#hu-01) | Registrar una propiedad en captación | EP-2 | 1 | En Curso | Aprobado (parcial) | **Fallido** | Pendiente |
+| [HU-01](#hu-01) | Registrar una propiedad en captación | EP-2 | 1 | En Curso | Aprobado (parcial) | Pendiente (DT-07 y DT-09 resueltos; quedan DT-34, DT-39) | Pendiente |
 | [HU-02](#hu-02) | Registrarse como captador y responsable inicial | EP-2 | 1 | En Curso | Aprobado (parcial) | Pendiente | Pendiente |
 | [HU-03](#hu-03) | Cargar la documentación inicial | EP-2 | 1 | Pruebas | Aprobado | Pendiente | Pendiente |
 | [HU-05](#hu-05) | Registrar las características del inmueble | EP-2 | 1 | En Curso | Pendiente | Pendiente | Pendiente |
 | [HU-09](#hu-09) | Actualizar una propiedad publicada | EP-2 | 2 | En Curso | Pendiente | Pendiente | Pendiente |
-| [HU-53](#hu-53) | Publicar una propiedad | EP-2 | 3 | En Curso | **Fallido** | **Fallido** | Pendiente |
+| [HU-53](#hu-53) | Publicar una propiedad | EP-2 | 3 | En Curso | Aprobado (requisitos de publicación) | Pendiente (DT-40; falta `slug`/metaetiquetas) | Pendiente |
 | [HU-04](#hu-04) | Seleccionar comparables para el avalúo | EP-2 | 2 | Por hacer | Pendiente | Pendiente | Pendiente |
 | [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Bloqueado** (D-04) | Pendiente | Pendiente | Pendiente |
-| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | Por hacer | Pendiente | Pendiente | Pendiente |
+| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | En Curso (modelo base + API) | Aprobado (backend) | Pendiente (sin I-12) | Pendiente |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | Por hacer | **Fallido** | **Fallido** | Pendiente |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Pendiente | **Fallido** | Pendiente |
@@ -67,10 +68,19 @@ flowchart TD
   E -->|sí| F[Estado DISPONIBLE<br/>visible en el catálogo]
   E -->|no| B
   classDef gap fill:#fde2e2,stroke:#c0392b;
-  class D gap;
+  classDef partial fill:#fff4d6,stroke:#b7791f;
+  class D partial;
 ```
 
-**Hoy el sistema no aplica este proceso:** (1) las propiedades `captacion` ya son visibles en el catálogo, (2) publicar no exige ni avalúo ni corretaje, y (3) el avalúo no existe. El proceso está documentado, pero **el software todavía se comporta como un CRUD** en este tramo.
+**Estado al 2026-10-24: el proceso ya se aplica en el servidor.** El hueco 1 (DT-09) se cerró el mismo día (FX-11): `status` es de solo lectura y la única vía hacia `disponible` es la acción de publicar. Queda el hueco 2 (DT-40).
+
+| Tramo | Antes (2026-10-22) | Ahora (2026-10-24) |
+|---|---|---|
+| Captación oculta al público | Visible para todos | Oculta para anónimos (DT-07 resuelto). Sigue visible para un `cliente` autenticado (DT-39) |
+| Avalúo | No existía | `apps.appraisals`: borrador → calibración → aprobación inmutable. Sin motor (D-04) y sin pantallas (DT-40) |
+| Publicar | Sin requisitos | `POST …/publish/` exige foto + corretaje vigente no rechazado + avalúo aprobado, solo desde captación |
+| ~~**Hueco 1 — DT-09 (P0)**~~ | — | **Resuelto (FX-11):** `POST` crea siempre en `captacion`; `PATCH` ignora `status` (`test_create_ignores_status`, `test_patch_cannot_change_status`) |
+| **Hueco 2 — DT-40** | — | Desde la UI no se puede aprobar un avalúo, así que **ninguna propiedad se puede publicar desde el navegador**. Es el comportamiento de negocio esperado hasta que exista I-12 |
 
 ---
 
@@ -83,12 +93,12 @@ flowchart TD
 | Criterio de aceptación (Anexo 2) | Implementación encontrada | Prueba | Resultado |
 |---|---|---|---|
 | Exige campos obligatorios y al menos una fotografía | Campos obligatorios: sí en el modelo/serializer. Foto: **solo en el frontend** (`validateForm`); el backend crea la propiedad sin imágenes | `test_create_property_as_agent` crea, pero no prueba rechazos | Parcial |
-| Al guardarse queda En captación, sin exhibirse al público | `status` por defecto `captacion` ✔. **`GET /api/auth/properties/` y `/properties/<id>/` devuelven también las de captación a anónimos**, y `frontend/app/properties/page.tsx` las muestra | `test_create_property_as_agent` verifica `captacion` | **Fallido** (exposición pública) |
+| Al guardarse queda En captación, sin exhibirse al público | `status` por defecto `captacion` ✔. **Desde 2026-10-24** un anónimo solo recibe `disponible`/`reservador` en la lista y 404 en el detalle de una ficha en captación (`PUBLIC_STATUSES`, commit `2817dcd`). Desde FX-11 el `POST` siempre guarda `captacion` (DT-09 resuelto). Pendiente: un `cliente` autenticado aún ve la captación (DT-39) | `test_create_property_as_agent`, `test_create_ignores_status`, `test_anonymous_list_only_shows_public_statuses`, `test_anonymous_cannot_read_captacion_detail`, `test_owner_still_reads_captacion_detail` | Parcial (anónimos ✔; DT-39 abierto) |
 | El asesor queda como captador y responsable inicial | `perform_create` asigna `agent=request.user`; `agent` de solo lectura en la API | `test_create_property_as_agent` verifica `agent` | Aprobado (técnico) |
 
 - **Interfaz:** modal con 4 pestañas en `frontend/app/dashboard/page.tsx`. Los datos persisten al cambiar de pestaña; errores por pestaña; vistas previas de imágenes.
-- **Bloqueos y riesgos:** DT-07 (exposición pública), DT-34 (foto solo en frontend), DT-10 (imágenes sin control de propiedad).
-- **Siguiente paso:** filtrar el catálogo público a `disponible` y `reservado` en el backend (RF-01) y exigir la foto también en el servidor. Después, validar en el navegador: crear con y sin foto, y comprobar que la propiedad no aparece en `/properties`.
+- **Bloqueos y riesgos:** ~~DT-07~~ y ~~DT-09~~ (resueltos 2026-10-24), DT-39 (rol `cliente`), DT-34 (foto al registrar solo en frontend), DT-10 (imágenes sin control de propiedad).
+- **Siguiente paso:** validar en el navegador sin sesión: una propiedad recién creada **no** aparece en `/properties` ni se abre en `/properties/<id>`. Después, DT-39.
 
 ## HU-02
 
@@ -139,7 +149,7 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| Cambiar entre En captación, Disponible y No disponible; No disponible exige motivo | `PropertySerializer.validate()` exige el motivo. **La UI no permite cambiar el estado.** Por PATCH se puede poner cualquier estado, incluido `disponible` (salta HU-53) o `reservador` | No cumplido (sin UI; riesgo DT-09) |
+| Cambiar entre En captación, Disponible y No disponible; No disponible exige motivo | **Desde FX-11 (2026-10-24) `status` es de solo lectura**: ningún estado se cambia por PATCH. HU-09 necesita una **acción explícita** (p. ej. `POST …/withdraw/` con motivo) que hoy no existe; la regla del motivo en `validate()` queda sin uso efectivo (DT-44). La UI tampoco permite cambiar el estado | No cumplido (falta la acción de HU-09) |
 | No permite asignar Vendido o Arrendado manualmente | `validate()` lo rechaza | Implementado, sin prueba |
 
 ## HU-53
@@ -148,17 +158,23 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| Requiere avalúo registrado y contrato de corretaje cargado | `PropertyPublishView` **solo comprueba permisos**; publica sin avalúo, sin corretaje y sin foto. `test_publish_property_permission` **afirma** ese comportamiento | **Fallido** |
+| Requiere avalúo registrado y contrato de corretaje cargado | **Desde 2026-10-24 (commit `cca371e`):** `PropertyPublishView` responde **400** con `missing_requirements` si falta ≥1 `PropertyImage`, un `CORRETAJE` vigente (versión actual, no vencido, no `RECHAZADO`; `PENDIENTE` sí sirve, DS-04) o un `Appraisal` `APROBADO`. Solo publica desde `captacion` (409 en otro estado, DS-07). Todo en `transaction.atomic` + `select_for_update`. Desde FX-11 es la **única** vía hacia `disponible` | Aprobado (técnico) |
 | Al publicarse pasa a Disponible y se genera su URL con metaetiquetas | Pasa a `disponible`. No existen `slug` ni metaetiquetas OpenGraph | Parcial |
 
-Dependencia directa de Avalúos: cuando exista el avalúo aprobado, esta vista debe exigirlo junto con `Document` vigente de tipo `CORRETAJE` y al menos una foto. La prueba actual deberá reescribirse. La pestaña Expediente ya muestra "Avalúo aprobado — Módulo de avalúos (Sprint 2)" como requisito pendiente.
+**Pruebas (`apps.users.tests`):** `test_publish_property_permission` (reescrita: 403 de un no dueño + 200 con todos los requisitos, corretaje `PENDIENTE`), `test_publish_rejected_without_image`, `…_without_corretaje`, `…_with_expired_corretaje`, `…_with_rejected_corretaje`, `…_with_draft_appraisal_only`, `test_publish_rejected_lists_all_missing_requirements`, `test_publish_only_from_captacion`.
+
+**Contrato del 400** (lo que la UI debe mostrar): `{"detail": "No se puede publicar: …", "missing_requirements": [{"code": "image" | "brokerage_contract" | "appraisal", "message": "…"}]}`. El dashboard actual ya muestra `detail` en un `alert`.
+
+**Bloqueo funcional esperado (DT-40):** como no existen las pantallas I-11/I-12, un avalúo solo se aprueba por la API. Por eso **hoy no se puede publicar ninguna propiedad desde la interfaz**. Es el comportamiento correcto del proceso, no un error. La reutilizable `get_missing_publication_requirements()` debe alimentar la Vista 360° (I-10B) y la fila "Avalúo aprobado" de la pestaña Expediente, que sigue siendo un marcador fijo.
+
+**Validación funcional pendiente:** con un asesor de prueba, aprobar un avalúo por la API, cargar foto y corretaje y publicar desde el dashboard; luego, sin sesión, comprobar que aparece en `/properties`.
 
 ## HU-04
 
 **Seleccionar comparables para el avalúo** · EP-2 · RF-11 · Pantalla I-11 · Sprint 2 (URB-10)
 
 - Criterios (tesis): no permite calcular con menos de 3 ni más de 5 comparables; el avalúo se hace durante la captación y es requisito para publicar; sin comparables suficientes, el avalúo se registra de forma manual.
-- Implementación: **ninguna** (no existe `apps.appraisals`).
+- Implementación: **ninguna** para la selección. Desde 2026-10-24 existe `apps.appraisals` con el campo `comparables_snapshot` (hoy siempre `[]`) y el respaldo manual (`is_manual_fallback = True`) que esta HU deberá alimentar. El criterio "el avalúo es requisito para publicar" ya lo aplica HU-53.
 - Dependencias: `Property.zone` (inexistente), datos de comparables (la base de desarrollo no tiene un conjunto de prueba diseñado) y la contradicción C-02.
 
 ## HU-06
@@ -172,8 +188,15 @@ Dependencia directa de Avalúos: cuando exista el avalúo aprobado, esta vista d
 
 **Calibrar y aprobar el avalúo** · EP-2 · RF-11 · Pantalla I-12 · Sprint 2 (URB-13)
 
-- Criterios: conservar el valor del motor, el calibrado y su diferencia; un avalúo aprobado no se sobrescribe.
-- Implementación: ninguna. Patrón reutilizable: la inmutabilidad de `Document` (bloqueo de `save`/`delete`/`update` y restricciones de BD) en `backend/apps/documents/models.py`.
+| Criterio | Implementación (2026-10-24, commit `58b968c`) | Prueba | Resultado |
+|---|---|---|---|
+| Conservar el valor del motor, el calibrado y su diferencia | `Appraisal` guarda `suggested_value`, `calibrated_value`, `difference_amount` y `difference_percentage`; `approve()` calcula la diferencia (nula si no hay valor del motor) | `test_approve_computes_differences_when_engine_value_exists`, `test_approve_without_suggested_value_leaves_differences_null` | Aprobado (backend). Sin pantalla I-12 |
+| Un avalúo aprobado no se sobrescribe | Inmutabilidad igual que `Document`: `delete()` y `QuerySet.delete()` bloqueados; `save()` y `QuerySet.update()` validan `MUTABLE_FIELDS`; aprobado = ningún campo cambia. Restricciones de BD: un borrador abierto por propiedad, aprobado exige calibración y justificación. Admin de Django de solo lectura | `test_approved_appraisal_cannot_be_saved`, `…_bulk_updated`, `…_recalibrated_or_reapproved`, `test_appraisals_cannot_be_deleted`, `test_draft_engine_fields_are_immutable`, API: PATCH/approve tras aprobar → 400, PUT/DELETE → 405 | Aprobado (backend) |
+
+- **Ciclo:** `POST /api/appraisals/` (borrador) → `PATCH /api/appraisals/<id>/` (`calibrated_value`, `final_justification`) → `POST /api/appraisals/<id>/approve/`. Permisos: asesor dueño o admin (DS-05). Reevaluar = nuevo avalúo (DS-06).
+- **Placeholder (DS-02):** sin motor (D-04), cada avalúo nace con `suggested_value = NULL`, `is_manual_fallback = True` y confianza `BAJO`. Marcado con `# TODO: Implementar motor de cálculo HITL` en `Appraisal.create_draft()`.
+- **Falta:** pantalla I-12 y `frontend/types/appraisal.ts` (DT-40); HU-07 (borrador IA) llenará `ai_draft_justification`; HU-06 llenará `suggested_value` y `confidence_level`.
+- **BD local:** migración aplicada en la copia de Pablo el 2026-10-24 (`showmigrations appraisals` → `[X] 0001_initial`). Cualquier otra copia debe ejecutar `pipenv run python manage.py migrate` (DT-43).
 
 ## HU-37
 
@@ -184,7 +207,7 @@ Dependencia directa de Avalúos: cuando exista el avalúo aprobado, esta vista d
 | Solo el administrador valida | `Document.validate_document()` exige `role == 'admin'` | Aprobado a nivel de modelo (`test_only_admin_can_validate`, `test_rejection_requires_reason`, `test_old_versions_cannot_be_validated`). Sin endpoint ni UI |
 | Un documento rechazado o faltante bloquea el avance | Esta regla **sí está escrita en la tesis** (Anexo 2) y en RF-10 ("Impide pasar de Evaluación Documental a Pendiente de Cierre…"). No implementada: no existen las oportunidades (Sprint 5–6) | Pendiente |
 
-Pregunta de negocio abierta: ¿un documento `RECHAZADO` de tipo `CORRETAJE` debe impedir también **publicar** la propiedad (HU-53)? RF-01 solo dice "contrato de corretaje cargado". **POR CONFIRMAR con el equipo.**
+~~Pregunta de negocio abierta (N-01)~~ **Resuelta 2026-10-24 (DS-04):** un `CORRETAJE` vigente en estado `RECHAZADO` **impide publicar**; uno `PENDIENTE` lo permite. Implementado en HU-53.
 
 En la base de desarrollo no hay ningún usuario con rol `admin`, así que esta regla no se puede validar en la interfaz sin preparar datos.
 
