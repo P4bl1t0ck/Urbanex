@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
+| Última actualización | 2026-10-27 · PR #2 (URB-15) fusionada en `develop` con pruebas por Postman, **sin validación en la interfaz**; las validaciones pendientes pasan a `Project_Progress.md` (V-01 a V-12). Antes: 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 (pedidas) + HU-02, HU-09, HU-53 (EP-2, relevantes para Avalúos) + HU-04, HU-06, HU-08 (punto de partida de Sebas) |
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
@@ -172,7 +172,7 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 **Bloqueo funcional esperado (DT-40):** ~~como no existen las pantallas I-11/I-12, un avalúo solo se aprueba por la API.~~ **Desbloqueado en el código el 2026-10-25:** el avalúo se aprueba en I-12 y la publicación se hace desde el dashboard. La fila "Avalúo aprobado" del Expediente ya consulta los avalúos reales. Pendiente: que `get_missing_publication_requirements()` alimente también la Vista 360° (I-10B), que no existe.
 
-**Validación funcional pendiente:** con un asesor de prueba, aprobar un avalúo (desde 2026-10-25 se puede hacer en la pantalla I-12 en lugar de la API), cargar foto y corretaje y publicar desde el dashboard; luego, sin sesión, comprobar que aparece en `/properties`. **Pablo confirmó el 2026-10-25 que todavía no ha hecho esta validación ni la del catálogo anónimo.**
+**Validación funcional pendiente:** con un asesor de prueba, aprobar un avalúo (desde 2026-10-25 se puede hacer en la pantalla I-12 en lugar de la API), cargar foto y corretaje y publicar desde el dashboard; luego, sin sesión, comprobar que aparece en `/properties`. **Pablo confirmó el 2026-10-25 que todavía no ha hecho esta validación ni la del catálogo anónimo.** **(2026-10-27)** Sigue Pendiente: no hay usuario asesor hasta el seeder (DT-14). Los pasos, el resultado esperado y la fila para registrar la evidencia están en `Project_Progress.md` → "Validaciones pendientes de Pablo (o Aaron)": **V-01, V-02, V-11 y V-12** para HU-53 y HU-01; **V-05 a V-10** para HU-08; **V-03** para HU-03; **V-04** para HU-05.
 
 ## HU-04
 
