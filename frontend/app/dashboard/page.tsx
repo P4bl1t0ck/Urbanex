@@ -4,9 +4,15 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import Dialog from "@/components/Dialog";
 import type { LatLng } from "@/components/MapPicker";
 import { ApiError, authFetch } from "@/lib/api";
-import type { Appraisal, MissingRequirement, PublishErrorResponse } from "@/types/appraisal";
+import type {
+  Appraisal,
+  MissingRequirement,
+  PublicationRequirementsResponse,
+  PublishErrorResponse,
+} from "@/types/appraisal";
 import type { Property, PropertyImage } from "@/types/property";
 
 //Importamos el mapa desactivando el SSR
@@ -61,10 +67,31 @@ type TabId = "general" | "location" | "media" | "docs";
 // Estado del requisito "Avalúo aprobado" en la pestaña Expediente (HU-53).
 type AppraisalRequirement = "loading" | "approved" | "draft" | "none" | "error";
 
-// Resultado de la última publicación, mostrado sobre la tabla (DT-40).
-type PublishFeedback =
-  | { kind: "success"; title: string }
-  | { kind: "error"; title: string; propertyId: number; detail: string; missing: MissingRequirement[] };
+// Requisitos de publicación según el servidor (DS-15), mostrados en la pestaña Expediente.
+type RequirementsState =
+  | { kind: "loading" }
+  | { kind: "ready"; data: PublicationRequirementsResponse }
+  | { kind: "error" };
+
+// Aviso sobre la tabla tras guardar o publicar (reemplaza los alert nativos, DS-15).
+type Notice = { kind: "success" | "warning"; title: string; lines: string[] };
+
+// Rechazo al publicar: se explica en un modal con enlaces a lo que falta (HU-53).
+type PublishProblem = { property: Property; detail: string; missing: MissingRequirement[] };
+
+const REQUIREMENT_TABS: Partial<Record<MissingRequirement["code"], { tab: TabId; label: string }>> = {
+  image: { tab: "media", label: "Abrir Multimedia" },
+  brokerage_contract: { tab: "docs", label: "Abrir Expediente" },
+};
+
+// Convierte el cuerpo de error de DRF ({campo: [mensajes]}) en líneas legibles.
+function drfErrorLines(body: unknown): string[] {
+  if (!body || typeof body !== "object") return [];
+  return Object.entries(body as Record<string, unknown>).map(([field, value]) => {
+    const text = Array.isArray(value) ? value.join(" ") : String(value);
+    return field === "detail" || field === "non_field_errors" ? text : `${field}: ${text}`;
+  });
+}
 
 const STATUS_LABELS: Record<string, string> = {
   captacion: "En captación",
@@ -191,7 +218,11 @@ export default function DashboardPage() {
 
   // Avalúo (HU-08): solo se consulta al editar; el avalúo se gestiona en su propia pantalla (I-12).
   const [appraisalRequirement, setAppraisalRequirement] = useState<AppraisalRequirement | null>(null);
-  const [publishFeedback, setPublishFeedback] = useState<PublishFeedback | null>(null);
+  const [requirements, setRequirements] = useState<RequirementsState | null>(null);
+  const [saveErrors, setSaveErrors] = useState<string[]>([]);
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [publishCandidate, setPublishCandidate] = useState<Property | null>(null);
+  const [publishProblem, setPublishProblem] = useState<PublishProblem | null>(null);
   const [publishingId, setPublishingId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -271,7 +302,7 @@ export default function DashboardPage() {
     setFormData((prev) => ({ ...prev, [key]: value }));
   }
 
-  function resetModalState(form: PropertyForm, images: PropertyImage[]) {
+  function resetModalState(form: PropertyForm, images: PropertyImage[], tab: TabId = "general") {
     selectedImages.forEach((img) => URL.revokeObjectURL(img.preview));
     setFormData(form);
     setExistingImages(images);
@@ -283,12 +314,14 @@ export default function DashboardPage() {
     setDocFile(null);
     setDocError("");
     setAppraisalRequirement(null);
+    setRequirements(null);
+    setSaveErrors([]);
     setFormErrors({});
-    setActiveTab("general");
+    setActiveTab(tab);
     setShowModal(true);
   }
 
-  function openEditModal(property: Property) {
+  function openEditModal(property: Property, tab: TabId = "general") {
     setEditingId(property.id);
     resetModalState(
       {
@@ -306,9 +339,24 @@ export default function DashboardPage() {
         parking_spaces: property.parking_spaces ?? 0,
       },
       property.images ?? [],
+      tab,
     );
     void loadSavedDocuments(property.id);
     void loadAppraisalRequirement(property.id);
+    void loadPublicationRequirements(property.id);
+  }
+
+  // DS-15: el Expediente muestra lo mismo que respondería el 400 de publicar.
+  async function loadPublicationRequirements(propertyId: number) {
+    setRequirements({ kind: "loading" });
+    try {
+      const data = await authFetch<PublicationRequirementsResponse>(
+        `/api/auth/properties/${propertyId}/publication-requirements/`,
+      );
+      setRequirements({ kind: "ready", data });
+    } catch {
+      setRequirements({ kind: "error" });
+    }
   }
 
   async function loadAppraisalRequirement(propertyId: number) {
@@ -411,6 +459,7 @@ export default function DashboardPage() {
     };
 
     setSaving(true);
+    setSaveErrors([]);
     try {
       const responseProp = await fetch(url, {
         method: method,
@@ -422,11 +471,11 @@ export default function DashboardPage() {
       });
 
       if (!responseProp.ok) {
-        // Leemos el chisme exacto de Django
-        const errorDetails = await responseProp.json();
-        console.error( "Django rechazó la solicitud:", errorDetails);
-        alert(`Error desde el servidor: ${JSON.stringify(errorDetails)}`);
-        return; // Detenemos la ejecución aquí
+        // El modal sigue abierto con los datos y muestra los errores de Django por campo.
+        const errorDetails = await responseProp.json().catch(() => null);
+        const lines = drfErrorLines(errorDetails);
+        setSaveErrors(lines.length ? lines : [`El servidor rechazó los datos (error ${responseProp.status}).`]);
+        return;
       }
 
       let savedProperty: Property = await responseProp.json();
@@ -458,17 +507,23 @@ export default function DashboardPage() {
 
       const failedDocs = await uploadStagedDocuments(savedProperty.id, token);
       const failedImages = selectedImages.length - uploadedImages.length;
-      const notes = [editingId ? "¡Propiedad actualizada con éxito!" : "¡Propiedad registrada en estado de captación!"];
-      if (failedImages > 0) notes.push(`${failedImages} imagen(es) no se pudieron subir.`);
+      // Nunca simular éxito: el aviso detalla lo que el servidor no aceptó.
+      const lines: string[] = [];
+      if (failedImages > 0) lines.push(`${failedImages} imagen(es) no se pudieron subir.`);
       if (stagedDocs.length > failedDocs.length)
-        notes.push(`${stagedDocs.length - failedDocs.length} documento(s) agregados al expediente.`);
-      if (failedDocs.length > 0)
-        notes.push(`Documentos rechazados por el servidor:\n- ${failedDocs.join("\n- ")}`);
-      alert(notes.join("\n"));
+        lines.push(`${stagedDocs.length - failedDocs.length} documento(s) agregados al expediente.`);
+      failedDocs.forEach((failure) => lines.push(`Documento rechazado: ${failure}`));
+      setNotice({
+        kind: failedImages > 0 || failedDocs.length > 0 ? "warning" : "success",
+        title: editingId
+          ? `"${savedProperty.title}" se actualizó.`
+          : `"${savedProperty.title}" se registró en captación.`,
+        lines,
+      });
 
       closeModal();
     } catch {
-      alert("Error al procesar la solicitud. Verifica los datos.");
+      setSaveErrors(["No se pudo conectar con el servidor. Tus datos siguen en el formulario; intenta de nuevo."]);
     } finally {
       setSaving(false);
     }
@@ -504,37 +559,40 @@ export default function DashboardPage() {
   // HU-53: el servidor decide si se puede publicar. Un 400 trae la lista de requisitos
   // faltantes (missing_requirements) y un 409 indica que la propiedad no está en captación.
   async function handlePublish(property: Property) {
-    if (!confirm(`¿Publicar "${property.title}" en el catálogo?`)) return;
-
     setPublishingId(property.id);
-    setPublishFeedback(null);
+    setNotice(null);
     try {
       await authFetch(`/api/auth/properties/${property.id}/publish/`, { method: "POST" });
       setProperties((prevProps) =>
         prevProps.map((prop) => (prop.id === property.id ? { ...prop, status: "disponible" } : prop)),
       );
-      setPublishFeedback({ kind: "success", title: property.title });
+      setNotice({ kind: "success", title: `"${property.title}" se publicó y ya está disponible en el catálogo.`, lines: [] });
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         router.replace("/login");
         return;
       }
       const body = error instanceof ApiError ? (error.body as Partial<PublishErrorResponse> | null) : null;
-      setPublishFeedback({
-        kind: "error",
-        title: property.title,
-        propertyId: property.id,
+      setPublishProblem({
+        property,
         detail:
           error instanceof ApiError
             ? body?.missing_requirements?.length
-              ? "No se puede publicar todavía. Falta:"
+              ? "Para publicarla en el catálogo todavía falta:"
               : error.message
-            : "Error de conexión con el servidor.",
+            : "No se pudo conectar con el servidor. Intenta de nuevo.",
         missing: body?.missing_requirements ?? [],
       });
     } finally {
       setPublishingId(null);
+      setPublishCandidate(null);
     }
+  }
+
+  // Desde el modal de requisitos, abre la ficha en la pestaña donde se corrige lo que falta.
+  function fixRequirement(property: Property, tab: TabId) {
+    setPublishProblem(null);
+    openEditModal(property, tab);
   }
 
   function handleLogout() {
@@ -559,6 +617,24 @@ export default function DashboardPage() {
   const savedCorretaje = savedDocs.some((doc) => doc.doc_type === "CORRETAJE");
   const stagedCorretaje = stagedDocs.some((doc) => doc.doc_type === "CORRETAJE");
 
+  // Al editar, lo guardado se juzga con la regla del servidor (DS-15); lo pendiente de
+  // guardar se marca en ámbar porque todavía no cuenta para publicar.
+  const serverMissing = requirements?.kind === "ready" ? requirements.data.missing_requirements : null;
+  const missingOf = (code: MissingRequirement["code"]) => serverMissing?.find((item) => item.code === code);
+  const imageOk = serverMissing ? !missingOf("image") : imageCount > 0;
+  const imageRow = imageOk
+    ? { dot: "bg-emerald-500", text: `${existingImages.length || imageCount} cargada(s)` }
+    : selectedImages.length > 0
+      ? { dot: "bg-amber-400", text: "Se subirá al guardar" }
+      : { dot: "bg-slate-300", text: "Falta" };
+  const corretajeMissing = missingOf("brokerage_contract");
+  const corretajeOk = serverMissing ? !corretajeMissing : savedCorretaje;
+  const corretajeRow = corretajeOk
+    ? { dot: "bg-emerald-500", text: serverMissing ? "Vigente" : "Cargado" }
+    : stagedCorretaje
+      ? { dot: "bg-amber-400", text: "Se subirá al guardar" }
+      : { dot: corretajeMissing ? "bg-red-400" : "bg-slate-300", text: corretajeMissing?.message ?? "Falta" };
+
   return (
      <>
 
@@ -582,35 +658,22 @@ export default function DashboardPage() {
              </div>
            </header>
 
-           {publishFeedback && (
+           {notice && (
              <div
-               role={publishFeedback.kind === "error" ? "alert" : "status"}
+               role="status"
                className={`mb-4 flex items-start justify-between gap-4 rounded-lg border p-4 text-sm ${
-                 publishFeedback.kind === "error" ? "border-red-200 bg-red-50 text-red-800" : "border-green-200 bg-green-50 text-green-800"
+                 notice.kind === "warning" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-green-200 bg-green-50 text-green-800"
                }`}
              >
-               {publishFeedback.kind === "success" ? (
-                 <p>&quot;{publishFeedback.title}&quot; se publicó y ya está disponible en el catálogo.</p>
-               ) : (
-                 <div>
-                   <p className="font-semibold">&quot;{publishFeedback.title}&quot;: {publishFeedback.detail}</p>
-                   {publishFeedback.missing.length > 0 && (
-                     <ul className="mt-2 list-disc space-y-1 pl-5">
-                       {publishFeedback.missing.map((item) => (
-                         <li key={`${item.code}-${item.message}`}>
-                           {item.message}
-                           {item.code === "appraisal" && (
-                             <Link href={`/dashboard/properties/${publishFeedback.propertyId}/appraisal`} className="ml-2 font-semibold underline">
-                               Ir al avalúo
-                             </Link>
-                           )}
-                         </li>
-                       ))}
-                     </ul>
-                   )}
-                 </div>
-               )}
-               <button type="button" onClick={() => setPublishFeedback(null)} aria-label="Cerrar aviso" className="font-bold opacity-60 hover:opacity-100">
+               <div>
+                 <p className="font-semibold">{notice.title}</p>
+                 {notice.lines.length > 0 && (
+                   <ul className="mt-2 list-disc space-y-1 pl-5">
+                     {notice.lines.map((line) => <li key={line}>{line}</li>)}
+                   </ul>
+                 )}
+               </div>
+               <button type="button" onClick={() => setNotice(null)} aria-label="Cerrar aviso" className="font-bold opacity-60 hover:opacity-100">
                  ×
                </button>
              </div>
@@ -669,7 +732,7 @@ export default function DashboardPage() {
                            {property.status === "captacion" && (
                              <button
                                type="button"
-                               onClick={() => handlePublish(property)}
+                               onClick={() => setPublishCandidate(property)}
                                disabled={publishingId !== null}
                                className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
                                {publishingId === property.id ? "Publicando..." : "Publicar"}
@@ -749,6 +812,14 @@ export default function DashboardPage() {
 
              {/* Contenido de la viñeta activa */}
              <div role="tabpanel" className="flex-1 overflow-y-auto px-6 py-5">
+               {saveErrors.length > 0 && (
+                 <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                   <p className="font-semibold">No se pudo guardar la propiedad:</p>
+                   <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                     {saveErrors.map((message) => <li key={message}>{message}</li>)}
+                   </ul>
+                 </div>
+               )}
                {formErrors[activeTab]?.length ? (
                  <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                    <ul className="list-disc space-y-0.5 pl-4">
@@ -877,16 +948,14 @@ export default function DashboardPage() {
                      <p className="mb-3 text-xs font-semibold uppercase text-slate-700">Requisitos para publicar</p>
                      <ul className="space-y-2 text-sm">
                        <li className="flex items-center gap-2">
-                         <span className={`h-2.5 w-2.5 rounded-full ${imageCount > 0 ? "bg-emerald-500" : "bg-slate-300"}`} />
+                         <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${imageRow.dot}`} />
                          <span className="text-slate-700">Al menos 1 fotografía</span>
-                         <span className="ml-auto text-xs text-slate-500">{imageCount > 0 ? `${imageCount} cargada(s)` : "Falta"}</span>
+                         <span className="ml-auto text-right text-xs text-slate-500">{imageRow.text}</span>
                        </li>
                        <li className="flex items-center gap-2">
-                         <span className={`h-2.5 w-2.5 rounded-full ${savedCorretaje ? "bg-emerald-500" : stagedCorretaje ? "bg-amber-400" : "bg-slate-300"}`} />
+                         <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${corretajeRow.dot}`} />
                          <span className="text-slate-700">Contrato de corretaje</span>
-                         <span className="ml-auto text-xs text-slate-500">
-                           {savedCorretaje ? "Cargado" : stagedCorretaje ? "Se subirá al guardar" : "Falta"}
-                         </span>
+                         <span className="ml-auto text-right text-xs text-slate-500">{corretajeRow.text}</span>
                        </li>
                        <li className="flex items-center gap-2">
                          <span
@@ -915,6 +984,28 @@ export default function DashboardPage() {
                          </span>
                        </li>
                      </ul>
+                     {editingId && requirements && (
+                       <p
+                         role="status"
+                         className={`mt-3 rounded-lg px-3 py-2 text-xs font-medium ${
+                           requirements.kind === "ready" && requirements.data.can_publish
+                             ? "bg-emerald-50 text-emerald-800"
+                             : requirements.kind === "error"
+                               ? "bg-red-50 text-red-800"
+                               : "bg-slate-50 text-slate-600"
+                         }`}
+                       >
+                         {requirements.kind === "loading"
+                           ? "Consultando los requisitos en el servidor..."
+                           : requirements.kind === "error"
+                             ? "No se pudieron consultar los requisitos en el servidor."
+                             : requirements.data.status !== "captacion"
+                               ? `Esta propiedad ya no está en captación (${STATUS_LABELS[requirements.data.status] ?? requirements.data.status}); no se vuelve a publicar.`
+                               : requirements.data.can_publish
+                                 ? "Según el servidor está lista para publicar: usa \"Publicar\" en la tabla."
+                                 : `Según el servidor faltan ${requirements.data.missing_requirements.length} requisito(s) para publicar. Lo que agregues aquí cuenta después de guardar.`}
+                       </p>
+                     )}
                    </div>
 
                    {savedDocsError && (
@@ -1022,6 +1113,57 @@ export default function DashboardPage() {
            </form>
          </div>
        )}
+
+       <Dialog
+         open={publishCandidate !== null}
+         title="¿Publicar esta propiedad?"
+         confirmLabel={publishingId !== null ? "Publicando..." : "Publicar"}
+         busy={publishingId !== null}
+         onConfirm={() => publishCandidate && handlePublish(publishCandidate)}
+         onCancel={() => setPublishCandidate(null)}
+       >
+         <p>
+           &quot;{publishCandidate?.title}&quot; pasará a <strong>Disponible</strong> y será visible para cualquier
+           persona en el catálogo público. El servidor comprobará antes la foto, el contrato de corretaje y el avalúo aprobado.
+         </p>
+       </Dialog>
+
+       <Dialog
+         open={publishProblem !== null}
+         title="No se puede publicar todavía"
+         tone="warning"
+         confirmLabel="Entendido"
+         onConfirm={() => setPublishProblem(null)}
+       >
+         {publishProblem && (
+           <>
+             <p>
+               &quot;{publishProblem.property.title}&quot;: {publishProblem.detail}
+             </p>
+             {publishProblem.missing.length > 0 && (
+               <ul className="mt-3 space-y-2">
+                 {publishProblem.missing.map((item) => {
+                   const fix = REQUIREMENT_TABS[item.code];
+                   return (
+                     <li key={`${item.code}-${item.message}`} className="flex items-start justify-between gap-3 rounded-lg bg-amber-50 px-3 py-2 text-amber-900">
+                       <span>{item.message}</span>
+                       {item.code === "appraisal" ? (
+                         <Link href={`/dashboard/properties/${publishProblem.property.id}/appraisal`} className="shrink-0 font-semibold text-blue-700 hover:underline">
+                           Ir al avalúo
+                         </Link>
+                       ) : fix ? (
+                         <button type="button" onClick={() => fixRequirement(publishProblem.property, fix.tab)} className="shrink-0 font-semibold text-blue-700 hover:underline">
+                           {fix.label}
+                         </button>
+                       ) : null}
+                     </li>
+                   );
+                 })}
+               </ul>
+             )}
+           </>
+         )}
+       </Dialog>
      </>
    );
 }
