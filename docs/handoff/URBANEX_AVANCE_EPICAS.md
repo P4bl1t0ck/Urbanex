@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Medir el avance real de EP-1 y EP-2 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
+| Última actualización | 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
 | Fuentes | Composición de épicas: tesis, Anexo 4 (columna "Épica"), y contexto maestro §9.1 y §10. Criterios: tesis, Anexo 2. Evidencia: [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) |
 | No disponible | Tablero de Jira y planillas Excel (no están en el repositorio). El estado en Jira es **POR CONFIRMAR** |
 
@@ -70,10 +70,10 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | HU-02 | El captador no es editable | ✗ | ✗ | ✗ | Editable desde el admin de Django |
 | HU-02 | Responsable inicial hasta reasignación | ✗ | ✗ | ✗ | Campo único `agent` |
 | HU-03 | Acepta PDF e imágenes | ✔ | ✗ | ✗ | Hay pruebas para PDF; ninguna sube una imagen |
-| HU-03 | Registra fecha de vigencia | ✔ | ✔ | ✗ | Pruebas de API y modelo |
-| HU-03 | Asociado a la propiedad | ✔ | ✔ | ✗ | Pruebas de API |
+| HU-03 | Registra fecha de vigencia | ✔ | ✔ | ✔ | Pruebas de API y modelo. (2026-10-27) **V-03** (Pablo): v2 vigente hasta 2026-10-31 con el aviso "vence pronto" |
+| HU-03 | Asociado a la propiedad | ✔ | ✔ | ✔ | Pruebas de API. (2026-10-27) **V-03**: el contrato aparece en el expediente de `#32` y la versión vigente pasa de v1 a v2 |
 | HU-04 | Entre 3 y 5 comparables | ✗ | ✗ | ✗ | No iniciado |
-| HU-04 | Avalúo requisito para publicar | ✔ | ✔ | ✗ | (2026-10-24) Exigido en `PropertyPublishView`, única vía de publicación tras FX-11; `test_publish_rejected_with_draft_appraisal_only` |
+| HU-04 | Avalúo requisito para publicar | ✔ | ✔ | ✔ | (2026-10-24) Exigido en `PropertyPublishView`, única vía de publicación tras FX-11; `test_publish_rejected_with_draft_appraisal_only`. (2026-10-27) **V-02** (el avalúo aparece entre los requisitos faltantes) y **V-11** (publica tras aprobarlo en I-12) |
 | HU-04 | Registro manual sin comparables suficientes | ✗ | ✗ | ✗ | No iniciado |
 | HU-05 | Valores numéricos o selectores | ✔ | ✗ | ✗ | Los campos existentes cumplen; no hay prueba específica |
 | HU-05 | Obligatorios validados antes de calcular | ✗ | ✗ | ✗ | No hay cálculo |
@@ -81,11 +81,11 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | HU-06 | Cálculo registrado | ✗ | ✗ | ✗ | No iniciado |
 | HU-07 | Borrador editable desde el cálculo | ✗ | ✗ | ✗ | No iniciado |
 | HU-07 | Justificación manual si el servicio falla | ✗ | ✗ | ✗ | No iniciado |
-| HU-08 | Conserva valor del motor, calibrado y diferencia | ✔ | ✔ | ✗ | (2026-10-25) Backend verificado (`apps.appraisals.tests`, 52/52) + pantalla I-12 (`af9b416`: `tsc`, `eslint`, `build`). La UI no tiene prueba automática (DT-37). Falta la validación visual de Pablo |
-| HU-08 | El avalúo aprobado no se sobrescribe | ✔ | ✔ | ✗ | (2026-10-25) Backend verificado; I-12 oculta el formulario tras aprobar y ofrece "Crear reevaluación". Falta la validación visual |
+| HU-08 | Conserva valor del motor, calibrado y diferencia | ✔ | ✔ | ✔ | (2026-10-25) Backend verificado (`apps.appraisals.tests`) + pantalla I-12 (`af9b416`: `tsc`, `eslint`, `build`). (2026-10-27) **V-05 a V-08** (Pablo). **Matiz:** se validó con el registro manual (DS-02): valor del motor "No disponible (D-04)" y diferencia "No aplica" |
+| HU-08 | El avalúo aprobado no se sobrescribe | ✔ | ✔ | ✔ | (2026-10-25) Backend verificado. (2026-10-27) **V-08** (solo lectura tras aprobar) y **V-09** (la reevaluación crea otro folio y conserva el aprobado) |
 | HU-09 | Cambiar entre estados; No disponible con motivo | ✗ | ✗ | ✗ | La regla del motivo está en el serializer, pero la UI no permite cambiar el estado y el PATCH acepta estados no previstos (DT-09) |
 | HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✗ | ✗ | En el serializer; sin prueba |
-| HU-53 | Requiere avalúo y contrato de corretaje | ✔ | ✔ | ✗ | (2026-10-24) 8 pruebas de publicación + 2 de `status` de solo lectura (FX-11). (2026-10-25) La UI ya muestra `missing_requirements` y permite aprobar el avalúo (FX-14): solo falta la validación funcional de Pablo |
+| HU-53 | Requiere avalúo y contrato de corretaje | ✔ | ✔ | ✔ | (2026-10-24) 8 pruebas de publicación + 2 de `status` de solo lectura (FX-11). (2026-10-27) **V-02** (lista de requisitos faltantes en `#35`), **V-11** y **V-12** (`#33` publicada y visible sin sesión): **DT-40 cerrado** |
 | HU-53 | Pasa a Disponible y genera URL con metaetiquetas | ✗ | ✗ | ✗ | Sin `slug` ni OpenGraph |
 
 | Métrica | Valor |
@@ -93,12 +93,13 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | Total de criterios | 24 |
 | Implementado | 11/24 = **45,8 %** (2026-10-25: +2 de HU-08; antes 9/24) |
 | Verificado | 8/24 = **33,3 %** (2026-10-25: +2 de HU-08; antes 6/24) |
-| Validado | 0/24 = **0 %** |
-| HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** |
+| Validado | 6/24 = **25,0 %** (2026-10-27: HU-03 ×2, HU-04 ×1, HU-08 ×2, HU-53 ×1; antes 0/24) |
+| HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** (HU-08 tiene sus 2 criterios validados: ver la actualización del 2026-10-27) |
 
 ```mermaid
 pie showData title EP-2 — criterios de aceptación (24)
-  "Verificados (test aprobado)" : 8
+  "Validados (persona + test)" : 6
+  "Verificados sin validar" : 2
   "Implementados sin test" : 3
   "No implementados" : 13
 ```
@@ -116,6 +117,12 @@ Con I-12, el verificado subiría a **8/24 (33,3 %)**; con DT-39, a **9/24 (37,5 
 
 **Actualización 2026-10-25.** I-12 existe (commits `161f845` y `af9b416`): los 2 criterios de HU-08 pasan a ✔ implementado y ✔ verificado → **8/24 verificados (33,3 %)**. Criterio aplicado: la regla de negocio está probada en el backend (52/52) y la pantalla compila sin errores (`tsc`, `eslint`, `next build`); la UI no tiene pruebas automáticas (DT-37), así que **la validación visual de Pablo es la que confirmará el flujo**. HU-08 completa (5 pts) exige esa validación. El validado de EP-2 sigue en 0/24.
 
+**Actualización 2026-10-27.** Pablo validó en el navegador V-01 a V-12 (evidencia en `Project_Progress.md`) con los datos de `setup_demo_data`. Seis criterios pasan a ✔ validado → **6/24 (25,0 %)**; implementado (11/24) y verificado (8/24) no cambian. **DT-40 queda cerrado.**
+
+- **HU-08 (5 pts), POR CONFIRMAR si cuenta como completa:** sus 2 criterios del Anexo 2 están validados, pero con el registro manual (DS-02). El criterio "conservar el valor del motor, el calibrado y su diferencia" se cumple sin motor solo en sentido estricto: el motor no existe (D-04, HU-06). **Pablo decide** si HU-08 suma sus 5 pts ahora (EP-2 pasaría a 1/10 HU · 5/33 pts = 15,2 %) o cuando exista el motor. Hasta entonces, 0 pts.
+- **Candidatos que no se cuentan por inferencia:** HU-01 "Asesor como captador" y HU-02 "Asignación automática". En V-01 la propiedad creada apareció en el dashboard del asesor, pero ninguna prueba miró el captador. Para validarlos basta con que una persona compruebe, en el admin de Django o en la ficha, que `agent` es `asesor.demo`.
+- **Sin cambio de métricas:** HU-01 "sin exhibirse al público" (V-01 aprobado para anónimos, sigue abierto DT-39) y HU-05 "valores numéricos" (V-04 aprobó el mapa, pero el criterio no tiene prueba automática).
+
 ## 5. Bloqueos y dependencias que afectan al avance
 
 | Bloqueo | HU afectadas | Cómo se desbloquea |
@@ -123,7 +130,7 @@ Con I-12, el verificado subiría a **8/24 (33,3 %)**; con DT-39, a **9/24 (37,5 
 | D-04: fórmula, factores y umbrales del motor | HU-06, HU-08 y, por extensión, HU-53 | Aprobación del equipo y el tutor; registrar en el contexto maestro |
 | C-02: 1–2 comparables, ¿cálculo o manual? | HU-04, HU-06 | Decisión de negocio |
 | Faltan `zone` y los demás campos de RF-01 | HU-04, HU-05 | Definir los campos y crear una migración en `users` |
-| No hay usuarios `asesor`/`admin` en la BD de desarrollo | Validación de todas las HU con reglas por rol | Crear usuarios de prueba (ver [Guía](URBANEX_GUIA_CONTINUIDAD.md)) |
+| ~~No hay usuarios `asesor`/`admin` en la BD de desarrollo~~ | ~~Validación de todas las HU con reglas por rol~~ | **Resuelto 2026-10-27:** `pipenv run python manage.py setup_demo_data` (DT-14) |
 | D-05: política de JWT y sesión | HU-46 | Decisión técnica |
 
 ## 6. Siguientes pasos para mover los porcentajes
