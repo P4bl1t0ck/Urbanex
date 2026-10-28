@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Saber qué archivo implementa qué HU, qué riesgo tiene tocarlo y de qué depende Avalúos |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-27 · comando `setup_demo_data` (DT-14, `817da84`) y 6 pruebas nuevas en `users/tests.py`. Antes: 2026-10-25 · fase 3 en `dashboard/page.tsx` (`3783919`); pantalla I-12 (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx`), `frontend/types/appraisal.ts` y `authFetch` en `frontend/lib/api.ts` (DT-40, fases 1 y 2). Antes: 2026-10-24, app `apps.appraisals` y cambios en `users/views.py` y `users/tests.py` |
+| Última actualización | 2026-10-27 (tarea 5) · §3: precaución de seguridad para `users/views.py`/`serializers.py`. Antes: 2026-10-27 · comando `setup_demo_data` (DT-14, `817da84`) y 6 pruebas nuevas en `users/tests.py`. Antes: 2026-10-25 · fase 3 en `dashboard/page.tsx` (`3783919`); pantalla I-12 (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx`), `frontend/types/appraisal.ts` y `authFetch` en `frontend/lib/api.ts` (DT-40, fases 1 y 2). Antes: 2026-10-24, app `apps.appraisals` y cambios en `users/views.py` y `users/tests.py` |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 + dependencias de HU-04, HU-06, HU-08 |
 
 > **Este GPS es una guía de precauciones, no una lista de archivos intocables.** Sebas puede modificar lo necesario para Avalúos, siempre que revise las dependencias indicadas y ejecute las pruebas listadas.
@@ -165,4 +165,5 @@ flowchart LR
 | `frontend/types/property.ts` | Contrato usado por 5 archivos | Cambiar el tipo y el serializer en el mismo commit |
 | `backend/db.sqlite3` | Rastreado en Git | Cada desarrollador modifica su copia y aparecen conflictos binarios (DT-02) |
 | `frontend/lib/api.ts` (2026-10-25) | Cliente HTTP de todas las pantallas (`apiFetch`, `authFetch`) | No cambiar la firma de `apiFetch` (lo usa el login); los cambios de `authFetch` afectan a I-12 y a la fase 3 |
+| `backend/apps/users/views.py` + `serializers.py` (seguridad, 2026-10-27) | Visibilidad de propiedades e imágenes por usuario | Antes de tocar la visibilidad (DT-39) o las fotos (DT-10), leer el estado por componente de [Seguridad §1.1](URBANEX_SEGURIDAD_Y_DEUDA.md#11-estado-por-componente-confirmado-por-código-2026-10-27) y actualizarlo en el mismo cambio. **Riesgo Alto abierto: no desplegar** (DS-20) |
 | `frontend/CLAUDE.md` (2026-10-25) | Instrucciones que lee cualquier asistente de IA en `frontend/` | Hoy apunta a `@AGENTS.md`, que no existe (DT-45). Acordar su contenido antes de cambiarlo |
