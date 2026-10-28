@@ -10,6 +10,7 @@ djangorestframework-simplejwt = "*"
 python-decouple = "*"
 django-extensions = "*"
 django-cors-headers = "*"
+pillow = "*"
 
 [dev-packages]
 
