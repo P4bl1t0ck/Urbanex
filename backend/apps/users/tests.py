@@ -242,6 +242,60 @@ class UrbanexCoreTests(TestCase):
         response = self.client.post(f"/api/auth/properties/{property_obj.id}/publish/")
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
+    # TEST DS-15: requisitos de publicación sin intentar publicar (pestaña Expediente)
+    def _get_requirements(self, property_obj, user):
+        self.client.force_authenticate(user=user)
+        return self.client.get(f"/api/auth/properties/{property_obj.id}/publication-requirements/")
+
+    def test_requirements_list_everything_missing(self):
+        property_obj = self._create_property("captacion")
+        response = self._get_requirements(property_obj, self.agent)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data["can_publish"])
+        codes = [item["code"] for item in response.data["missing_requirements"]]
+        self.assertEqual(codes, ["image", "brokerage_contract", "appraisal"])
+        # Consultar no cambia el estado
+        property_obj.refresh_from_db()
+        self.assertEqual(property_obj.status, "captacion")
+
+    def test_requirements_complete_allows_publishing(self):
+        property_obj = self._create_property("captacion")
+        self._add_image(property_obj)
+        self._add_corretaje(property_obj)
+        self._add_approved_appraisal(property_obj)
+        response = self._get_requirements(property_obj, self.agent)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["can_publish"])
+        self.assertEqual(response.data["missing_requirements"], [])
+
+    def test_requirements_match_publish_rejection(self):
+        # El Expediente muestra exactamente lo mismo que respondería el 400 de publicar
+        property_obj = self._create_property("captacion")
+        self._add_image(property_obj)
+        requirements = self._get_requirements(property_obj, self.agent).data["missing_requirements"]
+        publish = self.client.post(f"/api/auth/properties/{property_obj.id}/publish/")
+        self.assertEqual(publish.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(requirements, publish.data["missing_requirements"])
+
+    def test_requirements_cannot_publish_outside_captacion(self):
+        property_obj = self._create_property("disponible")
+        self._add_image(property_obj)
+        self._add_corretaje(property_obj)
+        self._add_approved_appraisal(property_obj)
+        response = self._get_requirements(property_obj, self.agent)
+        self.assertEqual(response.data["status"], "disponible")
+        self.assertFalse(response.data["can_publish"])
+
+    def test_requirements_forbidden_for_non_owner(self):
+        property_obj = self._create_property("captacion")
+        response = self._get_requirements(property_obj, self.client_user)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_requirements_require_authentication(self):
+        property_obj = self._create_property("captacion")
+        response = self.client.get(f"/api/auth/properties/{property_obj.id}/publication-requirements/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     # TEST 3: Rechazo de autenticación con credenciales erróneas
     def test_login_failed_with_invalid_credentials(self):
         data = {
