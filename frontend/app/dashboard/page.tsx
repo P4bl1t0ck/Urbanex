@@ -442,6 +442,13 @@ export default function DashboardPage() {
       return;
     }
 
+    // DT-60: un archivo elegido pero no agregado al expediente no se descarta en silencio.
+    if (docFile) {
+      setActiveTab("docs");
+      setDocError(`Elegiste "${docFile.name}" pero no lo agregaste. Pulsa "+ Agregar al expediente" o quita el archivo antes de guardar.`);
+      return;
+    }
+
     const token = sessionStorage.getItem("access");
 
     // Lógica dinámica: PATCH para actualizar, POST para crear
@@ -691,32 +698,33 @@ export default function DashboardPage() {
                  <table className="min-w-full divide-y divide-slate-200 text-left">
                    <thead className="bg-slate-100">
                      <tr>
-                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Título</th>
-                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Ubicación</th>
-                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Precio</th>
-                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Estado</th>
-                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Asesor a cargo</th>
-                       <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Acción</th>
+                       <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Título</th>
+                       <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Ubicación</th>
+                       <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Precio</th>
+                       <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Estado</th>
+                       {/* DT-58: en "Mis propiedades" el asesor siempre es el usuario; se oculta en pantallas medianas */}
+                       <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600 xl:table-cell">Asesor a cargo</th>
+                       <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Acción</th>
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-slate-100">
                      {properties.map((property) => (
                        <tr key={property.id} className="hover:bg-slate-50">
-                         <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-900">{property.title}</td>
-                         <td className="px-6 py-4 text-slate-600">{property.location}</td>
-                         <td className="whitespace-nowrap px-6 py-4 text-slate-700">
+                         <td className="min-w-[12rem] px-4 py-3 font-medium text-slate-900">{property.title}</td>
+                         <td className="max-w-[14rem] px-4 py-3 text-slate-600">{property.location}</td>
+                         <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                            {Number(property.price).toLocaleString("es-EC", { style: "currency", currency: "USD" })}
                          </td>
-                         <td className="whitespace-nowrap px-6 py-4">
+                         <td className="whitespace-nowrap px-4 py-3">
                            <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
                              {STATUS_LABELS[property.status] ?? property.status.replace("_", " ")}
                            </span>
                          </td>
-                         <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                         <td className="hidden whitespace-nowrap px-4 py-3 text-sm text-slate-600 xl:table-cell">
                               {property.agent_name || userInfo.email}
                          </td>
-                        <td className="whitespace-nowrap px-6 py-4">
-                          <div className="flex gap-2">
+                        <td className="px-4 py-3">
+                          <div className="flex min-w-[10rem] flex-wrap gap-2">
                            <button
                              type="button"
                              onClick={() => openEditModal(property)}
@@ -1058,10 +1066,23 @@ export default function DashboardPage() {
                        Documento crítico (bloquea el avance si falta o vence)
                      </label>
                      {docError && <p role="alert" className="text-sm text-red-600 sm:col-span-2">{docError}</p>}
-                     <div className="sm:col-span-2">
+                     <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
                        <button type="button" onClick={handleAddDocument} className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">
                          + Agregar al expediente
                        </button>
+                       {docFile && (
+                         <button
+                           type="button"
+                           onClick={() => {
+                             setDocFile(null);
+                             setDocError("");
+                             setDocInputKey((k) => k + 1);
+                           }}
+                           className="text-sm font-semibold text-slate-500 hover:text-red-600"
+                         >
+                           Quitar archivo
+                         </button>
+                       )}
                      </div>
                    </div>
 
