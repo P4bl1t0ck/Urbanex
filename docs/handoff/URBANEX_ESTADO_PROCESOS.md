@@ -163,6 +163,8 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 **Pruebas (`apps.users.tests`):** `test_publish_property_permission` (reescrita: 403 de un no dueño + 200 con todos los requisitos, corretaje `PENDIENTE`), `test_publish_rejected_without_image`, `…_without_corretaje`, `…_with_expired_corretaje`, `…_with_rejected_corretaje`, `…_with_draft_appraisal_only`, `test_publish_rejected_lists_all_missing_requirements`, `test_publish_only_from_captacion`.
 
+**(2026-10-27, FX-16, DS-15)** Nuevo `GET /api/auth/properties/<id>/publication-requirements/` con la misma regla, sin publicar. El Expediente del dashboard lo consulta al editar, así que también muestra si el corretaje está vencido o rechazado. "Publicar" pide confirmación en un modal, y un 400 abre otro modal con enlaces a la pestaña donde se corrige cada requisito. Validación visual pendiente: V-13 a V-18 en `Project_Progress.md`.
+
 **Contrato del 400** (lo que la UI debe mostrar): `{"detail": "No se puede publicar: …", "missing_requirements": [{"code": "image" | "brokerage_contract" | "appraisal", "message": "…"}]}`. **Desde 2026-10-25 (`3783919`)** el dashboard lo muestra como lista sobre la tabla, con "Ir al avalúo" cuando falta el avalúo; el botón "Publicar" solo aparece en `captacion`.
 
 **Validación de extremo a extremo (pendiente, Pablo):**
