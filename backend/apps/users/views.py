@@ -203,6 +203,34 @@ class PropertyPublishView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class PropertyPublicationRequirementsView(APIView):
+    '''
+    HU-53 / DS-15: estado de los requisitos de publicacion sin intentar publicar.
+    Usa la misma regla que PropertyPublishView, asi el Expediente muestra lo mismo
+    que respondera el 400 de publicar.
+    '''
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            property_obj = Property.objects.get(pk=pk)
+        except Property.DoesNotExist:
+            return Response({"detail": "Propiedad no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Mismo permiso que publicar: dueno o admin.
+        if request.user != property_obj.agent and request.user.role != 'admin':
+            return Response({"detail": "No tienes permiso sobre esta propiedad."}, status=status.HTTP_403_FORBIDDEN)
+
+        missing = get_missing_publication_requirements(property_obj)
+        return Response({
+            "status": property_obj.status,
+            "can_publish": property_obj.status == 'captacion' and not missing,
+            "missing_requirements": missing,
+        })
+
+
 class PropertyDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Property.objects.all() #Query
     serializer_class = PropertySerializer

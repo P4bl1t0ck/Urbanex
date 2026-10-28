@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-10-27 · §4 (58 pruebas con el seeder). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -47,6 +47,7 @@ Principio rector (DoD del equipo): *"Ninguna funcionalidad se considera completa
 - **Nunca simular éxito:** la UI solo confirma lo que el servidor aceptó. Ejemplo: tras guardar, el modal informa qué imágenes o documentos rechazó el servidor.
 - **Accesibilidad básica:** `label` asociado, `role="alert"` en errores, `aria-selected` en pestañas, botones con `type` explícito dentro de formularios.
 - URL de la API desde `NEXT_PUBLIC_API_URL` (DT-22). (2026-10-25) En pantallas nuevas, usar `authFetch` de `frontend/lib/api.ts`: añade el token y lanza `ApiError` con el cuerpo de DRF para mostrar los errores por campo.
+- (2026-10-27) **Sin `alert()` ni `confirm()` nativos:** usar `frontend/components/Dialog.tsx` para confirmar (con `onCancel`) o avisar (sin `onCancel`), y mostrar los errores de un formulario dentro del propio formulario. Ejemplo: el dashboard (FX-16).
 - **Acciones irreversibles** (aprobar un avalúo, y en el futuro validar o cerrar): pedir confirmación indicando que no se puede deshacer, y desactivar el botón mientras haya cambios sin guardar. Ejemplo: `handleApprove()` en la pantalla I-12.
 - Next 16: en Client Components, `useParams()` devuelve el objeto de parámetros directamente (sin `await`); en Server Components, `params` es una `Promise`.
 
@@ -73,7 +74,7 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] Listo para revisión por el otro desarrollador
 ```
 
-**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-24 con `apps.appraisals` (DT-41); resultado esperado: **58 pruebas OK** (52 + 6 del comando `setup_demo_data`, 2026-10-27):
+**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-24 con `apps.appraisals` (DT-41); resultado esperado: **64 pruebas OK** (52 + 6 del comando `setup_demo_data` + 6 del endpoint de requisitos de publicación, 2026-10-27):
 
 ```bash
 pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests

@@ -5,6 +5,7 @@ from .views import (
     PropertyDetailView,
     PropertyImageViewSet,
     PropertyListCreateView,
+    PropertyPublicationRequirementsView,
     PropertyPublishView,
 )
 from rest_framework.routers import DefaultRouter
@@ -17,6 +18,11 @@ urlpatterns = [
     path("properties/mine/", MyPropertiesView.as_view(), name="my-properties"),
     path("properties/<int:pk>/", PropertyDetailView.as_view(), name="property-detail"), #No aparece la ruta por error
     path("properties/<int:pk>/publish/", PropertyPublishView.as_view(), name="property-publish"),
+    path(
+        "properties/<int:pk>/publication-requirements/",
+        PropertyPublicationRequirementsView.as_view(),
+        name="property-publication-requirements",
+    ),
 ]
 
 router = DefaultRouter()

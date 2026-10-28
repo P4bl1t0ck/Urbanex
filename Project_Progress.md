@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **58 OK** (desde el seeder, 2026-10-27). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **64 OK** (desde la tarea 3, 2026-10-27). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -30,6 +30,15 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Las transiciones de estado no son un PATCH genérico**: cada una es una acción explícita con sus precondiciones verificadas en el servidor (contexto maestro §11).
 - **Un cambio no está terminado** hasta que, en el mismo PR/commit, se actualicen Estado de procesos, Deuda técnica, GPS, Avance de épicas y este archivo, con evidencia (comando + resultado).
 - Estándares de código y checklist DoD: [`URBANEX_ESTANDARES_DOD.md`](docs/handoff/URBANEX_ESTANDARES_DOD.md). Requisitos: [`URBANEX_MASTER_CONTEXT.md`](docs/handoff/URBANEX_MASTER_CONTEXT.md) (la copia de `docs/handoff/` es la de referencia).
+
+---
+
+## 🚨 ¡PARA MAÑANA, MIÉRCOLES 2026-10-28! (pausa de Pablo el 2026-10-27 por la noche)
+
+> 1. **⏰ 08:00 — D-04:** ¿llegó la fórmula del motor? Si no llegó, Pablo decide si se diseña con la normativa de Quito y Ecuador (ver la directiva de abajo).
+> 2. ~~**🧪 URGENTE — Validaciones V-13 a V-18**~~ **Hechas el 2026-10-28 (15:30–16:05): las 6 aprobadas**, registradas en "Ronda 2". Queda V-19 (corta).
+> 3. **🔑 DT-65:** cambiar las contraseñas de las cuentas de la `db.sqlite3` publicada (si aún no se hizo).
+> 4. Después: abrir la PR de la tarea 3 (descripción preparada el 2026-10-28) y, tras fusionarla, empezar la **tarea 4** (filtros P-02, DS-16).
 
 ---
 
@@ -191,6 +200,94 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 |---|---|---|---|
 | Pablo (sin sesión) | 2026-10-27 | `#33` aparece en `/properties` y su ficha se abre. Observaciones: barra de navegación duplicada en la ficha (DT-25) y la etiqueta del catálogo dice "disponible" en minúscula (DT-57) | **Aprobado** |
 
+### Ronda 2 — Tarea 3: modales y requisitos (rama `feat/URB-15-HU-53-modales-requisitos`)
+
+> **Resultado de la ronda del 2026-10-28 (aprox. 15:30–16:05, hora de Ecuador):** Pablo, con `asesor.demo`. **Las 6 pruebas quedaron aprobadas**; V-14 y V-15 con datos distintos de los previstos y V-15 con un desvío (ver abajo). **DT-58 y DT-60 se cierran** con V-18 y V-17. Hallazgos nuevos: **DT-72** (el seeder no restaura el estado de las propiedades demo) y **DT-73** (se aprueban avalúos con valores no plausibles); N-05 suma evidencia. Queda una comprobación corta, **V-19**, para los mensajes que esta ronda no pudo ver.
+>
+> **Corrección del estado esperado (escrito el 2026-10-27 sin consultar la BD).** La consulta de solo lectura a `backend/db.sqlite3` del 2026-10-28 muestra que la ronda 1 ya había cambiado más datos de lo anotado:
+> - `#34 La Mariscal` recibió el corretaje v1 (20:34 del 27-10, vigente hasta el 2026-11-29) y **se publicó a las 21:10 del 27-10**.
+> - `#35 Tumbaco` tiene **2 avalúos aprobados**, creados a mano en I-12 por `asesor.demo` (20:47 y 21:26 del 27-10; $12,50 y $111,00). No vienen de `setup_demo_data`, que nunca da avalúo a Tumbaco.
+> - `#32 Cumbayá` tiene, además del avalúo del seeder ($285.000), uno aprobado a las 21:23 del 27-10 por $123,99.
+>
+> Las horas de la BD están en UTC (DT-01) y aquí se pasan a la hora de Ecuador (UTC−5).
+
+Preparación: la misma de arriba (`setup_demo_data` ya ejecutado; sesión como `asesor.demo`). Estado esperado de las propiedades demo tras la ronda 1 (tal como se escribió el 2026-10-27; ver la corrección de arriba): `#32 Cumbayá` en captación con todo; `#33 La Carolina` disponible; `#34 La Mariscal` sin corretaje; `#35 Tumbaco` sin requisitos.
+
+### V-13 · HU-53 / DS-15 — Publicar pide confirmación en un modal
+1. En el dashboard, pulsa "Publicar" en `#35 Tumbaco`.
+2. Pulsa "Cancelar". Vuelve a pulsar "Publicar" y esta vez pulsa la tecla **Escape**.
+
+**Resultado esperado:** ¿aparece un modal (no la ventana gris del navegador) titulado "¿Publicar esta propiedad?", que explica que pasará a Disponible y será pública? ¿"Cancelar" y Escape lo cierran **sin** publicar?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (`asesor.demo`) | 2026-10-28, aprox. 15:30–16:05 | Modal "¿Publicar esta propiedad?", no la ventana del navegador. "Cancelar" y Escape lo cierran sin publicar | **Aprobado** |
+
+### V-14 · HU-53 / DS-15 — Lo que falta se explica en un modal con enlaces
+1. Pulsa "Publicar" en `#35 Tumbaco` y confirma con "Publicar".
+2. En el modal, pulsa "Abrir Multimedia".
+
+**Resultado esperado:** ¿aparece el modal "No se puede publicar todavía" con los 3 requisitos (foto, corretaje, avalúo), cada uno con su enlace ("Abrir Multimedia", "Abrir Expediente", "Ir al avalúo")? ¿"Abrir Multimedia" abre la ficha de Tumbaco **directamente en la pestaña Multimedia**? ¿La propiedad sigue "En captación"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (`asesor.demo`) | 2026-10-28, aprox. 15:30–16:05 | Modal "No se puede publicar todavía" con **2** requisitos, no 3: foto y corretaje, con "Abrir Multimedia" y "Abrir Expediente". El avalúo ya estaba cumplido por los 2 avalúos aprobados a mano en la ronda 1 (ver la corrección de arriba), así que el enlace "Ir al avalúo" del modal **no se vio** (queda en V-19). "Abrir Multimedia" abrió la ficha en la pestaña Multimedia (confirmado por Pablo en la conversación). Tumbaco sigue "En captación" (BD) | **Aprobado** (con datos distintos) |
+
+### V-15 · HU-53 / DS-15 — El Expediente muestra los requisitos del servidor
+1. "Editar" en `#34 La Mariscal` → pestaña Expediente.
+2. "Editar" en `#32 Cumbayá` → pestaña Expediente.
+3. "Editar" en `#33 La Carolina` → pestaña Expediente.
+
+**Resultado esperado:** en el paso 1, ¿la fila "Contrato de corretaje" dice "Falta el contrato de corretaje." y el resumen dice "Según el servidor faltan 1 requisito(s)…"? En el paso 2, ¿el resumen en verde dice "Según el servidor está lista para publicar"? En el paso 3, ¿dice "Esta propiedad ya no está en captación (Disponible)"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (`asesor.demo`) | 2026-10-28, aprox. 15:30–16:05 | **Paso 1 (La Mariscal):** "Esta propiedad ya no está en captación (Disponible)". Pablo lo anotó primero como "bloqueada por falta del contrato de corretaje" y lo corrigió en la conversación tras ver la consulta a la BD: `#34` está publicada desde el 27-10. Es el comportamiento correcto para una propiedad disponible, pero el mensaje "Según el servidor faltan N requisito(s)…" **no se vio** (queda en V-19). **Paso 2 (Cumbayá):** todos los requisitos en verde, "lista para publicar". **Paso 3 (La Carolina):** "ya no está en captación (Disponible)" | **Aprobado** (paso 1 con otros datos) |
+
+> **⚠️ Desvío de V-15:** después de la prueba, Pablo **publicó `#32 Cumbayá`**, aunque la indicación era no hacerlo. Pasó a Disponible sin problemas (BD: `updated_at` 16:01 del 28-10). Con eso **ya no queda ninguna propiedad demo "lista para publicar" en captación**, y `setup_demo_data` **no la restaura**: registrado como **DT-72**. Cumbayá se publicó con un avalúo aprobado de $123,99 frente a un precio de $285.000: más evidencia para **N-05** y **DT-73**.
+
+### V-16 · DS-15 — Los errores al guardar no cierran el modal
+1. "Editar" en cualquier propiedad; en Datos generales, pega un **título de más de 200 caracteres** y pulsa "Guardar cambios".
+2. Corrige el título (corto) y vuelve a guardar.
+
+**Resultado esperado:** en el paso 1, ¿aparece **dentro del modal** un recuadro rojo "No se pudo guardar la propiedad:" con el mensaje del servidor sobre el título, y el modal sigue abierto con tus datos? En el paso 2, ¿se cierra el modal y aparece sobre la tabla un aviso verde `"<título>" se actualizó.`, sin ventanas del navegador?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (`asesor.demo`) | 2026-10-28, aprox. 15:30–16:05 | Con un título de 220 caracteres: recuadro rojo de error en "Datos generales" y el modal sigue abierto. Al restaurar el título: guarda, cierra y aparece el aviso verde | **Aprobado** |
+
+### V-17 · DT-60 — Un archivo no agregado ya no se pierde en silencio
+1. "Editar" en `#34 La Mariscal` → Expediente; elige un PDF en "Archivo" pero **no** pulses "+ Agregar al expediente".
+2. Pulsa "Guardar cambios".
+3. Pulsa "Quitar archivo".
+
+**Resultado esperado:** en el paso 2, ¿el guardado se detiene en la pestaña Expediente con el mensaje `Elegiste "<archivo>" pero no lo agregaste…`? En el paso 3, ¿desaparecen el archivo elegido y el mensaje?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (`asesor.demo`) | 2026-10-28, aprox. 15:30–16:05 | Con el PDF elegido y sin agregar, el guardado se detiene con el aviso de agregarlo primero. "Quitar archivo" borra el archivo y el aviso. No pide confirmación; Pablo lo da por bueno porque el cambio se ve | **Aprobado** → **DT-60 cerrado** |
+
+### V-18 · DT-58 — La tabla cabe sin scroll horizontal
+1. Abre el dashboard en tu portátil, con la ventana del navegador maximizada. Anota el ancho aproximado de la pantalla.
+
+**Resultado esperado:** ¿se ven los botones "Editar", "Avalúo" y "Publicar" completos **sin** scroll horizontal? (Si la pantalla es más estrecha que unos 1280 px, la columna "Asesor a cargo" se oculta a propósito.)
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (`asesor.demo`) | 2026-10-28, aprox. 15:30–16:05 | Navegador maximizado, viewport de **1868×884 px** (DevTools): "Editar", "Avalúo" y "Publicar" completos, sin scroll horizontal. **Solo se probó a ese tamaño**: no se vio la tabla por debajo de 1280 px, donde se oculta "Asesor a cargo" | **Aprobado** → **DT-58 cerrado** (a 1868 px) |
+
+### V-19 · HU-53 / DS-15 — Mensajes que la ronda 2 no pudo ver (pendiente, corta)
+Depende de **DT-72**: hoy ninguna propiedad demo en captación tiene foto y le falta solo un requisito, y ninguna está sin avalúo. Con lo que hay:
+1. "Editar" en `#35 Tumbaco` → pestaña Expediente.
+
+**Resultado esperado:** ¿el resumen dice "Según el servidor faltan 2 requisito(s) para publicar…" (foto y corretaje)?
+
+El enlace "Ir al avalúo" **dentro del modal** de requisitos y el caso "falta solo el corretaje" se prueban cuando se resuelva DT-72 (una propiedad nueva en captación sin avalúo). Opcional: repetir V-18 con la ventana a menos de 1280 px de ancho.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
 ---
 
 ## Estado actual (2026-10-27)
@@ -228,7 +325,15 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 1. ~~**PR de URB-13 → `develop`**~~ Fusionada (PR #3).
 2. **Seeder** `setup_demo_data` (DT-14, DS-17): **hecho** en `chore/DT-14-seeder-datos-demo` (`817da84`). En la misma rama: Pillow declarado en `Pipfile`/`Pipfile.lock` (cierra DT-54) y registro de la validación. Falta la PR hacia `develop`.
 3. ~~**Validación visual de Pablo**~~ **Hecha el 2026-10-27:** V-01 a V-12 aprobadas; **DT-40 cerrado**. Hallazgos: DT-25 (actualizado), DT-55 a DT-60 y N-05 (pregunta para el tutor). HU-08 completa: **POR CONFIRMAR** hasta el plazo de D-04 (2026-10-28, 08:00; ver arriba).
-4. **Tarea 3:** modales/avisos con Tailwind en `dashboard/page.tsx` + `GET …/publication-requirements/` en el Expediente (DS-15).
+4. **Tarea 3:** modales/avisos con Tailwind en `dashboard/page.tsx` + `GET …/publication-requirements/` en el Expediente (DS-15). **Hecha el 2026-10-27** en `feat/URB-15-HU-53-modales-requisitos` (desde `develop` `7a43bad`), en 4 commits:
+   - `5e68dce`, fase 1: endpoint + 6 pruebas + tipo TS;
+   - `cf62881`, fase 2a: componente `Dialog`;
+   - `3bda58f`, fase 2b: dashboard;
+   - `a3a8f13`, fase 3: DT-60 y DT-58.
+
+   Backend **64/64 OK**; `tsc` y `next build` OK; `eslint` solo con el error previo de DT-24. **Avisar a Sebas:** se tocaron `users/views.py`, `users/urls.py` y `dashboard/page.tsx`.
+
+   **Validación visual hecha el 2026-10-28:** V-13 a V-18 aprobadas (Pablo, `asesor.demo`). Se cierran DT-58 y DT-60. Hallazgos: DT-72, DT-73 y evidencia nueva para N-05. Línea base antes de preparar la PR: `manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **64/64 OK** (2026-10-28). Siguiente paso: la PR hacia `develop`, que abre Pablo en GitHub (DT-53).
 5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42). **Hecha el 2026-10-27** en `docs/DT-42-seguridad-y-deuda` (desde `develop` `47b59ce`, tras fusionar la PR #4 del seeder); ver "Tarea 5" abajo.
 6. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16).
 

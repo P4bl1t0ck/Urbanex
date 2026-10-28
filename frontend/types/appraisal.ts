@@ -1,6 +1,8 @@
 // Contrato de /api/appraisals/ (HU-08). Debe coincidir con AppraisalSerializer y
 // AppraisalCalibrateSerializer en backend/apps/appraisals/serializers.py.
 
+import type { PropertyStatus } from "./property";
+
 export type AppraisalStatus = "BORRADOR" | "APROBADO";
 
 export type ConfidenceLevel = "ALTO" | "MEDIO" | "BAJO";
@@ -46,4 +48,11 @@ export type MissingRequirement = {
 export type PublishErrorResponse = {
   detail: string;
   missing_requirements?: MissingRequirement[];
+};
+
+// GET /api/auth/properties/<id>/publication-requirements/ (DS-15): misma regla que el 400.
+export type PublicationRequirementsResponse = {
+  status: PropertyStatus;
+  can_publish: boolean;
+  missing_requirements: MissingRequirement[];
 };
