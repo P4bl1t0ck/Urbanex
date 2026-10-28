@@ -509,7 +509,7 @@ Las siguientes decisiones se resolverán antes de implementar las funcionalidade
 
 | ID | Decisión | Momento de resolución |
 |---|---|---|
-| D-04 | Definir fórmula matemática del motor de avalúo, factores ponderados, umbrales de confianza y datos iniciales de comparables. | Sprint 2, antes de URB-11 |
+| D-04 | Definir fórmula matemática del motor de avalúo, factores ponderados, umbrales de confianza y datos iniciales de comparables. **(2026-10-28) Resuelta provisionalmente con DS-21** (`URBANEX_DS-21_MOTOR_AVALUOS.md`). C-02 sigue pendiente de confirmar con el tutor | Sprint 2, antes de URB-11 |
 | D-05 | Definir almacenamiento, expiración, renovación y revocación de JWT, incluyendo mecanismos de protección de sesión. | Sprint 1, antes de URB-04 |
 | D-06 | Elegir mecanismo de ejecución de procesos programados, webhooks y reintentos, considerando los servicios disponibles en la arquitectura. | Antes del Sprint 4 |
 

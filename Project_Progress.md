@@ -35,14 +35,34 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 🚨 ¡PARA MAÑANA, MIÉRCOLES 2026-10-28! (pausa de Pablo el 2026-10-27 por la noche)
 
-> 1. **⏰ 08:00 — D-04:** ¿llegó la fórmula del motor? Si no llegó, Pablo decide si se diseña con la normativa de Quito y Ecuador (ver la directiva de abajo).
+> 1. ~~**⏰ 08:00 — D-04:** ¿llegó la fórmula del motor?~~ **No llegó. Plan B activado por Pablo el 2026-10-28:** la propuesta [DS-21](docs/handoff/URBANEX_DS-21_MOTOR_AVALUOS.md) **se aprobó el mismo día con carácter provisional** (D-04 resuelta provisionalmente). El motor se implementa en `feat/URB-10-11-motor-avaluos`.
 > 2. ~~**🧪 URGENTE — Validaciones V-13 a V-18**~~ **Hechas el 2026-10-28 (15:30–16:05): las 6 aprobadas**, registradas en "Ronda 2". Queda V-19 (corta).
 > 3. **🔑 DT-65:** cambiar las contraseñas de las cuentas de la `db.sqlite3` publicada (si aún no se hizo).
-> 4. Después: abrir la PR de la tarea 3 (descripción preparada el 2026-10-28) y, tras fusionarla, empezar la **tarea 4** (filtros P-02, DS-16).
+> 4. ~~Abrir la PR de la tarea 3~~ **Fusionada el 2026-10-28 (PR #6).** **Nuevo orden (DS-22):** primero el motor (HU-04 y HU-06, con I-11) y después la tarea 4 (filtros P-02, DS-16).
 
 ---
 
-## ⏰ ¡PLAZO ABIERTO! D-04 — FÓRMULA DEL MOTOR DE AVALÚOS
+## D-04 — FÓRMULA DEL MOTOR DE AVALÚOS: PLAN B ACTIVADO (2026-10-28)
+
+> **Registro del 2026-10-28.** El plazo (08:00) **venció sin respuesta** del compañero responsable. **Pablo activó el plan B** y decidió la arquitectura: y = f(x; θ) en tres capas.
+> - **Estructura:** método comparativo de mercado, de 3 a 5 comparables del mismo tipo y zona, combinados con pesos y con una confianza que depende de la cantidad y la dispersión de los comparables. Es determinista.
+> - **Factores:** piezas intercambiables, registradas por nombre y cada una con su referencia.
+> - **Parámetros θ:** versionados y editables por un admin; cada avalúo guarda la versión que usó. Quedan EN OBSERVACIÓN.
+>
+> La propuesta, con las fuentes (COOTAD arts. 495–496, Superintendencia de Bancos SB-2020-0573, Código Municipal del DMQ Libro III.5, Ordenanza Metropolitana 108-2025 y la Norma Técnica de Valoración DMQ 2025), está en [`URBANEX_DS-21_MOTOR_AVALUOS.md`](docs/handoff/URBANEX_DS-21_MOTOR_AVALUOS.md).
+>
+> **✅ Aprobada por Pablo el 2026-10-28, con carácter provisional. D-04 queda resuelta provisionalmente con DS-21.**
+> - C-02: manual con 1–2 comparables, hasta que lo confirme el tutor.
+> - `zone`: lista controlada como destino y radio entre coordenadas como provisional.
+> - Comparables: `disponible`, `reservador` y `vendido`.
+> - θ v1: EN OBSERVACIÓN.
+> - F4 y F5: las confirma Pablo.
+>
+> Ajustes de Pablo: factores por tipo de propiedad, comparables sintéticos antes de I-11 y valor mostrado redondeado a cientos. DS-02 (registro manual) sigue vigente cuando no hay comparables suficientes.
+>
+> El texto de abajo es la directiva original, que se conserva como historial.
+
+### Directiva original (2026-10-27)
 
 > **¡ATENCIÓN! EL MOTOR DE CÁLCULO ES PARTE VITAL DEL CORE DE URBANEX (RF-11, HU-04, HU-06, HU-08).**
 >
@@ -335,7 +355,13 @@ El enlace "Ir al avalúo" **dentro del modal** de requisitos y el caso "falta so
 
    **Validación visual hecha el 2026-10-28:** V-13 a V-18 aprobadas (Pablo, `asesor.demo`). Se cierran DT-58 y DT-60. Hallazgos: DT-72, DT-73 y evidencia nueva para N-05. Línea base antes de preparar la PR: `manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **64/64 OK** (2026-10-28). Siguiente paso: la PR hacia `develop`, que abre Pablo en GitHub (DT-53).
 5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42). **Hecha el 2026-10-27** en `docs/DT-42-seguridad-y-deuda` (desde `develop` `47b59ce`, tras fusionar la PR #4 del seeder); ver "Tarea 5" abajo.
-6. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16).
+6. **Motor de avalúos (DS-21, DS-22, 2026-10-28)**, en la rama `feat/URB-10-11-motor-avaluos`, por fases:
+   1. núcleo puro;
+   2. θ versionado (`EngineParameters`);
+   3. comparables sintéticos (DS-23);
+   4. backend de HU-04 y HU-06;
+   5. pantalla I-11 y resultado en I-12.
+7. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16). **Se pospone hasta después del motor (DS-22).**
 
 Las tareas 4 a 6 empiezan después de fusionar la PR del seeder, cada una en su rama desde `develop` (DS-14).
 
