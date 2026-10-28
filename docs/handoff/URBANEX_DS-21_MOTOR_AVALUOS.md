@@ -216,7 +216,7 @@ En fases con pruebas, cada una con su commit, en la rama `feat/URB-10-11-motor-a
 | 3 | `zone`: ¿opción 1 como destino y 2 como provisional? | **Sí.** La lista de zonas queda en N-03 |
 | 4 | ¿`estados_comparables` = disponible, reservador y vendido? | **Aprobado** (N-02) |
 | 5 | ¿Se acepta θ v1 de la §5.1 como provisional? | **Aprobado, EN OBSERVACIÓN** |
-| 6 | ¿Quién confirma F4 y F5 contra los originales? | **Pablo**, desde el navegador |
+| 6 | ¿Quién confirma F4 y F5 contra los originales? | **Pablo**, desde el navegador. **✅ Confirmadas por Pablo el 2026-10-28:** "las fuentes están correctas". Los valores de θ tomados de F5 (`superficie@1`, `cv_max`) dejan de estar POR CONFIRMAR por la fuente; siguen EN OBSERVACIÓN como el resto de θ v1 |
 
 **Ajustes pedidos por Pablo e incorporados:**
 - factores por tipo de propiedad, con la intensidad γ de `superficie@1` (§4 y §5.1);

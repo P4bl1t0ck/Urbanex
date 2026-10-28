@@ -312,6 +312,8 @@ El enlace "Ir al avalúo" **dentro del modal** de requisitos y el caso "falta so
 ### Ronda 3 — Motor de avalúos DS-21 (rama `feat/URB-10-11-motor-avaluos`, pendientes)
 
 **Preparación (en este orden, desde `backend/`):**
+> **Hecho el 2026-10-28 en la copia de Pablo:** las migraciones ya estaban aplicadas y `setup_comparables_demo` creó los 11 comparables (La Carolina 1–6 = #40–#45; casas de Cumbayá = #46–#48). Verificado por consola contra la BD: V-21 da $143.861,35 (≈ $143.900, ALTO, CV 1,63 %), V-22 da MEDIO (CV 21,27 %), La Mariscal tiene 2 candidatos y Tumbaco 0, y #32 a #35 no tienen borradores abiertos. Puedes saltar los pasos 1 y 2.
+
 1. `pipenv run python manage.py migrate`: aplica `appraisals.0002` y `0003` (θ v1). Tu `db.sqlite3` cambia: **no la incluyas en ningún commit** (DT-02).
 2. `pipenv run python manage.py setup_comparables_demo`: crea 11 comparables sintéticos en "Vendido" (no salen en el catálogo ni en "Mis propiedades").
 3. Reinicia `runserver` y `npm run dev`. Inicia sesión como `asesor.demo`.
@@ -322,7 +324,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 1. Dashboard → "Avalúo" en `#33 La Carolina` → "Crear reevaluación".
 2. Desmarca "La Carolina 2" y marca y desmarca otros, hasta tener 2 y luego 6.
 
-**Resultado esperado:** ¿aparecen **6** departamentos "[COMP-SINT]" con su precio, m², USD/m² y distancia, y vienen **5 marcados** (todos menos el de 120 m², "La Carolina 3")? ¿Con 2 o con 6 marcados, "Calcular y crear borrador" queda **desactivado** y el contador lo indica?
+**Resultado esperado:** ¿aparecen **7** departamentos con su precio, m², USD/m² y distancia: los 6 "[COMP-SINT]" y, **al final**, tu `#36 [DEMO] Departamento de 2 pisos - Carolina Norte` (Disponible, 37 m², a 0,41 km)? ¿Vienen **5 marcados**: todos los "[COMP-SINT]" menos el de 120 m² ("La Carolina 3"), y el #36 sin marcar? (El #36 sale porque es un departamento de la misma zona; queda último por su superficie, muy distinta. Verificado contra la BD el 2026-10-28.) ¿Con 2 o con 6 marcados, "Calcular y crear borrador" queda **desactivado** y el contador lo indica?
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
