@@ -1,4 +1,5 @@
 import copy
+from datetime import timedelta
 from decimal import Decimal
 from io import StringIO
 
@@ -6,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.management import CommandError, call_command
 from django.test import SimpleTestCase, TestCase, override_settings
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -397,3 +399,103 @@ class SetupComparablesDemoCommandTests(TestCase):
         shops = [Sample.from_property(p) for p in self.synthetic('local')]
         self.assertTrue(compute(mariscal, shops, THETA_V1).is_manual_fallback)
         self.assertFalse(self.synthetic('terreno').exists())
+
+
+class AppraisalEngineApiTests(AppraisalTestMixin, TestCase):
+    '''HU-04 (candidatos) y HU-06 (avaluo calculado al crear), DS-21.'''
+    url = '/api/appraisals/'
+
+    def setUp(self):
+        super().setUp()
+        with override_settings(DEBUG=True):
+            call_command('setup_comparables_demo', stdout=StringIO())
+        self.subject = Property.objects.create(
+            agent=self.agent, title='Departamento sujeto', description='Prueba',
+            property_type='departamento', price=148000, area_m2=95, location='La Carolina',
+            latitude=Decimal('-0.185700'), longitude=Decimal('-78.483600'),
+        )
+        # '[COMP-SINT] Departamento vendido La Carolina 5 (atipico)' -> '5'
+        self.flats = {
+            p.title.split('Carolina ')[1][0]: p
+            for p in Property.objects.filter(title__startswith='[COMP-SINT] Departamento')
+        }
+        self.example_ids = [self.flats[k].id for k in ('1', '2', '3', '4', '5')]
+        self.client.force_authenticate(user=self.agent)
+
+    def test_candidates_are_same_type_zone_and_ranked(self):
+        response = self.client.get(f'{self.url}candidates/', {'property': self.subject.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
+        self.assertTrue(data['can_calculate'])
+        self.assertEqual(data['parameters_version'], 1)
+        self.assertEqual(len(data['candidates']), 6)
+        self.assertEqual({row['property_type'] for row in data['candidates']}, {'departamento'})
+        # El de 95 m2 (identico en superficie) va primero; el de 120 m2 queda fuera de los 5.
+        self.assertEqual(data['candidates'][0]['id'], self.flats['6'].id)
+        self.assertEqual(len(data['suggested_ids']), 5)
+        self.assertNotIn(self.flats['3'].id, data['suggested_ids'])
+
+    def test_candidates_exclude_stale_data_and_explain_blockers(self):
+        Property.objects.filter(title__startswith='[COMP-SINT] Departamento').update(
+            updated_at=timezone.now() - timedelta(days=400))
+        response = self.client.get(f'{self.url}candidates/', {'property': self.subject.id})
+        self.assertFalse(response.data['can_calculate'])
+        self.assertIn('C-02', response.data['blocker'])
+
+        response = self.client.get(f'{self.url}candidates/', {'property': self.property.id})
+        self.assertFalse(response.data['can_calculate'])
+        self.assertIn('coordenadas', response.data['blocker'])
+
+    def test_candidates_of_other_agent_property_are_hidden(self):
+        self.client.force_authenticate(user=self.other_agent)
+        response = self.client.get(f'{self.url}candidates/', {'property': self.subject.id})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_create_with_comparables_runs_the_engine(self):
+        response = self.client.post(self.url, {
+            'property': self.subject.id, 'comparables': self.example_ids,
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['suggested_value'], '143861.35')
+        self.assertEqual(response.data['suggested_value_display'], '143900.00')
+        self.assertEqual(response.data['confidence_level'], 'ALTO')
+        self.assertFalse(response.data['is_manual_fallback'])
+        self.assertEqual(response.data['engine_parameters_version'], 1)
+        self.assertEqual(len(response.data['comparables_snapshot']['comparables']), 5)
+
+        appraisal = Appraisal.objects.get(pk=response.data['id'])
+        appraisal.calibrate(calibrated_value=Decimal('148000.00'), final_justification='Ajuste.')
+        appraisal.approve()
+        self.assertEqual(appraisal.difference_amount, Decimal('4138.65'))
+        self.assertEqual(appraisal.difference_percentage, Decimal('2.88'))
+
+    def test_two_comparables_give_manual_with_reference(self):
+        response = self.client.post(self.url, {
+            'property': self.subject.id, 'comparables': self.example_ids[:2],
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsNone(response.data['suggested_value'])
+        self.assertTrue(response.data['is_manual_fallback'])
+        self.assertIsNone(response.data['engine_parameters_version'])
+        self.assertEqual(len(response.data['comparables_snapshot']['comparables']), 2)
+
+    def test_invalid_comparables_are_rejected_without_creating(self):
+        house = Property.objects.filter(title__startswith='[COMP-SINT] Casa').first()
+        for comparables in ([*self.example_ids[:2], house.id],
+                            [*self.example_ids[:2], self.property.id],
+                            self.example_ids + [self.flats['6'].id]):
+            response = self.client.post(self.url, {
+                'property': self.subject.id, 'comparables': comparables,
+            }, format='json')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn('comparables', response.data)
+        self.assertFalse(Appraisal.objects.filter(property=self.subject).exists())
+
+    def test_engine_fields_stay_immutable(self):
+        response = self.client.post(self.url, {
+            'property': self.subject.id, 'comparables': self.example_ids,
+        }, format='json')
+        detail = f'{self.url}{response.data["id"]}/'
+        response = self.client.patch(detail, {'suggested_value': '1.00',
+                                              'final_justification': 'x'}, format='json')
+        self.assertEqual(response.data['suggested_value'], '143861.35')

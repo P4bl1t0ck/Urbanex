@@ -8,7 +8,8 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from .engine import validate_params
+from .engine import EngineError, Sample, compute, validate_params
+from .services import find_candidates, subject_blocker
 
 '''
 Avaluo comercial (RF-11, HU-08). Modelo de apps.appraisals del Contexto Maestro §7,
@@ -264,15 +265,18 @@ class Appraisal(models.Model):
             )
 
     @classmethod
-    def create_draft(cls, *, property, agent):
-        '''Unica via para iniciar un avaluo (HU-08). Falla si ya hay un borrador abierto.'''
+    def create_draft(cls, *, property, agent, comparables=None):
+        '''
+        Unica via para iniciar un avaluo (HU-08). Falla si ya hay un borrador abierto.
+        - comparables=None: registro manual de confianza baja (DS-02, boton "Registro manual").
+        - comparables=[Property, ...]: los confirmados por el asesor en I-11 (HU-04). El motor
+          (HU-06, DS-21) calcula con 3 a 5; con 0 a 2 queda manual (C-02, opcion A) y guarda
+          los encontrados como referencia. El resultado se escribe al crear, nunca despues.
+        El borrador de IA (HU-07) sigue pendiente.
+        '''
         if cls.objects.filter(property=property, status=cls.Status.BORRADOR).exists():
             raise ValidationError('La propiedad ya tiene un avalúo en borrador.')
 
-        # TODO: Implementar motor de cálculo HITL.
-        # Pendiente de D-04 (formula, factores ponderados, umbrales de confianza) y de
-        # HU-04/HU-06/HU-07. Hasta entonces el avaluo es un registro manual de confianza
-        # baja: sin valor sugerido, sin comparables y sin borrador de IA.
         appraisal = cls(
             property=property,
             agent=agent,
@@ -282,9 +286,43 @@ class Appraisal(models.Model):
             comparables_snapshot=[],
             ai_draft_justification='',
         )
+        if comparables is not None:
+            appraisal._apply_engine(property, comparables)
         appraisal.full_clean()
         appraisal.save()
         return appraisal
+
+    def _apply_engine(self, property_obj, comparables):
+        parameters = EngineParameters.active()
+        if parameters is None:
+            raise ValidationError('No hay una versión activa de los parámetros del motor.')
+        blocker = subject_blocker(property_obj)
+        if blocker and comparables:
+            raise ValidationError({'comparables': blocker})
+
+        candidates = find_candidates(property_obj, parameters.parameters)
+        valid_ids = {candidate.id for candidate, _ in candidates}
+        invalid = [comparable.id for comparable in comparables if comparable.id not in valid_ids]
+        if invalid:
+            raise ValidationError({'comparables': (
+                'No son comparables válidos (tipo, estado, antigüedad o zona): '
+                + ', '.join(f'#{pk}' for pk in sorted(invalid)) + '.'
+            )})
+        try:
+            result = compute(
+                Sample.from_property(property_obj),
+                [Sample.from_property(comparable) for comparable in comparables],
+                parameters.parameters,
+                params_version=parameters.version,
+            )
+        except EngineError as error:
+            raise ValidationError({'comparables': str(error)})
+
+        self.suggested_value = result.suggested_value
+        self.confidence_level = result.confidence_level
+        self.is_manual_fallback = result.is_manual_fallback
+        self.comparables_snapshot = result.snapshot
+        self.engine_parameters = None if result.is_manual_fallback else parameters
 
     def calibrate(self, *, calibrated_value=None, final_justification=None):
         '''Calibracion HITL: el asesor ajusta el valor y la justificacion del borrador.'''
