@@ -1,9 +1,11 @@
 import copy
 from decimal import Decimal
+from io import StringIO
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import SimpleTestCase, TestCase
+from django.core.management import CommandError, call_command
+from django.test import SimpleTestCase, TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -350,3 +352,48 @@ class EngineParametersTests(AppraisalTestMixin, TestCase):
         with self.assertRaises(ValidationError):
             EngineParameters.create_version(parameters=theta, created_by=self.admin)
         self.assertEqual(EngineParameters.objects.count(), 1)
+
+
+class SetupComparablesDemoCommandTests(TestCase):
+    def run_command(self):
+        call_command('setup_comparables_demo', stdout=StringIO())
+
+    def synthetic(self, property_type):
+        return Property.objects.filter(title__startswith='[COMP-SINT]', property_type=property_type)
+
+    @override_settings(DEBUG=False)
+    def test_refuses_outside_development(self):
+        with self.assertRaises(CommandError):
+            self.run_command()
+
+    @override_settings(DEBUG=True)
+    def test_creates_sold_market_data_once(self):
+        self.run_command()
+        self.run_command()
+        synthetic = Property.objects.filter(title__startswith='[COMP-SINT]')
+        self.assertEqual(synthetic.count(), 11)
+        self.assertEqual(set(synthetic.values_list('status', flat=True)), {'vendido'})
+        self.assertFalse(synthetic.exclude(agent=None).exists())
+        response = APIClient().get('/api/auth/properties/')
+        self.assertFalse(any(row['title'].startswith('[COMP-SINT]') for row in response.data))
+
+    @override_settings(DEBUG=True)
+    def test_scenarios_cover_high_medium_and_manual(self):
+        self.run_command()
+        carolina = sample(1000, '148000', '95', status='captacion',
+                          lat=Decimal('-0.185700'), lon=Decimal('-78.483600'))
+        flats = [Sample.from_property(p) for p in self.synthetic('departamento')]
+        self.assertTrue(all(same_zone(carolina, flat, THETA_V1) for flat in flats))
+        example = [flat for flat in flats if flat.area != Decimal('95.0')]  # los 5 de DS-21 §8
+        result = compute(carolina, example, THETA_V1)
+        self.assertEqual(result.suggested_value, Decimal('143861.35'))
+        self.assertEqual(result.confidence_level, 'ALTO')
+
+        cumbaya = sample(1001, '285000', '240', status='captacion', property_type='casa')
+        houses = [Sample.from_property(p) for p in self.synthetic('casa')]
+        self.assertEqual(compute(cumbaya, houses, THETA_V1).confidence_level, 'MEDIO')
+
+        mariscal = sample(1002, '120000', '80', status='captacion', property_type='local')
+        shops = [Sample.from_property(p) for p in self.synthetic('local')]
+        self.assertTrue(compute(mariscal, shops, THETA_V1).is_manual_fallback)
+        self.assertFalse(self.synthetic('terreno').exists())
