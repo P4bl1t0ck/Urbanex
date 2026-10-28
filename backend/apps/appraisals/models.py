@@ -8,6 +8,8 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from .engine import validate_params
+
 '''
 Avaluo comercial (RF-11, HU-08). Modelo de apps.appraisals del Contexto Maestro §7,
 ampliado con status y approved_at (decision del equipo para el flujo HITL).
@@ -18,8 +20,9 @@ Ciclo de vida: BORRADOR -> APROBADO.
 - Un avaluo APROBADO jamas se modifica ni se elimina; recalibrar = crear un avaluo nuevo
   (historial acumulativo, HU-50).
 
-El motor de calculo (HU-04, HU-06, HU-07) depende de la decision D-04. Mientras tanto
-todo avaluo nace como registro manual de confianza baja (degradacion de RF-11 / RNF-07).
+El motor de calculo (HU-04, HU-06) es el de DS-21 (D-04 resuelta provisionalmente): con 3 a 5
+comparables confirmados el avaluo nace con valor sugerido; sin ellos, como registro manual de
+confianza baja (degradacion de RF-11 / RNF-07, DS-02). HU-07 (borrador de IA) sigue pendiente.
 '''
 
 # Campos que se pueden tocar mientras el avaluo esta en BORRADOR. status, approved_at y
@@ -58,6 +61,88 @@ class AppraisalQuerySet(models.QuerySet):
         return self.filter(status=Appraisal.Status.APROBADO)
 
 
+class EngineParameters(models.Model):
+    '''
+    Theta del motor (DS-21, capa 3). Cada version es inmutable: cambiar theta = crear una
+    version nueva desde el admin. Solo una version esta activa; cada avaluo calculado guarda
+    la version que uso (HU-08).
+    '''
+    version = models.PositiveIntegerField(unique=True, editable=False)
+    parameters = models.JSONField()
+    sources = models.JSONField(default=dict, blank=True)
+    note = models.TextField(blank=True, default='')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        null=True,  # La version 1 la crea la migracion de datos.
+        blank=True,
+        related_name='engine_parameters',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-version']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['is_active'],
+                condition=Q(is_active=True),
+                name='engine_parameters_single_active',
+            ),
+        ]
+
+    def __str__(self):
+        return f'theta v{self.version}{" (activa)" if self.is_active else ""}'
+
+    def clean(self):
+        try:
+            validate_params(self.parameters)
+        except ValueError as error:
+            raise ValidationError({'parameters': str(error)})
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            stored = EngineParameters.objects.filter(pk=self.pk).values().first()
+            changed = {
+                field.attname for field in self._meta.concrete_fields
+                if stored and getattr(self, field.attname) != stored[field.attname]
+            }
+            if changed - {'is_active'}:
+                raise ValidationError('Una versión de parámetros no se modifica: cree una nueva.')
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError('Las versiones de parámetros no se pueden eliminar.')
+
+    @classmethod
+    def active(cls):
+        return cls.objects.filter(is_active=True).first()
+
+    @classmethod
+    def create_version(cls, *, parameters, created_by, sources=None, note='', activate=True):
+        with transaction.atomic():
+            last = cls.objects.select_for_update().order_by('-version').first()
+            version = cls(
+                version=(last.version if last else 0) + 1,
+                parameters=parameters,
+                sources=sources or {},
+                note=note,
+                created_by=created_by,
+            )
+            version.full_clean(exclude=['version'])
+            version.save()
+            if activate:
+                version.activate()
+        return version
+
+    def activate(self):
+        with transaction.atomic():
+            EngineParameters.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
+            self.is_active = True
+            self.save(update_fields=['is_active'])
+        return self
+
+
 class Appraisal(models.Model):
     class Status(models.TextChoices):
         BORRADOR = 'BORRADOR', 'Borrador'
@@ -93,6 +178,14 @@ class Appraisal(models.Model):
     )
     is_manual_fallback = models.BooleanField(default=True)
     comparables_snapshot = models.JSONField(default=list, blank=True)
+    # Version de theta con la que se calculo (HU-08); nula en los registros manuales.
+    engine_parameters = models.ForeignKey(
+        EngineParameters,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='appraisals',
+    )
     ai_draft_justification = models.TextField(blank=True, default='')
 
     # Calibracion HITL del asesor. calibrated_value es nullable solo durante el borrador.

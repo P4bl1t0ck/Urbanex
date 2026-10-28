@@ -1,8 +1,8 @@
 '''
 Theta v1 (DS-21 §5.1), aprobado por Pablo el 2026-10-28 como provisional, EN OBSERVACION.
-Los numeros van como texto para conservarlos exactos en JSON. La migracion de datos de
-EngineParameters copia este valor como version 1; despues, theta solo cambia creando
-versiones nuevas desde el admin.
+Los numeros van como texto para conservarlos exactos en JSON. La migracion 0003_theta_v1
+guarda una copia fija como version 1; despues, theta solo cambia creando versiones nuevas
+desde el admin. Este modulo queda como referencia y para las pruebas.
 '''
 
 THETA_V1 = {

@@ -17,7 +17,7 @@ from .engine import (
     same_zone,
     validate_params,
 )
-from .models import Appraisal
+from .models import Appraisal, EngineParameters
 
 User = get_user_model()
 
@@ -313,3 +313,40 @@ class EngineCalculatorTests(SimpleTestCase):
         self.assertTrue(same_zone(carolina, near, THETA_V1))
         self.assertFalse(same_zone(carolina, tumbaco, THETA_V1))
         self.assertFalse(same_zone(carolina, sample(4, '1', '1'), THETA_V1))
+
+
+class EngineParametersTests(AppraisalTestMixin, TestCase):
+    def test_theta_v1_is_active_after_migration(self):
+        active = EngineParameters.active()
+        self.assertEqual(active.version, 1)
+        self.assertEqual(active.parameters, THETA_V1)
+        self.assertIn('cv_max', active.sources)
+
+    def test_version_is_immutable_and_not_deletable(self):
+        active = EngineParameters.active()
+        active.parameters = dict(active.parameters, alfa='0')
+        with self.assertRaises(ValidationError):
+            active.save()
+        with self.assertRaises(ValidationError):
+            EngineParameters.active().delete()
+        self.assertEqual(EngineParameters.active().parameters['alfa'], '5')
+
+    def test_new_version_is_activated_and_history_kept(self):
+        theta = copy.deepcopy(THETA_V1)
+        theta['alfa'] = '0'
+        second = EngineParameters.create_version(parameters=theta, created_by=self.admin,
+                                                 note='Promedio simple')
+        self.assertEqual(second.version, 2)
+        self.assertEqual(EngineParameters.active().pk, second.pk)
+        self.assertFalse(EngineParameters.objects.get(version=1).is_active)
+
+        EngineParameters.objects.get(version=1).activate()
+        self.assertEqual(EngineParameters.active().version, 1)
+        self.assertEqual(EngineParameters.objects.filter(is_active=True).count(), 1)
+
+    def test_invalid_theta_is_rejected(self):
+        theta = copy.deepcopy(THETA_V1)
+        theta['cv_max'] = '2'
+        with self.assertRaises(ValidationError):
+            EngineParameters.create_version(parameters=theta, created_by=self.admin)
+        self.assertEqual(EngineParameters.objects.count(), 1)
