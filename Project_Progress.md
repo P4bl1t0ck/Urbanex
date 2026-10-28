@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **52 OK**. Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **58 OK** (desde el seeder, 2026-10-27). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -33,8 +33,22 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
+## ⏰ ¡PLAZO ABIERTO! D-04 — FÓRMULA DEL MOTOR DE AVALÚOS
+
+> **¡ATENCIÓN! EL MOTOR DE CÁLCULO ES PARTE VITAL DEL CORE DE URBANEX (RF-11, HU-04, HU-06, HU-08).**
+>
+> - **Situación (2026-10-27):** Pablo pidió la fórmula al compañero responsable el **jueves 2026-10-22** y **aún no hay respuesta**.
+> - **PLAZO: MIÉRCOLES 2026-10-28, 08:00 (hora de Ecuador).**
+> - **Si llega la respuesta:** se registra como decisión de D-04 (fórmula, factores ponderados, umbrales de confianza) en Deuda técnica §4 y en el contexto maestro, y se implementa tal cual.
+> - **SI NO LLEGA:** Pablo pedirá a la IA **diseñar el motor de cálculo a partir de las fórmulas de valoración del municipio (Quito) y de la normativa de Ecuador**. Aun así, **no se programa nada sin antes documentar las fuentes** (ordenanza o norma, artículo y fecha) y sin que Pablo apruebe la fórmula propuesta como decisión DS-xx.
+> - **HASTA ENTONCES:** HU-08 se queda como **POR CONFIRMAR** respecto a si cuenta como completa (sus 2 criterios están validados con el registro manual, DS-02). **¡No inventar la fórmula ni valores sugeridos!**
+
+---
+
 ## 🧪 Validaciones pendientes de Pablo
 
+> **Resultado de la ronda del 2026-10-27:** Pablo, con `asesor.demo@urbanex.test` y los datos de `setup_demo_data` (propiedades #32 Cumbayá, #33 La Carolina, #35 Tumbaco). **Las 12 pruebas quedaron aprobadas** (V-03 en el segundo intento). **DT-40 se cerró** con V-11 y V-12. Los 8 hallazgos de la ronda están registrados en [Deuda técnica](docs/handoff/URBANEX_DEUDA_TECNICA.md): DT-25 (actualizado), DT-55 a DT-60 y la pregunta de negocio N-05.
+>
 > **Por qué existe esta sección:** el DoD del equipo exige que cada flujo se compruebe **en la interfaz** ("no basta con Postman"). Estas pruebas se acumularon desde el 2026-10-22 sin hacerse. Mientras sigan en **Pendiente**, DT-40 no se cierra y HU-01, HU-03, HU-05, HU-08 y HU-53 no pueden marcarse como validadas en la parte funcional ni en la visual.
 >
 > **Cómo usarla:** sigue los pasos de cada prueba y responde la pregunta del resultado esperado. Después llena la fila: **quién** la hizo, **cuándo** (fecha y hora), **qué viste** (textos, estados, capturas si las hay) y el resultado (**Aprobado** / **Fallido**). Si algo falla, anota exactamente qué apareció; con eso se abre o actualiza el DT correspondiente. Ninguna fila se marca como Aprobada por inferencia.
@@ -42,8 +56,14 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 **Preparación (antes de empezar):**
 1. Desde `backend/`: `pipenv run python manage.py migrate` y luego `pipenv run python manage.py runserver`.
 2. Desde `frontend/`: `npm run dev` y abrir `http://localhost:3000`.
-3. Hace falta un usuario con rol **`asesor`**; hoy la BD no tiene ninguno (DT-14). Lo creará el comando `setup_demo_data` (rama del seeder, siguiente paso). Mientras tanto estas pruebas **no se pueden ejecutar**.
-4. Ten a mano un PDF cualquiera (para el corretaje) y una foto JPG o PNG.
+3. Carga los datos demo (DT-14, FX-15). Agrega a `backend/.env` (no se versiona) la línea `DEMO_PASSWORD=<una contraseña de 8+ caracteres, no solo números>` y ejecuta desde `backend/`: `pipenv run python manage.py setup_demo_data`. El comando imprime el id de cada propiedad y lo que le falta para publicar. Se puede repetir sin duplicar nada.
+   - Inicia sesión como **`asesor.demo@urbanex.test`** con esa contraseña (el admin es `admin.demo@urbanex.test`).
+   - `[DEMO] Terreno en Tumbaco - sin requisitos` → **V-02** (faltan los 3 requisitos). En **V-01** registra una propiedad nueva, como dicen sus pasos; el terreno sirve de alternativa (tampoco debe verse sin sesión).
+   - `[DEMO] Departamento en La Carolina - sin avalúo` (tiene foto y corretaje) → **V-05 a V-11** (iniciar, calibrar y aprobar en I-12 y después publicar) y **V-12**.
+   - `[DEMO] Local en La Mariscal - sin corretaje` → **V-03** (sube ahí el corretaje v1 y v2).
+   - `[DEMO] Casa en Cumbayá - lista para publicar` → atajo de **V-11/V-12** si quieres probar la publicación sin pasar por I-12.
+   - **Ojo:** los avalúos y documentos demo son inmutables y **no se pueden borrar** de tu BD local. Tu `db.sqlite3` cambiará: **no la incluyas en ningún commit** (DT-02).
+4. Para V-03 ten a mano un PDF cualquiera; para V-04, ninguna preparación extra.
 
 **Pruebas que cierran DT-40:** V-11 y V-12 (requieren antes V-05 a V-08).
 
@@ -57,7 +77,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | Al registrar la propiedad nueva, el formulario no dejó guardarla sin foto (la foto es la única exigencia del formulario, DT-34; el corretaje no lo exige). Sin sesión, la propiedad en captación no aparece en `/properties` y su ficha no muestra datos | **Aprobado** |
 
 ### V-02 · HU-53 — Publicar sin requisitos muestra lo que falta
 1. Como asesor, en el dashboard, busca una propiedad **En captación** sin fotos, sin corretaje y sin avalúo (por ejemplo `Prueba V-01`).
@@ -67,7 +87,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | Se usó `#35 [DEMO] Terreno en Tumbaco - sin requisitos`, porque la propiedad de V-01 ya tenía foto. Aviso: `"[DEMO] Terreno en Tumbaco - sin requisitos": No se puede publicar todavía. Falta:` con foto, contrato de corretaje y avalúo (resumen de Pablo en la conversación; su nota escrita a mano copiaba solo las dos primeras líneas). La propiedad sigue "En captación" | **Aprobado** |
 
 ### V-03 · HU-03 — El expediente versiona el contrato de corretaje
 1. En el dashboard, pulsa "Editar" en una propiedad tuya y ve a la pestaña **Expediente**.
@@ -79,7 +99,8 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27, 1.er intento | Subió un segundo PDF y solo seguía la v1. Causa: eligió el archivo y pulsó "Guardar cambios" **sin** pulsar "+ Agregar al expediente"; el archivo se descartó sin aviso (registrado como DT-60) | (repetido) |
+| Pablo (`asesor.demo`) | 2026-10-27, 2.º intento | En `#32 [DEMO] Casa en Cumbayá`, pulsando "+ Agregar al expediente": aparece la **v2** como vigente (hasta 2026-10-31, con el aviso "vence pronto") y la v1 ya no figura como vigente | **Aprobado** |
 
 ### V-04 · HU-05 — La ubicación del mapa se guarda
 1. "Editar" en una propiedad → pestaña **Ubicación**.
@@ -90,7 +111,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | Al volver a abrir Ubicación, el marcador está en el punto elegido | **Aprobado** |
 
 ### V-05 · HU-08 (I-12, paso 1) — Iniciar el avalúo es una acción explícita
 1. En el dashboard, pulsa "Avalúo" en una propiedad en captación que nunca tuvo avalúo.
@@ -99,7 +120,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | En `#33 [DEMO] Departamento en La Carolina`: precio en el campo gris y botón "Iniciar avalúo"; al pulsarlo aparecen el folio y el formulario. La fecha del folio sale en UTC (registrado como DT-55) | **Aprobado** |
 
 ### V-06 · HU-08 (I-12, paso 2) — No se aprueba sin guardar
 1. En el borrador recién iniciado, no escribas nada todavía.
@@ -109,7 +130,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | "Aprobar avalúo" desactivado con el borrador vacío y con cambios sin guardar | **Aprobado** |
 
 ### V-07 · HU-08 (I-12, paso 3) — Validación del valor calibrado
 1. Escribe `0` como valor calibrado y pulsa "Guardar borrador".
@@ -120,7 +141,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | `0` y `12,5` muestran el error del campo; un valor válido se guarda. Observación: la UI muestra los montos como `$148.000,00` pero el campo exige `148000.00` (registrado como DT-56) | **Aprobado** |
 
 ### V-08 · HU-08 (I-12, paso 4) — La aprobación es irreversible
 1. Pulsa "Aprobar avalúo".
@@ -130,7 +151,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | Confirmación de irreversibilidad; después, vista de solo lectura y avalúo en el historial | **Aprobado** |
 
 ### V-09 · HU-08 (I-12, paso 5) — Reevaluar no borra el aprobado
 1. En la misma pantalla, pulsa "Crear reevaluación".
@@ -139,7 +160,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | Borrador nuevo con otro folio; el historial conserva el aprobado | **Aprobado** |
 
 ### V-10 · HU-08 / HU-53 (I-12, paso 6) — El expediente refleja el avalúo
 1. Vuelve al dashboard, pulsa "Editar" en esa propiedad y ve a la pestaña **Expediente**.
@@ -148,7 +169,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | Fila "Avalúo aprobado" en verde con "Abrir avalúo" | **Aprobado** |
 
 ### V-11 · HU-53 / DT-46 — Publicar con todos los requisitos (cierra DT-40, parte 1)
 1. Con la propiedad de V-05 a V-10: en "Editar", sube al menos **una foto** (Multimedia) y un **contrato de corretaje vigente** (Expediente, como en V-03). Guarda.
@@ -158,7 +179,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-27 | `#33` se publicó: aviso verde, estado "Disponible" y sin botón "Publicar". Observación: la tabla necesita scroll horizontal y "Publicar" queda cortado (registrado como DT-58) | **Aprobado** |
 
 ### V-12 · HU-53 / HU-01 — La propiedad publicada es pública (cierra DT-40, parte 2)
 1. Cierra sesión, o abre una ventana privada.
@@ -168,7 +189,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (sin sesión) | 2026-10-27 | `#33` aparece en `/properties` y su ficha se abre. Observaciones: barra de navegación duplicada en la ficha (DT-25) y la etiqueta del catálogo dice "disponible" en minúscula (DT-57) | **Aprobado** |
 
 ---
 
@@ -180,15 +201,22 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Línea base 2026-10-27:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **52/52 OK**.
 - **Respuestas de Pablo a las 7 preguntas del 2026-10-27:** registradas como DS-14 a DS-18 en [Deuda técnica §4](docs/handoff/URBANEX_DEUDA_TECNICA.md#4-decisiones-tomadas-sesión-2026-10-24-aprobadas-por-pablo).
 
+### Seeder (2026-10-27, rama `chore/DT-14-seeder-datos-demo`)
+- La PR #3 (URB-13) se fusionó en `develop` el 2026-10-27 a las 21:18 UTC (`45250ec`). La rama del seeder sale de ese `develop`.
+- **`817da84` (FX-15):** comando `pipenv run python manage.py setup_demo_data` (`backend/apps/users/management/commands/setup_demo_data.py`) según DS-17. Uso y propiedades en la **Preparación** de la sección de validaciones.
+- **Pruebas:** 6 nuevas (`SetupDemoDataCommandTests`): sin `DEMO_PASSWORD` falla; con `DEBUG=False` se niega; roles, `is_staff` y contraseña; las 4 propiedades en captación con los requisitos esperados (`get_missing_publication_requirements`) y sin valor sugerido; repetir no duplica y actualiza la contraseña; no aprueba un borrador abierto. `manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **58/58 OK**; `makemigrations --check` → sin cambios.
+- **No ejecutado** sobre la BD local de Pablo: crea registros que no se pueden borrar y modifica `db.sqlite3` (rastreado, DT-02). Lo ejecuta Pablo al preparar la validación.
+- Hallazgo nuevo: **DT-54** (Pillow no está en el `Pipfile`).
+
 ### Orden acordado (2026-10-27)
-1. **PR de URB-13 → `develop`** (esta rama). Pablo revisa y fusiona.
-2. **Seeder** `setup_demo_data` en una rama nueva desde `develop` (DT-14, DS-17).
-3. **Validación visual de Pablo:** V-01 a V-12 de la sección de arriba.
+1. ~~**PR de URB-13 → `develop`**~~ Fusionada (PR #3).
+2. **Seeder** `setup_demo_data` (DT-14, DS-17): **hecho** en `chore/DT-14-seeder-datos-demo` (`817da84`). En la misma rama: Pillow declarado en `Pipfile`/`Pipfile.lock` (cierra DT-54) y registro de la validación. Falta la PR hacia `develop`.
+3. ~~**Validación visual de Pablo**~~ **Hecha el 2026-10-27:** V-01 a V-12 aprobadas; **DT-40 cerrado**. Hallazgos: DT-25 (actualizado), DT-55 a DT-60 y N-05 (pregunta para el tutor). HU-08 completa: **POR CONFIRMAR** hasta el plazo de D-04 (2026-10-28, 08:00; ver arriba).
 4. **Tarea 3:** modales/avisos con Tailwind en `dashboard/page.tsx` + `GET …/publication-requirements/` en el Expediente (DS-15).
 5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42).
 6. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16).
 
-Las tareas 3 a 6 **no empiezan** hasta que Pablo haga la validación visual.
+Las tareas 4 a 6 empiezan después de fusionar la PR del seeder, cada una en su rama desde `develop` (DS-14).
 
 ---
 

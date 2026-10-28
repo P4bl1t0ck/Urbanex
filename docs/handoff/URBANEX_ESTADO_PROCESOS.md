@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-27 · PR #2 (URB-15) fusionada en `develop` con pruebas por Postman, **sin validación en la interfaz**; las validaciones pendientes pasan a `Project_Progress.md` (V-01 a V-12). Antes: 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
+| Última actualización | 2026-10-27 (noche) · validación de Pablo V-01 a V-12 aprobada: **DT-40 cerrado**; resumen actualizado para HU-01, 03, 05, 08 y 53. Antes, el mismo día: PR #2 (URB-15) fusionada en `develop` con pruebas por Postman, **sin validación en la interfaz**; las validaciones pendientes pasan a `Project_Progress.md` (V-01 a V-12). Antes: 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 (pedidas) + HU-02, HU-09, HU-53 (EP-2, relevantes para Avalúos) + HU-04, HU-06, HU-08 (punto de partida de Sebas) |
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
@@ -33,15 +33,15 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 
 | HU | Nombre (tesis, Anexo 2) | Épica | Sprint (backlog definitivo) | Estado | Técnica | Funcional | Visual |
 |---|---|---|---|---|---|---|---|
-| [HU-01](#hu-01) | Registrar una propiedad en captación | EP-2 | 1 | En Curso | Aprobado (parcial) | Pendiente (DT-07 y DT-09 resueltos; quedan DT-34, DT-39) | Pendiente |
+| [HU-01](#hu-01) | Registrar una propiedad en captación | EP-2 | 1 | En Curso | Aprobado (parcial) | Parcial: anónimos no ven la captación (V-01, 2026-10-27); quedan DT-34 y DT-39 | Aprobado (V-01) |
 | [HU-02](#hu-02) | Registrarse como captador y responsable inicial | EP-2 | 1 | En Curso | Aprobado (parcial) | Pendiente | Pendiente |
-| [HU-03](#hu-03) | Cargar la documentación inicial | EP-2 | 1 | Pruebas | Aprobado | Pendiente | Pendiente |
-| [HU-05](#hu-05) | Registrar las características del inmueble | EP-2 | 1 | En Curso | Pendiente | Pendiente | Pendiente |
+| [HU-03](#hu-03) | Cargar la documentación inicial | EP-2 | 1 | Pruebas | Aprobado | Aprobado para PDF (V-03, 2026-10-27); la subida de una imagen no se probó | Aprobado (V-03; ver DT-60) |
+| [HU-05](#hu-05) | Registrar las características del inmueble | EP-2 | 1 | En Curso | Pendiente | Parcial: el mapa guarda la ubicación (V-04); faltan los campos de RF-01 (DT-19) | Aprobado (V-04) |
 | [HU-09](#hu-09) | Actualizar una propiedad publicada | EP-2 | 2 | En Curso | Pendiente | Pendiente | Pendiente |
-| [HU-53](#hu-53) | Publicar una propiedad | EP-2 | 3 | En Curso | Aprobado (requisitos de publicación) | Pendiente (DT-40; falta `slug`/metaetiquetas) | Pendiente |
+| [HU-53](#hu-53) | Publicar una propiedad | EP-2 | 3 | En Curso | Aprobado (requisitos de publicación) | Aprobado para los requisitos (V-02, V-11, V-12; **DT-40 cerrado** 2026-10-27); falta `slug`/metaetiquetas | Aprobado (V-02, V-11, V-12; ver DT-57, DT-58) |
 | [HU-04](#hu-04) | Seleccionar comparables para el avalúo | EP-2 | 2 | Por hacer | Pendiente | Pendiente | Pendiente |
 | [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Bloqueado** (D-04) | Pendiente | Pendiente | Pendiente |
-| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12 + integración en el dashboard, 2026-10-25) | Aprobado (backend 52/52; frontend `tsc`/`eslint`/`build`) | Pendiente (Pablo) | Pendiente (Pablo) |
+| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12 + integración en el dashboard, 2026-10-25; validada el 2026-10-27, completa POR CONFIRMAR sin motor, D-04) | Aprobado (backend; frontend `tsc`/`eslint`/`build`) | Aprobado con registro manual (V-05 a V-10, Pablo, 2026-10-27; ver N-05) | Aprobado (V-05 a V-10; ver DT-55, DT-56) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | Por hacer | **Fallido** | **Fallido** | Pendiente |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Pendiente | **Fallido** | Pendiente |
@@ -228,7 +228,7 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 ~~Pregunta de negocio abierta (N-01)~~ **Resuelta 2026-10-24 (DS-04):** un `CORRETAJE` vigente en estado `RECHAZADO` **impide publicar**; uno `PENDIENTE` lo permite. Implementado en HU-53.
 
-En la base de desarrollo no hay ningún usuario con rol `admin`, así que esta regla no se puede validar en la interfaz sin preparar datos.
+En la base de desarrollo no hay ningún usuario con rol `admin`, así que esta regla no se puede validar en la interfaz sin preparar datos. **(2026-10-27)** `setup_demo_data` crea `admin.demo@urbanex.test` (DT-14, FX-15); la regla sigue sin endpoint ni UI (Sprint 7).
 
 ## HU-44
 

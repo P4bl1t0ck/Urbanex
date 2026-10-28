@@ -1,11 +1,15 @@
+import io
+import os
 import shutil
 import tempfile
 from datetime import timedelta
 from decimal import Decimal
 from unittest import mock
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
@@ -14,6 +18,7 @@ from rest_framework import status
 from apps.appraisals.models import Appraisal
 from apps.documents.models import Document
 from apps.users.models import Property, PropertyImage
+from apps.users.views import get_missing_publication_requirements
 # Create your tests here.
 User = get_user_model()
 
@@ -248,3 +253,96 @@ class UrbanexCoreTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.agent.refresh_from_db()
         self.assertEqual(self.agent.failed_attempts, 1)
+
+
+# DT-14 / DS-17: comando setup_demo_data
+DEMO_PASSWORD = "Demo-Urbanex-2026!"
+
+
+class SetupDemoDataCommandTests(TestCase):
+    def setUp(self):
+        # Fotos y documentos van a carpetas temporales, no a media/ ni a private_media/
+        media_dir = tempfile.mkdtemp()
+        private_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, media_dir, ignore_errors=True)
+        self.addCleanup(shutil.rmtree, private_dir, ignore_errors=True)
+        # El runner de pruebas fuerza DEBUG=False; el comando solo corre en desarrollo
+        settings_override = override_settings(DEBUG=True, MEDIA_ROOT=media_dir)
+        settings_override.enable()
+        self.addCleanup(settings_override.disable)
+        patcher = mock.patch.object(
+            Document._meta.get_field("file"), "storage",
+            FileSystemStorage(location=private_dir),
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def _run(self, password=DEMO_PASSWORD):
+        with mock.patch.dict(os.environ, {"DEMO_PASSWORD": password}):
+            call_command("setup_demo_data", stdout=io.StringIO())
+
+    def _missing_codes(self, title_fragment):
+        property_obj = Property.objects.get(title__contains=title_fragment)
+        return {item["code"] for item in get_missing_publication_requirements(property_obj)}
+
+    def test_requires_demo_password(self):
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(CommandError):
+                call_command("setup_demo_data", stdout=io.StringIO())
+        self.assertFalse(User.objects.filter(email__endswith="@urbanex.test").exists())
+
+    def test_refuses_to_run_without_debug(self):
+        with override_settings(DEBUG=False):
+            with self.assertRaises(CommandError):
+                self._run()
+        self.assertFalse(Property.objects.exists())
+
+    def test_creates_users_with_roles_and_password(self):
+        self._run()
+        admin = User.objects.get(email="admin.demo@urbanex.test")
+        agent = User.objects.get(email="asesor.demo@urbanex.test")
+        self.assertEqual(admin.role, "admin")
+        self.assertTrue(admin.is_staff)
+        self.assertFalse(admin.is_superuser)
+        self.assertEqual(agent.role, "asesor")
+        self.assertFalse(agent.is_staff)
+        self.assertTrue(admin.check_password(DEMO_PASSWORD))
+        self.assertTrue(agent.check_password(DEMO_PASSWORD))
+
+    def test_properties_start_in_captacion_with_expected_requirements(self):
+        self._run()
+        agent = User.objects.get(email="asesor.demo@urbanex.test")
+        properties = Property.objects.filter(agent=agent)
+        self.assertEqual(properties.count(), 4)
+        self.assertFalse(properties.exclude(status="captacion").exists())
+        self.assertEqual(self._missing_codes("Cumbayá"), set())
+        self.assertEqual(self._missing_codes("La Carolina"), {"appraisal"})
+        self.assertEqual(self._missing_codes("La Mariscal"), {"brokerage_contract"})
+        self.assertEqual(self._missing_codes("Tumbaco"), {"image", "brokerage_contract", "appraisal"})
+        # Sin motor (DS-02): el avalúo demo no inventa un valor sugerido
+        appraisal = Appraisal.objects.approved().get(property__title__contains="Cumbayá")
+        self.assertIsNone(appraisal.suggested_value)
+
+    def test_rerun_is_idempotent_and_updates_password(self):
+        self._run()
+        counts = (User.objects.count(), Property.objects.count(), PropertyImage.objects.count(),
+                  Document.objects.count(), Appraisal.objects.count())
+        self._run(password="Otra-Clave-Demo-2026!")
+        self.assertEqual(
+            counts,
+            (User.objects.count(), Property.objects.count(), PropertyImage.objects.count(),
+             Document.objects.count(), Appraisal.objects.count()),
+        )
+        agent = User.objects.get(email="asesor.demo@urbanex.test")
+        self.assertTrue(agent.check_password("Otra-Clave-Demo-2026!"))
+
+    def test_open_draft_is_not_approved_on_rerun(self):
+        self._run()
+        agent = User.objects.get(email="asesor.demo@urbanex.test")
+        # El asesor empezó una reevaluación en I-12: el comando no debe aprobarla
+        draft = Appraisal.create_draft(
+            property=Property.objects.get(title__contains="Cumbayá"), agent=agent,
+        )
+        self._run()
+        draft.refresh_from_db()
+        self.assertEqual(draft.status, Appraisal.Status.BORRADOR)
