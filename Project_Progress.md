@@ -33,6 +33,15 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
+## 🚨 ¡PARA MAÑANA, MIÉRCOLES 2026-10-28! (pausa de Pablo el 2026-10-27 por la noche)
+
+> 1. **⏰ 08:00 — D-04:** ¿llegó la fórmula del motor? Si no llegó, Pablo decide si se diseña con la normativa de Quito y Ecuador (ver la directiva de abajo).
+> 2. **🧪 URGENTE — Validaciones V-13 a V-18** de la tarea 3 (sección "Ronda 2" más abajo), en la rama `feat/URB-15-HU-53-modales-requisitos`. Antes, **reiniciar `runserver` y `npm run dev`**. Hacerlas **antes** de abrir la PR, para que entre validada. Pasos resumidos: la tabla de la conversación del 2026-10-27, o cada V-xx abajo.
+> 3. **🔑 DT-65:** cambiar las contraseñas de las cuentas de la `db.sqlite3` publicada (si aún no se hizo).
+> 4. Después: abrir la PR de la tarea 3 y empezar la **tarea 4** (filtros P-02, DS-16).
+
+---
+
 ## ⏰ ¡PLAZO ABIERTO! D-04 — FÓRMULA DEL MOTOR DE AVALÚOS
 
 > **¡ATENCIÓN! EL MOTOR DE CÁLCULO ES PARTE VITAL DEL CORE DE URBANEX (RF-11, HU-04, HU-06, HU-08).**
