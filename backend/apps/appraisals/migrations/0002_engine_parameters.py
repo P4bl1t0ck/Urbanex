@@ -26,6 +26,8 @@ class Migration(migrations.Migration):
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='engine_parameters', to=settings.AUTH_USER_MODEL)),
             ],
             options={
+                'verbose_name': 'versión de parámetros del motor',
+                'verbose_name_plural': 'parámetros del motor (θ)',
                 'ordering': ['-version'],
             },
         ),

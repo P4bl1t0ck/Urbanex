@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Propósito | Inventario de riesgos de seguridad e infraestructura del código actual, con su plan de corrección, y opciones documentadas para las decisiones pendientes (D-05 sesión/JWT, DT-42 folio, almacenamiento y base de datos) |
-| Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`) |
+| Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3 |
 | Método | Lectura del código del backend y del frontend. **No se hicieron pruebas de intrusión.** Lo que no se comprobó en ejecución está marcado **Por verificar** |
 | Alcance | Control de acceso · sesión y JWT · validación de entradas y archivos · folio de avalúos · infraestructura y almacenamiento · requisitos previos al despliegue |
 | Registro oficial | Cada riesgo tiene su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md); el estado se actualiza allí y en la tabla de §0 |
@@ -31,7 +31,7 @@
 |---|---|---|---|---|---|---|
 | SEC-01 | Control de acceso (BOLA) | Lista y detalle de propiedades (`PropertyListCreateView`, `PropertyDetailView` en `backend/apps/users/views.py`) | **Alta** | Abierto · Confirmado (código) | Regla de visibilidad única por rol (§1.2) + pruebas | [DT-39](URBANEX_DEUDA_TECNICA.md#p1--seguridad-integridad-o-bloqueos-para-avalúos) |
 | SEC-02 | Control de acceso (BOLA) | Fotos de propiedades (`PropertyImageViewSet`, `PropertyImageSerializer`) | **Alta** | Abierto · Por verificar | Filtrar por dueño y validar la propiedad al crear, como en documentos (§1.2) | [DT-10](URBANEX_DEUDA_TECNICA.md#p1--seguridad-integridad-o-bloqueos-para-avalúos) |
-| SEC-09 | Exposición de datos | `backend/db.sqlite3` versionado en un repositorio público | **Alta** | Abierto · Confirmado | Cambiar credenciales, dejar de versionar la BD (§5.3) | [DT-65](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
+| SEC-09 | Exposición de datos | `backend/db.sqlite3` versionado en un repositorio público | **Alta** | Abierto · Confirmado. **(2026-10-28)** Cuentas inutilizadas en la copia de Pablo; falta la copia de Sebas y dejar de versionar la BD | Cambiar credenciales, dejar de versionar la BD (§5.3, propuesta concreta) | [DT-65](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
 | SEC-07 | Validación de archivos | Subida y publicación de fotos (`PropertyImage.image`, `media/`) | **Alta** | Abierto · Por verificar | Límite de tamaño, formatos permitidos y fotos de captación no públicas (§3.2) | [DT-64](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
 | SEC-10 | Configuración | `backend/config/settings.py` (valores por defecto) | Media (**Alta** al desplegar) | Abierto · Confirmado (código) | Valores seguros por defecto y `check --deploy` (§6.4) | [DT-20](URBANEX_DEUDA_TECNICA.md#p1--seguridad-integridad-o-bloqueos-para-avalúos) |
 | SEC-04 | Autenticación | Inicio de sesión (`LoginView`) | Media | Abierto · Confirmado (código) | Respuesta uniforme, bloqueo temporal y límite de peticiones (§2.5) | [DT-62](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
@@ -258,6 +258,17 @@ Sea cual sea la opción, las fotos de propiedades **no publicadas** no deben ser
 | Hacer privado el repositorio | Corta el acceso público a todo el historial | Depende de si el curso exige un repositorio público (*Por confirmar con el tutor*) |
 
 **Acción que no depende de esta decisión:** cambiar las contraseñas de las cuentas de desarrollo que están en la BD versionada, y de cualquier servicio donde se reutilicen (DT-65).
+
+**(2026-10-28) Hecho en la copia de Pablo (DS-24):** las 3 cuentas de desarrollo que contiene la BD publicada quedaron con la **contraseña inutilizable** (no pueden iniciar sesión) y **sin permisos de superusuario**. Para trabajar se usan las cuentas de `setup_demo_data`, que nunca se publicaron. **Pendientes:**
+- Sebas hace lo mismo en su copia.
+- Cada dueño cambia esas contraseñas donde las haya reutilizado. Eso no se puede hacer desde el repositorio.
+
+#### Propuesta concreta para sacar la BD del repositorio (2026-10-28; **no ejecutada**, decide el equipo en N-04)
+
+1. **Antes de nada:** Sebas copia su `backend/db.sqlite3` y `backend/media/` fuera del repositorio.
+2. **Rama propia desde `develop`** (p. ej. `chore/DT-70-dejar-de-versionar-bd`): `git rm --cached backend/db.sqlite3`, `git rm -r --cached backend/media`, los 6 `.pyc` rastreados y `.gitignore.swp` (DT-02). El `.gitignore` ya los cubre, así que **no hay que tocarlo**. Commit y PR.
+3. **Después del pull**, cada copia restaura su BD desde la copia de seguridad o crea una nueva con `migrate`, `setup_demo_data` y `setup_comparables_demo`. Las fotos de `media/` se regeneran con el seeder.
+4. **Historial: se recomienda mantenerlo** (primera fila de la tabla). Las cuentas expuestas ya no pueden iniciar sesión, así que reescribirlo no compensa: es destructivo y no borra las copias ni los *forks* existentes. Si el tutor permite un repositorio privado, es la medida complementaria más barata.
 
 ---
 

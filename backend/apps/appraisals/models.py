@@ -83,6 +83,8 @@ class EngineParameters(models.Model):
     is_active = models.BooleanField(default=False)
 
     class Meta:
+        verbose_name = 'versión de parámetros del motor'
+        verbose_name_plural = 'parámetros del motor (θ)'
         ordering = ['-version']
         constraints = [
             models.UniqueConstraint(

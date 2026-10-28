@@ -95,7 +95,9 @@ export default function ComparablesPage() {
     setBusy(true);
     setError("");
     const payload: AppraisalCreatePayload = { property: Number(propertyId) };
-    if (mode === "engine") payload.comparables = selected;
+    // Con 1-2 marcados, el registro manual los guarda como referencia (C-02, opción A).
+    const keepAsReference = mode === "manual" && selected.length > 0 && selected.length < (data?.min_comparables ?? 3);
+    if (mode === "engine" || keepAsReference) payload.comparables = selected;
     try {
       await authFetch<Appraisal>("/api/appraisals/", { method: "POST", body: JSON.stringify(payload) });
       router.push(`/dashboard/properties/${propertyId}/appraisal`);
@@ -259,7 +261,9 @@ export default function ComparablesPage() {
         <p>
           {pending === "engine"
             ? `El motor calculará el valor sugerido con ${count} comparable(s) y creará un borrador.`
-            : "Se creará un borrador sin valor sugerido y con confianza baja."}{" "}
+            : count > 0 && count < data.min_comparables
+              ? `Se creará un borrador sin valor sugerido, con confianza baja; los ${count} comparable(s) marcados quedan como referencia.`
+              : "Se creará un borrador sin valor sugerido y con confianza baja."}{" "}
           El avalúo recibe un folio que no se puede eliminar.
         </p>
       </Dialog>
