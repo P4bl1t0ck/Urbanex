@@ -33,6 +33,18 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
+## ⏰ ¡PLAZO ABIERTO! D-04 — FÓRMULA DEL MOTOR DE AVALÚOS
+
+> **¡ATENCIÓN! EL MOTOR DE CÁLCULO ES PARTE VITAL DEL CORE DE URBANEX (RF-11, HU-04, HU-06, HU-08).**
+>
+> - **Situación (2026-10-27):** Pablo pidió la fórmula al compañero responsable el **jueves 2026-10-22** y **aún no hay respuesta**.
+> - **PLAZO: MIÉRCOLES 2026-10-28, 08:00 (hora de Ecuador).**
+> - **Si llega la respuesta:** se registra como decisión de D-04 (fórmula, factores ponderados, umbrales de confianza) en Deuda técnica §4 y en el contexto maestro, y se implementa tal cual.
+> - **SI NO LLEGA:** Pablo pedirá a la IA **diseñar el motor de cálculo a partir de las fórmulas de valoración del municipio (Quito) y de la normativa de Ecuador**. Aun así, **no se programa nada sin antes documentar las fuentes** (ordenanza o norma, artículo y fecha) y sin que Pablo apruebe la fórmula propuesta como decisión DS-xx.
+> - **HASTA ENTONCES:** HU-08 se queda como **POR CONFIRMAR** respecto a si cuenta como completa (sus 2 criterios están validados con el registro manual, DS-02). **¡No inventar la fórmula ni valores sugeridos!**
+
+---
+
 ## 🧪 Validaciones pendientes de Pablo
 
 > **Resultado de la ronda del 2026-10-27:** Pablo, con `asesor.demo@urbanex.test` y los datos de `setup_demo_data` (propiedades #32 Cumbayá, #33 La Carolina, #35 Tumbaco). **Las 12 pruebas quedaron aprobadas** (V-03 en el segundo intento). **DT-40 se cerró** con V-11 y V-12. Los 8 hallazgos de la ronda están registrados en [Deuda técnica](docs/handoff/URBANEX_DEUDA_TECNICA.md): DT-25 (actualizado), DT-55 a DT-60 y la pregunta de negocio N-05.
@@ -199,7 +211,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ### Orden acordado (2026-10-27)
 1. ~~**PR de URB-13 → `develop`**~~ Fusionada (PR #3).
 2. **Seeder** `setup_demo_data` (DT-14, DS-17): **hecho** en `chore/DT-14-seeder-datos-demo` (`817da84`). En la misma rama: Pillow declarado en `Pipfile`/`Pipfile.lock` (cierra DT-54) y registro de la validación. Falta la PR hacia `develop`.
-3. ~~**Validación visual de Pablo**~~ **Hecha el 2026-10-27:** V-01 a V-12 aprobadas; **DT-40 cerrado**. Hallazgos: DT-25 (actualizado), DT-55 a DT-60 y N-05 (pregunta para el tutor). Pendiente de Pablo: decidir si HU-08 cuenta como completa sin motor (ver Avance de épicas).
+3. ~~**Validación visual de Pablo**~~ **Hecha el 2026-10-27:** V-01 a V-12 aprobadas; **DT-40 cerrado**. Hallazgos: DT-25 (actualizado), DT-55 a DT-60 y N-05 (pregunta para el tutor). HU-08 completa: **POR CONFIRMAR** hasta el plazo de D-04 (2026-10-28, 08:00; ver arriba).
 4. **Tarea 3:** modales/avisos con Tailwind en `dashboard/page.tsx` + `GET …/publication-requirements/` en el Expediente (DS-15).
 5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42).
 6. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16).

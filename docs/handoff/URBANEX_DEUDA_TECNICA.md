@@ -138,7 +138,7 @@ Referencias: [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) · [GPS](URBAN
 
 | ID | Decisión | Afecta a | Fuente |
 |---|---|---|---|
-| D-04 | Fórmula del motor, factores ponderados, umbrales de confianza y comparables iniciales | HU-04, 06, 08, 53 | Contexto maestro §14 |
+| D-04 | Fórmula del motor, factores ponderados, umbrales de confianza y comparables iniciales. **⏰ ¡PLAZO: 2026-10-28, 08:00!** Pablo la pidió al compañero responsable el 2026-10-22, sin respuesta al 2026-10-27. **Si no llega**, Pablo pedirá diseñar el motor con las fórmulas de valoración del municipio de Quito y la normativa de Ecuador: primero se documentan las fuentes (norma, artículo, fecha) y Pablo aprueba la fórmula como DS-xx; solo después se programa. Mientras tanto HU-08 completa queda **POR CONFIRMAR** | HU-04, 06, 08, 53 | Contexto maestro §14 |
 | D-05 | Almacenamiento, expiración, renovación y revocación de JWT | HU-46 | Contexto maestro §14 |
 | D-06 | Mecanismo de tareas programadas, webhooks y reintentos | Sprint 4+ | Contexto maestro §14 |
 | C-02 | Con 1–2 comparables: ¿calcular con confianza media o pasar a manual? | HU-04, HU-06 | [Contradicciones](URBANEX_ESTADO_PROCESOS.md#contradicciones-entre-fuentes) |
