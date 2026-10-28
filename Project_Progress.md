@@ -208,12 +208,28 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **No ejecutado** sobre la BD local de Pablo: crea registros que no se pueden borrar y modifica `db.sqlite3` (rastreado, DT-02). Lo ejecuta Pablo al preparar la validación.
 - Hallazgo nuevo: **DT-54** (Pillow no está en el `Pipfile`).
 
+### Tarea 5: seguridad e infraestructura (2026-10-27, rama `docs/DT-42-seguridad-y-deuda`)
+- **Solo documentación, sin cambios de código ni de configuración.** Nuevo [`URBANEX_SEGURIDAD_Y_DEUDA.md`](docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md), **publicable**: sin pasos de explotación. Los detalles de reproducción se guardan en privado, fuera del repositorio.
+- **Contenido:**
+  - inventario SEC-01 a SEC-12 e INF-01 a INF-04, cada uno con categoría, componente, severidad, estado y plan;
+  - control de acceso;
+  - JWT (recomendación B para D-05, sin implementar);
+  - entradas y archivos;
+  - DT-42 (POR CONFIRMAR);
+  - base de datos y almacenamiento (objetivo del contexto maestro §2; momento y proveedor POR CONFIRMAR);
+  - dejar de versionar `db.sqlite3`/`media/`;
+  - requisitos previos al despliegue.
+- **⛔ Regla DS-20:** ningún despliegue, tampoco el de demostración, con riesgos Altos abiertos.
+- **DS-19:** despliegue de demostración aprobado por el tutor (aprox. 2026-10-20), fuera de la infraestructura de la empresa. **✅ Servicios confirmados por Pablo: Vercel + Render + Supabase** (las del contexto maestro §2); el momento del despliegue sigue POR CONFIRMAR.
+- **⚠️ ¡ACCIÓN PARA PABLO! (DT-65):** la `db.sqlite3` versionada en el repositorio público contiene credenciales cifradas de cuentas de desarrollo. Cambia esas contraseñas (y donde las reutilices).
+- **Nuevos en Deuda técnica:** DT-61 a DT-71 (sección "Seguridad e infraestructura"), DS-19 y DS-20. **Ampliados:** DT-10, DT-20, DT-39 y DT-42.
+
 ### Orden acordado (2026-10-27)
 1. ~~**PR de URB-13 → `develop`**~~ Fusionada (PR #3).
 2. **Seeder** `setup_demo_data` (DT-14, DS-17): **hecho** en `chore/DT-14-seeder-datos-demo` (`817da84`). En la misma rama: Pillow declarado en `Pipfile`/`Pipfile.lock` (cierra DT-54) y registro de la validación. Falta la PR hacia `develop`.
 3. ~~**Validación visual de Pablo**~~ **Hecha el 2026-10-27:** V-01 a V-12 aprobadas; **DT-40 cerrado**. Hallazgos: DT-25 (actualizado), DT-55 a DT-60 y N-05 (pregunta para el tutor). HU-08 completa: **POR CONFIRMAR** hasta el plazo de D-04 (2026-10-28, 08:00; ver arriba).
 4. **Tarea 3:** modales/avisos con Tailwind en `dashboard/page.tsx` + `GET …/publication-requirements/` en el Expediente (DS-15).
-5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42).
+5. **Tarea 5:** `docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md` (incluye las opciones de DT-42). **Hecha el 2026-10-27** en `docs/DT-42-seguridad-y-deuda` (desde `develop` `47b59ce`, tras fusionar la PR #4 del seeder); ver "Tarea 5" abajo.
 6. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16).
 
 Las tareas 4 a 6 empiezan después de fusionar la PR del seeder, cada una en su rama desde `develop` (DS-14).
