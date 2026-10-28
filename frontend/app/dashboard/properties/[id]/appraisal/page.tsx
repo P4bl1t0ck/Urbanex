@@ -1,9 +1,9 @@
 "use client";
 
-// Pantalla I-12 (HU-08): calibrar y aprobar el avalúo de una propiedad.
-// Ciclo en el servidor: POST (borrador) -> PATCH (calibración) -> POST approve/ (inmutable).
-// Sin motor de cálculo (D-04): todo avalúo es un registro manual (DS-02), así que esta
-// pantalla nunca muestra ni calcula un valor sugerido.
+// Pantalla I-12 (HU-08): resultado del motor, calibración y aprobación del avalúo.
+// Ciclo en el servidor: POST (borrador, desde I-11) -> PATCH (calibración) -> POST approve/.
+// El borrador se crea en I-11 (HU-04): con comparables lo calcula el motor (HU-06, DS-21);
+// sin ellos es un registro manual (DS-02). Esta pantalla nunca calcula: solo muestra.
 
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
@@ -33,6 +33,12 @@ function formatMoney(value: string | null) {
   if (value == null) return "—";
   return Number(value).toLocaleString("es-EC", { style: "currency", currency: "USD" });
 }
+
+const CONFIDENCE_BADGE: Record<string, string> = {
+  ALTO: "bg-green-50 text-green-800",
+  MEDIO: "bg-amber-50 text-amber-800",
+  BAJO: "bg-slate-100 text-slate-700",
+};
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -96,7 +102,8 @@ export default function AppraisalPage() {
   const [justification, setJustification] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [notice, setNotice] = useState("");
-  const [busy, setBusy] = useState<"start" | "save" | "approve" | null>(null);
+  const [busy, setBusy] = useState<"save" | "approve" | null>(null);
+  const comparablesHref = `/dashboard/properties/${propertyId}/appraisal/comparables`;
 
   // El servidor ordena por -created_at: el primero es el más reciente.
   const draft = appraisals.find((a) => a.status === "BORRADOR") ?? null;
@@ -164,25 +171,6 @@ export default function AppraisalPage() {
         ? prev.map((a) => (a.id === updated.id ? updated : a))
         : [updated, ...prev],
     );
-  }
-
-  async function handleStart() {
-    setBusy("start");
-    setNotice("");
-    setErrors({});
-    try {
-      const created = await authFetch<Appraisal>("/api/appraisals/", {
-        method: "POST",
-        body: JSON.stringify({ property: Number(propertyId) }),
-      });
-      upsertAppraisal(created);
-      fillForm(created);
-      setNotice(`Avalúo ${created.folio} iniciado como borrador.`);
-    } catch (error) {
-      if (!handleAuthError(error)) setErrors(toFieldErrors(error));
-    } finally {
-      setBusy(null);
-    }
   }
 
   function validateLocally(): FieldErrors {
@@ -278,6 +266,8 @@ export default function AppraisalPage() {
       justification.trim() !== draft.final_justification);
   const canApprove = !!draft && !!draft.calibrated_value && !!draft.final_justification.trim() && !isDirty;
   const shown = draft ?? latestApproved;
+  // [] en los avalúos anteriores al motor (DS-21).
+  const snapshot = shown && !Array.isArray(shown.comparables_snapshot) ? shown.comparables_snapshot : null;
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
@@ -307,11 +297,11 @@ export default function AppraisalPage() {
           </div>
         )}
 
-        {/* Referencia para el asesor: no es un resultado del motor (D-04). */}
+        {/* Referencia para el asesor: no es un resultado del motor (DS-12). */}
         <Card title="Referencia">
           <Field
             label="Precio actual de publicación"
-            hint="Solo referencia. No es un valor sugerido: el motor de cálculo aún no está definido (D-04)."
+            hint="Solo referencia. No es el valor sugerido: ese lo calcula el motor con los comparables (abajo)."
           >
             <input
               type="text"
@@ -326,17 +316,16 @@ export default function AppraisalPage() {
         {!shown ? (
           <Card title="Sin avalúos">
             <p className="text-sm text-slate-600">
-              Esta propiedad todavía no tiene avalúos. Al iniciarlo se crea un borrador con folio propio que no se
-              puede eliminar; podrás calibrarlo y, cuando esté listo, aprobarlo.
+              Esta propiedad todavía no tiene avalúos. Al iniciarlo eliges los comparables (o lo registras manual) y
+              se crea un borrador con folio propio que no se puede eliminar; podrás calibrarlo y, cuando esté listo,
+              aprobarlo.
             </p>
-            <button
-              type="button"
-              onClick={handleStart}
-              disabled={busy !== null}
-              className="mt-4 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+            <Link
+              href={comparablesHref}
+              className="mt-4 inline-block rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
             >
-              {busy === "start" ? "Iniciando..." : "Iniciar avalúo"}
-            </button>
+              Iniciar avalúo
+            </Link>
           </Card>
         ) : (
           <>
@@ -344,27 +333,90 @@ export default function AppraisalPage() {
               <dl className="grid gap-4 sm:grid-cols-3">
                 <div>
                   <dt className="text-xs font-semibold uppercase text-slate-500">Valor sugerido</dt>
-                  <dd className="mt-1 text-sm text-slate-700">
-                    {shown.suggested_value != null ? formatMoney(shown.suggested_value) : "No disponible (D-04)"}
+                  <dd className="mt-1">
+                    {shown.suggested_value_display != null ? (
+                      <>
+                        <span className="text-lg font-semibold text-slate-900">
+                          ≈ {formatMoney(shown.suggested_value_display)}
+                        </span>
+                        <span className="block text-xs text-slate-500">
+                          Exacto: {formatMoney(shown.suggested_value)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-sm text-slate-700">No disponible (registro manual)</span>
+                    )}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs font-semibold uppercase text-slate-500">Nivel de confianza</dt>
                   <dd className="mt-1">
-                    <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${CONFIDENCE_BADGE[shown.confidence_level] ?? CONFIDENCE_BADGE.BAJO}`}
+                    >
                       {shown.confidence_level_display}
                     </span>
+                    {snapshot?.cv && (
+                      <span className="mt-1 block text-xs text-slate-500">
+                        Dispersión (CV): {(Number(snapshot.cv) * 100).toFixed(2)} %
+                      </span>
+                    )}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-xs font-semibold uppercase text-slate-500">Origen</dt>
                   <dd className="mt-1 text-sm text-slate-700">
-                    {shown.is_manual_fallback ? "Registro manual" : "Motor paramétrico"}
+                    {shown.is_manual_fallback
+                      ? "Registro manual"
+                      : `Motor paramétrico · parámetros v${shown.engine_parameters_version}`}
                   </dd>
                 </div>
               </dl>
+
+              {snapshot?.manual_reason && (
+                <p className="mt-4 text-sm text-slate-700">Motivo del registro manual: {snapshot.manual_reason}</p>
+              )}
+              {snapshot && snapshot.comparables.length > 0 && (
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="border-b border-slate-200 uppercase text-slate-500">
+                      <tr>
+                        <th className="py-2 pr-3">Comparable</th>
+                        <th className="py-2 pr-3 text-right">m²</th>
+                        <th className="py-2 pr-3 text-right">USD/m²</th>
+                        <th className="py-2 pr-3 text-right">Factor</th>
+                        <th className="py-2 pr-3 text-right">USD/m² ajustado</th>
+                        <th className="py-2 text-right">Peso</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {snapshot.comparables.map((c) => (
+                        <tr key={c.id} className={c.discarded ? "text-slate-400" : ""}>
+                          <td className="py-2 pr-3">
+                            #{c.id} · {c.status}
+                            {c.discarded && <span className="ml-1 font-semibold">(atípico, descartado)</span>}
+                          </td>
+                          <td className="py-2 pr-3 text-right">{c.area_m2}</td>
+                          <td className="py-2 pr-3 text-right">{formatMoney(c.unit_price)}</td>
+                          <td className="py-2 pr-3 text-right">{c.total_factor ?? "—"}</td>
+                          <td className="py-2 pr-3 text-right">
+                            {c.adjusted_unit_price ? formatMoney(c.adjusted_unit_price) : "—"}
+                          </td>
+                          <td className="py-2 text-right">{c.weight ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {snapshot.weighted_unit_price && (
+                    <p className="mt-2 text-xs text-slate-500">
+                      Precio por m² combinado: {formatMoney(snapshot.weighted_unit_price)}. El valor exacto se guarda;
+                      aquí se muestra redondeado a cientos.
+                    </p>
+                  )}
+                </div>
+              )}
               <p className="mt-4 text-xs text-slate-500">
-                {shown.comparables_snapshot.length === 0 && "Sin comparables seleccionados (HU-04). "}
+                {!snapshot && "Sin comparables (avalúo anterior al motor o registro manual). "}
                 {!shown.ai_draft_justification && "Sin borrador de justificación de IA (HU-07). "}
                 El valor final lo define el asesor.
               </p>
@@ -463,14 +515,12 @@ export default function AppraisalPage() {
                   <p className="mt-4 text-xs text-slate-500">
                     Un avalúo aprobado no se puede modificar. Si el valor cambió, crea una reevaluación.
                   </p>
-                  <button
-                    type="button"
-                    onClick={handleStart}
-                    disabled={busy !== null}
-                    className="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  <Link
+                    href={comparablesHref}
+                    className="mt-4 inline-block rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
                   >
-                    {busy === "start" ? "Creando..." : "Crear reevaluación"}
-                  </button>
+                    Crear reevaluación
+                  </Link>
                 </Card>
               )
             )}
