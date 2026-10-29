@@ -70,14 +70,11 @@ npm run dev                        # (no ejecutado) http://localhost:3000
 - **Comprobar la conexión:** abrir `/login`, entrar y ver "Mis propiedades". Pablo confirmó el 2026-10-22 que el dashboard carga datos.
 - **Ojo:** `manage.py test` **sin etiquetas no encuentra pruebas** (DT-06). Usa siempre las etiquetas.
 
-### Usuarios de prueba (necesarios: hoy todos los usuarios de la BD son `cliente`)
+### Usuarios de prueba y HU-44
 
-Comandos sugeridos, *no ejecutados en la auditoría*. El login es **por email**; las contraseñas se eligen localmente y no se versionan:
+La A-01 ya está en `/dashboard/users`; el backend exige el rol `admin`, no basta ocultar el enlace en Next.js. Para crear una cuenta de prueba, un administrador usa **Crear usuario** y la persona define su contraseña desde el enlace de activación. En desarrollo, Django imprime el enlace en la consola del backend; vence en 24 horas y solo se usa una vez.
 
-```bash
-pipenv run python manage.py shell -c "from apps.users.models import User; User.objects.create_user(username='asesor_demo', email='asesor.demo@urbanex.test', password='CAMBIA-ESTA', role='asesor')"
-pipenv run python manage.py shell -c "from apps.users.models import User; User.objects.create_user(username='admin_demo', email='admin.demo@urbanex.test', password='CAMBIA-ESTA', role='admin', is_staff=True)"
-```
+La migración `users.0007` todavía no se ha aplicado a Supabase. Hasta que se revise y aplique con respaldo, la base activa conserva su esquema/roles anteriores y la A-01 no está lista para usarse contra ella. La migración no borra cuentas; cambia `cliente` heredado a `admin` para superusuarios y `asesor` para los demás. La desactivación del asesor de prueba acordado y el `SET_NULL` de sus propiedades siguen pendientes de ejecutarse desde la A-01 después de migrar.
 
 ## Paso 3. Dependencias que Avalúos necesita conocer
 

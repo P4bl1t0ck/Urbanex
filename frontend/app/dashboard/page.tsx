@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -97,6 +97,19 @@ const DOC_TYPES: Record<string, string> = {
 const DOCUMENTS_URL = "http://127.0.0.1:8000/api/documents/";
 const DOC_ACCEPT = "application/pdf,image/jpeg,image/png,image/webp";
 const MAX_DOC_BYTES = 20 * 1024 * 1024; // RF-10
+const EMPTY_USER_INFO = JSON.stringify({ email: "Usuario", role: "Asesor" });
+
+function getUserInfoSnapshot() {
+  return JSON.stringify({
+    email: sessionStorage.getItem("userEmail") || "Usuario",
+    role: sessionStorage.getItem("userRole") || "Asesor",
+  });
+}
+
+function subscribeToUserInfo(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
 
 const TABS: { id: TabId; label: string; hint: string }[] = [
   { id: "general", label: "Datos generales", hint: "Tipo, precio y características" },
@@ -167,7 +180,9 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
-  const [userInfo, setUserInfo] = useState({ email: "", role: "" });
+  const userInfo = JSON.parse(
+    useSyncExternalStore(subscribeToUserInfo, getUserInfoSnapshot, () => EMPTY_USER_INFO),
+  ) as { email: string; role: string };
 
   //Estado para saber si estabamos editando (guarda el ID) o si esta creadno es null.
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -196,11 +211,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const token = sessionStorage.getItem("access");
-    // NUEVO: Leer quién soy desde la memoria de la pestaña
-    const userEmail = sessionStorage.getItem("userEmail") || "Usuario";
-    const userRole = sessionStorage.getItem("userRole") || "Asesor";
-    setUserInfo({ email: userEmail, role: userRole });
-
     if (!token) {
       router.replace("/login");
       return;
@@ -537,13 +547,6 @@ export default function DashboardPage() {
     }
   }
 
-  function handleLogout() {
-    sessionStorage.removeItem("access");
-    sessionStorage.removeItem("refresh");
-    router.replace("/login");
-
-  }
-
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-50 px-4 py-12">
@@ -573,11 +576,13 @@ export default function DashboardPage() {
               </p>
             </div>
              <div className="flex items-center gap-3">
-               <button onClick={openCreateModal} className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800">
+                {userInfo.role === "admin" && (
+                  <Link href="/dashboard/users" className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50">
+                    Administrar usuarios
+                  </Link>
+                )}
+                <button onClick={openCreateModal} className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800">
                  + Registrar propiedad
-               </button>
-               <button onClick={handleLogout} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100">
-                 Cerrar sesión
                </button>
              </div>
            </header>

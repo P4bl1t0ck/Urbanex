@@ -33,7 +33,7 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 
 | HU | Nombre (tesis, Anexo 2) | Épica | Sprint (backlog definitivo) | Estado | Técnica | Funcional | Visual |
 |---|---|---|---|---|---|---|---|
-| [HU-01](#hu-01) | Registrar una propiedad en captación | EP-2 | 1 | En Curso | Aprobado (parcial) | Pendiente (DT-07 y DT-09 resueltos; quedan DT-34, DT-39) | Pendiente |
+| [HU-01](#hu-01) | Registrar una propiedad en captación | EP-2 | 1 | En Curso | Aprobado (parcial) | Pendiente (DT-07/DT-09/DT-39 resueltos en código/base; queda DT-34) | Pendiente |
 | [HU-02](#hu-02) | Registrarse como captador y responsable inicial | EP-2 | 1 | En Curso | Aprobado (parcial) | Pendiente | Pendiente |
 | [HU-03](#hu-03) | Cargar la documentación inicial | EP-2 | 1 | Pruebas | Aprobado | Pendiente | Pendiente |
 | [HU-05](#hu-05) | Registrar las características del inmueble | EP-2 | 1 | En Curso | Pendiente | Pendiente | Pendiente |
@@ -43,9 +43,9 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Bloqueado** (D-04) | Pendiente | Pendiente | Pendiente |
 | [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12 + integración en el dashboard, 2026-10-25) | Aprobado (backend 52/52; frontend `tsc`/`eslint`/`build`) | Pendiente (Pablo) | Pendiente (Pablo) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
-| [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | Por hacer | **Fallido** | **Fallido** | Pendiente |
-| [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Pendiente | **Fallido** | Pendiente |
-| [HU-46](#hu-46) | Iniciar sesión y recuperar contraseña | EP-1 | 1 | En Curso | Aprobado (parcial) | **Fallido** | Pendiente |
+| [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | **Pruebas** | **Aprobado (70 pruebas backend)** | Pendiente (flujo de invitación en navegador) | Pendiente (A-01 en navegador) |
+| [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Aprobado (bloqueo tras 5 intentos) | **Fallido** (desbloqueo admin pendiente) | Pendiente |
+| [HU-46](#hu-46) | Iniciar sesión y recuperar contraseña | EP-1 | 1 | En Curso | Aprobado (login e inactivos) | Pendiente (recuperación pendiente) | Pendiente |
 
 > **Ninguna HU auditada está completa al 100 %.** Ver regla de cálculo en [Avance de épicas](URBANEX_AVANCE_EPICAS.md).
 
@@ -76,7 +76,7 @@ flowchart TD
 
 | Tramo | Antes (2026-10-22) | Ahora (2026-10-24) |
 |---|---|---|
-| Captación oculta al público | Visible para todos | Oculta para anónimos (DT-07 resuelto). Sigue visible para un `cliente` autenticado (DT-39) |
+| Captación oculta al público | Visible para todos | Oculta para anónimos (DT-07 resuelto). `users.0007` ya se aplicó en Supabase según confirmación del usuario; los roles ahora son solo `admin`/`asesor` |
 | Avalúo | No existía | `apps.appraisals`: borrador → calibración → aprobación inmutable. Sin motor (D-04) y sin pantallas (DT-40) |
 | Publicar | Sin requisitos | `POST …/publish/` exige foto + corretaje vigente no rechazado + avalúo aprobado, solo desde captación |
 | ~~**Hueco 1 — DT-09 (P0)**~~ | — | **Resuelto (FX-11):** `POST` crea siempre en `captacion`; `PATCH` ignora `status` (`test_create_ignores_status`, `test_patch_cannot_change_status`) |
@@ -93,12 +93,12 @@ flowchart TD
 | Criterio de aceptación (Anexo 2) | Implementación encontrada | Prueba | Resultado |
 |---|---|---|---|
 | Exige campos obligatorios y al menos una fotografía | Campos obligatorios: sí en el modelo/serializer. Foto: **solo en el frontend** (`validateForm`); el backend crea la propiedad sin imágenes | `test_create_property_as_agent` crea, pero no prueba rechazos | Parcial |
-| Al guardarse queda En captación, sin exhibirse al público | `status` por defecto `captacion` ✔. **Desde 2026-10-24** un anónimo solo recibe `disponible`/`reservador` en la lista y 404 en el detalle de una ficha en captación (`PUBLIC_STATUSES`, commit `2817dcd`). Desde FX-11 el `POST` siempre guarda `captacion` (DT-09 resuelto). Pendiente: un `cliente` autenticado aún ve la captación (DT-39) | `test_create_property_as_agent`, `test_create_ignores_status`, `test_anonymous_list_only_shows_public_statuses`, `test_anonymous_cannot_read_captacion_detail`, `test_owner_still_reads_captacion_detail` | Parcial (anónimos ✔; DT-39 abierto) |
+| Al guardarse queda En captación, sin exhibirse al público | `status` por defecto `captacion` ✔. **Desde 2026-10-24** un anónimo solo recibe `disponible`/`reservador` en la lista y 404 en el detalle de una ficha en captación (`PUBLIC_STATUSES`, commit `2817dcd`). Desde FX-11 el `POST` siempre guarda `captacion` (DT-09 resuelto). `users.0007` ya se aplicó en Supabase; el rol `cliente` fue eliminado del modelo y sus cuentas heredadas se mapearon a roles internos | `test_create_property_as_agent`, `test_create_ignores_status`, `test_anonymous_list_only_shows_public_statuses`, `test_anonymous_cannot_read_captacion_detail`, `test_owner_still_reads_captacion_detail` | Parcial (anónimos ✔; validación manual pendiente) |
 | El asesor queda como captador y responsable inicial | `perform_create` asigna `agent=request.user`; `agent` de solo lectura en la API | `test_create_property_as_agent` verifica `agent` | Aprobado (técnico) |
 
 - **Interfaz:** modal con 4 pestañas en `frontend/app/dashboard/page.tsx`. Los datos persisten al cambiar de pestaña; errores por pestaña; vistas previas de imágenes.
-- **Bloqueos y riesgos:** ~~DT-07~~ y ~~DT-09~~ (resueltos 2026-10-24), DT-39 (rol `cliente`), DT-34 (foto al registrar solo en frontend), DT-10 (imágenes sin control de propiedad).
-- **Siguiente paso:** validar en el navegador sin sesión: una propiedad recién creada **no** aparece en `/properties` ni se abre en `/properties/<id>`. Después, DT-39.
+- **Bloqueos y riesgos:** ~~DT-07~~, ~~DT-09~~ y ~~DT-39~~ (resueltos en código/base; validación manual pendiente), DT-34 (foto al registrar solo en frontend), DT-10 (imágenes sin control de propiedad).
+- **Siguiente paso:** validar en el navegador sin sesión: una propiedad recién creada **no** aparece en `/properties` ni se abre en `/properties/<id>`. Después de la migración, volver a verificar permisos de roles heredados.
 
 ## HU-02
 
@@ -236,10 +236,19 @@ En la base de desarrollo no hay ningún usuario con rol `admin`, así que esta r
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| Cada usuario tiene un correo único | `User.email` **no** es único; el login usa `.filter(email=...).first()` | **Fallido** |
-| El administrador no puede desactivar su propia cuenta | No hay gestión de usuarios propia; solo el `UserAdmin` genérico de Django, que **no muestra `role`, `is_locked` ni `failed_attempts`** | **Fallido** |
+| Correo único | `User.email` único y validado en API; duplicados rechazados | Aprobado en pruebas |
+| Roles internos | Solo `admin` y `asesor`; la migración convierte roles heredados `cliente` (superusuario → admin, resto → asesor) | Aplicado en Supabase según confirmación del usuario |
+| Crear usuario | API admin-only; cuenta inactiva, contraseña inutilizable y enlace de activación enviado | Aprobado en pruebas; entrega real probada con Resend en modo de prueba |
+| Editar usuario | Solo nombre, apellido, teléfono y rol; email no editable | Aprobado en pruebas |
+| Desactivar usuario | Sin `DELETE`; motivo obligatorio; no permite autodesactivación; asesor conserva registro y sus propiedades quedan sin responsable; las cuentas desactivadas no se reactivan en este alcance | Aprobado en pruebas |
+| Activar cuenta | Token guardado como hash, de un solo uso, 24 horas; contraseña validada; inactivos no pueden iniciar sesión | Pruebas automatizadas aprobadas; flujo manual de activación probado por el usuario |
+| Reenvío de invitación | Solo para cuentas pendientes de activación; no reenvía invitaciones a cuentas desactivadas por un administrador | Backend aplica la regla; la interfaz distingue ambos estados |
+| Envío de invitación | Resend integrado como proveedor seleccionable por variables de entorno; consola permanece como opción local | Entrega real probada en modo de prueba; Resend solo permite enviar al correo autorizado hasta verificar un dominio |
+| Pantalla A-01 | Next.js en `/dashboard/users`; visible solo a rol admin; Django Admin queda como herramienta interna; cierre de sesión en navegación global | Implementada; pruebas manuales confirmadas para edición, desactivación y flujo de invitación/activación |
 
-No hay pantalla A-01 ni endpoints `/users/`.
+**Estado HU-44: cerrada** según las pruebas manuales y automatizadas registradas. El envío a destinatarios distintos del correo autorizado por Resend queda sujeto a verificar un dominio; se acepta esa limitación temporal para desarrollo.
+
+Las migraciones `users.0007` y `users.0008` son aditivas y no eliminan registros; el usuario confirmó que se aplicaron en Supabase. En particular, el usuario de prueba asesor y sus propiedades todavía no se han desactivado/desasignado en la base activa.
 
 ## HU-45
 
@@ -247,8 +256,8 @@ No hay pantalla A-01 ni endpoints `/users/`.
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| La cuenta se bloquea tras 5 intentos fallidos | `LoginView`: `failed_attempts += 1`; `is_locked=True` al llegar a 5; responde 403 si está bloqueada; reinicia al acertar | Implementado. La prueba solo verifica el primer intento fallido (`test_login_failed_with_invalid_credentials`) |
-| Solo el administrador desbloquea | No hay endpoint ni UI; `is_locked` no aparece en el admin de Django | **Fallido** |
+| La cuenta se bloquea tras 5 intentos fallidos | `LoginView`: `failed_attempts += 1`; `is_locked=True` al llegar a 5; responde 403 si está bloqueada | Aprobado en pruebas: 5 intentos fallidos bloquean el acceso |
+| Solo el administrador desbloquea | No hay endpoint ni acción de desbloqueo en A-01 | **Pendiente** |
 
 Tampoco existe la notificación in-app al admin que pide RF-13.
 
@@ -258,7 +267,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| Solo los usuarios activos inician sesión | `LoginView` **no comprueba `is_active`**; SimpleJWT `for_user` solo registra una advertencia y emite el token. Las peticiones protegidas posteriores sí lo rechazan (`CHECK_USER_IS_ACTIVE=True`). Efecto: un inactivo "entra" al dashboard y luego falla | **Fallido** (por lectura de código; no reproducido) |
+| Solo los usuarios activos inician sesión | `LoginView` rechaza usuarios inactivos antes de emitir JWT | Aprobado en pruebas |
 | Enlace de recuperación de 60 min y de un solo uso | No existe (`PasswordResetToken`, I-02, Resend) | **Fallido** |
 
 - Sesión: `access` en `sessionStorage` (aislado por pestaña), vigencia de 1 día; el `refresh` no se guarda; no hay cierre por inactividad. Depende de la decisión D-05.
@@ -277,4 +286,4 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | C-05 | HU-01 en el Anexo 4 se titula "Registrar y publicar"; en el Anexo 2, "Registrar en captación" (la publicación es HU-53) | Tesis | Usar el título del Anexo 2 |
 | C-06 | El contexto maestro nombra `main` y ramas `feat/URB-XX-…`; el repositorio usa `master`/`develop`/`test`, y el prompt propone `feature/HU-XX-…` | Contexto maestro §2, repositorio, prompt | Elegir una convención única (ver [Estándares](URBANEX_ESTANDARES_DOD.md#5-gitflow-y-colaboración)) |
 | C-07 | La arquitectura documentada (PostgreSQL/Supabase/Cloudinary) no coincide con la real (SQLite y almacenamiento local) | README y contexto maestro vs `settings.py` | Registrar cuándo se migra (Sprint 8 / URB-55, POR CONFIRMAR) |
-| C-08 | El rol `cliente` existe en `User` y es el valor por defecto; RF-12 solo define `Administrador` y `Asesor` | `models.py` vs RF-12 | Decidir si se elimina `cliente` como rol interno |
+| C-08 | El rol `cliente` existe en `User` y es el valor por defecto; RF-12 solo define `Administrador` y `Asesor` | `models.py` vs RF-12 | **Resuelto por decisión del usuario:** limitar roles a `admin`/`asesor`; migración mapea los roles heredados sin borrar usuarios |

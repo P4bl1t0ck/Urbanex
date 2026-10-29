@@ -12,32 +12,43 @@ La plataforma adopta una **arquitectura desacoplada** evaluada bajo el marco de 
 * **Base de datos y almacenamiento:** PostgreSQL y Supabase Storage (Archivos legales privados servidos a través de URL firmadas con límite de tiempo).
 * **Gestión de medios:** Cloudinary (Optimización y entrega de imágenes de propiedades).
 
-# ¿Comó puedo probarlo?
-**--Backend--**
-  cd backend/
-  
-  pipenv install 
+# ¿Cómo puedo probarlo?
 
-  pipenv shell
+### Backend
 
-  cp .env.example .env
+En PowerShell:
 
-  python manage.py migrate
+```powershell
+cd backend
+pipenv install
+if (-not (Test-Path .env)) {
+    Copy-Item .env.example .env
+}
+pipenv run python manage.py migrate
+pipenv run python manage.py runserver
+```
 
-  python manage.py runserver
+Por defecto, el backend usa SQLite en `backend\db.sqlite3`. Para conectarlo a Supabase PostgreSQL, configura en `backend\.env` las variables `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` y `DB_SSLMODE`, usando los datos que proporciona Supabase. No compartas ni subas el archivo `.env`.
 
-  Backend server will run at: https://localhost:8000/
+Al cambiar de SQLite a PostgreSQL, `migrate` crea las tablas de los modelos implementados, pero no copia los registros existentes. La migración de datos debe hacerse por separado y conservar una copia de seguridad de SQLite.
 
-**--Frontend--**
-  cd frontend
-  
-  npm install 
-  
-  cp .env.example .env.local
+El backend local estará en http://127.0.0.1:8000/.
 
-  npm run dev
-  
-  Backend server will run at: http://localhost:3000/
+En desarrollo, las invitaciones para activar cuentas se imprimen en la consola donde corre Django (backend de correo de consola). El enlace abre `/activate`, es de un solo uso y vence en 24 horas. La integración con un proveedor de correo real se configura aparte.
+
+La gestión A-01 está en `/dashboard/users` y requiere un usuario autenticado con rol `admin`. La migración de HU-44 agrega los campos y restricciones necesarios; antes de usar esa pantalla con una base PostgreSQL existente, revisa y aplica las migraciones de forma deliberada. No restablece ni elimina los registros.
+
+### Frontend
+
+En otra ventana de PowerShell:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+El frontend usa por defecto la API en `http://127.0.0.1:8000` y estará en http://localhost:3000/.
 
 # Requisitos:
   --This project was made with:
@@ -50,4 +61,3 @@ La plataforma adopta una **arquitectura desacoplada** evaluada bajo el marco de 
   
   --pipenv: pipenv, version 2026.7.1
    
-

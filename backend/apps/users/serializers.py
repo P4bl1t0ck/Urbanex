@@ -1,8 +1,201 @@
+from django.contrib.auth import get_user_model, password_validation
+from django.conf import settings
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.mail import send_mail
+from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Property, PropertyImage
+from rest_framework.exceptions import APIException
+from datetime import timedelta
+import hashlib
+import logging
+import secrets
+import resend
+from resend.exceptions import ResendError
+
+from .models import Property, PropertyImage, UserActivationToken
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
+
+
+class ActivationEmailError(APIException):
+    status_code = 502
+    default_detail = (
+        "No se pudo enviar el correo de activación. Verifica la configuración "
+        "del remitente y del proveedor de correo."
+    )
+    default_code = "activation_email_failed"
+
+
+def build_username(email):
+    base = email[:150]
+    username = base
+    suffix = 1
+    while User.objects.filter(username=username).exists():
+        suffix_text = f"-{suffix}"
+        username = f"{base[:150 - len(suffix_text)]}{suffix_text}"
+        suffix += 1
+    return username
+
+
+def send_activation_email(user):
+    raw_token = secrets.token_urlsafe(32)
+    UserActivationToken.objects.create(
+        user=user,
+        token_hash=hashlib.sha256(raw_token.encode("utf-8")).hexdigest(),
+        expires_at=timezone.now() + timedelta(hours=24),
+    )
+    activation_url = (
+        f"{settings.FRONTEND_BASE_URL.rstrip('/')}/activate#{raw_token}"
+    )
+    subject = "Activa tu cuenta de Urbanex"
+    message = (
+        f"Hola {user.first_name or user.email},\n\n"
+        "El administrador creó una cuenta para ti. "
+        "Usa este enlace dentro de las próximas 24 horas para establecer tu "
+        f"contraseña y activarla:\n{activation_url}\n"
+    )
+
+    if settings.EMAIL_PROVIDER == "resend":
+        resend.api_key = settings.RESEND_API_KEY
+        try:
+            resend.Emails.send(
+                {
+                    "from": settings.DEFAULT_FROM_EMAIL,
+                    "to": [user.email],
+                    "subject": subject,
+                    "text": message,
+                }
+            )
+        except ResendError as exc:
+            logger.error(
+                "Resend rejected activation email for user_id=%s: %s (%s)",
+                user.pk,
+                exc.message,
+                exc.error_type,
+            )
+            raise ActivationEmailError() from exc
+        return
+
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
+class ManagedUserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=False)
+
+    def validate_email(self, value):
+        users = User.objects.filter(email=value)
+        if self.instance:
+            users = users.exclude(pk=self.instance.pk)
+        if users.exists():
+            raise serializers.ValidationError("Ya existe una cuenta con este correo.")
+        return value
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "phone",
+            "role",
+            "is_active",
+            "deactivation_reason",
+            "failed_attempts",
+            "is_locked",
+            "date_joined",
+        )
+        read_only_fields = (
+            "id",
+            "username",
+            "is_active",
+            "deactivation_reason",
+            "failed_attempts",
+            "is_locked",
+            "date_joined",
+        )
+
+    def validate(self, attrs):
+        if self.instance and "email" in self.initial_data:
+            raise serializers.ValidationError(
+                {"email": "El correo no se puede editar desde esta pantalla."}
+            )
+        if self.instance is None and not attrs.get("email"):
+            raise serializers.ValidationError({"email": "Este campo es obligatorio."})
+        if (
+            self.instance
+            and self.instance.is_active
+            and self.instance.role == User.Role.ADMIN
+            and attrs.get("role") == User.Role.ADVISOR
+            and User.objects.filter(is_active=True, role=User.Role.ADMIN).count() == 1
+        ):
+            raise serializers.ValidationError(
+                {"role": "Debe permanecer al menos un administrador activo."}
+            )
+        return attrs
+
+    def create(self, validated_data):
+        email = validated_data.pop("email")
+        user = User(
+            username=build_username(email),
+            email=email,
+            **validated_data,
+        )
+        user.set_unusable_password()
+        user.is_active = False
+        with transaction.atomic():
+            user.save()
+            send_activation_email(user)
+        return user
+
+
+class UserActivationSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def validate(self, attrs):
+        token_hash = hashlib.sha256(attrs["token"].encode("utf-8")).hexdigest()
+        activation = (
+            UserActivationToken.objects.select_related("user")
+            .filter(
+                token_hash=token_hash,
+                used_at__isnull=True,
+                expires_at__gt=timezone.now(),
+                user__is_active=False,
+                user__deactivation_reason="",
+            )
+            .first()
+        )
+        if activation is None:
+            raise serializers.ValidationError(
+                {"token": "El enlace no es válido, ya se usó o venció."}
+            )
+
+        try:
+            password_validation.validate_password(attrs["password"], activation.user)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": exc.messages}) from exc
+        attrs["activation"] = activation
+        return attrs
+
+
+class UserDeactivationSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=2000, allow_blank=False, trim_whitespace=True)
+
+    def validate_reason(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("El motivo es obligatorio.")
+        return value.strip()
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()

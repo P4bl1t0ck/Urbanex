@@ -1,19 +1,56 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.conf import settings 
+import uuid
+from datetime import timedelta
+
+from django.utils import timezone
+
+
+def activation_token_expiry():
+    return timezone.now() + timedelta(hours=24)
+
+
+class UserManager(DjangoUserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("role", User.Role.ADMIN)
+        return super().create_superuser(
+            username,
+            email=email,
+            password=password,
+            **extra_fields,
+        )
+
 
 # Create your models here.
 class User(AbstractUser):
-    # The class about our Users
-    ROLE_CHOICES = [
-        ("admin","Administrador"),
-        ("asesor","Captador"), #Correcion por predefiniciones hechas previamente
-        ("cliente","Cliente"),
-    ]
-    
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="cliente")
+    class Role(models.TextChoices):
+        ADMIN = "admin", "Administrador"
+        ADVISOR = "asesor", "Asesor"
+
+    email = models.EmailField(unique=True)
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.ADVISOR)
     failed_attempts = models.PositiveIntegerField(default=0)
     is_locked = models.BooleanField(default=False)
+    phone = models.CharField(max_length=32, blank=True, default="")
+    deactivation_reason = models.TextField(blank=True, default="")
+
+    objects = UserManager()
+
+
+class UserActivationToken(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="activation_tokens",
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(default=activation_token_expiry)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Activation token for user {self.user_id}"
 class Property(models.Model):
     #The class about every property.
     # We create 

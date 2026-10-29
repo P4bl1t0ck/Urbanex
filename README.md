@@ -23,32 +23,43 @@ as our frameworks.
 # Tests & Another Stuff tuff
 This project was tested with postman due, its more easy and intuitive
 
-# How can i run it?:
-**--Backend--**
-  cd backend/
-  
-  pipenv install 
+# How can I run it?
 
-  pipenv shell
+### Backend
 
-  cp .env.example .env
+In PowerShell:
 
-  python manage.py migrate
+```powershell
+cd backend
+pipenv install
+if (-not (Test-Path .env)) {
+    Copy-Item .env.example .env
+}
+pipenv run python manage.py migrate
+pipenv run python manage.py runserver
+```
 
-  python manage.py runserver
+By default, the backend uses SQLite at `backend\db.sqlite3`. To connect it to Supabase PostgreSQL, configure `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, and `DB_SSLMODE` in `backend\.env` with the values provided by Supabase. Do not share or commit `.env`.
 
-  Backend server will run at: https://localhost:8000/
+When switching from SQLite to PostgreSQL, `migrate` creates tables for the implemented models, but does not copy existing records. Data transfer must be done separately; keep a backup of SQLite.
 
-**--Frontend--**
-  cd frontend
-  
-  npm install 
-  
-  cp .env.example .env.local
+The local backend runs at http://127.0.0.1:8000/.
 
-  npm run dev
-  
-  Backend server will run at: http://localhost:3000/
+During development, account activation invitations are printed in the console running Django (console email backend). The link opens `/activate`, is single-use, and expires after 24 hours. A production email provider is configured separately.
+
+The A-01 user-management screen is at `/dashboard/users` and requires an authenticated `admin` role. HU-44 adds fields and constraints through a migration; review and deliberately apply migrations before using this screen with an existing PostgreSQL database. The migration does not reset or delete records.
+
+### Frontend
+
+In another PowerShell window:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+The frontend defaults to the API at `http://127.0.0.1:8000` and runs at http://localhost:3000/.
 
 # Requirements:
   --This project was made with:
@@ -61,4 +72,3 @@ This project was tested with postman due, its more easy and intuitive
   
   --pipenv: pipenv, version 2026.7.1
    
-

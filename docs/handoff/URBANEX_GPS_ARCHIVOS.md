@@ -21,9 +21,9 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 |---|---|---|---|---|---|---|
 | `backend/apps/users/models.py` (`Property`, `PropertyImage`) | Modelo | Datos de la propiedad e imágenes | Código + `test_create_property_as_agent` | En Curso | **Alto** | Cualquier campo nuevo exige migración en la app `users`; `documents` tiene FK `PROTECT` hacia `Property` |
 | `backend/apps/users/serializers.py` (`PropertySerializer`) | Serializer | Contrato JSON de propiedades; regla de `no_disponible` y prohibición de `vendido`/`arrendado` | Código | En Curso | **Alto** | Mantener sincronizado con `frontend/types/property.ts`. `get_agent_name` está duplicado |
-| `backend/apps/users/views.py` (`PUBLIC_STATUSES`, `PropertyListCreateView`, `MyPropertiesView`, `PropertyDetailView`, `PropertyImageViewSet`) | Vista | CRUD de propiedades e imágenes; filtro del catálogo público para anónimos (lista y detalle) | Código + tests | En Curso | **Alto** | `PUBLIC_STATUSES` usa `'reservador'` (DT-16): cambiarlo cuando se migre. Un `cliente` autenticado aún ve la captación (DT-39); imágenes sin control (DT-10) |
+| `backend/apps/users/views.py` (`PUBLIC_STATUSES`, `PropertyListCreateView`, `MyPropertiesView`, `PropertyDetailView`, `PropertyImageViewSet`) | Vista | CRUD de propiedades e imágenes; filtro del catálogo público para anónimos (lista y detalle) | Código + tests | En Curso | **Alto** | `PUBLIC_STATUSES` usa `'reservador'` (DT-16): cambiarlo cuando se migre. El rol `cliente` se elimina por decisión C-08 y sus cuentas heredadas se mapean mediante `users.0007`; imágenes sin control (DT-10) |
 | `backend/apps/users/urls.py` | Rutas | `/api/auth/properties/…`, `/api/auth/property-images/` | Código | Listo | Medio | El frontend tiene estas URLs hardcodeadas |
-| `backend/apps/users/tests.py` | Test | 15 pruebas: crear, `status` de solo lectura (2), catálogo público (3), publicación HU-53 (8), login fallido | 15/15 aprobadas (2026-10-24) | — | Medio | Los helpers `_add_corretaje` parchean el storage de `Document` a una carpeta temporal y `_add_image` guarda solo la ruta: no escriben en `private_media/` ni en `media/` |
+| `backend/apps/users/tests.py` | Test | Pruebas de propiedades/publicación, login y gestión HU-44 | Suite explícita backend: 70/70 aprobadas (SQLite aislada, 2026-10-29) | — | Medio | Los helpers `_add_corretaje` parchean el storage de `Document` a una carpeta temporal y `_add_image` guarda solo la ruta: no escriben en `private_media/` ni en `media/` |
 | `frontend/app/dashboard/page.tsx` | UI (I-03 + modal I-10) | Lista "Mis propiedades" + modal de 4 pestañas + guardado de propiedad, imágenes y documentos | `tsc` OK; validación visual parcial del usuario | En Curso | **Alto** | Archivo de 927 líneas: si se modifica, revisar las 4 pestañas. `validateForm()` es la única validación de la foto |
 | `frontend/types/property.ts` | Tipos | Contrato TS de `Property` | `tsc` OK | Listo | **Alto** | Lo usan el dashboard, el catálogo, la ficha, `PropertyCard` y `lib/api` |
 | `frontend/app/properties/page.tsx`, `frontend/components/PropertyCard.tsx` | UI (P-02) | Catálogo público | `next build` OK | En Curso | Medio | Muestra lo que devuelva el backend, incluida la captación (DT-07) |
@@ -87,12 +87,13 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 
 | Ruta | Capa | Responsabilidad | Evidencia | Estado | Riesgo | Precauciones |
 |---|---|---|---|---|---|---|
-| `backend/apps/users/models.py` (`User`) | Modelo | `role`, `failed_attempts`, `is_locked` | Código | En Curso | **Alto** | `AUTH_USER_MODEL = "users.User"`: cambios aquí afectan a todo |
-| `backend/apps/users/views.py` (`LoginView`) | Vista | Login JWT, bloqueo a los 5 intentos | `test_login_failed_with_invalid_credentials` | En Curso | **Alto** | No comprueba `is_active` (DT-12) |
-| `backend/apps/users/admin.py` | Admin | `UserAdmin` genérico | Código | En Curso | Bajo | No muestra `role` ni `is_locked` (DT-15) |
-| `frontend/app/(auth)/login/page.tsx` | UI (I-01) | Formulario de login; guarda el token en `sessionStorage` | Código | En Curso | Medio | No guarda `refresh`; error de lint `any` |
-| `frontend/lib/api.ts` (`apiFetch`) | Cliente HTTP | Fetch genérico | Código | Listo | Medio | Lanza `Error ${status}` sin el detalle del backend (DT-26). Desde 2026-10-25 existe `authFetch`/`ApiError` en el mismo archivo, que sí lo conserva |
-| — | Recuperación de contraseña (I-02), gestión de usuarios (A-01) | **No existen** | — | — | — | — |
+| `backend/apps/users/models.py` (`User`, `UserActivationToken`) | Modelo | Roles `admin`/`asesor`, email único, teléfono, motivo de desactivación y token hash de activación | Migraciones `0007`/`0008` + pruebas; usuario confirma aplicadas en Supabase | Pruebas | **Alto** | `AUTH_USER_MODEL = "users.User"`: migraciones aditivas; la baja del asesor heredado todavía requiere ejecutar el flujo de A-01 |
+| `backend/apps/users/views.py` (`LoginView`, gestión/activación de usuarios) | Vista | Login JWT activo; API admin-only para listar/crear/editar/desactivar/reinvitar; activación de un solo uso | Suite explícita backend: 70 pruebas | Pruebas | **Alto** | Django Admin no es la A-01; errores de email deben atenderse explícitamente |
+| `backend/apps/users/admin.py` | Admin interno | Herramienta Django para desarrolladores; no es la interfaz diaria de administración | Código | Intencional | Bajo | La administración de la inmobiliaria vive en Next.js; desbloqueo HU-45 pendiente |
+| `frontend/app/(auth)/login/page.tsx` | UI (I-01) | Formulario de login; guarda token, rol y email en `sessionStorage` | `tsc`, ESLint y build OK | Listo | Medio | La recuperación de contraseña (I-02) sigue pendiente |
+| `frontend/app/dashboard/users/page.tsx` | UI (A-01) | Lista, crea, edita y desactiva usuarios; permite reenviar activación | `tsc`, ESLint y build OK; validación visual pendiente | Pruebas | **Alto** | Solo rol admin; no ofrece acción DELETE; API vuelve a autorizar cada operación |
+| `frontend/app/activate/page.tsx` | UI de activación | Establecer contraseña desde enlace con token, una vez y dentro de 24 h | `tsc`, ESLint y build OK | Pruebas | Medio | En desarrollo el enlace aparece en la consola de Django |
+| `frontend/lib/api.ts` (`apiFetch`, `authFetch`, `ApiError`) | Cliente HTTP | Fetch público/autenticado; conserva el cuerpo y el estado de error de DRF | `tsc`, ESLint y build OK | Listo | Medio | `authFetch` lee JWT desde `sessionStorage` |
 
 ## 2. Mapa de dependencias de Avalúos (HU-04, HU-06, HU-08)
 
@@ -100,7 +101,7 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 flowchart LR
   subgraph Existe["Existe hoy"]
     P[Property<br/>apps/users/models.py]
-    U[User.role<br/>admin/asesor/cliente]
+    U[User.role<br/>admin/asesor]
     D[Document CORRETAJE<br/>apps/documents]
     T[types/property.ts]
     DB[dashboard/page.tsx<br/>pestaña Expediente]
