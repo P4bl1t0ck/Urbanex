@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/auth/", include("apps.users.urls")),
     path("api/documents/", include("apps.documents.urls")),  # Expediente digital (HU-03)
     path("api/appraisals/", include("apps.appraisals.urls")),  # Avalúos (RF-11, HU-08)
+    path("api/opportunities/", include("apps.opportunities.urls")),  # Oportunidades (RF-05, HU-27, HU-34)
     #path("api/properties/", include("apps.properties.urls")),
 ]
 
