@@ -91,12 +91,13 @@ class ManagedUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=False)
 
     def validate_email(self, value):
-        users = User.objects.filter(email=value)
+        email = value.strip().lower()
+        users = User.objects.filter(email__iexact=email)
         if self.instance:
             users = users.exclude(pk=self.instance.pk)
         if users.exists():
             raise serializers.ValidationError("Ya existe una cuenta con este correo.")
-        return value
+        return email
 
     class Meta:
         model = User
@@ -144,7 +145,7 @@ class ManagedUserSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        email = validated_data.pop("email")
+        email = validated_data.pop("email").strip().lower()
         user = User(
             username=build_username(email),
             email=email,

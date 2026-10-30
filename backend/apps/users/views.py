@@ -114,10 +114,10 @@ class LoginView(APIView):
     def post(self, request): #Post Function WEB
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data["email"]
+        email = serializer.validated_data["email"].strip().lower()
         password = serializer.validated_data["password"]
 
-        user = User.objects.filter(email=email).first()
+        user = User.objects.filter(email__iexact=email).first()
 
         if not user or not user.is_active:
             return Response({"detail": "Credenciales inválidas."}, status=401)

@@ -252,6 +252,22 @@ class UrbanexCoreTests(TestCase):
         self.agent.refresh_from_db()
         self.assertEqual(self.agent.failed_attempts, 1)
 
+    def test_login_accepts_email_with_different_casing(self):
+        self.agent.set_password("Login-test-2026!")
+        self.agent.save(update_fields=["password"])
+
+        response = self.client.post(
+            "/api/auth/login/",
+            {
+                "email": "  ASESOR.TEST@URBANEX.EC  ",
+                "password": "Login-test-2026!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+
     def test_login_locks_account_after_five_failed_attempts(self):
         for _ in range(5):
             response = self.client.post(
@@ -353,6 +369,26 @@ class UserManagementApiTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("activate", mail.outbox[0].body)
 
+    def test_admin_creation_normalizes_email(self):
+        self.client.force_authenticate(user=self.admin)
+
+        with self.settings(EMAIL_PROVIDER="console"):
+            response = self.client.post(
+                "/api/auth/users/",
+                {
+                    "email": "  New.Advisor@Urbanex.Test  ",
+                    "first_name": "Nuevo",
+                    "role": "asesor",
+                },
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["email"], "new.advisor@urbanex.test")
+        self.assertTrue(
+            User.objects.filter(email="new.advisor@urbanex.test").exists()
+        )
+
     def test_admin_can_send_activation_email_with_resend(self):
         self.client.force_authenticate(user=self.admin)
 
@@ -421,6 +457,20 @@ class UserManagementApiTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.filter(email=self.advisor.email).count(), 1)
+
+    def test_admin_rejects_duplicate_email_with_different_casing(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            "/api/auth/users/",
+            {"email": "  ADVISOR@URBANEX.TEST  ", "role": "asesor"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            User.objects.filter(email__iexact=self.advisor.email).count(), 1
+        )
 
     def test_admin_cannot_create_client_role(self):
         self.client.force_authenticate(user=self.admin)
