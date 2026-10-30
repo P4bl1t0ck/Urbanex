@@ -43,9 +43,9 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Pruebas** (FX-17, 2026-10-28: motor DS-21, D-04 resuelta provisionalmente; FX-18 para θ en el admin; validada en la ronda 3; sigue en Pruebas por decisión de Pablo; completa **POR CONFIRMAR**: θ v1 en observación) | Aprobado (90 OK, 2026-10-30) | Aprobado (V-21, V-22, V-25; Pablo, 2026-10-29/30; V-25 tras FX-18) | Aprobado (V-21, V-22, V-25; ver DT-80) |
 | [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12 + integración en el dashboard, 2026-10-25; validada el 2026-10-27 con registro manual; con el valor del motor, validada en V-21 a V-23 el 2026-10-29/30; completa **POR CONFIRMAR**, decisión de Pablo) | Aprobado (backend; frontend `tsc` y `build`; `eslint`: **2 errores previos de DT-24, ninguno nuevo**) | Aprobado con registro manual (V-05 a V-10, Pablo, 2026-10-27; ver N-05) | Aprobado (V-05 a V-10; ver DT-55, DT-56) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
-| [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | Por hacer | **Fallido** | **Fallido** | Pendiente |
-| [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Pendiente | **Fallido** | Pendiente |
-| [HU-46](#hu-46) | Iniciar sesión y recuperar contraseña | EP-1 | 1 | En Curso | Aprobado (parcial) | **Fallido** | Pendiente |
+| [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | **Pruebas** | **Aprobado (53/53 en `apps.users.tests`; suite 116/116)** | Aprobadas: V-26 a V-31; V-32 parcial, tras cambios de usabilidad pendiente revalidar | Parcial: validación funcional aprobada; retestar límite visual del teléfono y su presencia en la lista |
+| [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Aprobado (bloqueo tras 5 intentos) | **Fallido** (desbloqueo admin pendiente) | Pendiente |
+| [HU-46](#hu-46) | Iniciar sesión y recuperar contraseña | EP-1 | 1 | En Curso | Aprobado (login e inactivos) | Pendiente (recuperación pendiente) | Pendiente |
 
 > **Ninguna HU auditada está completa al 100 %.** Ver regla de cálculo en [Avance de épicas](URBANEX_AVANCE_EPICAS.md).
 
@@ -76,8 +76,8 @@ flowchart TD
 
 | Tramo | Antes (2026-10-22) | Ahora (2026-10-24) |
 |---|---|---|
-| Captación oculta al público | Visible para todos | Oculta para anónimos (DT-07 resuelto). Sigue visible para un `cliente` autenticado (DT-39). **(2026-10-27)** También para cualquier asesor: ve las captaciones de otros (SEC-01, Alta; [Seguridad §1.2](URBANEX_SEGURIDAD_Y_DEUDA.md#12-riesgos-y-plan)) |
-| Avalúo | No existía | `apps.appraisals`: borrador → calibración → aprobación inmutable. Sin motor (D-04) y sin pantallas (DT-40). **(2026-10-25)** Pantalla I-12. **(2026-10-28, FX-17)** Motor DS-21 (D-04 resuelta provisionalmente) y pantalla I-11 de comparables; validación visual pendiente (V-20 a V-25) |
+| Captación oculta al público | Visible para todos | Oculta para anónimos (DT-07 resuelto). HU-44 elimina el rol `cliente`; `users.0007` y `users.0008` se aplicaron en Supabase según Sebas (2026-10-29). SEC-01 sigue abierto: un asesor ve las captaciones de otros asesores |
+| Avalúo | No existía | `apps.appraisals`: borrador → calibración → aprobación inmutable. **(2026-10-28, FX-17)** Motor DS-21 y pantalla I-11 de comparables; **FX-18** habilita la gestión de θ por rol admin. Ronda 3 validada por Pablo; línea base de `origin/develop`: 90 pruebas (2026-10-30) |
 | Publicar | Sin requisitos | `POST …/publish/` exige foto + corretaje vigente no rechazado + avalúo aprobado, solo desde captación |
 | ~~**Hueco 1 — DT-09 (P0)**~~ | — | **Resuelto (FX-11):** `POST` crea siempre en `captacion`; `PATCH` ignora `status` (`test_create_ignores_status`, `test_patch_cannot_change_status`) |
 | **Hueco 2 — DT-40** | — | Desde la UI no se puede aprobar un avalúo, así que **ninguna propiedad se puede publicar desde el navegador**. Es el comportamiento de negocio esperado hasta que exista I-12. **2026-10-25: implementado en las 3 fases.** I-12 (`/dashboard/properties/[id]/appraisal`) aprueba desde la UI; el dashboard enlaza a I-12, muestra el estado del avalúo en el Expediente y lista `missing_requirements` al publicar. Se cierra cuando una persona publique desde el navegador. **Cerrado el 2026-10-27** (DT-40, validación V-11 y V-12 de Pablo) |
@@ -93,7 +93,7 @@ flowchart TD
 | Criterio de aceptación (Anexo 2) | Implementación encontrada | Prueba | Resultado |
 |---|---|---|---|
 | Exige campos obligatorios y al menos una fotografía | Campos obligatorios: sí en el modelo/serializer. Foto: **solo en el frontend** (`validateForm`); el backend crea la propiedad sin imágenes | `test_create_property_as_agent` crea, pero no prueba rechazos | Parcial |
-| Al guardarse queda En captación, sin exhibirse al público | `status` por defecto `captacion` ✔. **Desde 2026-10-24** un anónimo solo recibe `disponible`/`reservador` en la lista y 404 en el detalle de una ficha en captación (`PUBLIC_STATUSES`, commit `2817dcd`). Desde FX-11 el `POST` siempre guarda `captacion` (DT-09 resuelto). Pendiente: un `cliente` autenticado aún ve la captación (DT-39) | `test_create_property_as_agent`, `test_create_ignores_status`, `test_anonymous_list_only_shows_public_statuses`, `test_anonymous_cannot_read_captacion_detail`, `test_owner_still_reads_captacion_detail` | Parcial (anónimos ✔; DT-39 abierto) |
+| Al guardarse queda En captación, sin exhibirse al público | `status` por defecto `captacion` ✔. **Desde 2026-10-24** un anónimo solo recibe `disponible`/`reservador` en la lista y 404 en el detalle de una ficha en captación (`PUBLIC_STATUSES`, commit `2817dcd`). Desde FX-11 el `POST` siempre guarda `captacion` (DT-09 resuelto). `users.0007` ya se aplicó en Supabase; el rol `cliente` fue eliminado del modelo y sus cuentas heredadas se mapearon a roles internos | `test_create_property_as_agent`, `test_create_ignores_status`, `test_anonymous_list_only_shows_public_statuses`, `test_anonymous_cannot_read_captacion_detail`, `test_owner_still_reads_captacion_detail` | Parcial (anónimos ✔; validación manual pendiente) |
 | El asesor queda como captador y responsable inicial | `perform_create` asigna `agent=request.user`; `agent` de solo lectura en la API | `test_create_property_as_agent` verifica `agent` | Aprobado (técnico) |
 
 - **Interfaz:** modal con 4 pestañas en `frontend/app/dashboard/page.tsx`. Los datos persisten al cambiar de pestaña; errores por pestaña; vistas previas de imágenes.
@@ -256,10 +256,19 @@ En la base de desarrollo no hay ningún usuario con rol `admin`, así que esta r
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| Cada usuario tiene un correo único | `User.email` **no** es único; el login usa `.filter(email=...).first()` | **Fallido** |
-| El administrador no puede desactivar su propia cuenta | No hay gestión de usuarios propia; solo el `UserAdmin` genérico de Django, que **no muestra `role`, `is_locked` ni `failed_attempts`** | **Fallido** |
+| Correo único | `User.email` único y validado en API; duplicados rechazados | Aprobado en pruebas |
+| Roles internos | Solo `admin` y `asesor`; la migración convierte roles heredados `cliente` (superusuario → admin, resto → asesor) | Aplicado en Supabase según confirmación del usuario |
+| Crear usuario | API admin-only; cuenta inactiva, contraseña inutilizable y enlace de activación enviado | Aprobado en pruebas; entrega real no verificada |
+| Editar usuario | Solo nombre, apellido, teléfono y rol; email no editable | Aprobado en pruebas |
+| Desactivar usuario | Sin `DELETE`; motivo obligatorio; no permite autodesactivación; asesor conserva registro y sus propiedades quedan sin responsable; las cuentas desactivadas no se reactivan en este alcance | Aprobado en pruebas |
+| Activar cuenta | Token guardado como hash, de un solo uso, 24 horas; contraseña validada; inactivos no pueden iniciar sesión | Pruebas automatizadas aprobadas; V-27 y V-28 comprobadas manualmente |
+| Reenvío de invitación | Solo para cuentas pendientes de activación; no reenvía invitaciones a cuentas desactivadas por un administrador | V-29 aprobada manualmente: al reenviar, el enlace anterior deja de servir |
+| Envío de invitación | Resend integrado como proveedor seleccionable por variables de entorno; consola permanece como opción local | Integración probada; el modo de prueba de Resend limita destinatarios y el dominio no está verificado. Validación manual de correo real pendiente |
+| Pantalla A-01 | Next.js en `/dashboard/users`; visible solo a rol admin; Django Admin queda como herramienta interna; cierre de sesión en navegación global | V-31 aprobada: asesor no ve la pantalla y `GET /api/auth/users/` responde 403 |
 
-No hay pantalla A-01 ni endpoints `/users/`.
+**Estado HU-44: Pruebas.** `apps.users.tests` pasó 53/53; la suite backend pasó 116/116 con SQLite y correo de consola. Sebas confirmó manualmente V-26 a V-31, incluyendo que el enlace anterior no sirve después del reenvío y que la API responde 403 para un asesor. También confirmó la validación del celular; después se ajustó el campo para aceptar solo dígitos (máximo 10), mostrar el teléfono en la lista y desplazar el formulario a la vista. Falta revalidar esos cambios de interfaz (V-32). Los correos de la prueba se imprimieron en consola; no se verificó entrega real por Resend.
+
+Las migraciones `users.0007` y `users.0008` están aplicadas en Supabase. Sebas confirmó el 2026-10-30 que copió datos de `db.sqlite3` a Supabase; registrar este origen en DT-65 y confirmar la rotación de credenciales de las cuentas importadas.
 
 ## HU-45
 
@@ -267,8 +276,8 @@ No hay pantalla A-01 ni endpoints `/users/`.
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| La cuenta se bloquea tras 5 intentos fallidos | `LoginView`: `failed_attempts += 1`; `is_locked=True` al llegar a 5; responde 403 si está bloqueada; reinicia al acertar | Implementado. La prueba solo verifica el primer intento fallido (`test_login_failed_with_invalid_credentials`) |
-| Solo el administrador desbloquea | No hay endpoint ni UI; `is_locked` no aparece en el admin de Django | **Fallido** |
+| La cuenta se bloquea tras 5 intentos fallidos | `LoginView`: `failed_attempts += 1`; `is_locked=True` al llegar a 5; responde 403 si está bloqueada | Aprobado en pruebas: 5 intentos fallidos bloquean el acceso |
+| Solo el administrador desbloquea | No hay endpoint ni acción de desbloqueo en A-01 | **Pendiente** |
 
 Tampoco existe la notificación in-app al admin que pide RF-13.
 
@@ -278,7 +287,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 | Criterio | Implementación | Resultado |
 |---|---|---|
-| Solo los usuarios activos inician sesión | `LoginView` **no comprueba `is_active`**; SimpleJWT `for_user` solo registra una advertencia y emite el token. Las peticiones protegidas posteriores sí lo rechazan (`CHECK_USER_IS_ACTIVE=True`). Efecto: un inactivo "entra" al dashboard y luego falla | **Fallido** (por lectura de código; no reproducido) |
+| Solo los usuarios activos inician sesión | `LoginView` rechaza usuarios inactivos antes de emitir JWT | Aprobado en pruebas |
 | Enlace de recuperación de 60 min y de un solo uso | No existe (`PasswordResetToken`, I-02, Resend) | **Fallido** |
 
 - Sesión: `access` en `sessionStorage` (aislado por pestaña), vigencia de 1 día; el `refresh` no se guarda; no hay cierre por inactividad. Depende de la decisión D-05.
@@ -297,4 +306,4 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | C-05 | HU-01 en el Anexo 4 se titula "Registrar y publicar"; en el Anexo 2, "Registrar en captación" (la publicación es HU-53) | Tesis | Usar el título del Anexo 2 |
 | C-06 | El contexto maestro nombra `main` y ramas `feat/URB-XX-…`; el repositorio usa `master`/`develop`/`test`, y el prompt propone `feature/HU-XX-…` | Contexto maestro §2, repositorio, prompt | Elegir una convención única (ver [Estándares](URBANEX_ESTANDARES_DOD.md#5-gitflow-y-colaboración)) |
 | C-07 | La arquitectura documentada (PostgreSQL/Supabase/Cloudinary) no coincide con la real (SQLite y almacenamiento local) | README y contexto maestro vs `settings.py` | Registrar cuándo se migra (Sprint 8 / URB-55, POR CONFIRMAR) |
-| C-08 | El rol `cliente` existe en `User` y es el valor por defecto; RF-12 solo define `Administrador` y `Asesor` | `models.py` vs RF-12 | Decidir si se elimina `cliente` como rol interno |
+| C-08 | El rol `cliente` existe en `User` y es el valor por defecto; RF-12 solo define `Administrador` y `Asesor` | `models.py` vs RF-12 | Decisión de Sebas (Mateo Cartagena en GitHub; comunicada por WhatsApp, 2026-10-29): limitar roles a `admin`/`asesor`; pendiente de confirmar por Pablo y, si aplica, por el tutor |

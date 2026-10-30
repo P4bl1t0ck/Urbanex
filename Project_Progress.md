@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **90 OK** (desde FX-18, 2026-10-30; antes 88 con el motor DS-21). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `origin/develop`: **90/90 OK** (FX-18, 2026-10-30). Tras integrar HU-44 y la validación del teléfono: **116/116 OK** con SQLite y correo de consola; ver "Estado actual". Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -36,6 +36,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 🧭 Pendiente ahora (2026-10-30)
 
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
+> - **HU-44 (Fase B):** rama reconstruida sobre `origin/develop`; 116/116 pruebas backend aprobadas en SQLite. Sebas confirmó V-26 a V-31, incluido el 403 de la API y la invalidación del enlace anterior al reenviar. V-32 confirmó la regla telefónica; está pendiente revalidar en navegador el nuevo límite visual, teléfono en la lista y desplazamiento al formulario. Sin commits, push ni PR.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
 > - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
@@ -81,6 +82,8 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 > **Por qué existe esta sección:** el DoD del equipo exige que cada flujo se compruebe **en la interfaz** ("no basta con Postman"). Estas pruebas se acumularon desde el 2026-10-22 sin hacerse. Mientras sigan en **Pendiente**, DT-40 no se cierra y HU-01, HU-03, HU-05, HU-08 y HU-53 no pueden marcarse como validadas en la parte funcional ni en la visual.
 >
 > **Cómo usarla:** sigue los pasos de cada prueba y responde la pregunta del resultado esperado. Después llena la fila: **quién** la hizo, **cuándo** (fecha y hora), **qué viste** (textos, estados, capturas si las hay) y el resultado (**Aprobado** / **Fallido**). Si algo falla, anota exactamente qué apareció; con eso se abre o actualiza el DT correspondiente. Ninguna fila se marca como Aprobada por inferencia.
+>
+> **HU-44:** implementación y pruebas automatizadas aprobadas. Sebas confirmó V-26 a V-31, incluido el rechazo del enlace anterior al reenviar y el HTTP 403 para asesores. V-32 confirmó que la validación del teléfono funciona; tras el ajuste de usabilidad, queda pendiente comprobar el límite visual y el teléfono en la lista.
 
 **Preparación (antes de empezar):**
 1. Desde `backend/`: `pipenv run python manage.py migrate` y luego `pipenv run python manage.py runserver`.
@@ -382,10 +385,95 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 ---
 
+### Ronda 4 — HU-44 · Invitaciones y administración de usuarios (Pendiente)
+
+> **Antes de empezar:** para que los enlaces de prueba no salgan a un proveedor externo, usa `EMAIL_PROVIDER=console` en la configuración local del backend y reinícialo. El enlace se imprime en la consola. No uses Resend para estas pruebas manuales.
+
+### V-26 · HU-44 — Crear usuario y localizar el enlace de activación
+1. Inicia sesión como administrador y abre `/dashboard/users`.
+2. Crea un asesor con un correo nuevo de prueba.
+3. Busca en la consola del backend el correo de activación y abre o copia su enlace.
+
+**Resultado esperado:** ¿A-01 confirma la creación, muestra la cuenta pendiente/inactiva y la consola contiene el enlace `/activate#...` sin exponer una contraseña temporal?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-10-30 | Creó un asesor desde A-01; se mostró el mensaje de éxito y el correo con el enlace de activación apareció en la consola local. No se envió desde Resend | **Aprobado** |
+
+### V-27 · HU-44 — Activar la cuenta e iniciar sesión
+1. Desde el enlace de V-26, establece una contraseña válida en la pantalla de activación.
+2. Ve a `/login` e inicia sesión con el correo y la contraseña que acabas de establecer.
+3. Cierra sesión, vuelve a iniciar sesión como administrador, abre A-01 y revisa el estado de la cuenta.
+
+**Resultado esperado:** ¿la pantalla confirma la activación, el usuario puede iniciar sesión y A-01 lo muestra activo?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-10-30 | Abrió el enlace, estableció la contraseña y pudo iniciar sesión con la cuenta activada | **Aprobado** |
+
+### V-28 · HU-44 — Rechazar un enlace de activación usado
+1. Crea otra invitación y activa la cuenta con su enlace.
+2. Abre de nuevo el mismo enlace o intenta enviarlo una segunda vez.
+
+**Resultado esperado:** ¿se rechaza el segundo uso con un mensaje de enlace inválido o vencido, sin cambiar la contraseña ya establecida? La expiración de 24 horas se cubre además en las pruebas automatizadas.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-10-30 | Tras activar la cuenta, volvió a intentar el enlace usado y la activación fue rechazada | **Aprobado** |
+
+### V-29 · HU-44 — Reenviar una invitación
+1. Crea un asesor nuevo y conserva el primer enlace de activación de la consola.
+2. Desde A-01, reenvía la invitación y localiza el nuevo enlace en la consola.
+3. Intenta activar con el enlace anterior y luego con el nuevo.
+
+**Resultado esperado:** ¿el enlace anterior se rechaza, el nuevo permite activar la cuenta y A-01 refleja el estado actualizado?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-10-30 | El backend respondió 200 al reenvío desde A-01, imprimió un nuevo enlace en la consola y confirmó que, al existir dos enlaces, el antiguo ya no sirve | **Aprobado** |
+
+### V-30 · HU-44 — Desactivar un asesor, impedir su acceso y liberar sus propiedades
+1. Crea y activa un asesor de prueba; inicia sesión con él y registra una propiedad.
+2. Cierra sesión, vuelve a entrar como administrador en A-01 y desactiva al asesor con un motivo.
+3. Intenta iniciar sesión con el asesor desactivado y verifica en `GET /api/auth/properties/` o el admin de Django que la propiedad aún existe y tiene `agent: null`.
+
+**Resultado esperado:** ¿A-01 conserva la cuenta como inactiva y muestra el motivo, el asesor no puede iniciar sesión y la propiedad sigue existiendo pero queda sin responsable?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-10-30 | Desde A-01 desactivó una cuenta de asesor. El asesor no pudo iniciar sesión y sus propiedades permanecieron registradas, sin responsable asignado | **Aprobado** |
+
+### V-31 · HU-44 — Restringir A-01 a administradores
+1. Inicia sesión con un asesor.
+2. Comprueba que la navegación no ofrece A-01 e intenta abrir directamente `/dashboard/users`.
+3. Comprueba que `GET /api/auth/users/` responde 403 para ese asesor.
+
+**Resultado esperado:** ¿el asesor no ve ni puede acceder a la lista o las acciones de A-01, incluso al usar la URL directa?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-10-30 | Con sesión de asesor, no pudo ver A-01 y comprobó desde la consola del navegador que `GET /api/auth/users/` respondió 403 | **Aprobado** |
+
+### V-32 · A-01 — Validar el celular ecuatoriano
+1. En `/dashboard/users`, crea o edita una cuenta con un celular como `0991234567`; también prueba escribirlo con espacios, guiones o paréntesis.
+2. Prueba un número que no empiece con `09`, uno con letras y uno internacional con `+593`.
+
+**Resultado esperado:** el celular local de 10 dígitos se guarda normalizado como `09XXXXXXXX`; los valores inválidos se rechazan con un mensaje y no se acepta el formato internacional.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-10-30 | Confirmó que la validación del teléfono funcionó. Se añadió límite visual de 10 dígitos y se muestra el teléfono en la lista; falta comprobar estos dos ajustes en el navegador | **Parcial; ajuste visual pendiente de revalidación** |
+
+---
+
 ## Estado actual (2026-10-30)
 
 - **Ronda 3 validada** (V-20 a V-25, Pablo, 2026-10-29 y 2026-10-30): las 6 aprobadas.
-- **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. **Suite: 90/90 OK**; `makemigrations --check` sin cambios.
+- **HU-44 (Fase B):** rama local reconstruida sobre `origin/develop` (`9801bc9`); se conserva el respaldo `respaldo/HU-44-antes-de-faseB`. **Suite backend: 116/116 OK** con SQLite y correo de consola (53/53 en `apps.users.tests`). Sebas confirmó V-26 a V-31, incluida la invalidación del enlace anterior y el 403 de la API. V-32 confirmó la validación del teléfono; tras los ajustes de límite visual y visualización en lista, falta revalidarlos en el navegador. La validación manual anterior se hizo el 2026-10-30 usando Supabase PostgreSQL según Sebas. No se ha hecho commit, push ni PR.
+- **Seguridad de pruebas (FX-19):** `UserManagementApiTests` fuerza el proveedor de consola y las dos pruebas específicas de Resend parchean el punto de uso en `apps.users.serializers`; así una `.env` local con Resend no dispara llamadas externas durante la suite.
+- **Migraciones:** `users.0007` y `users.0008` aplicadas en la base PostgreSQL conectada. `showmigrations` aún muestra pendientes `appraisals.0002` y `appraisals.0003`; no se aplicaron durante esta tarea. `makemigrations --check --dry-run` propone únicamente `documents/0002_alter_document_file.py` (DT-77); no se generó el archivo.
+- **Frontend:** `npm run build` y `npx tsc --noEmit -p .` aprobados; ESLint sin errores y con 2 warnings previos de `SiteNav` no usado.
+- **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. La suite base de `origin/develop` fue 90/90.
 - **Hallazgos nuevos:** DT-80, DT-81 y DT-82; N-05 ampliada (pregunta también para la empresa); evidencia nueva en DT-01 y DT-74.
 - **Siguiente:** PR a `develop`. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
 

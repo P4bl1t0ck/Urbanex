@@ -43,21 +43,21 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 
 | HU | Criterio | Impl. | Verif. | Valid. | Motivo |
 |---|---|:-:|:-:|:-:|---|
-| HU-44 | Cada usuario tiene correo único | ✗ | ✗ | ✗ | `email` no es único |
-| HU-44 | Admin no puede desactivar su propia cuenta | ✗ | ✗ | ✗ | Sin gestión de usuarios |
+| HU-44 | Cada usuario tiene correo único | ✔ | ✔ | ✗ | Modelo, migraciones y API validados; `apps.users.tests` 53/53 y suite backend 116/116; `users.0007` y `users.0008` aplicadas en PostgreSQL |
+| HU-44 | Admin no puede desactivar su propia cuenta | ✔ | ✔ | ✗ | Endpoint API probado; falta comprobación manual de A-01 (V-26 a V-31) |
 | HU-45 | Solo el administrador desbloquea | ✗ | ✗ | ✗ | Sin endpoint ni UI |
-| HU-45 | Bloqueo tras cinco intentos fallidos | ✔ | ✗ | ✗ | Implementado en `LoginView`; la prueba solo cubre el primer intento |
-| HU-46 | Solo usuarios activos inician sesión | ✗ | ✗ | ✗ | Se emite token a usuarios inactivos |
+| HU-45 | Bloqueo tras cinco intentos fallidos | ✔ | ✔ | ✗ | `LoginView` y prueba automatizada de cinco intentos |
+| HU-46 | Solo usuarios activos inician sesión | ✔ | ✔ | ✗ | Inactivos rechazados antes de emitir JWT; prueba API |
 | HU-46 | Enlace de recuperación de 60 min y de un solo uso | ✗ | ✗ | ✗ | No existe |
 
 | Métrica | Valor |
 |---|---|
-| Implementado | 1/6 = **16,7 %** |
-| Verificado | 0/6 = **0 %** |
+| Implementado | 4/6 = **66,7 %** |
+| Verificado | 4/6 = **66,7 %** |
 | Validado | 0/6 = **0 %** |
 | HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
 
-**Lectura:** EP-1 (Sprint 1) tiene un login operativo que permite usar el sistema, pero **ninguno de sus criterios de aceptación está cumplido y probado**.
+**Lectura:** HU-44 ya cuenta con API, migraciones y pantalla A-01; el backend pasó 53/53 pruebas de usuarios y la suite general 116/116. V-26 a V-31 se confirmaron manualmente; V-32 requiere volver a revisar el límite del campo telefónico y su visualización en la lista tras los ajustes de usabilidad. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
 
 ## 4. EP-2 — Gestión de propiedades y avalúos
 
