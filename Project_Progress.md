@@ -33,13 +33,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## 🚨 ¡PARA MAÑANA, MIÉRCOLES 2026-10-28! (pausa de Pablo el 2026-10-27 por la noche)
+## 🧭 Pendiente ahora (2026-10-29)
 
-> 1. ~~**⏰ 08:00 — D-04:** ¿llegó la fórmula del motor?~~ **No llegó. Plan B activado por Pablo el 2026-10-28:** la propuesta [DS-21](docs/handoff/URBANEX_DS-21_MOTOR_AVALUOS.md) **se aprobó el mismo día con carácter provisional** (D-04 resuelta provisionalmente). El motor se implementa en `feat/URB-10-11-motor-avaluos`.
-> 2. ~~**🧪 URGENTE — Validaciones V-13 a V-18**~~ **Hechas el 2026-10-28 (15:30–16:05): las 6 aprobadas**, registradas en "Ronda 2". Queda V-19 (corta).
-> 3. ~~**🔑 DT-65:** cambiar las contraseñas de las cuentas de la `db.sqlite3` publicada~~ **Hecho en la copia de Pablo el 2026-10-28 (DS-24):** contraseñas inutilizables y sin superusuario. Falta la copia de Sebas.
-> 5. **🧪 Ronda 3 (motor DS-21):** V-20 a V-25, abajo. Antes, `migrate` y `setup_comparables_demo`.
-> 4. ~~Abrir la PR de la tarea 3~~ **Fusionada el 2026-10-28 (PR #6).** **Nuevo orden (DS-22):** primero el motor (HU-04 y HU-06, con I-11) y después la tarea 4 (filtros P-02, DS-16).
+> - **🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25, abajo. Después, la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
+> - **DT-65:** falta la copia de Sebas.
+> - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
 
 ---
 
@@ -392,7 +390,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
   - `ca3542a`: fase 4, HU-04 y HU-06 en el backend;
   - `ba466b8`: fase 5, I-11 e I-12;
   - el commit del handoff y del ajuste de I-11.
-- **Pruebas:** suite **88/88 OK**; `makemigrations --check` sin cambios; `tsc`, `eslint` y `next build` exit 0.
+- **Pruebas:** suite **88/88 OK**; `makemigrations --check` sin cambios; `tsc` y `next build` exit 0; `eslint`: **2 errores previos de DT-24, ninguno nuevo** (corregido el 2026-10-29: `npx eslint .` → 2 errores y 4 avisos en `login/page.tsx:49` y `dashboard/page.tsx:233`, que vienen de `28d117fd` y `2c8d4c45`, ambos anteriores a esta rama).
 - **Validación visual pendiente:** V-20 a V-25.
 - **DT-65:** resuelto en la copia de Pablo (DS-24). La propuesta para sacar la BD del repositorio está en [Seguridad §5.3](docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md#53-dejar-de-versionar-dbsqlite3-y-media-inf-03-dt-70-dt-02-n-04) y **no se ejecutó** (N-04).
 - **Hallazgos nuevos:** DT-74 (un borrador impide recalcular), DT-75 (la antigüedad del dato se mide con `updated_at`) y DT-76 (I-11 muestra datos de mercado de otros asesores).
@@ -571,6 +569,13 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 ---
 
 ## Historial
+
+### Pendientes del 2026-10-28 (pausa de Pablo el 2026-10-27 por la noche; archivado el 2026-10-29)
+1. ~~**⏰ 08:00 — D-04:** ¿llegó la fórmula del motor?~~ **No llegó. Plan B activado por Pablo el 2026-10-28:** la propuesta [DS-21](docs/handoff/URBANEX_DS-21_MOTOR_AVALUOS.md) **se aprobó el mismo día con carácter provisional** (D-04 resuelta provisionalmente). El motor se implementa en `feat/URB-10-11-motor-avaluos`.
+2. ~~**🧪 URGENTE — Validaciones V-13 a V-18**~~ **Hechas el 2026-10-28 (15:30–16:05): las 6 aprobadas**, registradas en "Ronda 2". Queda V-19 (corta).
+3. ~~**🔑 DT-65:** cambiar las contraseñas de las cuentas de la `db.sqlite3` publicada~~ **Hecho en la copia de Pablo el 2026-10-28 (DS-24):** contraseñas inutilizables y sin superusuario. Falta la copia de Sebas.
+4. ~~Abrir la PR de la tarea 3~~ **Fusionada el 2026-10-28 (PR #6).** **Nuevo orden (DS-22):** primero el motor (HU-04 y HU-06, con I-11) y después la tarea 4 (filtros P-02, DS-16).
+5. **🧪 Ronda 3 (motor DS-21):** V-20 a V-25. Antes, `migrate` y `setup_comparables_demo`. *(Sigue pendiente al archivar: ver "Pendiente ahora".)*
 
 ### Sesión anterior (registro hasta 2026-10-22)
 - **Sprint:** Sprint 1

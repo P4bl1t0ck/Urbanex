@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -82,6 +82,8 @@ pipenv run python manage.py makemigrations --check --dry-run
 ```
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
+
+**Ojo (DT-06):** usa la etiqueta del **módulo** de pruebas (`apps.appraisals.tests`), no la del paquete. `pipenv run python manage.py test apps.appraisals` falla con `ImportError: attempted relative import with no known parent package`, porque falta `backend/apps/__init__.py` y `tests.py` importa con `from .engine import …`. Verificado el 2026-10-29: con `apps.appraisals.tests`, 42 OK.
 
 Desde `frontend/`:
 
