@@ -57,7 +57,7 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | Validado | 0/6 = **0 %** |
 | HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
 
-**Lectura:** HU-44 ya cuenta con API, migraciones y pantalla A-01; el backend pasó 53/53 pruebas de usuarios y la suite general 116/116. V-26 a V-31 se confirmaron manualmente; V-32 requiere volver a revisar el límite del campo telefónico y su visualización en la lista tras los ajustes de usabilidad. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
+**Lectura:** HU-44 ya cuenta con API, migraciones y pantalla A-01; el backend pasó 53/53 pruebas de usuarios y la suite general 116/116. V-26 a V-32 se confirmaron manualmente. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
 
 ## 4. EP-2 — Gestión de propiedades y avalúos
 

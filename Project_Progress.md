@@ -36,7 +36,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 🧭 Pendiente ahora (2026-10-30)
 
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
-> - **HU-44 (Fase B):** rama reconstruida sobre `origin/develop`; 116/116 pruebas backend aprobadas en SQLite. Sebas confirmó V-26 a V-31, incluido el 403 de la API y la invalidación del enlace anterior al reenviar. V-32 confirmó la regla telefónica; está pendiente revalidar en navegador el nuevo límite visual, teléfono en la lista y desplazamiento al formulario. Sin commits, push ni PR.
+> - **HU-44 (Fase B):** rama reconstruida sobre `origin/develop`; 116/116 pruebas backend aprobadas en SQLite. Sebas confirmó V-26 a V-32, incluido el 403 de la API, la invalidación del enlace anterior al reenviar y los ajustes de usabilidad del teléfono. Commits publicados; PR pendiente de autenticación en GitKraken.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
 > - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
@@ -83,7 +83,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 >
 > **Cómo usarla:** sigue los pasos de cada prueba y responde la pregunta del resultado esperado. Después llena la fila: **quién** la hizo, **cuándo** (fecha y hora), **qué viste** (textos, estados, capturas si las hay) y el resultado (**Aprobado** / **Fallido**). Si algo falla, anota exactamente qué apareció; con eso se abre o actualiza el DT correspondiente. Ninguna fila se marca como Aprobada por inferencia.
 >
-> **HU-44:** implementación y pruebas automatizadas aprobadas. Sebas confirmó V-26 a V-31, incluido el rechazo del enlace anterior al reenviar y el HTTP 403 para asesores. V-32 confirmó que la validación del teléfono funciona; tras el ajuste de usabilidad, queda pendiente comprobar el límite visual y el teléfono en la lista.
+> **HU-44:** implementación, pruebas automatizadas y validación manual aprobadas. Sebas confirmó V-26 a V-32, incluido el rechazo del enlace anterior al reenviar, el HTTP 403 para asesores y los ajustes de usabilidad del teléfono en A-01.
 
 **Preparación (antes de empezar):**
 1. Desde `backend/`: `pipenv run python manage.py migrate` y luego `pipenv run python manage.py runserver`.
@@ -462,14 +462,14 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| Sebas | 2026-10-30 | Confirmó que la validación del teléfono funcionó. Se añadió límite visual de 10 dígitos y se muestra el teléfono en la lista; falta comprobar estos dos ajustes en el navegador | **Parcial; ajuste visual pendiente de revalidación** |
+| Sebas | 2026-10-30 | Confirmó que los cambios finales funcionan: solo se pueden ingresar hasta 10 dígitos, el teléfono se ve en la lista y el formulario aparece a la vista | **Aprobado** |
 
 ---
 
 ## Estado actual (2026-10-30)
 
 - **Ronda 3 validada** (V-20 a V-25, Pablo, 2026-10-29 y 2026-10-30): las 6 aprobadas.
-- **HU-44 (Fase B):** rama local reconstruida sobre `origin/develop` (`9801bc9`); se conserva el respaldo `respaldo/HU-44-antes-de-faseB`. **Suite backend: 116/116 OK** con SQLite y correo de consola (53/53 en `apps.users.tests`). Sebas confirmó V-26 a V-31, incluida la invalidación del enlace anterior y el 403 de la API. V-32 confirmó la validación del teléfono; tras los ajustes de límite visual y visualización en lista, falta revalidarlos en el navegador. La validación manual anterior se hizo el 2026-10-30 usando Supabase PostgreSQL según Sebas. No se ha hecho commit, push ni PR.
+- **HU-44 (Fase B):** rama local reconstruida sobre `origin/develop` (`9801bc9`); se conserva el respaldo `respaldo/HU-44-antes-de-faseB`. **Suite backend: 116/116 OK** con SQLite y correo de consola (53/53 en `apps.users.tests`). Sebas confirmó V-26 a V-32, incluida la invalidación del enlace anterior, el 403 de la API y los ajustes finales de usabilidad del teléfono. La validación manual anterior se hizo el 2026-10-30 usando Supabase PostgreSQL según Sebas. Los commits se publicaron en la rama; la PR está pendiente del inicio de sesión de GitKraken.
 - **Seguridad de pruebas (FX-19):** `UserManagementApiTests` fuerza el proveedor de consola y las dos pruebas específicas de Resend parchean el punto de uso en `apps.users.serializers`; así una `.env` local con Resend no dispara llamadas externas durante la suite.
 - **Migraciones:** `users.0007` y `users.0008` aplicadas en la base PostgreSQL conectada. `showmigrations` aún muestra pendientes `appraisals.0002` y `appraisals.0003`; no se aplicaron durante esta tarea. `makemigrations --check --dry-run` propone únicamente `documents/0002_alter_document_file.py` (DT-77); no se generó el archivo.
 - **Frontend:** `npm run build` y `npx tsc --noEmit -p .` aprobados; ESLint sin errores y con 2 warnings previos de `SiteNav` no usado.
