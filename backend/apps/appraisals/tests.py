@@ -1,4 +1,5 @@
 import copy
+import json
 from datetime import timedelta
 from decimal import Decimal
 from io import StringIO
@@ -354,6 +355,41 @@ class EngineParametersTests(AppraisalTestMixin, TestCase):
         with self.assertRaises(ValidationError):
             EngineParameters.create_version(parameters=theta, created_by=self.admin)
         self.assertEqual(EngineParameters.objects.count(), 1)
+
+
+class EngineParametersAdminTests(AppraisalTestMixin, TestCase):
+    '''V-25: el rol admin (staff, sin superusuario, sin permisos de modelo) gestiona theta.'''
+    changelist_url = '/admin/appraisals/engineparameters/'
+
+    def test_role_admin_without_model_permissions_sees_and_adds_versions(self):
+        self.admin.is_staff = True
+        self.admin.save(update_fields=['is_staff'])
+        self.client.force_login(self.admin)
+
+        self.assertContains(self.client.get('/admin/'), self.changelist_url)
+        self.assertEqual(self.client.get(self.changelist_url).status_code, 200)
+        self.assertEqual(self.client.get(self.changelist_url + 'add/').status_code, 200)
+
+        theta = copy.deepcopy(THETA_V1)
+        theta['alfa'] = '0'
+        response = self.client.post(self.changelist_url + 'add/', {
+            'parameters': json.dumps(theta),
+            'sources': json.dumps(EngineParameters.active().sources),
+            'note': 'Promedio simple',
+        })
+        self.assertEqual(response.status_code, 302)
+        active = EngineParameters.active()
+        self.assertEqual(active.version, 2)
+        self.assertEqual(active.created_by, self.admin)
+
+    def test_staff_advisor_cannot_see_theta(self):
+        self.agent.is_staff = True
+        self.agent.save(update_fields=['is_staff'])
+        self.client.force_login(self.agent)
+
+        self.assertNotContains(self.client.get('/admin/'), self.changelist_url)
+        self.assertEqual(self.client.get(self.changelist_url).status_code, 403)
+        self.assertEqual(self.client.get(self.changelist_url + 'add/').status_code, 403)
 
 
 class SetupComparablesDemoCommandTests(TestCase):

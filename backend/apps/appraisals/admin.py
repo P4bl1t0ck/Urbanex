@@ -53,6 +53,14 @@ class EngineParametersAdmin(admin.ModelAdmin):
             return {}
         return {'parameters': active.parameters, 'sources': active.sources}
 
+    # El rol admin de la app no trae permisos de modelo de Django: sin esto, un admin que
+    # no es superusuario no ve la app ni la lista (V-25). Se conservan los permisos normales.
+    def has_module_permission(self, request):
+        return is_role_admin(request) or super().has_module_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        return is_role_admin(request) or super().has_view_permission(request, obj)
+
     def has_add_permission(self, request):
         return is_role_admin(request)
 
