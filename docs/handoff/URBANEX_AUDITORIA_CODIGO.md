@@ -1,5 +1,7 @@
 # Urbanex — Auditoría técnica del código
 
+> **Instantánea histórica del 2026-10-25** (último commit que la tocó: `a1c32b7`). No refleja el seeder `setup_demo_data` (FX-15), el motor de avalúos DS-21 (FX-17) ni las validaciones V-01 a V-18. Para el estado vigente, consulta [Estado de procesos](URBANEX_ESTADO_PROCESOS.md), [GPS de archivos](URBANEX_GPS_ARCHIVOS.md) y [Deuda técnica](URBANEX_DEUDA_TECNICA.md). (Nota agregada el 2026-10-29.)
+
 | Campo | Valor |
 |---|---|
 | Propósito | Fotografía técnica verificable del repositorio antes de tocarlo |

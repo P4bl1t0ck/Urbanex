@@ -5,7 +5,7 @@
 | Propósito | Retomar el desarrollo, empezando por Avalúos (HU-04, HU-06, HU-08), sin depender de explicaciones orales |
 | Fecha de auditoría | 2026-10-22 · rama `develop` |
 | Estado | Instantánea. **Actualízala** al cerrar cada HU (ver Paso 5) |
-| Última actualización | 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
+| Última actualización | 2026-10-30 · ronda 3 validada (V-20 a V-25), FX-18 y 90 pruebas. Antes: 2026-10-29 · al día con el motor DS-21 (FX-17) y el seeder (FX-15): usuarios demo, D-04 resuelta provisionalmente, HU-04 y HU-06 implementadas (visual pendiente), 88 pruebas, 10 documentos en `docs/handoff/`. Antes: 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
 
 ---
 
@@ -37,7 +37,8 @@ Orden de lectura:
 - `Property` vive en `backend/apps/users/models.py` y el expediente en `backend/apps/documents/`.
 - El proceso que importa: **captación → expediente + avalúo → publicación**.
 - (2026-10-24) La captación y el expediente funcionan a nivel técnico; el avalúo existe como modelo inmutable **sin motor** (D-04); publicar exige foto + corretaje + avalúo aprobado.
-- (2026-10-25) La pantalla I-12 (`/dashboard/properties/[id]/appraisal`) inicia, calibra y aprueba avalúos; el dashboard enlaza a ella y lista lo que falta al publicar. Validación visual pendiente.
+- (2026-10-25) La pantalla I-12 (`/dashboard/properties/[id]/appraisal`) inicia, calibra y aprueba avalúos; el dashboard enlaza a ella y lista lo que falta al publicar. ~~Validación visual pendiente~~ Validada el 2026-10-27 (V-05 a V-12).
+- (2026-10-28) **Motor de avalúos DS-21 (FX-17):** D-04 quedó **resuelta provisionalmente con DS-21**. La pantalla I-11 (`/dashboard/properties/[id]/appraisal/comparables`) propone de 3 a 5 comparables y el motor calcula el valor sugerido que muestra I-12. Con menos de 3 comparables, el registro es manual (C-02, provisional). Validación visual **aprobada por Pablo el 2026-10-29/30** (V-20 a V-25 en `Project_Progress.md`; V-25 tras FX-18).
 - El catálogo ya no muestra la captación a anónimos (DT-07 resuelto) y `status` es de solo lectura (DT-09 resuelto): la única vía para publicar es `POST …/publish/`.
 - Nada está desplegado; no hay CI.
 
@@ -56,7 +57,7 @@ pipenv install                     # (no ejecutado en la auditoría; el entorno 
 #   Crea backend/.env con las variables SECRET_KEY, DEBUG y ALLOWED_HOSTS
 #   (pide los valores a Pablo; no hay .env.example — DT-21). Pipenv carga .env solo.
 pipenv run python manage.py migrate                # crea también la tabla de avalúos (DT-43)
-pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 52 tests OK (2026-10-24)
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 90 tests OK (2026-10-30)
 pipenv run python manage.py runserver          # (no ejecutado) http://127.0.0.1:8000
 
 # 2. Frontend (Node 25 / npm 10)
@@ -70,14 +71,17 @@ npm run dev                        # (no ejecutado) http://localhost:3000
 - **Comprobar la conexión:** abrir `/login`, entrar y ver "Mis propiedades". Pablo confirmó el 2026-10-22 que el dashboard carga datos.
 - **Ojo:** `manage.py test` **sin etiquetas no encuentra pruebas** (DT-06). Usa siempre las etiquetas.
 
-### Usuarios de prueba (necesarios: hoy todos los usuarios de la BD son `cliente`)
+### Usuarios y datos de prueba (seeder FX-15 y DS-23)
 
-Comandos sugeridos, *no ejecutados en la auditoría*. El login es **por email**; las contraseñas se eligen localmente y no se versionan:
+Desde el 2026-10-27, los usuarios y las propiedades de prueba se crean con comandos; ya no se crean a mano. El login es **por email**. La contraseña se define localmente y no se versiona:
 
 ```bash
-pipenv run python manage.py shell -c "from apps.users.models import User; User.objects.create_user(username='asesor_demo', email='asesor.demo@urbanex.test', password='CAMBIA-ESTA', role='asesor')"
-pipenv run python manage.py shell -c "from apps.users.models import User; User.objects.create_user(username='admin_demo', email='admin.demo@urbanex.test', password='CAMBIA-ESTA', role='admin', is_staff=True)"
+# 1. En backend/.env (no se versiona): DEMO_PASSWORD=<8+ caracteres, no solo números>
+pipenv run python manage.py setup_demo_data          # admin.demo@urbanex.test (admin) y asesor.demo@urbanex.test (asesor) + 4 propiedades demo
+pipenv run python manage.py setup_comparables_demo   # 11 comparables sintéticos en "vendido" para el motor (DS-23)
 ```
+
+Ambos comandos solo corren con `DEBUG=True` y se pueden repetir sin duplicar datos. El seeder no restaura el estado de las propiedades demo (DT-72). Detalle en `Project_Progress.md` → "Validaciones pendientes de Pablo" → Preparación.
 
 ## Paso 3. Dependencias que Avalúos necesita conocer
 
@@ -88,33 +92,33 @@ Detalle completo en el [GPS §2](URBANEX_GPS_ARCHIVOS.md#2-mapa-de-dependencias-
 | Propiedad sujeto del avalúo | Sí | `Property` en `backend/apps/users/models.py` → FK `'users.Property'` |
 | Tipo de propiedad para no mezclar comparables | Sí | `property_type` (`casa`/`departamento`/`local`/`terreno`) |
 | Precio y área para el precio por m² | Sí | `price` (Decimal), `area_m2` (Float): convertir explícitamente |
-| Zona para segmentar comparables | **No** | Falta `zone` (DT-19, N-03) |
-| Coordenadas | Sí, pero vacías | `latitude`/`longitude` existen; 0 de 28 propiedades las tienen |
-| Antigüedad, conservación, área útil, operación | **No** | Dependen de D-04 (DT-19) |
-| Fórmula y umbrales del motor | **No** | Decisión **D-04** abierta: **no la inventes** |
-| Regla de 1–2 comparables | **Contradictoria** | C-02 |
+| Zona para segmentar comparables | **No** (provisional) | Falta `zone` (DT-19, N-03). **(2026-10-28)** El motor usa un radio entre coordenadas mientras no exista (DS-21 §7) |
+| Coordenadas | Sí | `latitude`/`longitude` existen; el motor las exige (`subject_blocker()`). Dato del 2026-10-22: 0 de 28 propiedades las tenían (no verificado hoy) |
+| Antigüedad, conservación, área útil, operación | **No** | No existen (DT-19). El motor v1 no los usa: sus factores son `superficie@1` y `negociacion@1` (DS-21) |
+| Fórmula y umbrales del motor | **Sí, provisional (2026-10-28)** | ~~Decisión D-04 abierta~~ Resuelta provisionalmente con **DS-21** (`URBANEX_DS-21_MOTOR_AVALUOS.md`); θ v1 en observación |
+| Regla de 1–2 comparables | **Provisional** | C-02: registro manual (DS-21), pendiente de confirmar con el tutor |
 | Permisos | Sí | Patrón `role == 'admin' or property.agent_id == user.id` |
 | Autenticación desde el frontend | Sí | `sessionStorage.getItem("access")` + `Authorization: Bearer` |
 | Contrato de corretaje para publicar | Sí (en uso) | `get_missing_publication_requirements()` en `backend/apps/users/views.py` (DS-04) |
 | Patrón de registro inmutable | Sí | `backend/apps/documents/models.py` y `backend/apps/appraisals/models.py` |
-| App `apps.appraisals`, modelo `Appraisal` y endpoints | **Sí (2026-10-24)** | `/api/appraisals/`; placeholder manual hasta D-04 (DS-02). Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md) |
+| App `apps.appraisals`, modelo `Appraisal` y endpoints | **Sí (2026-10-24)** | `/api/appraisals/`; ~~placeholder manual hasta D-04 (DS-02)~~ desde FX-17 calcula con el motor; manual solo con menos de 3 comparables. Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md) |
 | `frontend/types/appraisal.ts` y `authFetch` | **Sí (2026-10-25)** | Ver [GPS HU-08](URBANEX_GPS_ARCHIVOS.md). Usa `authFetch` de `frontend/lib/api.ts` en pantallas nuevas |
-| Pantalla I-12 | **Sí (2026-10-25)**, visual pendiente | `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` |
-| Pantalla I-11 (comparables) | **No** | Es tu trabajo (HU-04); ruta nueva bajo `/dashboard/properties/[id]/appraisal/` |
+| Pantalla I-12 | **Sí (2026-10-25)**, validada con registro manual (V-05 a V-10) | `frontend/app/dashboard/properties/[id]/appraisal/page.tsx` |
+| Pantalla I-11 (comparables) | **Sí (2026-10-28, FX-17)**, validada (V-20, V-23 y V-24; 2026-10-29/30) | `frontend/app/dashboard/properties/[id]/appraisal/comparables/page.tsx` |
 | Servicio de IA (HU-07) | **No** | Fuera de tu alcance; HU-08 debe aceptar la justificación manual |
 
 ## Paso 4. Siguiente paso seguro
 
 Orden recomendado según las dependencias reales:
 
-1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor D-04 (fórmula, factores, umbrales), C-02 (1–2 comparables), N-02 (qué propiedades son comparables) y N-03 (cómo se define la zona). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
-2. **Comprobar la línea base:** ejecutar las 52 pruebas y `tsc` (Paso 2) y anotar el resultado.
+1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor ~~D-04 (fórmula, factores, umbrales)~~ (**resuelta provisionalmente con DS-21**, 2026-10-28), C-02 (1–2 comparables; provisional: manual, falta el tutor), ~~N-02 (qué propiedades son comparables)~~ (resuelta provisionalmente, DS-21) y N-03 (cómo se define la zona; falta la lista de zonas). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
+2. **Comprobar la línea base:** ejecutar las pruebas (90 al 2026-10-30) y `tsc` (Paso 2) y anotar el resultado.
 3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). ~~Cerrar DT-09~~ **Hecho el 2026-10-24** (FX-11).
    - ~~Siguiente incremento sin D-04: pantalla I-12 + `frontend/types/appraisal.ts`~~ **Fases 1, 2 y 3 hechas el 2026-10-25** (commits `161f845`, `af9b416`, `3783919`; la fase 3 tocó `dashboard/page.tsx` en un commit propio, DS-13). **Siguiente:** validación visual y funcional de Pablo.
-4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una sola migración `users.0007` con los campos acordados. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.
-5. **HU-04:** endpoint de candidatos a comparables (mismo tipo y zona) y selección de 3 a 5 con registro manual de respaldo. Pantalla I-11 en una **ruta nueva**, no dentro del modal, para evitar conflictos en `dashboard/page.tsx`.
-6. **HU-06**, solo con D-04 aprobada: cálculo determinista en un servicio aislado y con pruebas para 0, 1–2 y 3+ comparables y para dispersión alta (contexto maestro §12.4).
-7. **HU-08:** backend, pantalla I-12 e integración en el dashboard hechos; falta la validación visual (ver paso 3).
+4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una **migración nueva** de `users`, coordinada con Pablo, con los campos acordados. (2026-10-29) No uses el número `0007`: la rama de HU-44 (`feat/URB-02-HU-44-gestion-usuarios`) ya creó `users.0007` y `users.0008`. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.
+5. ~~**HU-04:** endpoint de candidatos a comparables (mismo tipo y zona) y selección de 3 a 5 con registro manual de respaldo. Pantalla I-11 en una **ruta nueva**~~ **Implementada el 2026-10-28 (FX-17)**: `GET /api/appraisals/candidates/` y la pantalla I-11 en una ruta nueva. Validada por Pablo (V-20, V-23 y V-24; 2026-10-29/30).
+6. ~~**HU-06**, solo con D-04 aprobada~~ **Implementada el 2026-10-28 (FX-17, DS-21)**: motor determinista en `backend/apps/appraisals/engine/`. Pruebas en `backend/apps/appraisals/tests.py`: sin comparables → manual (`test_draft_uses_manual_fallback_placeholder`); 2 → manual (`test_fewer_than_three_is_manual_with_reference`, `test_two_comparables_give_manual_with_reference`); 3 a 5 → ejemplo de DS-21 §8 (`test_worked_example_of_ds21`); dispersión alta → Medio (`test_high_dispersion_gives_medium_and_keeps_three`). Validada por Pablo (V-21, V-22 y V-25, esta tras FX-18; 2026-10-29/30).
+7. **HU-08:** backend, pantalla I-12 e integración en el dashboard hechos; ~~falta la validación visual~~ validada el 2026-10-27 con registro manual (V-05 a V-10). Con el valor del motor: V-21 a V-23.
 8. ~~HU-53: exigir el avalúo aprobado y el corretaje en `PropertyPublishView`~~ **Hecho el 2026-10-24** (commit `cca371e`). ~~Mostrar `missing_requirements` en la UI~~ hecho el 2026-10-25 (`3783919`). Falta: `slug` + metaetiquetas (segundo criterio de HU-53).
 
 **Validación funcional por incremento:** como asesor de prueba, crear una propiedad, abrir su avalúo, seleccionar comparables, ver el valor y calibrarlo. Registrar quién lo probó, cuándo y qué se vio.
@@ -155,4 +159,4 @@ Instrucciones previas para el asistente:
 
 > Esta directiva se complementa con la **DIRECTIVA DE CONTINUIDAD (GPS)** de `PROJECT_PROGRESS.md`, que es obligatoria y prevalece.
 >
-> Directiva de IA: Antes de escribir código nuevo, lee el URBANEX_MASTER_CONTEXT.md y los 7 documentos en docs/handoff/. Trabaja en pasos pequeños, respeta los archivos ya estabilizados, y antes de avanzar pregúntame siempre: '¿Pasaron las pruebas unitarias y visuales del paso anterior antes de que procedamos a implementar esto?'.
+> Directiva de IA: Antes de escribir código nuevo, lee el URBANEX_MASTER_CONTEXT.md y los documentos de docs/handoff/ (10 al 2026-10-29: Auditoría, Avance, Deuda, DS-21, Estado, Estándares, GPS, Guía, Contexto maestro y Seguridad). Trabaja en pasos pequeños, respeta los archivos ya estabilizados, y antes de avanzar pregúntame siempre: '¿Pasaron las pruebas unitarias y visuales del paso anterior antes de que procedamos a implementar esto?'.

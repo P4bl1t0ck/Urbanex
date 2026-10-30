@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-28 · HU-53: validación V-13 a V-18 de la tarea 3 (modales y requisitos del servidor) aprobada; DT-72 (estado de los datos demo). Antes: 2026-10-27 (noche) · validación de Pablo V-01 a V-12 aprobada: **DT-40 cerrado**; resumen actualizado para HU-01, 03, 05, 08 y 53. Antes, el mismo día: PR #2 (URB-15) fusionada en `develop` con pruebas por Postman, **sin validación en la interfaz**; las validaciones pendientes pasan a `Project_Progress.md` (V-01 a V-12). Antes: 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
+| Última actualización | 2026-10-30 · ronda 3 validada por Pablo (V-20 a V-25): HU-04 y HU-06 siguen en **Pruebas** por decisión de Pablo (el proceso se comparará de otra forma), con funcional y visual aprobadas (completas POR CONFIRMAR: C-02 y θ v1 provisionales); HU-08 validada también con el valor del motor; FX-18 (θ en el admin por rol admin). Antes: 2026-10-29 · tabla resumen y secciones al día con el código (auditoría documental): HU-04 y HU-06 pasan a **Pruebas** (técnica aprobada, 88 OK; funcional y visual pendientes, V-20 a V-25); HU-05, HU-08, HU-53, HU-01, la tabla de proceso y C-02 sin referencias vencidas a D-04 o DT-40. Antes: 2026-10-28 (noche) · HU-04 y HU-06 implementadas con el motor DS-21 (FX-17), validación visual pendiente. Antes: 2026-10-28 · HU-53: validación V-13 a V-18 de la tarea 3 (modales y requisitos del servidor) aprobada; DT-72 (estado de los datos demo). Antes: 2026-10-27 (noche) · validación de Pablo V-01 a V-12 aprobada: **DT-40 cerrado**; resumen actualizado para HU-01, 03, 05, 08 y 53. Antes, el mismo día: PR #2 (URB-15) fusionada en `develop` con pruebas por Postman, **sin validación en la interfaz**; las validaciones pendientes pasan a `Project_Progress.md` (V-01 a V-12). Antes: 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
 | Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 (pedidas) + HU-02, HU-09, HU-53 (EP-2, relevantes para Avalúos) + HU-04, HU-06, HU-08 (punto de partida de Sebas) |
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
@@ -39,9 +39,9 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-05](#hu-05) | Registrar las características del inmueble | EP-2 | 1 | En Curso | Pendiente | Parcial: el mapa guarda la ubicación (V-04); faltan los campos de RF-01 (DT-19) | Aprobado (V-04) |
 | [HU-09](#hu-09) | Actualizar una propiedad publicada | EP-2 | 2 | En Curso | Pendiente | Pendiente | Pendiente |
 | [HU-53](#hu-53) | Publicar una propiedad | EP-2 | 3 | En Curso | Aprobado (requisitos de publicación) | Aprobado para los requisitos (V-02, V-11, V-12; **DT-40 cerrado** 2026-10-27); falta `slug`/metaetiquetas | Aprobado (V-02, V-11, V-12; ver DT-57, DT-58) |
-| [HU-04](#hu-04) | Seleccionar comparables para el avalúo | EP-2 | 2 | Por hacer | Pendiente | Pendiente | Pendiente |
-| [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Bloqueado** (D-04) | Pendiente | Pendiente | Pendiente |
-| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12 + integración en el dashboard, 2026-10-25; validada el 2026-10-27, completa POR CONFIRMAR sin motor, D-04) | Aprobado (backend; frontend `tsc`/`eslint`/`build`) | Aprobado con registro manual (V-05 a V-10, Pablo, 2026-10-27; ver N-05) | Aprobado (V-05 a V-10; ver DT-55, DT-56) |
+| [HU-04](#hu-04) | Seleccionar comparables para el avalúo | EP-2 | 2 | **Pruebas** (FX-17, 2026-10-28: endpoint de candidatos + pantalla I-11; validada en la ronda 3; sigue en Pruebas por decisión de Pablo, el proceso se comparará de otra forma; completa **POR CONFIRMAR**: C-02 provisional, falta el tutor) | Aprobado (90 OK, 2026-10-30) | Aprobado (V-20, V-23, V-24; Pablo, 2026-10-29/30) | Aprobado (V-20, V-23, V-24; ver DT-80, DT-81) |
+| [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Pruebas** (FX-17, 2026-10-28: motor DS-21, D-04 resuelta provisionalmente; FX-18 para θ en el admin; validada en la ronda 3; sigue en Pruebas por decisión de Pablo; completa **POR CONFIRMAR**: θ v1 en observación) | Aprobado (90 OK, 2026-10-30) | Aprobado (V-21, V-22, V-25; Pablo, 2026-10-29/30; V-25 tras FX-18) | Aprobado (V-21, V-22, V-25; ver DT-80) |
+| [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12 + integración en el dashboard, 2026-10-25; validada el 2026-10-27 con registro manual; con el valor del motor, validada en V-21 a V-23 el 2026-10-29/30; completa **POR CONFIRMAR**, decisión de Pablo) | Aprobado (backend; frontend `tsc` y `build`; `eslint`: **2 errores previos de DT-24, ninguno nuevo**) | Aprobado con registro manual (V-05 a V-10, Pablo, 2026-10-27; ver N-05) | Aprobado (V-05 a V-10; ver DT-55, DT-56) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | Por hacer | **Fallido** | **Fallido** | Pendiente |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Pendiente | **Fallido** | Pendiente |
@@ -76,11 +76,11 @@ flowchart TD
 
 | Tramo | Antes (2026-10-22) | Ahora (2026-10-24) |
 |---|---|---|
-| Captación oculta al público | Visible para todos | Oculta para anónimos (DT-07 resuelto). Sigue visible para un `cliente` autenticado (DT-39) |
-| Avalúo | No existía | `apps.appraisals`: borrador → calibración → aprobación inmutable. Sin motor (D-04) y sin pantallas (DT-40) |
+| Captación oculta al público | Visible para todos | Oculta para anónimos (DT-07 resuelto). Sigue visible para un `cliente` autenticado (DT-39). **(2026-10-27)** También para cualquier asesor: ve las captaciones de otros (SEC-01, Alta; [Seguridad §1.2](URBANEX_SEGURIDAD_Y_DEUDA.md#12-riesgos-y-plan)) |
+| Avalúo | No existía | `apps.appraisals`: borrador → calibración → aprobación inmutable. Sin motor (D-04) y sin pantallas (DT-40). **(2026-10-25)** Pantalla I-12. **(2026-10-28, FX-17)** Motor DS-21 (D-04 resuelta provisionalmente) y pantalla I-11 de comparables; validación visual pendiente (V-20 a V-25) |
 | Publicar | Sin requisitos | `POST …/publish/` exige foto + corretaje vigente no rechazado + avalúo aprobado, solo desde captación |
 | ~~**Hueco 1 — DT-09 (P0)**~~ | — | **Resuelto (FX-11):** `POST` crea siempre en `captacion`; `PATCH` ignora `status` (`test_create_ignores_status`, `test_patch_cannot_change_status`) |
-| **Hueco 2 — DT-40** | — | Desde la UI no se puede aprobar un avalúo, así que **ninguna propiedad se puede publicar desde el navegador**. Es el comportamiento de negocio esperado hasta que exista I-12. **2026-10-25: implementado en las 3 fases.** I-12 (`/dashboard/properties/[id]/appraisal`) aprueba desde la UI; el dashboard enlaza a I-12, muestra el estado del avalúo en el Expediente y lista `missing_requirements` al publicar. Se cierra cuando una persona publique desde el navegador |
+| **Hueco 2 — DT-40** | — | Desde la UI no se puede aprobar un avalúo, así que **ninguna propiedad se puede publicar desde el navegador**. Es el comportamiento de negocio esperado hasta que exista I-12. **2026-10-25: implementado en las 3 fases.** I-12 (`/dashboard/properties/[id]/appraisal`) aprueba desde la UI; el dashboard enlaza a I-12, muestra el estado del avalúo en el Expediente y lista `missing_requirements` al publicar. Se cierra cuando una persona publique desde el navegador. **Cerrado el 2026-10-27** (DT-40, validación V-11 y V-12 de Pablo) |
 
 ---
 
@@ -98,7 +98,7 @@ flowchart TD
 
 - **Interfaz:** modal con 4 pestañas en `frontend/app/dashboard/page.tsx`. Los datos persisten al cambiar de pestaña; errores por pestaña; vistas previas de imágenes.
 - **Bloqueos y riesgos:** ~~DT-07~~ y ~~DT-09~~ (resueltos 2026-10-24), DT-39 (rol `cliente`), DT-34 (foto al registrar solo en frontend), DT-10 (imágenes sin control de propiedad).
-- **Siguiente paso:** validar en el navegador sin sesión: una propiedad recién creada **no** aparece en `/properties` ni se abre en `/properties/<id>`. Después, DT-39.
+- **Siguiente paso:** ~~validar en el navegador sin sesión: una propiedad recién creada **no** aparece en `/properties` ni se abre en `/properties/<id>`~~ **Hecho el 2026-10-27 (V-01, Pablo, Aprobado).** Quedan DT-39/SEC-01 (también afecta a asesores) y DT-34.
 
 ## HU-02
 
@@ -137,7 +137,7 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 | Criterio | Implementación | Prueba | Resultado |
 |---|---|---|---|
 | Datos con valores numéricos o selectores, sin texto libre | Tipo (botones), precio, área, habitaciones, baños y parqueaderos son numéricos. Ubicación exacta por mapa y buscador Nominatim; latitud y longitud ya se **persisten** (migración `users.0006`) | Ninguna específica | Implementado para los campos existentes, sin prueba; el conjunto de campos de RF-01 está incompleto |
-| Los campos obligatorios se validan antes de calcular | No existe el cálculo (HU-06) | — | Pendiente |
+| Los campos obligatorios se validan antes de calcular | ~~No existe el cálculo (HU-06)~~ **(2026-10-28, FX-17)** `subject_blocker()` exige superficie > 0 y coordenadas antes de proponer comparables o calcular; si faltan, I-11 lo explica y ofrece el registro manual (`backend/apps/appraisals/services.py:17-24`) | `test_candidates_exclude_stale_data_and_explain_blockers` (`backend/apps/appraisals/tests.py:438`) | Implementado y verificado; validación visual pendiente |
 
 - **Falta para el avalúo:** RF-01 pide `zone`, `operation_type`, `usable_area_m2`, `age_years`, `conservation_state`, `floor_number` y `storage_units`; **ninguno existe** en `Property` (DT-19). Sin `zone` no se pueden segmentar los comparables (RF-11).
 - **Mapa:** búsqueda real comprobada contra Nominatim (200, CORS `*`). Faltan la validación visual y comprobar en BD que, tras guardar, las coordenadas no quedan en el valor por defecto de Quito.
@@ -167,29 +167,47 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 **Contrato del 400** (lo que la UI debe mostrar): `{"detail": "No se puede publicar: …", "missing_requirements": [{"code": "image" | "brokerage_contract" | "appraisal", "message": "…"}]}`. **Desde 2026-10-25 (`3783919`)** el dashboard lo muestra como lista sobre la tabla, con "Ir al avalúo" cuando falta el avalúo; el botón "Publicar" solo aparece en `captacion`.
 
-**Validación de extremo a extremo (pendiente, Pablo):**
+**Validación de extremo a extremo** (~~pendiente, Pablo~~ **validada el 2026-10-27: V-01, V-02, V-11 y V-12**, `Project_Progress.md`; queda V-19, ver DT-72):
 1. Sin foto, sin corretaje o sin avalúo, "Publicar" muestra la lista con lo que falta.
 2. Con foto + corretaje + avalúo aprobado en I-12, "Publicar" muestra el aviso verde y el estado pasa a "Disponible"; el botón desaparece.
 3. Sin sesión, la propiedad aparece en `/properties` y su ficha abre.
 
 **Bloqueo funcional esperado (DT-40):** ~~como no existen las pantallas I-11/I-12, un avalúo solo se aprueba por la API.~~ **Desbloqueado en el código el 2026-10-25:** el avalúo se aprueba en I-12 y la publicación se hace desde el dashboard. La fila "Avalúo aprobado" del Expediente ya consulta los avalúos reales. Pendiente: que `get_missing_publication_requirements()` alimente también la Vista 360° (I-10B), que no existe.
 
-**Validación funcional pendiente:** con un asesor de prueba, aprobar un avalúo (desde 2026-10-25 se puede hacer en la pantalla I-12 en lugar de la API), cargar foto y corretaje y publicar desde el dashboard; luego, sin sesión, comprobar que aparece en `/properties`. **Pablo confirmó el 2026-10-25 que todavía no ha hecho esta validación ni la del catálogo anónimo.** **(2026-10-27)** Sigue Pendiente: no hay usuario asesor hasta el seeder (DT-14). Los pasos, el resultado esperado y la fila para registrar la evidencia están en `Project_Progress.md` → "Validaciones pendientes de Pablo": **V-01, V-02, V-11 y V-12** para HU-53 y HU-01; **V-05 a V-10** para HU-08; **V-03** para HU-03; **V-04** para HU-05.
+**Validación funcional pendiente:** con un asesor de prueba, aprobar un avalúo (desde 2026-10-25 se puede hacer en la pantalla I-12 en lugar de la API), cargar foto y corretaje y publicar desde el dashboard; luego, sin sesión, comprobar que aparece en `/properties`. **Pablo confirmó el 2026-10-25 que todavía no ha hecho esta validación ni la del catálogo anónimo.** **(2026-10-27)** Sigue Pendiente: no hay usuario asesor hasta el seeder (DT-14). Los pasos, el resultado esperado y la fila para registrar la evidencia están en `Project_Progress.md` → "Validaciones pendientes de Pablo": **V-01, V-02, V-11 y V-12** para HU-53 y HU-01; **V-05 a V-10** para HU-08; **V-03** para HU-03; **V-04** para HU-05. **(2026-10-27) Hechas y aprobadas** V-01 a V-12 (DT-40 cerrado); lo anterior de este párrafo queda como historial.
 
 ## HU-04
 
 **Seleccionar comparables para el avalúo** · EP-2 · RF-11 · Pantalla I-11 · Sprint 2 (URB-10)
 
 - Criterios (tesis): no permite calcular con menos de 3 ni más de 5 comparables; el avalúo se hace durante la captación y es requisito para publicar; sin comparables suficientes, el avalúo se registra de forma manual.
-- Implementación: **ninguna** para la selección. Desde 2026-10-24 existe `apps.appraisals` con el campo `comparables_snapshot` (hoy siempre `[]`) y el respaldo manual (`is_manual_fallback = True`) que esta HU deberá alimentar. El criterio "el avalúo es requisito para publicar" ya lo aplica HU-53.
-- Dependencias: `Property.zone` (inexistente), datos de comparables (la base de desarrollo no tiene un conjunto de prueba diseñado) y la contradicción C-02.
+- **Implementación (2026-10-28, FX-17, DS-21):**
+  - `GET /api/appraisals/candidates/?property=<id>` propone candidatos del **mismo tipo**, con estado `disponible`, `reservador` o `vendido`, un dato de 365 días como máximo y de la **misma zona** (provisional: hasta 1,5 km, porque no existe `zone`). Los ordena por superficie más parecida y preselecciona 5.
+  - La pantalla **I-11** (`/dashboard/properties/[id]/appraisal/comparables`) deja elegir de 3 a 5 y crea el borrador calculado.
+  - Con menos de 3, el avalúo es **manual** y guarda los encontrados como referencia (C-02, opción A, **provisional hasta el tutor**).
+  - El servidor vuelve a validar cada comparable que envía el cliente.
+- **Proceso:** el asesor ya no inventa el valor desde cero: parte de datos de mercado de la base interna (RF-11) y deja la traza de qué comparó.
+- **Datos de prueba:** `setup_comparables_demo` (DS-23) crea comparables sintéticos en `vendido` alrededor de las propiedades demo (casos ALTO, MEDIO, manual con 2 y manual con 0).
+- **Pendientes:** ~~validación visual (V-20 a V-24)~~ **aprobada por Pablo el 2026-10-29/30** (V-20, V-23 y V-24; V-21 solo se pudo repetir tras aprobar un borrador previo, DT-74); `zone` (N-03), la fecha real del dato (DT-75), la visibilidad de datos de otros asesores (DT-76), comparables identificados solo por id en I-12 (DT-80) y el registro manual lento (DT-81).
 
 ## HU-06
 
 **Obtener el valor sugerido del motor** · EP-2 · RF-11 · Pantalla I-12 · Sprint 2 (URB-11)
 
 - Criterios: el motor procesa los comparables con factores ponderados; el cálculo queda registrado.
-- **Bloqueado** por la decisión **D-04** del contexto maestro (fórmula, factores, umbrales de confianza y datos iniciales), que debe resolverse antes de URB-11. No se debe inventar la fórmula.
+- ~~Bloqueado por D-04~~ **D-04 resuelta provisionalmente con DS-21 (2026-10-28).**
+- **Implementación (FX-17):** motor determinista en `apps/appraisals/engine/` (método comparativo de mercado):
+  - homogeneización con factores registrados y configurables por tipo (`superficie@1`, `negociacion@1`);
+  - descarte de atípicos y combinación con pesos;
+  - confianza ALTO o MEDIO según el CV (≤ 15 %).
+- **Qué se registra al crear el avalúo:** el valor exacto, la confianza, la traza (`comparables_snapshot`) y la versión de θ (`EngineParameters`), todo inmutable. La interfaz muestra el valor **redondeado a cientos**.
+- **Pruebas:** 24 nuevas, entre ellas el ejemplo de DS-21 §8 (USD 143.861,35, ALTO).
+- **Pendientes:** ~~validación visual~~ **aprobada por Pablo el 2026-10-29/30**:
+  - V-21: ejemplo de DS-21 §8, ≈ $143.900, exacto $143.861,35, CV 1,63 %, ALTO, con el atípico en gris;
+  - V-22: Medio, CV 21,27 %;
+  - V-25: θ v2 creada y v1 reactivada desde el admin, tras FX-18.
+
+  Siguen pendientes: confirmar C-02 y la adaptación de la superficie a viviendas con el tutor; θ v1 sigue EN OBSERVACIÓN; un admin creado desde A-01 no podrá gestionar θ (DT-82).
 
 ## HU-08
 
@@ -197,26 +215,26 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 | Criterio | Implementación (2026-10-24, commit `58b968c`) | Prueba | Resultado |
 |---|---|---|---|
-| Conservar el valor del motor, el calibrado y su diferencia | `Appraisal` guarda `suggested_value`, `calibrated_value`, `difference_amount` y `difference_percentage`; `approve()` calcula la diferencia (nula si no hay valor del motor). **I-12 (2026-10-25)** muestra el valor del motor ("No disponible (D-04)"), el calibrado y la diferencia ("No aplica (sin valor del motor)") | `test_approve_computes_differences_when_engine_value_exists`, `test_approve_without_suggested_value_leaves_differences_null` | Aprobado (backend). I-12 implementada; visual pendiente |
+| Conservar el valor del motor, el calibrado y su diferencia | `Appraisal` guarda `suggested_value`, `calibrated_value`, `difference_amount` y `difference_percentage`; `approve()` calcula la diferencia (nula si no hay valor del motor). **I-12 (2026-10-25)** muestra el valor del motor ("No disponible (D-04)"), el calibrado y la diferencia ("No aplica (sin valor del motor)"). **(2026-10-28, FX-17)** Con el motor, I-12 muestra el valor sugerido redondeado y el exacto, o "No disponible (registro manual)" cuando hay menos de 3 comparables (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx:347`) | `test_approve_computes_differences_when_engine_value_exists`, `test_approve_without_suggested_value_leaves_differences_null` | Aprobado (backend). Visual con registro manual: aprobado (V-05 a V-08, 2026-10-27). Con el valor del motor: aprobado (V-21 a V-23, Pablo, 2026-10-29/30) |
 | Un avalúo aprobado no se sobrescribe | Inmutabilidad igual que `Document`: `delete()` y `QuerySet.delete()` bloqueados; `save()` y `QuerySet.update()` validan `MUTABLE_FIELDS`; aprobado = ningún campo cambia. Restricciones de BD: un borrador abierto por propiedad, aprobado exige calibración y justificación. Admin de Django de solo lectura | `test_approved_appraisal_cannot_be_saved`, `…_bulk_updated`, `…_recalibrated_or_reapproved`, `test_appraisals_cannot_be_deleted`, `test_draft_engine_fields_are_immutable`, API: PATCH/approve tras aprobar → 400, PUT/DELETE → 405 | Aprobado (backend) |
 
 - **Ciclo:** `POST /api/appraisals/` (borrador) → `PATCH /api/appraisals/<id>/` (`calibrated_value`, `final_justification`) → `POST /api/appraisals/<id>/approve/`. Permisos: asesor dueño o admin (DS-05). Reevaluar = nuevo avalúo (DS-06).
-- **Placeholder (DS-02):** sin motor (D-04), cada avalúo nace con `suggested_value = NULL`, `is_manual_fallback = True` y confianza `BAJO`. Marcado con `# TODO: Implementar motor de cálculo HITL` en `Appraisal.create_draft()`.
+- **Placeholder (DS-02):** sin motor (D-04), cada avalúo nace con `suggested_value = NULL`, `is_manual_fallback = True` y confianza `BAJO`. Marcado con `# TODO: Implementar motor de cálculo HITL` en `Appraisal.create_draft()`. **(2026-10-28, FX-17)** Superado: `Appraisal.create_draft(comparables=…)` calcula con el motor DS-21 (`backend/apps/appraisals/models.py:270`) y el `TODO` ya no existe. El registro manual (DS-02) se mantiene solo cuando hay menos de 3 comparables (C-02, provisional).
 - **Pantalla I-12 (2026-10-25, commits `161f845` y `af9b416`):** ruta `/dashboard/properties/[id]/appraisal` (DS-10).
   - Sin avalúos: botón explícito **"Iniciar avalúo"** (DS-11).
   - Tarjeta "Referencia": **"Precio actual de publicación"** en un campo gris deshabilitado, solo como referencia (DS-12).
-  - Tarjeta "Resultado del motor": valor sugerido "No disponible (D-04)", confianza `BAJO`, origen "Registro manual" (DS-02).
+  - Tarjeta "Resultado del motor": valor sugerido "No disponible (D-04)", confianza `BAJO`, origen "Registro manual" (DS-02). **(2026-10-28, FX-17)** Ahora muestra el valor del motor, la confianza y el origen "Motor paramétrico · parámetros v{n}", o "Registro manual" (`page.tsx:370-371`).
   - Calibración: valor calibrado (> 0, 2 decimales) y justificación; "Guardar borrador" (PATCH) y "Aprobar avalúo", que pide confirmar que es irreversible y se desactiva si hay cambios sin guardar.
   - Aprobado: vista de solo lectura, "Crear reevaluación" (DS-06) e historial de aprobados.
 - **Integración en el dashboard (fase 3, 2026-10-25, commit `3783919`):** botón "Avalúo" en cada fila; en el modal de edición, la fila "Avalúo aprobado" del Expediente muestra Aprobado (verde), En borrador (ámbar) o Falta, con el enlace "Abrir avalúo".
-- **Validación visual pendiente (Pablo).** Pasos sugeridos, como asesor dueño de una propiedad en captación, entrando con el botón "Avalúo" del dashboard:
+- **Validación visual** (~~pendiente (Pablo)~~ **hecha el 2026-10-27 con registro manual: V-05 a V-10, Aprobado**; la parte del motor, aprobada en V-21 a V-23 el 2026-10-29/30). Pasos sugeridos originales, como asesor dueño de una propiedad en captación, entrando con el botón "Avalúo" del dashboard:
   1. Ves el precio en el campo gris y el botón "Iniciar avalúo"; al pulsarlo aparece el folio y el formulario.
   2. "Aprobar avalúo" está desactivado hasta guardar valor y justificación.
   3. Un valor `0` o `12,5` muestra el error del campo; un valor válido se guarda.
   4. Al aprobar sale la confirmación; después el formulario desaparece y queda la vista de solo lectura y el historial.
   5. "Crear reevaluación" abre un borrador nuevo sin borrar el aprobado.
   6. De vuelta en el dashboard, "Editar" → pestaña Expediente: la fila "Avalúo aprobado" está en verde.
-- **Falta:** las validaciones; HU-07 (borrador IA) llenará `ai_draft_justification`; HU-06 llenará `suggested_value` y `confidence_level`.
+- **Falta:** ~~las validaciones~~ (hechas el 2026-10-27, V-05 a V-10); HU-07 (borrador IA) llenará `ai_draft_justification`. ~~HU-06 llenará `suggested_value` y `confidence_level`~~ **Desde FX-17 (2026-10-28) HU-06 los llena**; validado en la interfaz en V-21 a V-23 (2026-10-29/30).
 - **BD local:** migración aplicada en la copia de Pablo el 2026-10-24 (`showmigrations appraisals` → `[X] 0001_initial`). Cualquier otra copia debe ejecutar `pipenv run python manage.py migrate` (DT-43).
 
 ## HU-37
@@ -273,7 +291,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | ID | Contradicción | Fuentes | Decisión que debe confirmar el equipo |
 |---|---|---|---|
 | C-01 | El pedido de auditoría asocia HU-44, HU-45 y HU-46 al modal con pestañas; la tesis las define como gestión de usuarios, desbloqueo y login | Prompt de auditoría vs Anexo 2 y Anexo 4 de la tesis | Confirmar que el modal pertenece a HU-01, HU-03 y HU-05 (pantalla I-10) |
-| C-02 | HU-04: "no permite calcular con menos de 3 comparables". RF-11 y el contexto maestro: confianza `Medio` con 1–2 comparables y `Bajo` (manual) con 0 | Anexo 2 vs RF-11 y `URBANEX_MASTER_CONTEXT.md` §4 | ¿Con 1–2 comparables se calcula (confianza media) o se pasa a manual? **Bloquea el diseño de HU-04 y HU-06** |
+| C-02 | HU-04: "no permite calcular con menos de 3 comparables". RF-11 y el contexto maestro: confianza `Medio` con 1–2 comparables y `Bajo` (manual) con 0 | Anexo 2 vs RF-11 y `URBANEX_MASTER_CONTEXT.md` §4 | ¿Con 1–2 comparables se calcula (confianza media) o se pasa a manual? ~~Bloquea el diseño de HU-04 y HU-06~~ **(2026-10-28) Provisional por DS-21: manual con 1–2 comparables; pendiente de confirmar con el tutor** ([Deuda C-02](URBANEX_DEUDA_TECNICA.md)) |
 | C-03 | EP-2 tiene "9 historias / 33 pts" (Tabla 23), pero el Anexo 4 le asigna 10 HU (HU-01 a HU-09 + HU-53) que suman 33 pts | Tesis, tabla 23 vs anexo 4 | El contexto maestro adopta 10 HU / 33 pts; corregir la tabla 23 |
 | C-04 | Plan de sprints: la tesis (Tabla 24) pone propiedades en el Sprint 2 y avalúo en el 3; el backlog definitivo del contexto maestro pone propiedades en el 1 y avalúo en el 2 | Tesis vs contexto maestro §8 y §10 | El contexto maestro se declara el plan adoptado; confirmar |
 | C-05 | HU-01 en el Anexo 4 se titula "Registrar y publicar"; en el Anexo 2, "Registrar en captación" (la publicación es HU-53) | Tesis | Usar el título del Anexo 2 |
