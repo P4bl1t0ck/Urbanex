@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **88 OK** (desde el motor DS-21, 2026-10-28). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **90 OK** (desde FX-18, 2026-10-30; antes 88 con el motor DS-21). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -33,9 +33,10 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## 🧭 Pendiente ahora (2026-10-29)
+## 🧭 Pendiente ahora (2026-10-30)
 
-> - **🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25, abajo. Después, la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
+> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
+> - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
 > - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
 
@@ -307,7 +308,9 @@ El enlace "Ir al avalúo" **dentro del modal** de requisitos y el caso "falta so
 |---|---|---|---|
 | | | | Pendiente |
 
-### Ronda 3 — Motor de avalúos DS-21 (rama `feat/URB-10-11-motor-avaluos`, pendientes)
+### Ronda 3 — Motor de avalúos DS-21 (rama `feat/URB-10-11-motor-avaluos`; validada el 2026-10-29 y el 2026-10-30)
+
+> **Resultado:** las 6 aprobadas (V-25, tras FX-18). Hallazgos de la ronda: V-25 falló en el primer intento (corregido con **FX-18**); **DT-80** (I-12 identifica los comparables solo por id), **DT-81** (el registro manual tarda unos 3,5 s), **DT-82** (un admin creado desde A-01 no podrá entrar al admin de Django para gestionar θ), **N-05 ampliada** (¿el avalúo aprobado actualiza el precio? Ahora también es pregunta para la empresa), DT-01 con evidencia nueva (fechas del admin en UTC) y DT-74 con evidencia nueva (un borrador previo impidió repetir V-21).
 
 **Preparación (en este orden, desde `backend/`):**
 > **Hecho el 2026-10-28 en la copia de Pablo:** las migraciones ya estaban aplicadas y `setup_comparables_demo` creó los 11 comparables (La Carolina 1–6 = #40–#45; casas de Cumbayá = #46–#48). Verificado por consola contra la BD: V-21 da $143.861,35 (≈ $143.900, ALTO, CV 1,63 %), V-22 da MEDIO (CV 21,27 %), La Mariscal tiene 2 candidatos y Tumbaco 0, y #32 a #35 no tienen borradores abiertos. Puedes saltar los pasos 1 y 2.
@@ -326,7 +329,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-30 | En I-11 de `#33` (tras aprobar el borrador previo `AV-20261028-965538` y crear la reevaluación) aparecen **7 filas**, con la `#36 [DEMO] Departamento de 2 pisos - Carolina Norte` al final. Con 6 marcadas, "Calcular y crear borrador" se bloquea; con 5 se habilita; con menos de 3 tampoco deja calcular. En el primer intento (2026-10-29) se contaron 6 y se vio un borrador previo de `#33`, creado el 2026-10-28 a las 18:26 hora de Ecuador, que bloqueaba la reevaluación (DT-74) | **Aprobado** |
 
 ### V-21 · HU-06 — El motor calcula, redondea a cientos y explica
 1. En la misma pantalla, marca exactamente "La Carolina 1, 2, 3, 4 y 5 (atípico)" (desmarca la 6).
@@ -336,7 +339,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-30 | Primero se aprobó el borrador previo `AV-20261028-965538` en $144.000. Ese borrador se había calculado con la preselección de I-11 (`#40`, `#41`, `#43`, `#44`, `#45`: exacto $144.113,10, CV 1,05 %, `#44` en gris), lo que coincide con el motor para esa selección. Después, en una reevaluación con La Carolina 1 a 5: valor sugerido **$143.900**, exacto **$143.861,35**, CV **1,63 %**, confianza **Alto**; `#40` a `#43` usados y `#44` en gris ("vendido, atípico, descartado"). Son los números del ejemplo de DS-21 §8 | **Aprobado** |
 
 ### V-22 · HU-06 — Dispersión alta da confianza media
 1. "Avalúo" en `#32 Cumbayá` → "Crear reevaluación" → con las 3 casas marcadas, "Calcular y crear borrador".
@@ -345,7 +348,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-29 | `#32` Cumbayá con las 3 casas sugeridas: confianza **Medio**, CV **21,27 %** (> 15 %); se ven el valor sugerido y el exacto | **Aprobado** |
 
 ### V-23 · HU-04 / C-02 — Con 2 comparables no se calcula
 1. "Avalúo" en `#34 La Mariscal` → "Crear reevaluación".
@@ -355,7 +358,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-29 | `#34` La Mariscal con 2 comparables: "Registrar avalúo manual" (tardó unos 3,5 s, DT-81). En I-12, el valor sugerido dice "No disponible", la confianza es **Bajo** y las columnas factor, ajustado y peso salen vacías. Calibrado en $123.000 con justificación, guardado, aprobado y confirmado: quedó aprobado. No se anotó el texto del aviso de I-11 ni el motivo del registro manual | **Aprobado** |
 
 ### V-24 · HU-04 — Sin comparables
 1. "Avalúo" en `#35 Tumbaco` → "Crear reevaluación".
@@ -364,7 +367,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`asesor.demo`) | 2026-10-29 | `#35` Tumbaco, sin comparables en la zona: "Calcular" desactivado y "Registrar avalúo manual" activo | **Aprobado** |
 
 ### V-25 · DS-21 capa 3 — θ versionado desde el admin
 1. Abre `http://127.0.0.1:8000/admin/` como `admin.demo` → "Parámetros del motor (θ)".
@@ -375,11 +378,18 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (`admin.demo`) | 2026-10-29 / 2026-10-30 | **Primer intento (2026-10-29): Fallido.** Django decía que `admin.demo` no tenía permiso para ver ni editar nada, y "Parámetros del motor" no aparecía. Causa: el admin de θ solo daba por rol el permiso de agregar (FX-18). **Tras FX-18 (2026-10-30):** `admin.demo` ve "Parámetros del motor" y creó la **v2** (`alfa` = 0), que quedó activa con `created_by = admin.demo`; la v1 se desactivó. Después reactivó la v1. Observación: el admin muestra las fechas en UTC (DT-01). No se anotó si la v1 se ve de solo lectura | **Aprobado** (tras FX-18) |
 
 ---
 
-## Estado actual (2026-10-28, noche)
+## Estado actual (2026-10-30)
+
+- **Ronda 3 validada** (V-20 a V-25, Pablo, 2026-10-29 y 2026-10-30): las 6 aprobadas.
+- **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. **Suite: 90/90 OK**; `makemigrations --check` sin cambios.
+- **Hallazgos nuevos:** DT-80, DT-81 y DT-82; N-05 ampliada (pregunta también para la empresa); evidencia nueva en DT-01 y DT-74.
+- **Siguiente:** PR a `develop`. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
+
+### Estado anterior (2026-10-28, noche)
 
 - **PR #6 (tarea 3) fusionada** en `develop` (`44ccd2e`).
 - **Rama `feat/URB-10-11-motor-avaluos`** (desde `develop`), en 7 commits:
@@ -391,7 +401,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
   - `ba466b8`: fase 5, I-11 e I-12;
   - el commit del handoff y del ajuste de I-11.
 - **Pruebas:** suite **88/88 OK**; `makemigrations --check` sin cambios; `tsc` y `next build` exit 0; `eslint`: **2 errores previos de DT-24, ninguno nuevo** (corregido el 2026-10-29: `npx eslint .` → 2 errores y 4 avisos en `login/page.tsx:49` y `dashboard/page.tsx:233`, que vienen de `28d117fd` y `2c8d4c45`, ambos anteriores a esta rama).
-- **Validación visual pendiente:** V-20 a V-25.
+- **Validación visual pendiente:** V-20 a V-25. *(Hecha el 2026-10-29/30: ver "Estado actual".)*
 - **DT-65:** resuelto en la copia de Pablo (DS-24). La propuesta para sacar la BD del repositorio está en [Seguridad §5.3](docs/handoff/URBANEX_SEGURIDAD_Y_DEUDA.md#53-dejar-de-versionar-dbsqlite3-y-media-inf-03-dt-70-dt-02-n-04) y **no se ejecutó** (N-04).
 - **Hallazgos nuevos:** DT-74 (un borrador impide recalcular), DT-75 (la antigüedad del dato se mide con `updated_at`) y DT-76 (I-11 muestra datos de mercado de otros asesores).
 - **Preguntas para el tutor:** C-02 frente a RF-11, la superficie en viviendas y el resto, en la conversación del 2026-10-28.
