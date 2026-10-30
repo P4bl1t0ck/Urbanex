@@ -2,9 +2,11 @@ import io
 import os
 import shutil
 import tempfile
+import hashlib
 from datetime import timedelta
 from decimal import Decimal
 from unittest import mock
+from resend.exceptions import ResendError
 
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
@@ -13,11 +15,12 @@ from django.core.management.base import CommandError
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
+from django.core import mail
 from rest_framework.test import APIClient
 from rest_framework import status
 from apps.appraisals.models import Appraisal
 from apps.documents.models import Document
-from apps.users.models import Property, PropertyImage
+from apps.users.models import Property, PropertyImage, UserActivationToken
 from apps.users.views import get_missing_publication_requirements
 # Create your tests here.
 User = get_user_model()
@@ -40,7 +43,7 @@ class UrbanexCoreTests(TestCase):
             username="cliente.test",
             email="cliente.test@urbanex.ec",
             password="Password123!",
-            role="cliente"
+            role="asesor"
         )
 #El usuario y la contraseña definidas en una clase que usaremos en la prueba.
 
@@ -308,6 +311,44 @@ class UrbanexCoreTests(TestCase):
         self.agent.refresh_from_db()
         self.assertEqual(self.agent.failed_attempts, 1)
 
+    def test_login_accepts_email_with_different_casing(self):
+        self.agent.set_password("Login-test-2026!")
+        self.agent.save(update_fields=["password"])
+
+        response = self.client.post(
+            "/api/auth/login/",
+            {
+                "email": "  ASESOR.TEST@URBANEX.EC  ",
+                "password": "Login-test-2026!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+
+    def test_login_locks_account_after_five_failed_attempts(self):
+        for _ in range(5):
+            response = self.client.post(
+                "/api/auth/login/",
+                {
+                    "email": self.agent.email,
+                    "password": "PasswordIncorrecta",
+                },
+                format="json",
+            )
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.agent.refresh_from_db()
+        self.assertEqual(self.agent.failed_attempts, 5)
+        self.assertTrue(self.agent.is_locked)
+
+        response = self.client.post(
+            "/api/auth/login/",
+            {"email": self.agent.email, "password": "AnyPassword"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 # DT-14 / DS-17: comando setup_demo_data
 DEMO_PASSWORD = "Demo-Urbanex-2026!"
@@ -331,9 +372,9 @@ class SetupDemoDataCommandTests(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def _run(self, password=DEMO_PASSWORD):
+    def _run(self, password=DEMO_PASSWORD, *, stdout=None):
         with mock.patch.dict(os.environ, {"DEMO_PASSWORD": password}):
-            call_command("setup_demo_data", stdout=io.StringIO())
+            call_command("setup_demo_data", stdout=stdout or io.StringIO())
 
     def _missing_codes(self, title_fragment):
         property_obj = Property.objects.get(title__contains=title_fragment)
@@ -373,7 +414,7 @@ class SetupDemoDataCommandTests(TestCase):
         self.assertEqual(self._missing_codes("La Carolina"), {"appraisal"})
         self.assertEqual(self._missing_codes("La Mariscal"), {"brokerage_contract"})
         self.assertEqual(self._missing_codes("Tumbaco"), {"image", "brokerage_contract", "appraisal"})
-        # Sin motor (DS-02): el avalúo demo no inventa un valor sugerido
+        # El seeder usa el flujo manual y no fija un valor sugerido del motor.
         appraisal = Appraisal.objects.approved().get(property__title__contains="Cumbayá")
         self.assertIsNone(appraisal.suggested_value)
 
@@ -400,3 +441,486 @@ class SetupDemoDataCommandTests(TestCase):
         self._run()
         draft.refresh_from_db()
         self.assertEqual(draft.status, Appraisal.Status.BORRADOR)
+
+    def test_rerun_does_not_reactivate_deactivated_demo_agent(self):
+        self._run()
+        agent = User.objects.get(email="asesor.demo@urbanex.test")
+        agent.is_active = False
+        agent.deactivation_reason = "Fin de prueba"
+        agent.is_locked = True
+        agent.failed_attempts = 4
+        agent.save(
+            update_fields=[
+                "is_active",
+                "deactivation_reason",
+                "is_locked",
+                "failed_attempts",
+            ]
+        )
+
+        output = io.StringIO()
+        self._run(stdout=output)
+
+        agent.refresh_from_db()
+        self.assertFalse(agent.is_active)
+        self.assertEqual(agent.deactivation_reason, "Fin de prueba")
+        self.assertTrue(agent.is_locked)
+        self.assertEqual(agent.failed_attempts, 4)
+        self.assertIn("sigue inactivo", output.getvalue())
+
+@override_settings(EMAIL_PROVIDER="console")
+class UserManagementApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_user(
+            username="manager.test",
+            email="manager@urbanex.test",
+            password="Admin-test-2026!",
+            role="admin",
+            is_staff=True,
+        )
+        self.advisor = User.objects.create_user(
+            username="advisor.test",
+            email="advisor@urbanex.test",
+            password="Advisor-test-2026!",
+            role="asesor",
+        )
+
+    def create_property_for_advisor(self):
+        return Property.objects.create(
+            agent=self.advisor,
+            title="Propiedad del asesor",
+            description="Registro de prueba",
+            property_type="casa",
+            price=150000,
+            area_m2=120,
+            location="Quito",
+        )
+
+    def test_django_superuser_is_also_an_application_admin(self):
+        superuser = User.objects.create_superuser(
+            username="root.test",
+            email="root@urbanex.test",
+            password="Secure-Root-2026!",
+        )
+
+        self.assertTrue(superuser.is_superuser)
+        self.assertEqual(superuser.role, "admin")
+
+    def test_only_admin_can_list_users(self):
+        response = self.client.get("/api/auth/users/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.client.force_authenticate(user=self.advisor)
+        response = self.client.get("/api/auth/users/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_list_users_without_password_data(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.get("/api/auth/users/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertNotIn("password", response.data[0])
+
+    def test_admin_creates_inactive_user_and_sends_activation_email(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            "/api/auth/users/",
+            {
+                "email": "new.advisor@urbanex.test",
+                "first_name": "Nuevo",
+                "last_name": "Asesor",
+                "phone": "0991234567",
+                "role": "asesor",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        created_user = User.objects.get(email="new.advisor@urbanex.test")
+        self.assertFalse(created_user.is_active)
+        self.assertFalse(created_user.has_usable_password())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("activate", mail.outbox[0].body)
+
+    def test_admin_normalizes_local_ecuadorian_mobile_phone(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            "/api/auth/users/",
+            {
+                "email": "formatted.phone@urbanex.test",
+                "phone": "(09) 9123-4567",
+                "role": "asesor",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["phone"], "0991234567")
+        self.assertEqual(
+            User.objects.get(email="formatted.phone@urbanex.test").phone,
+            "0991234567",
+        )
+
+    def test_admin_rejects_non_local_or_invalid_phone_numbers(self):
+        self.client.force_authenticate(user=self.admin)
+
+        for index, phone in enumerate(
+            ("1234567890", "09912345ab", "+593991234567", "09912345678")
+        ):
+            with self.subTest(phone=phone):
+                response = self.client.post(
+                    "/api/auth/users/",
+                    {
+                        "email": f"invalid.phone.{index}@urbanex.test",
+                        "phone": phone,
+                        "role": "asesor",
+                    },
+                    format="json",
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn("phone", response.data)
+
+    def test_admin_creation_normalizes_email(self):
+        self.client.force_authenticate(user=self.admin)
+
+        with self.settings(EMAIL_PROVIDER="console"):
+            response = self.client.post(
+                "/api/auth/users/",
+                {
+                    "email": "  New.Advisor@Urbanex.Test  ",
+                    "first_name": "Nuevo",
+                    "role": "asesor",
+                },
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["email"], "new.advisor@urbanex.test")
+        self.assertTrue(
+            User.objects.filter(email="new.advisor@urbanex.test").exists()
+        )
+
+    def test_admin_can_send_activation_email_with_resend(self):
+        self.client.force_authenticate(user=self.admin)
+
+        with (
+            self.settings(
+                EMAIL_PROVIDER="resend",
+                RESEND_API_KEY="re_test_key",
+                DEFAULT_FROM_EMAIL="Urbanex <no-reply@urbanex.test>",
+            ),
+            mock.patch("apps.users.serializers.resend.Emails.send") as send_email,
+        ):
+            response = self.client.post(
+                "/api/auth/users/",
+                {
+                    "email": "resend.advisor@urbanex.test",
+                    "first_name": "Nuevo",
+                    "role": "asesor",
+                },
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        params = send_email.call_args.args[0]
+        self.assertEqual(params["from"], "Urbanex <no-reply@urbanex.test>")
+        self.assertEqual(params["to"], ["resend.advisor@urbanex.test"])
+        self.assertEqual(params["subject"], "Activa tu cuenta de Urbanex")
+        self.assertIn("/activate#", params["text"])
+
+    def test_resend_failure_returns_gateway_error_and_rolls_back_user_creation(self):
+        self.client.force_authenticate(user=self.admin)
+
+        with (
+            self.settings(
+                EMAIL_PROVIDER="resend",
+                RESEND_API_KEY="re_test_key",
+                DEFAULT_FROM_EMAIL="Urbanex <no-reply@urbanex.test>",
+            ),
+            mock.patch(
+                "apps.users.serializers.resend.Emails.send",
+                side_effect=ResendError(
+                    403,
+                    "validation_error",
+                    "The domain is not verified.",
+                    "Verify the sending domain.",
+                ),
+            ),
+        ):
+            response = self.client.post(
+                "/api/auth/users/",
+                {"email": "rejected@urbanex.test", "role": "asesor"},
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_502_BAD_GATEWAY)
+        self.assertIn("No se pudo enviar", response.data["detail"])
+        self.assertFalse(User.objects.filter(email="rejected@urbanex.test").exists())
+
+    def test_admin_rejects_duplicate_email(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            "/api/auth/users/",
+            {"email": self.advisor.email, "role": "asesor"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(User.objects.filter(email=self.advisor.email).count(), 1)
+
+    def test_admin_rejects_duplicate_email_with_different_casing(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            "/api/auth/users/",
+            {"email": "  ADVISOR@URBANEX.TEST  ", "role": "asesor"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            User.objects.filter(email__iexact=self.advisor.email).count(), 1
+        )
+
+    def test_admin_cannot_create_client_role(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            "/api/auth/users/",
+            {"email": "client@urbanex.test", "role": "cliente"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(User.objects.filter(email="client@urbanex.test").exists())
+
+    def test_user_delete_endpoint_is_not_available(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.delete(f"/api/auth/users/{self.advisor.pk}/")
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertTrue(User.objects.filter(pk=self.advisor.pk).exists())
+        self.advisor.refresh_from_db()
+        self.assertTrue(self.advisor.is_active)
+
+    def test_admin_edits_only_allowed_profile_fields(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            f"/api/auth/users/{self.advisor.pk}/",
+            {
+                "first_name": "Nombre actualizado",
+                "last_name": "Apellido actualizado",
+                "phone": "0987654321",
+                "role": "admin",
+                "email": "changed@urbanex.test",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.advisor.refresh_from_db()
+        self.assertEqual(self.advisor.email, "advisor@urbanex.test")
+
+        response = self.client.patch(
+            f"/api/auth/users/{self.advisor.pk}/",
+            {
+                "first_name": "Nombre actualizado",
+                "last_name": "Apellido actualizado",
+                "phone": "0987654321",
+                "role": "admin",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.advisor.refresh_from_db()
+        self.assertEqual(self.advisor.first_name, "Nombre actualizado")
+        self.assertEqual(self.advisor.last_name, "Apellido actualizado")
+        self.assertEqual(self.advisor.phone, "0987654321")
+        self.assertEqual(self.advisor.role, "admin")
+
+    def test_last_active_admin_cannot_be_demoted(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.patch(
+            f"/api/auth/users/{self.admin.pk}/",
+            {"role": "asesor"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.admin.refresh_from_db()
+        self.assertEqual(self.admin.role, "admin")
+
+    def test_admin_cannot_deactivate_self(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            f"/api/auth/users/{self.admin.pk}/deactivate/",
+            {"reason": "Prueba"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.admin.refresh_from_db()
+        self.assertTrue(self.admin.is_active)
+
+    def test_deactivation_keeps_user_and_unassigns_properties(self):
+        property_obj = self.create_property_for_advisor()
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            f"/api/auth/users/{self.advisor.pk}/deactivate/",
+            {"reason": "Fin de pruebas del asesor."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.advisor.refresh_from_db()
+        property_obj.refresh_from_db()
+        self.assertFalse(self.advisor.is_active)
+        self.assertEqual(self.advisor.deactivation_reason, "Fin de pruebas del asesor.")
+        self.assertIsNone(property_obj.agent_id)
+        self.assertTrue(User.objects.filter(pk=self.advisor.pk).exists())
+
+    def test_deactivation_requires_reason(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            f"/api/auth/users/{self.advisor.pk}/deactivate/",
+            {"reason": "   "},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.advisor.refresh_from_db()
+        self.assertTrue(self.advisor.is_active)
+
+    def test_activation_token_is_one_time_and_expires_after_24_hours(self):
+        self.client.force_authenticate(user=self.admin)
+        create_response = self.client.post(
+            "/api/auth/users/",
+            {
+                "email": "activation@urbanex.test",
+                "first_name": "Activar",
+                "last_name": "Cuenta",
+                "role": "asesor",
+            },
+            format="json",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        activation_token = mail.outbox[-1].body.rsplit("#", 1)[1].strip()
+        self.assertIn(f"/activate#{activation_token}", mail.outbox[-1].body)
+
+        self.client.force_authenticate(user=None)
+        response = self.client.post(
+            "/api/auth/users/activate/",
+            {"token": activation_token, "password": "Safe-Pass-2026!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        activated_user = User.objects.get(email="activation@urbanex.test")
+        self.assertTrue(activated_user.is_active)
+        self.assertTrue(activated_user.check_password("Safe-Pass-2026!"))
+
+        repeated_response = self.client.post(
+            "/api/auth/users/activate/",
+            {"token": activation_token, "password": "Another-Safe-2026!"},
+            format="json",
+        )
+        self.assertEqual(repeated_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_expired_activation_token_is_rejected(self):
+        self.client.force_authenticate(user=self.admin)
+        create_response = self.client.post(
+            "/api/auth/users/",
+            {"email": "expired@urbanex.test", "role": "asesor"},
+            format="json",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        activation_token = mail.outbox[-1].body.rsplit("#", 1)[1].strip()
+        token_hash = hashlib.sha256(activation_token.encode("utf-8")).hexdigest()
+        UserActivationToken.objects.filter(token_hash=token_hash).update(
+            expires_at=timezone.now() - timedelta(seconds=1)
+        )
+
+        self.client.force_authenticate(user=None)
+        response = self.client.post(
+            "/api/auth/users/activate/",
+            {"token": activation_token, "password": "Safe-Pass-2026!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(User.objects.get(email="expired@urbanex.test").is_active)
+
+    def test_admin_can_resend_activation_and_old_token_is_invalidated(self):
+        self.client.force_authenticate(user=self.admin)
+        create_response = self.client.post(
+            "/api/auth/users/",
+            {"email": "resend@urbanex.test", "role": "asesor"},
+            format="json",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(email="resend@urbanex.test")
+        previous_token = mail.outbox[-1].body.rsplit("#", 1)[1].strip()
+
+        response = self.client.post(
+            f"/api/auth/users/{user.pk}/resend-activation/",
+            {},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_token = mail.outbox[-1].body.rsplit("#", 1)[1].strip()
+        self.assertNotEqual(previous_token, new_token)
+
+        self.client.force_authenticate(user=None)
+        old_token_response = self.client.post(
+            "/api/auth/users/activate/",
+            {"token": previous_token, "password": "Safe-Pass-2026!"},
+            format="json",
+        )
+        self.assertEqual(old_token_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_deactivated_user_cannot_be_reactivated_by_resending_activation(self):
+        self.client.force_authenticate(user=self.admin)
+        self.client.post(
+            "/api/auth/users/",
+            {"email": "deactivated@urbanex.test", "role": "asesor"},
+            format="json",
+        )
+        user = User.objects.get(email="deactivated@urbanex.test")
+        user.deactivation_reason = "Baja administrativa."
+        user.save(update_fields=["deactivation_reason"])
+
+        response = self.client.post(
+            f"/api/auth/users/{user.pk}/resend-activation/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
+
+    def test_inactive_users_cannot_log_in(self):
+        self.advisor.is_active = False
+        self.advisor.save(update_fields=["is_active"])
+
+        response = self.client.post(
+            "/api/auth/login/",
+            {"email": self.advisor.email, "password": "Advisor-test-2026!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

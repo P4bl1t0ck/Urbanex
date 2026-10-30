@@ -4,13 +4,22 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 //We create the modular function for handle the infor from the DANJO API.
 
-export async function apiFetch(path: string, options: RequestInit = {}) {
+export async function apiFetch<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...options.headers },
   });
-  if (!res.ok) throw new Error(`Error ${res.status}`);
-  return res.json();
+  const text = await res.text();
+  let body: unknown = null;
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = text;
+    }
+  }
+  if (!res.ok) throw new ApiError(res.status, body);
+  return body as T;
 }
 
 // Error de la API que conserva el estado HTTP y el cuerpo (errores por campo de DRF,
@@ -28,7 +37,6 @@ export class ApiError extends Error {
 }
 
 function getErrorMessage(status: number, body: unknown): string {
-  if (status === 401) return "La sesión venció. Inicia sesión nuevamente.";
   if (body && typeof body === "object") {
     const data = body as Record<string, unknown>;
     if (typeof data.detail === "string") return data.detail;
@@ -37,6 +45,7 @@ function getErrorMessage(status: number, body: unknown): string {
     const message = Array.isArray(first) ? first[0] : first;
     if (typeof message === "string") return message;
   }
+  if (status === 401) return "La sesión venció. Inicia sesión nuevamente.";
   return `Error ${status} al comunicarse con el servidor.`;
 }
 
@@ -63,7 +72,14 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
     }
   }
 
-  if (!res.ok) throw new ApiError(res.status, body);
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new ApiError(res.status, {
+        detail: "La sesión venció. Inicia sesión nuevamente.",
+      });
+    }
+    throw new ApiError(res.status, body);
+  }
   return body as T;
 }
 
@@ -95,4 +111,3 @@ export async function getPropertyById(id:string): Promise<Property> {
   }
   return res.json();
 }
-
