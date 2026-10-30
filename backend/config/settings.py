@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'apps.users.properties.apps.PropertiesConfig',  # <-- Se corrigió 'apss' a 'apps'
     'apps.documents.apps.DocumentsConfig',  # Expediente digital (RF-10)
     'apps.appraisals.apps.AppraisalsConfig',  # Avalúos (RF-11)
+    'apps.opportunities.apps.OpportunitiesConfig',  # Seguimiento de oportunidades (RF-05, RF-06)
 ]
 
 MIDDLEWARE = [
