@@ -4,8 +4,8 @@
 |---|---|
 | Propósito | Saber qué archivo implementa qué HU, qué riesgo tiene tocarlo y de qué depende Avalúos |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-30 · `appraisals/admin.py` (FX-18, θ por rol admin) y `appraisals/tests.py` (44 pruebas). Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): `engine/`, `services.py`, `EngineParameters`, comando `setup_comparables_demo` y pantalla I-11. Antes: 2026-10-28 · `setup_demo_data` no restaura el estado (DT-72); tarea 3 validada (V-13 a V-18). Antes: 2026-10-27 (tarea 3) · endpoint de requisitos de publicación, `components/Dialog.tsx` y dashboard sin `alert`/`confirm`. Antes: 2026-10-27 (tarea 5) · §3: precaución de seguridad para `users/views.py`/`serializers.py`. Antes: 2026-10-27 · comando `setup_demo_data` (DT-14, `817da84`) y 6 pruebas nuevas en `users/tests.py`. Antes: 2026-10-25 · fase 3 en `dashboard/page.tsx` (`3783919`); pantalla I-12 (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx`), `frontend/types/appraisal.ts` y `authFetch` en `frontend/lib/api.ts` (DT-40, fases 1 y 2). Antes: 2026-10-24, app `apps.appraisals` y cambios en `users/views.py` y `users/tests.py` |
-| Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 + dependencias de HU-04, HU-06, HU-08 |
+| Última actualización | 2026-10-30 (tarde) · EP-5, primer corte (FX-19): app nueva `apps.opportunities` (DS-27), pantallas I-06 e I-07, `types/opportunity.ts` y `lib/opportunities.ts`; una línea en `config/settings.py` y una en `config/urls.py` (§3). Antes: 2026-10-30 · `appraisals/admin.py` (FX-18, θ por rol admin) y `appraisals/tests.py` (44 pruebas). Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): `engine/`, `services.py`, `EngineParameters`, comando `setup_comparables_demo` y pantalla I-11. Antes: 2026-10-28 · `setup_demo_data` no restaura el estado (DT-72); tarea 3 validada (V-13 a V-18). Antes: 2026-10-27 (tarea 3) · endpoint de requisitos de publicación, `components/Dialog.tsx` y dashboard sin `alert`/`confirm`. Antes: 2026-10-27 (tarea 5) · §3: precaución de seguridad para `users/views.py`/`serializers.py`. Antes: 2026-10-27 · comando `setup_demo_data` (DT-14, `817da84`) y 6 pruebas nuevas en `users/tests.py`. Antes: 2026-10-25 · fase 3 en `dashboard/page.tsx` (`3783919`); pantalla I-12 (`frontend/app/dashboard/properties/[id]/appraisal/page.tsx`), `frontend/types/appraisal.ts` y `authFetch` en `frontend/lib/api.ts` (DT-40, fases 1 y 2). Antes: 2026-10-24, app `apps.appraisals` y cambios en `users/views.py` y `users/tests.py` |
+| Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 + dependencias de HU-04, HU-06, HU-08 + (2026-10-30) HU-27 y HU-34 (EP-5) |
 
 > **Este GPS es una guía de precauciones, no una lista de archivos intocables.** Sebas puede modificar lo necesario para Avalúos, siempre que revise las dependencias indicadas y ejecute las pruebas listadas.
 
@@ -102,6 +102,22 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 | `frontend/lib/api.ts` (`apiFetch`) | Cliente HTTP | Fetch genérico | Código | Listo | Medio | Lanza `Error ${status}` sin el detalle del backend (DT-26). Desde 2026-10-25 existe `authFetch`/`ApiError` en el mismo archivo, que sí lo conserva |
 | — | Recuperación de contraseña (I-02), gestión de usuarios (A-01) | **No existen** | — | — | — | — |
 
+### HU-27 y HU-34 · Abrir oportunidades y cartera con filtros (EP-5, 2026-10-30) → estado [HU-27](URBANEX_ESTADO_PROCESOS.md#hu-27) · [HU-34](URBANEX_ESTADO_PROCESOS.md#hu-34)
+
+| Ruta | Capa | Responsabilidad | Evidencia | Estado | Riesgo | Precauciones |
+|---|---|---|---|---|---|---|
+| `backend/apps/opportunities/models.py` | Modelo | `Contact`, `Opportunity` (todos los campos de §7) y `OpportunityStatusHistory` inmutable; restricción `opportunity_single_active_per_contact_property` | 16 pruebas de modelo (commit `257ba1c`) | Pruebas | Medio | `TERMINAL_STATUSES` (`CIERRE`, `PERDIDA`) define qué es "activa" (DS-28): cambiarlo exige una migración de la restricción. El historial no admite `update` ni `delete`. `property` es nombre de FK: dentro de la clase usar `@builtins.property` |
+| `backend/apps/opportunities/validators.py` | Dominio | `normalize_phone()`: celular de Ecuador → `+5939XXXXXXXX` (DS-28) | `NormalizePhoneTests` | Pruebas | Bajo | `Contact.phone` es único sobre el valor normalizado: cualquier entrada nueva (RF-02, RF-03, Messenger) debe pasar por esta función |
+| `backend/apps/opportunities/services.py` | Servicio | `open_manual_opportunity()` (HU-27) y `get_or_create_contact()`, reutilizable por HU-15/HU-16; `eligible_properties()` y `assignable_agents()` | Pruebas de API (commit `4282a87`) | Pruebas | Medio | Única vía para abrir una oportunidad: transacción, 409 por `OpportunityConflict` y fila de apertura en el historial. No crear oportunidades con `Opportunity.objects.create` fuera de un servicio |
+| `backend/apps/opportunities/serializers.py`, `views.py`, `urls.py` | Serializer / vista | `POST` y `GET /api/opportunities/` (filtros, paginación de 20, rango en hora de Ecuador), `eligible-properties/` y `agents/` | 19 pruebas de API | Pruebas | Medio | `IsInternalUser` deja fuera al rol `cliente`. `EligiblePropertySerializer` solo expone datos públicos (DS-28): no agregar el asesor. Los querysets de entrada están limitados a lo elegible (DT-67) |
+| `backend/apps/opportunities/admin.py` | Admin | Solo lectura de las tres tablas | Código | Listo | Bajo | — |
+| `backend/apps/opportunities/migrations/0001_initial.py` | Migración | Tablas, índices y restricción | Aplicada en las pruebas; **cada copia ejecuta `migrate`** (DT-43) | Listo | Medio | Depende de `users.0006`: no choca con las `users.0007`/`0008` de la rama de HU-44. No editar una vez compartida |
+| `backend/apps/opportunities/tests.py` | Test | 35 pruebas (modelo y API) | 35/35 OK; suite completa 125/125 (2026-10-30) | — | — | Se ejecuta con la etiqueta `apps.opportunities.tests` (DT-06) |
+| `frontend/types/opportunity.ts` | Tipos | Contrato TS de la API | `tsc` OK (commit `199294a`) | Listo | Medio | Espejo de `serializers.py`: cambiar ambos en el mismo commit |
+| `frontend/lib/opportunities.ts` | Cliente HTTP | Llamadas a `/api/opportunities/` con `authFetch` | `tsc`, `eslint` OK | Listo | Bajo | No modifica `lib/api.ts` (compartido) |
+| `frontend/app/dashboard/opportunities/page.tsx` | UI (I-06) | Cartera paginada con filtros; `?opened=` y `?property=` en la URL | `tsc`, `eslint`, `next build` OK; **visual pendiente** (V-30, V-31) | Pruebas | Medio | Sin pruebas automáticas (DT-37). El rol de `sessionStorage` solo decide qué controles se ven. Filtro de propiedad limitado (DT-103) |
+| `frontend/app/dashboard/opportunities/new/page.tsx` | UI (I-07) | Apertura manual con confirmación en `Dialog`, errores por campo, aviso de 409 y de contacto reutilizado | `tsc`, `eslint`, `next build` OK; **visual pendiente** (V-26 a V-29, V-32) | Pruebas | Medio | Sin enlace en el menú (DT-101) |
+
 ## 2. Mapa de dependencias de Avalúos (HU-04, HU-06, HU-08)
 
 ```mermaid
@@ -165,8 +181,8 @@ flowchart LR
 |---|---|---|
 | `backend/apps/users/models.py` | `User` + `Property` + `PropertyImage` en un solo archivo | Avisar antes de agregar campos; dos migraciones `users.0007` paralelas generan conflicto (`makemigrations --merge`) |
 | `backend/apps/users/migrations/` | Numeración secuencial | Hacer pull antes de `makemigrations`; nunca editar migraciones aplicadas |
-| `backend/config/settings.py` | `INSTALLED_APPS`, zona horaria, DRF | Un cambio de `TIME_ZONE` o de los permisos por defecto afecta a todas las apps |
-| `backend/config/urls.py` | Rutas raíz | Ya incluye `api/appraisals/` (2026-10-24); agregar rutas nuevas sin tocar las demás |
+| `backend/config/settings.py` | `INSTALLED_APPS`, zona horaria, DRF | Un cambio de `TIME_ZONE` o de los permisos por defecto afecta a todas las apps. (2026-10-30) Incluye `apps.opportunities` (una línea, FX-19); la rama de HU-44 cambia otras zonas del archivo (BD y correo). Si DT-01 cambia `TIME_ZONE`, el filtro de fechas de I-06 sigue bien: ya usa `America/Guayaquil` de forma explícita |
+| `backend/config/urls.py` | Rutas raíz | Ya incluye `api/appraisals/` (2026-10-24) y `api/opportunities/` (2026-10-30); agregar rutas nuevas sin tocar las demás |
 | `backend/apps/users/views.py` | Catálogo, detalle y publicación | `PUBLIC_STATUSES` y `get_missing_publication_requirements()` son reglas de negocio: cambiarlas exige actualizar pruebas, Estado de procesos y Deuda |
 | `frontend/app/dashboard/page.tsx` | Modal de propiedad + Expediente + lista | Si Avalúos se integra aquí, evitar que dos personas editen el archivo a la vez; mejor crear rutas nuevas (`/dashboard/properties/[id]/appraisal`) |
 | `frontend/types/property.ts` | Contrato usado por 5 archivos | Cambiar el tipo y el serializer en el mismo commit |

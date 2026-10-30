@@ -5,7 +5,7 @@
 | Propósito | Retomar el desarrollo, empezando por Avalúos (HU-04, HU-06, HU-08), sin depender de explicaciones orales |
 | Fecha de auditoría | 2026-10-22 · rama `develop` |
 | Estado | Instantánea. **Actualízala** al cerrar cada HU (ver Paso 5) |
-| Última actualización | 2026-10-30 · ronda 3 validada (V-20 a V-25), FX-18 y 90 pruebas. Antes: 2026-10-29 · al día con el motor DS-21 (FX-17) y el seeder (FX-15): usuarios demo, D-04 resuelta provisionalmente, HU-04 y HU-06 implementadas (visual pendiente), 88 pruebas, 10 documentos en `docs/handoff/`. Antes: 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
+| Última actualización | 2026-10-30 (tarde) · comando de pruebas con `apps.opportunities.tests` (EP-5, FX-19) y 125 pruebas. Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25), FX-18 y 90 pruebas. Antes: 2026-10-29 · al día con el motor DS-21 (FX-17) y el seeder (FX-15): usuarios demo, D-04 resuelta provisionalmente, HU-04 y HU-06 implementadas (visual pendiente), 88 pruebas, 10 documentos en `docs/handoff/`. Antes: 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
 
 ---
 
@@ -56,8 +56,8 @@ cd backend
 pipenv install                     # (no ejecutado en la auditoría; el entorno ya existía)
 #   Crea backend/.env con las variables SECRET_KEY, DEBUG y ALLOWED_HOSTS
 #   (pide los valores a Pablo; no hay .env.example — DT-21). Pipenv carga .env solo.
-pipenv run python manage.py migrate                # crea también la tabla de avalúos (DT-43)
-pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 90 tests OK (2026-10-30)
+pipenv run python manage.py migrate                # crea también las tablas de avalúos y oportunidades (DT-43)
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests   # esperado: 125 tests OK (2026-10-30)
 pipenv run python manage.py runserver          # (no ejecutado) http://127.0.0.1:8000
 
 # 2. Frontend (Node 25 / npm 10)
@@ -112,7 +112,7 @@ Detalle completo en el [GPS §2](URBANEX_GPS_ARCHIVOS.md#2-mapa-de-dependencias-
 Orden recomendado según las dependencias reales:
 
 1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor ~~D-04 (fórmula, factores, umbrales)~~ (**resuelta provisionalmente con DS-21**, 2026-10-28), C-02 (1–2 comparables; provisional: manual, falta el tutor), ~~N-02 (qué propiedades son comparables)~~ (resuelta provisionalmente, DS-21) y N-03 (cómo se define la zona; falta la lista de zonas). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
-2. **Comprobar la línea base:** ejecutar las pruebas (90 al 2026-10-30) y `tsc` (Paso 2) y anotar el resultado.
+2. **Comprobar la línea base:** ejecutar las pruebas (125 al 2026-10-30) y `tsc` (Paso 2) y anotar el resultado.
 3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). ~~Cerrar DT-09~~ **Hecho el 2026-10-24** (FX-11).
    - ~~Siguiente incremento sin D-04: pantalla I-12 + `frontend/types/appraisal.ts`~~ **Fases 1, 2 y 3 hechas el 2026-10-25** (commits `161f845`, `af9b416`, `3783919`; la fase 3 tocó `dashboard/page.tsx` en un commit propio, DS-13). **Siguiente:** validación visual y funcional de Pablo.
 4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una **migración nueva** de `users`, coordinada con Pablo, con los campos acordados. (2026-10-29) No uses el número `0007`: la rama de HU-44 (`feat/URB-02-HU-44-gestion-usuarios`) ya creó `users.0007` y `users.0008`. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.

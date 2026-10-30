@@ -1,10 +1,10 @@
-# Urbanex — Avance verificable de épicas (EP-1 y EP-2)
+# Urbanex — Avance verificable de épicas (EP-1, EP-2 y EP-5)
 
 | Campo | Valor |
 |---|---|
-| Propósito | Medir el avance real de EP-1 y EP-2 con un método reproducible, separando lo escrito de lo probado y de lo validado |
+| Propósito | Medir el avance real de EP-1, EP-2 y EP-5 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
+| Última actualización | 2026-10-30 (tarde) · nueva sección **EP-5** (§5), primer corte (FX-19): **4/20 implementados y verificados (20 %)**, 0/20 validados (V-26 a V-32 pendientes). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
 | Fuentes | Composición de épicas: tesis, Anexo 4 (columna "Épica"), y contexto maestro §9.1 y §10. Criterios: tesis, Anexo 2. Evidencia: [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) |
 | No disponible | Tablero de Jira y planillas Excel (no están en el repositorio). El estado en Jira es **POR CONFIRMAR** |
 
@@ -14,6 +14,7 @@
 |---|---|---|---|---|
 | EP-1 | Acceso y administración de usuarios | Autenticación, sesión, recuperación de contraseña, usuarios y roles, desbloqueo | HU-44, HU-45, HU-46 | 8 |
 | EP-2 | Gestión de propiedades y avalúos | Registro y publicación, captador, inventario, documentación inicial, motor de avalúos HITL | HU-01, 02, 03, 04, 05, 06, 07, 08, 09, 53 | 33 |
+| EP-5 | Seguimiento comercial (seguimiento de oportunidades, DS-27) | Conversaciones iniciales, apertura manual, asignación, avance de estados, interacciones, Perdida, recordatorios, detalle y filtros | HU-26, 27, 28, 29, 30, 31, 32, 33, 34 | 32 |
 
 La tabla 23 dice "9 historias" para EP-2, pero el Anexo 4 asigna 10 (contradicción C-03). Aquí se usan las **10**, igual que el contexto maestro.
 
@@ -131,7 +132,44 @@ Con I-12, el verificado subiría a **8/24 (33,3 %)**; con DT-39, a **9/24 (37,5 
 
 - **HU-04 (todos sus criterios validados), HU-06 (ídem) y HU-08: si cuentan como completas está POR CONFIRMAR (Pablo).** El motor existe y está validado, pero C-02 (1–2 comparables → manual) es provisional hasta el tutor y θ v1 sigue EN OBSERVACIÓN. Hasta la decisión, 0 pts.
 
-## 5. Bloqueos y dependencias que afectan al avance
+## 5. EP-5 — Seguimiento de oportunidades (2026-10-30)
+
+Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Criterios: tesis, Anexo 2 (`ProyectoCapstoneV4 (3).md`, sección "Seguimiento de oportunidades"). El orden se adelantó por DS-26; el primer corte es HU-27 y HU-34 (FX-19).
+
+| HU | Criterio | Impl. | Verif. | Valid. | Motivo |
+|---|---|:-:|:-:|:-:|---|
+| HU-26 | Lista las conversaciones pendientes | ✗ | ✗ | ✗ | No iniciado (`InitialConversation`, Messenger) |
+| HU-26 | El asesor puede marcarlas como atendidas | ✗ | ✗ | ✗ | No iniciado |
+| HU-27 | Exige un teléfono válido | ✔ | ✔ | ✗ | (2026-10-30, FX-19) Celular de Ecuador normalizado (DS-28). `NormalizePhoneTests`, `test_invalid_phone_is_rejected_and_nothing_is_created`. Validación visual pendiente (V-27) |
+| HU-27 | Reutiliza el contacto si ya existe | ✔ | ✔ | ✗ | (2026-10-30) Por teléfono, sin cambiar sus datos y con aviso (DS-28). `test_existing_contact_is_reused_without_changing_its_data`. Pendiente (V-28) |
+| HU-28 | La reasignación exige un motivo | ✗ | ✗ | ✗ | No iniciado (`AssignmentHistory`) |
+| HU-28 | Notifica al asesor entrante y al saliente | ✗ | ✗ | ✗ | No iniciado |
+| HU-29 | Avanza en la secuencia de RF-06 | ✗ | ✗ | ✗ | Corte posterior (DS-26); los estados existen en el modelo, sin transiciones |
+| HU-29 | Cada cambio registra fecha, hora y usuario | ✗ | ✗ | ✗ | Parcial: `OpportunityStatusHistory` registra la apertura (inmutable, probado), pero aún no hay cambios de estado. Parcial = no cuenta |
+| HU-29 | Pendiente de Cierre es el tope del asesor | ✗ | ✗ | ✗ | No iniciado |
+| HU-29 | Registra el precio final acordado al pasar a Pendiente de Cierre | ✗ | ✗ | ✗ | El campo `agreed_final_price` existe (DS-28), sin uso |
+| HU-30 | La negociación no modifica el precio público | ✗ | ✗ | ✗ | No iniciado (`OpportunityInteraction`) |
+| HU-30 | El historial no es editable retroactivamente | ✗ | ✗ | ✗ | No iniciado |
+| HU-31 | Exige un motivo | ✗ | ✗ | ✗ | El campo `loss_or_reversion_reason` existe, sin uso |
+| HU-31 | Puede hacerse desde cualquier estado | ✗ | ✗ | ✗ | No iniciado |
+| HU-32 | Recordatorios por inactividad, visita, documento o asignación | ✗ | ✗ | ✗ | No iniciado (`Reminder`, D-06) |
+| HU-32 | No se duplican para la misma oportunidad | ✗ | ✗ | ✗ | No iniciado |
+| HU-33 | Muestra estado, interacciones y documentos vinculados | ✗ | ✗ | ✗ | Sin I-06A; los documentos dependen de DT-31 |
+| HU-33 | El historial se presenta en orden cronológico | ✗ | ✗ | ✗ | El modelo ya ordena por fecha, pero no hay pantalla que lo muestre |
+| HU-34 | Los filtros se combinan | ✔ | ✔ | ✗ | (2026-10-30) Asesor, propiedad, estado y fechas en hora de Ecuador. `test_filters_combine`, `test_date_range_is_read_in_ecuador_time`. Pendiente (V-30) |
+| HU-34 | El asesor ve su cartera; el administrador ve todas | ✔ | ✔ | ✗ | (2026-10-30) `test_agent_sees_only_his_portfolio_and_admin_sees_all`, `test_agent_filter_does_not_leak_other_portfolios`. Pendiente (V-31) |
+
+| Métrica | Valor |
+|---|---|
+| Total de criterios | 20 |
+| Implementado | 4/20 = **20 %** (2026-10-30) |
+| Verificado | 4/20 = **20 %** (backend: 35 pruebas de `apps.opportunities.tests`; las pantallas I-06 e I-07 compilan con `tsc`, `eslint` y `next build`, sin pruebas automáticas, DT-37) |
+| Validado | 0/20 = **0 %** (V-26 a V-32 pendientes de Pablo) |
+| HU completas / puntos | 0/9 HU · 0/32 pts = **0 %** |
+
+**Lectura:** el primer corte cubre los dos criterios de HU-27 y los dos de HU-34 en el backend y en la interfaz. Si Pablo aprueba V-26 a V-32, HU-27 (3 pts) y HU-34 (3 pts) quedarían completas: **2/9 HU · 6/32 pts (18,8 %)**.
+
+## 6. Bloqueos y dependencias que afectan al avance
 
 | Bloqueo | HU afectadas | Cómo se desbloquea |
 |---|---|---|
@@ -141,7 +179,7 @@ Con I-12, el verificado subiría a **8/24 (33,3 %)**; con DT-39, a **9/24 (37,5 
 | ~~No hay usuarios `asesor`/`admin` en la BD de desarrollo~~ | ~~Validación de todas las HU con reglas por rol~~ | **Resuelto 2026-10-27:** `pipenv run python manage.py setup_demo_data` (DT-14) |
 | D-05: política de JWT y sesión | HU-46 | Decisión técnica |
 
-## 6. Siguientes pasos para mover los porcentajes
+## 7. Siguientes pasos para mover los porcentajes
 1. **Validado (barato):** que una persona pruebe en el navegador HU-03 (subida de PDF e imagen, versión v2) y HU-01 (creación y asignación al asesor) y lo registre. Puede subir el avance validado de EP-2 a 3/24 sin escribir código.
 2. **Verificado:** agregar una prueba que suba una imagen (HU-03) y otra para el bloqueo a los 5 intentos (HU-45).
 3. ~~**Implementado:** filtrar el catálogo público (HU-01) y comenzar `apps.appraisals`~~ Hecho el 2026-10-24 (backend), junto con DT-09. ~~Construir I-12~~ Hecho el 2026-10-25. **Siguiente:** fase 3 de DT-40 (dashboard) y cerrar DT-39.

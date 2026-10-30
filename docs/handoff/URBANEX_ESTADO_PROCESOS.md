@@ -4,8 +4,8 @@
 |---|---|
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-30 · ronda 3 validada por Pablo (V-20 a V-25): HU-04 y HU-06 siguen en **Pruebas** por decisión de Pablo (el proceso se comparará de otra forma), con funcional y visual aprobadas (completas POR CONFIRMAR: C-02 y θ v1 provisionales); HU-08 validada también con el valor del motor; FX-18 (θ en el admin por rol admin). Antes: 2026-10-29 · tabla resumen y secciones al día con el código (auditoría documental): HU-04 y HU-06 pasan a **Pruebas** (técnica aprobada, 88 OK; funcional y visual pendientes, V-20 a V-25); HU-05, HU-08, HU-53, HU-01, la tabla de proceso y C-02 sin referencias vencidas a D-04 o DT-40. Antes: 2026-10-28 (noche) · HU-04 y HU-06 implementadas con el motor DS-21 (FX-17), validación visual pendiente. Antes: 2026-10-28 · HU-53: validación V-13 a V-18 de la tarea 3 (modales y requisitos del servidor) aprobada; DT-72 (estado de los datos demo). Antes: 2026-10-27 (noche) · validación de Pablo V-01 a V-12 aprobada: **DT-40 cerrado**; resumen actualizado para HU-01, 03, 05, 08 y 53. Antes, el mismo día: PR #2 (URB-15) fusionada en `develop` con pruebas por Postman, **sin validación en la interfaz**; las validaciones pendientes pasan a `Project_Progress.md` (V-01 a V-12). Antes: 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
-| Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 (pedidas) + HU-02, HU-09, HU-53 (EP-2, relevantes para Avalúos) + HU-04, HU-06, HU-08 (punto de partida de Sebas) |
+| Última actualización | 2026-10-30 (tarde) · EP-5, primer corte (FX-19, DS-26 a DS-28): **HU-27** y **HU-34** pasan a **Pruebas** (técnica aprobada, 125 OK; funcional y visual pendientes, V-26 a V-32); HU-37 al día (las oportunidades ya existen, sin estados). Antes: 2026-10-30 · ronda 3 validada por Pablo (V-20 a V-25): HU-04 y HU-06 siguen en **Pruebas** por decisión de Pablo (el proceso se comparará de otra forma), con funcional y visual aprobadas (completas POR CONFIRMAR: C-02 y θ v1 provisionales); HU-08 validada también con el valor del motor; FX-18 (θ en el admin por rol admin). Antes: 2026-10-29 · tabla resumen y secciones al día con el código (auditoría documental): HU-04 y HU-06 pasan a **Pruebas** (técnica aprobada, 88 OK; funcional y visual pendientes, V-20 a V-25); HU-05, HU-08, HU-53, HU-01, la tabla de proceso y C-02 sin referencias vencidas a D-04 o DT-40. Antes: 2026-10-28 (noche) · HU-04 y HU-06 implementadas con el motor DS-21 (FX-17), validación visual pendiente. Antes: 2026-10-28 · HU-53: validación V-13 a V-18 de la tarea 3 (modales y requisitos del servidor) aprobada; DT-72 (estado de los datos demo). Antes: 2026-10-27 (noche) · validación de Pablo V-01 a V-12 aprobada: **DT-40 cerrado**; resumen actualizado para HU-01, 03, 05, 08 y 53. Antes, el mismo día: PR #2 (URB-15) fusionada en `develop` con pruebas por Postman, **sin validación en la interfaz**; las validaciones pendientes pasan a `Project_Progress.md` (V-01 a V-12). Antes: 2026-10-25 · rama `feat/URB-13-HU-08-pantalla-avaluo` · HU-08: pantalla I-12 e integración en el dashboard (fases 1, 2 y 3 de DT-40); HU-53: `missing_requirements` en la UI. Antes: 2026-10-24, HU-01 (DT-07), HU-08 (modelo base) y HU-53 (bloqueo de publicación) |
+| Alcance | HU-01, HU-03, HU-05, HU-37, HU-44, HU-45, HU-46 (pedidas) + HU-02, HU-09, HU-53 (EP-2, relevantes para Avalúos) + HU-04, HU-06, HU-08 (punto de partida de Sebas) + (2026-10-30) HU-27 y HU-34 (EP-5, primer corte) |
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
 Detalle técnico en [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) · archivos en [GPS](URBANEX_GPS_ARCHIVOS.md) · porcentajes en [Avance de épicas](URBANEX_AVANCE_EPICAS.md).
@@ -42,6 +42,8 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-04](#hu-04) | Seleccionar comparables para el avalúo | EP-2 | 2 | **Pruebas** (FX-17, 2026-10-28: endpoint de candidatos + pantalla I-11; validada en la ronda 3; sigue en Pruebas por decisión de Pablo, el proceso se comparará de otra forma; completa **POR CONFIRMAR**: C-02 provisional, falta el tutor) | Aprobado (90 OK, 2026-10-30) | Aprobado (V-20, V-23, V-24; Pablo, 2026-10-29/30) | Aprobado (V-20, V-23, V-24; ver DT-80, DT-81) |
 | [HU-06](#hu-06) | Obtener el valor sugerido del motor | EP-2 | 2 | **Pruebas** (FX-17, 2026-10-28: motor DS-21, D-04 resuelta provisionalmente; FX-18 para θ en el admin; validada en la ronda 3; sigue en Pruebas por decisión de Pablo; completa **POR CONFIRMAR**: θ v1 en observación) | Aprobado (90 OK, 2026-10-30) | Aprobado (V-21, V-22, V-25; Pablo, 2026-10-29/30; V-25 tras FX-18) | Aprobado (V-21, V-22, V-25; ver DT-80) |
 | [HU-08](#hu-08) | Calibrar y aprobar el avalúo | EP-2 | 2 | **Pruebas** (backend + pantalla I-12 + integración en el dashboard, 2026-10-25; validada el 2026-10-27 con registro manual; con el valor del motor, validada en V-21 a V-23 el 2026-10-29/30; completa **POR CONFIRMAR**, decisión de Pablo) | Aprobado (backend; frontend `tsc` y `build`; `eslint`: **2 errores previos de DT-24, ninguno nuevo**) | Aprobado con registro manual (V-05 a V-10, Pablo, 2026-10-27; ver N-05) | Aprobado (V-05 a V-10; ver DT-55, DT-56) |
+| [HU-27](#hu-27) | Abrir un contacto y una oportunidad manualmente | EP-5 | 5 | **Pruebas** (FX-19, 2026-10-30: API + pantalla I-07; adelantada por DS-26) | Aprobado (35 OK en `apps.opportunities.tests`; 125 OK la suite, 2026-10-30) | Pendiente (V-26 a V-29) | Pendiente (V-26 a V-29, V-32) |
+| [HU-34](#hu-34) | Buscar oportunidades con filtros | EP-5 | 5 | **Pruebas** (FX-19, 2026-10-30: API + pantalla I-06; adelantada por DS-26) | Aprobado (ídem) | Pendiente (V-30, V-31) | Pendiente (V-30, V-31) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | Por hacer | **Fallido** | **Fallido** | Pendiente |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | En Curso | Pendiente | **Fallido** | Pendiente |
@@ -244,7 +246,7 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 | Criterio (tesis) | Implementación | Resultado |
 |---|---|---|
 | Solo el administrador valida | `Document.validate_document()` exige `role == 'admin'` | Aprobado a nivel de modelo (`test_only_admin_can_validate`, `test_rejection_requires_reason`, `test_old_versions_cannot_be_validated`). Sin endpoint ni UI |
-| Un documento rechazado o faltante bloquea el avance | Esta regla **sí está escrita en la tesis** (Anexo 2) y en RF-10 ("Impide pasar de Evaluación Documental a Pendiente de Cierre…"). No implementada: no existen las oportunidades (Sprint 5–6) | Pendiente |
+| Un documento rechazado o faltante bloquea el avance | Esta regla **sí está escrita en la tesis** (Anexo 2) y en RF-10 ("Impide pasar de Evaluación Documental a Pendiente de Cierre…"). No implementada: no existen las oportunidades (Sprint 5–6). **(2026-10-30)** `Opportunity` ya existe (FX-19), pero sin los estados de RF-06 ni `Document.opportunity` (DT-31) | Pendiente |
 
 ~~Pregunta de negocio abierta (N-01)~~ **Resuelta 2026-10-24 (DS-04):** un `CORRETAJE` vigente en estado `RECHAZADO` **impide publicar**; uno `PENDIENTE` lo permite. Implementado en HU-53.
 
@@ -285,6 +287,32 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 - El pedido original agrupaba HU-44, HU-45 y HU-46 con el "modal de propiedades". En la tesis son historias de acceso (ver C-01). El modal se audita en HU-01, HU-03 y HU-05.
 
 ---
+
+## HU-27
+
+**Abrir un contacto y una oportunidad manualmente** · EP-5 · RF-05 · Pantalla I-07 · Sprint 5 (URB-30), adelantada por DS-26
+
+**Proceso:** un interesado llega por un canal no integrado (llamada, referido). El asesor registra el contacto y abre la oportunidad sobre una propiedad disponible; la oportunidad nace en Contacto inicial, a su cargo (RF-08), y la apertura queda en el historial de estados.
+
+| Criterio (tesis, Anexo 2) | Implementación | Prueba | Resultado |
+|---|---|---|---|
+| Exige un teléfono válido | `normalize_phone()`: celular de Ecuador, guardado como `+5939XXXXXXXX` (DS-28). El servidor responde 400 con el error en `phone` y no crea nada | `NormalizePhoneTests`, `test_invalid_phone_is_rejected_and_nothing_is_created` | Implementado y verificado; validación **Pendiente** (V-27) |
+| Reutiliza el contacto si ya existe | Busca por el teléfono normalizado; conserva el nombre y el correo guardados y responde `contact_reused: true`; I-07 avisa con los datos guardados (DS-28) | `test_existing_contact_is_reused_without_changing_its_data` | Implementado y verificado; validación **Pendiente** (V-28) |
+
+- **Reglas de RF-05 y DS-28 también implementadas y probadas:** una sola oportunidad activa por contacto e inmueble (restricción de la BD + 409 con el id de la existente; V-29), solo propiedades `disponible`, checkbox LOPDP obligatorio con fecha y hora, el admin elige un asesor activo y el selector solo muestra datos públicos (V-32).
+- **Fuera del corte:** I-06A (detalle), el avance de estados (HU-29), Perdida (HU-31) y la notificación de "nueva asignación" (RF-16, HU-32) cuando el admin asigna a otro asesor.
+- **Pendientes conocidos:** sin enlace en el menú (DT-101); "sector" = `location` (DT-102); sin auditoría RF-14 (DT-104).
+
+## HU-34
+
+**Buscar oportunidades con filtros** · EP-5 · RF-05, RF-06 · Pantalla I-06 · Sprint 5 (URB-34), adelantada por DS-26
+
+| Criterio (tesis, Anexo 2) | Implementación | Prueba | Resultado |
+|---|---|---|---|
+| Los filtros se combinan | `filter_opportunities()`: asesor, propiedad, estado y rango de la fecha de apertura en hora de Ecuador (DS-28, DT-01); un valor mal formado responde 400 | `test_filters_combine`, `test_date_range_is_read_in_ecuador_time`, `test_malformed_filters_return_400` | Implementado y verificado; validación **Pendiente** (V-30) |
+| El asesor ve su cartera; el administrador ve todas | `get_queryset()` filtra por `assigned_agent` salvo para el admin; filtrar por otro asesor no revela nada; el rol `cliente` recibe 403 | `test_agent_sees_only_his_portfolio_and_admin_sees_all`, `test_agent_filter_does_not_leak_other_portfolios`, `test_client_role_cannot_list` | Implementado y verificado; validación **Pendiente** (V-31) |
+
+- **Limitación:** el filtro de propiedad solo ofrece las disponibles (DT-103).
 
 ## Contradicciones entre fuentes
 

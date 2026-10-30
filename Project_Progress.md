@@ -21,7 +21,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **90 OK** (desde FX-18, 2026-10-30; antes 88 con el motor DS-21). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → hoy **125 OK** (desde FX-19, 2026-10-30; antes 90 sin `apps.opportunities`). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -35,7 +35,8 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 🧭 Pendiente ahora (2026-10-30)
 
-> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
+> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32**, todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **sin push ni PR** (lo autoriza Pablo). El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo.
+> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. ~~**Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.~~ **Fusionada (PR #7, `9801bc9`).**
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
 > - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
@@ -380,9 +381,105 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 |---|---|---|---|
 | Pablo (`admin.demo`) | 2026-10-29 / 2026-10-30 | **Primer intento (2026-10-29): Fallido.** Django decía que `admin.demo` no tenía permiso para ver ni editar nada, y "Parámetros del motor" no aparecía. Causa: el admin de θ solo daba por rol el permiso de agregar (FX-18). **Tras FX-18 (2026-10-30):** `admin.demo` ve "Parámetros del motor" y creó la **v2** (`alfa` = 0), que quedó activa con `created_by = admin.demo`; la v1 se desactivó. Después reactivó la v1. Observación: el admin muestra las fechas en UTC (DT-01). No se anotó si la v1 se ve de solo lectura | **Aprobado** (tras FX-18) |
 
+### Ronda 4 — EP-5, primer corte: HU-27 (I-07) y HU-34 (I-06) (rama `feat/URB-30-34-HU-27-HU-34-oportunidades`)
+
+> **Estado: las 7 pruebas están Pendientes (Pablo).** Ninguna se marca como aprobada por inferencia.
+
+**Preparación (desde `backend/`):**
+1. `pipenv run python manage.py migrate`: aplica `opportunities.0001`. Tu `db.sqlite3` cambia: **no la incluyas en ningún commit** (DT-02).
+2. Reinicia `runserver` y `npm run dev`. Inicia sesión como `asesor.demo`.
+3. Las pantallas aún **no tienen enlace en el menú** (DT-101): entra escribiendo la URL `http://localhost:3000/dashboard/opportunities`.
+4. Usa datos ficticios (los celulares de abajo). **Ojo:** las oportunidades y su historial **no se pueden borrar** (el historial es inmutable y la oportunidad está protegida); quedan en tu BD local.
+
+### V-26 · HU-27 — Abrir una oportunidad manual (asesor)
+1. En I-06 pulsa "+ Abrir oportunidad".
+2. Nombre `Prueba Uno`, celular `0991112233`, sin correo; elige `#33 La Carolina` (o cualquier tarjeta disponible); marca la casilla de la política de privacidad.
+3. "Abrir oportunidad" → confirma en el modal.
+
+**Resultado esperado:** ¿el modal pide confirmar y avisa que la apertura no se puede eliminar? ¿Vuelve a I-06 con el aviso verde "Oportunidad #N abierta en Contacto inicial" y la fila resaltada, con el celular `+593991112233`, el estado **Contacto inicial**, el canal **Captación manual** y la fecha y hora de Ecuador?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | **Pendiente** |
+
+### V-27 · HU-27 — Celular inválido y política de privacidad
+1. En I-07, con otra propiedad, escribe el fijo `022345678` → "Abrir oportunidad" → confirma.
+2. Corrige el celular a `0994445566`, desmarca la casilla de privacidad y pulsa "Abrir oportunidad".
+
+**Resultado esperado:** en el paso 1, ¿aparece bajo "Celular" el error "Ingrese un celular de Ecuador válido: 09XXXXXXXX o +5939XXXXXXXX."? En el paso 2, ¿aparece el error bajo la casilla **sin abrir el modal**? ¿En I-06 no aparece ninguna oportunidad nueva?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | **Pendiente** |
+
+### V-28 · HU-27 — Reutiliza el contacto existente
+1. En I-07: nombre `Otro Nombre`, celular `+593 99 111 2233` (el de V-26 con otro formato), correo `otro@correo.ec`, **otra propiedad** (no la de V-26), privacidad marcada → confirma.
+
+**Resultado esperado:** ¿aparece el modal "Se usó un contacto existente" con los datos guardados (`Prueba Uno`, `+593991112233`, sin correo)? Al pulsar "Ver oportunidades", ¿la fila nueva muestra **Prueba Uno**, no "Otro Nombre"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | **Pendiente** |
+
+### V-29 · RF-05 — Una sola oportunidad activa por contacto e inmueble
+1. En I-07 repite el celular `0991112233` con **la misma propiedad de V-26** → confirma.
+
+**Resultado esperado:** ¿aparece el aviso ámbar "El contacto ya tiene una oportunidad activa sobre este inmueble. (oportunidad #N)" con el número de V-26? ¿"Ver oportunidades" abre I-06 filtrada por esa propiedad? ¿No se creó otra fila?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | **Pendiente** |
+
+### V-30 · HU-34 — Los filtros se combinan
+1. En I-06 elige la propiedad de V-26 y el estado "Contacto inicial" → "Filtrar".
+2. "Abierta desde" y "Abierta hasta" = **hoy** → "Filtrar". Luego "Abierta desde" = **mañana** → "Filtrar".
+3. "Abierta desde" = mañana y "Abierta hasta" = hoy → "Filtrar". Al final, "Limpiar".
+
+**Resultado esperado:** ¿en el paso 1 solo quedan las filas de esa propiedad? En el paso 2, ¿con hoy aparecen y con mañana sale "No hay oportunidades con estos filtros."? En el paso 3, ¿aparece bajo "Abierta hasta" el error "La fecha final no puede ser anterior a la inicial."? ¿"Limpiar" vuelve a la lista completa?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | **Pendiente** |
+
+### V-31 · HU-34 / DS-28 — El asesor ve su cartera y el admin ve todas
+1. Cierra sesión e inicia como `admin.demo`. Abre `/dashboard/opportunities`.
+2. "+ Abrir oportunidad": llena los datos con el celular `0997778899`, sin elegir asesor → "Abrir oportunidad". Después elige `asesor.demo` como responsable → confirma.
+3. Vuelve a entrar como `asesor.demo` y abre `/dashboard/opportunities`.
+
+**Resultado esperado:** como admin, ¿el título dice "Oportunidades del equipo", hay una columna "Asesor" y un filtro "Asesor"? En el paso 2, ¿sin asesor sale el error "Elija el asesor responsable." y, con él, la oportunidad se abre a cargo de `asesor.demo`? En el paso 3, ¿el título dice "Mi cartera de oportunidades", sin columna ni filtro de asesor, y la oportunidad del paso 2 aparece en su lista?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | **Pendiente** |
+
+### V-32 · DS-28 — El selector de I-07 solo muestra datos públicos
+1. En I-07 (como `asesor.demo`), revisa las tarjetas de "Propiedad de interés".
+
+**Resultado esperado:** ¿cada tarjeta muestra solo la foto (o "Sin foto"), el título, el sector, el tipo y el precio, **sin** el nombre del asesor ni datos internos? ¿Solo aparecen propiedades **disponibles** (una en captación, por ejemplo una nueva que registres, no sale)?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | **Pendiente** |
+
 ---
 
-## Estado actual (2026-10-30)
+## Estado actual (2026-10-30, tarde)
+
+- **PR #7 (motor) fusionada** en `develop` (`9801bc9`).
+- **EP-5, primer corte (FX-19)** en la rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (desde `develop` `9801bc9`), en 4 commits:
+  - `257ba1c`: commit 1, modelos y migración de `apps.opportunities`;
+  - `4282a87`: commit 2, servicio, API y pruebas;
+  - `199294a`: commit 3, pantallas I-07 e I-06;
+  - el commit de documentación (este registro).
+- **Pruebas:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → **125/125 OK** (2026-10-30); `makemigrations --check` sin cambios; `tsc`, `eslint` de los archivos nuevos y `next build` exit 0; `eslint .` con los mismos 2 errores y 4 avisos previos de DT-24.
+- **Migraciones nuevas:** `opportunities.0001_initial`. **Endpoints nuevos:** `POST` y `GET /api/opportunities/`, `GET /api/opportunities/eligible-properties/` y `GET /api/opportunities/agents/`.
+- **Decisiones aprobadas:** DS-26 (EP-5 antes de la tarea 4), DS-27 (`apps.opportunities`; §1 y §7 del contexto maestro corregidos en `docs/handoff/`) y DS-28 (reglas del corte).
+- **Hallazgos nuevos:** DT-100 (la copia de la raíz del contexto maestro está obsoleta), DT-101 (sin enlace en el menú), DT-102 ("sector" = `location`), DT-103 (filtro de propiedad limitado) y DT-104 (sin auditoría RF-14). DT-31 al día.
+- **Archivos compartidos (GPS §3):** una línea en `backend/config/settings.py` y una en `backend/config/urls.py`. **No se tocaron** `backend/apps/users/`, `dashboard/page.tsx`, `SiteNav.tsx` ni `lib/api.ts`.
+- **Pendiente:** validación de Pablo (V-26 a V-32); el commit 4 (enlace en el menú) solo con su orden; push y PR, cuando él lo autorice.
+- **Avisar a Sebas:** ejecutar `migrate` (`opportunities.0001`); el cambio en `settings.py` es una línea en `INSTALLED_APPS`.
+
+### Estado anterior (2026-10-30)
 
 - **Ronda 3 validada** (V-20 a V-25, Pablo, 2026-10-29 y 2026-10-30): las 6 aprobadas.
 - **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. **Suite: 90/90 OK**; `makemigrations --check` sin cambios.
@@ -461,7 +558,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
    3. comparables sintéticos (DS-23);
    4. backend de HU-04 y HU-06;
    5. pantalla I-11 y resultado en I-12.
-7. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16). **Se pospone hasta después del motor (DS-22).**
+7. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16). **Se pospone hasta después del motor (DS-22).** **(2026-10-30) Se pospone otra vez, hasta después del primer corte de EP-5 (DS-26).**
+8. **EP-5 "Seguimiento de oportunidades", primer corte (DS-26, 2026-10-30):** HU-27 (I-07) y HU-34 (I-06) en `feat/URB-30-34-HU-27-HU-34-oportunidades`. La máquina de estados de RF-06 (HU-29, HU-31, I-06A) va en un corte posterior.
 
 Las tareas 4 a 6 empiezan después de fusionar la PR del seeder, cada una en su rama desde `develop` (DS-14).
 
