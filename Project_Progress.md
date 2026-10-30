@@ -35,7 +35,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 🧭 Pendiente ahora (2026-10-30)
 
-> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32**, todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **sin push ni PR** (lo autoriza Pablo). El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo.
+> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32**, todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **con push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`, 2026-10-30) y **sin PR todavía** (la abre Pablo). El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo.
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. ~~**Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.~~ **Fusionada (PR #7, `9801bc9`).**
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
@@ -476,7 +476,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 - **Decisiones aprobadas:** DS-26 (EP-5 antes de la tarea 4), DS-27 (`apps.opportunities`; §1 y §7 del contexto maestro corregidos en `docs/handoff/`) y DS-28 (reglas del corte).
 - **Hallazgos nuevos:** DT-100 (la copia de la raíz del contexto maestro está obsoleta), DT-101 (sin enlace en el menú), DT-102 ("sector" = `location`), DT-103 (filtro de propiedad limitado) y DT-104 (sin auditoría RF-14). DT-31 al día.
 - **Archivos compartidos (GPS §3):** una línea en `backend/config/settings.py` y una en `backend/config/urls.py`. **No se tocaron** `backend/apps/users/`, `dashboard/page.tsx`, `SiteNav.tsx` ni `lib/api.ts`.
-- **Pendiente:** validación de Pablo (V-26 a V-32); el commit 4 (enlace en el menú) solo con su orden; push y PR, cuando él lo autorice.
+- **Pendiente:** validación de Pablo (V-26 a V-32); el commit 4 (enlace en el menú) solo con su orden. La rama **ya tiene push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`); **la PR todavía no existe** (la abre Pablo). Al integrar HU-44, revisar DT-105.
 - **Avisar a Sebas:** ejecutar `migrate` (`opportunities.0001`); el cambio en `settings.py` es una línea en `INSTALLED_APPS`.
 
 ### Estado anterior (2026-10-30)
