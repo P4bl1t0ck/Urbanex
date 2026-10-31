@@ -15,13 +15,13 @@
 Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expediente + avalúo → publicación → …), no solo un CRUD. Cada vez que se programó sin mirar el handoff aparecieron fallas de proceso: catálogo con fichas internas (DT-07), publicación sin requisitos (DT-08). Esta directiva evita perder el hilo entre sesiones, entre personas y entre asistentes de IA.
 
 ### Protocolo de inicio (cada sesión, antes de cualquier cambio)
-1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos. Si el pull trae migraciones nuevas, ejecutar `pipenv run python manage.py migrate` (`showmigrations` para verificar).
+1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos. Si el pull trae migraciones nuevas, revisa `showmigrations` y verifica la conexión activa; nunca ejecutes `migrate` contra Supabase.
 2. Leer este archivo completo (sobre todo **Próxima tarea**).
 3. Leer **Estado de procesos** → la HU objetivo y sus criterios.
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `origin/develop`: **90/90 OK** (FX-18, 2026-10-30). Tras integrar HU-44 y la validación del teléfono: **116/116 OK** con SQLite y correo de consola; ver "Estado actual". Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `origin/develop`: **90/90 OK** (FX-18, 2026-10-30). HU-44: **53/53 users y 116/116 total**, con SQLite y correo de consola; ver "Estado actual". Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -33,10 +33,10 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## 🧭 Pendiente ahora (2026-10-30)
+## 🧭 Pendiente ahora (2026-10-31)
 
-> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
-> - **HU-44 (Fase B):** rama reconstruida sobre `origin/develop`; 116/116 pruebas backend aprobadas en SQLite. Sebas confirmó V-26 a V-32, incluido el 403 de la API, la invalidación del enlace anterior al reenviar y los ajustes de usabilidad del teléfono. Commits publicados; falta crear la PR desde GitHub en el navegador.
+> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** revisión de la PR existente de `feat/URB-10-11-motor-avaluos` a `develop`.
+> - **HU-44 (Fase B), PR #9:** 53/53 pruebas de users y 116/116 backend con SQLite. V-33..V-35 constan aprobadas; V-36..V-39 están **Pendiente de repetir** y tienen los pasos abajo. No se debe marcar HU-44 validada hasta aprobar todas las V.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
 > - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
@@ -83,10 +83,10 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 >
 > **Cómo usarla:** sigue los pasos de cada prueba y responde la pregunta del resultado esperado. Después llena la fila: **quién** la hizo, **cuándo** (fecha y hora), **qué viste** (textos, estados, capturas si las hay) y el resultado (**Aprobado** / **Fallido**). Si algo falla, anota exactamente qué apareció; con eso se abre o actualiza el DT correspondiente. Ninguna fila se marca como Aprobada por inferencia.
 >
-> **HU-44:** implementación, pruebas automatizadas y validación manual aprobadas. Sebas confirmó V-26 a V-32, incluido el rechazo del enlace anterior al reenviar, el HTTP 403 para asesores y los ajustes de usabilidad del teléfono en A-01.
+> **HU-44:** implementación y pruebas automatizadas aprobadas; la validación manual sigue incompleta. V-33..V-35 se registran como aprobadas según los datos disponibles; V-36..V-39 requieren repetición y capturas.
 
 **Preparación (antes de empezar):**
-1. Desde `backend/`: `pipenv run python manage.py migrate` y luego `pipenv run python manage.py runserver`.
+1. Desde `backend/`, configura el entorno local de pruebas para SQLite y correo `console`, confirma el motor con `settings.DATABASES['default']['ENGINE']` y luego inicia `pipenv run python manage.py runserver`. No ejecutes `migrate` si el motor es PostgreSQL/Supabase.
 2. Desde `frontend/`: `npm run dev` y abrir `http://localhost:3000`.
 3. Carga los datos demo (DT-14, FX-15). Agrega a `backend/.env` (no se versiona) la línea `DEMO_PASSWORD=<una contraseña de 8+ caracteres, no solo números>` y ejecuta desde `backend/`: `pipenv run python manage.py setup_demo_data`. El comando imprime el id de cada propiedad y lo que le falta para publicar. Se puede repetir sin duplicar nada.
    - Inicia sesión como **`asesor.demo@urbanex.test`** con esa contraseña (el admin es `admin.demo@urbanex.test`).
@@ -318,7 +318,7 @@ El enlace "Ir al avalúo" **dentro del modal** de requisitos y el caso "falta so
 **Preparación (en este orden, desde `backend/`):**
 > **Hecho el 2026-10-28 en la copia de Pablo:** las migraciones ya estaban aplicadas y `setup_comparables_demo` creó los 11 comparables (La Carolina 1–6 = #40–#45; casas de Cumbayá = #46–#48). Verificado por consola contra la BD: V-21 da $143.861,35 (≈ $143.900, ALTO, CV 1,63 %), V-22 da MEDIO (CV 21,27 %), La Mariscal tiene 2 candidatos y Tumbaco 0, y #32 a #35 no tienen borradores abiertos. Puedes saltar los pasos 1 y 2.
 
-1. `pipenv run python manage.py migrate`: aplica `appraisals.0002` y `0003` (θ v1). Tu `db.sqlite3` cambia: **no la incluyas en ningún commit** (DT-02).
+1. Solo si estás trabajando en una base local de desarrollo y verificaste que el motor activo es SQLite: `pipenv run python manage.py migrate` aplica `appraisals.0002` y `0003` (θ v1). La BD local cambia: **no la incluyas en ningún commit** (DT-02). Nunca ejecutar contra Supabase.
 2. `pipenv run python manage.py setup_comparables_demo`: crea 11 comparables sintéticos en "Vendido" (no salen en el catálogo ni en "Mis propiedades").
 3. Reinicia `runserver` y `npm run dev`. Inicia sesión como `asesor.demo`.
 
@@ -385,97 +385,105 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 ---
 
-### Ronda 4 — HU-44 · Invitaciones y administración de usuarios (Pendiente)
+### Ronda 5 — HU-44 · Invitaciones y administración de usuarios
 
-> **Antes de empezar:** para que los enlaces de prueba no salgan a un proveedor externo, usa `EMAIL_PROVIDER=console` en la configuración local del backend y reinícialo. El enlace se imprime en la consola. No uses Resend para estas pruebas manuales.
+> **Antes de empezar:** usa `EMAIL_PROVIDER=console` con SQLite local. Los enlaces aparecen en la consola del backend; no uses Resend ni Supabase para estas pruebas.
+>
+> **Capturas:** no se encontraron imágenes de esta ronda en el repositorio. Las rutas indicadas son destinos para guardar las capturas al repetir la prueba, no archivos ya existentes.
 
-### V-26 · HU-44 — Crear usuario y localizar el enlace de activación
+### V-33 · HU-44 — Crear usuario y localizar el enlace de activación
 1. Inicia sesión como administrador y abre `/dashboard/users`.
 2. Crea un asesor con un correo nuevo de prueba.
-3. Busca en la consola del backend el correo de activación y abre o copia su enlace.
+3. Busca en la consola el correo de activación y el enlace `/activate#...`.
 
-**Resultado esperado:** ¿A-01 confirma la creación, muestra la cuenta pendiente/inactiva y la consola contiene el enlace `/activate#...` sin exponer una contraseña temporal?
+**Resultado esperado:** A-01 confirma la creación y la cuenta queda pendiente/inactiva; el enlace aparece en consola sin contraseña temporal ni correo externo.
 
-| Quién | Cuándo | Qué vi | Resultado |
-|---|---|---|---|
-| Sebas | 2026-10-30 | Creó un asesor desde A-01; se mostró el mensaje de éxito y el correo con el enlace de activación apareció en la consola local. No se envió desde Resend | **Aprobado** |
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30 17:41:23 | `POST /api/auth/users/` respondió 201; el correo "Activa tu cuenta de Urbanex" y el enlace local aparecieron en la consola con proveedor `console` | No aportada; destino: `evidence/HU-44/V-33.png` | **Aprobado** |
 
-### V-27 · HU-44 — Activar la cuenta e iniciar sesión
-1. Desde el enlace de V-26, establece una contraseña válida en la pantalla de activación.
-2. Ve a `/login` e inicia sesión con el correo y la contraseña que acabas de establecer.
-3. Cierra sesión, vuelve a iniciar sesión como administrador, abre A-01 y revisa el estado de la cuenta.
+### V-34 · HU-44 — Activar la cuenta e iniciar sesión
+1. Desde el enlace de V-33, establece una contraseña válida.
+2. Inicia sesión con el correo y la contraseña recién establecida.
+3. Comprueba en A-01 que la cuenta figura activa.
 
-**Resultado esperado:** ¿la pantalla confirma la activación, el usuario puede iniciar sesión y A-01 lo muestra activo?
+**Resultado esperado:** la activación concluye, el usuario inicia sesión y A-01 refleja su estado activo.
 
-| Quién | Cuándo | Qué vi | Resultado |
-|---|---|---|---|
-| Sebas | 2026-10-30 | Abrió el enlace, estableció la contraseña y pudo iniciar sesión con la cuenta activada | **Aprobado** |
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30 17:41:55; 17:43:14 | `POST /api/auth/users/activate/` respondió 200 y después `POST /api/auth/login/` respondió 200 | No aportada; destino: `evidence/HU-44/V-34.png` | **Aprobado** |
 
-### V-28 · HU-44 — Rechazar un enlace de activación usado
-1. Crea otra invitación y activa la cuenta con su enlace.
-2. Abre de nuevo el mismo enlace o intenta enviarlo una segunda vez.
+### V-35 · HU-44 — Rechazar un enlace de activación usado
+1. Activa una cuenta desde su invitación.
+2. Abre de nuevo el mismo enlace e intenta enviar otra vez la contraseña.
 
-**Resultado esperado:** ¿se rechaza el segundo uso con un mensaje de enlace inválido o vencido, sin cambiar la contraseña ya establecida? La expiración de 24 horas se cubre además en las pruebas automatizadas.
+**Resultado esperado:** el segundo uso se rechaza como inválido o vencido y no cambia la contraseña ya establecida. La expiración de 24 horas se cubre en pruebas automatizadas.
 
-| Quién | Cuándo | Qué vi | Resultado |
-|---|---|---|---|
-| Sebas | 2026-10-30 | Tras activar la cuenta, volvió a intentar el enlace usado y la activación fue rechazada | **Aprobado** |
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30; hora no registrada | Sebas informó que, después de activar la cuenta, el enlace usado fue rechazado al volver a abrirlo; no se aportó el detalle visual ni una hora verificable | No aportada; destino: `evidence/HU-44/V-35.png` | **Aprobado según confirmación; evidencia visual pendiente** |
 
-### V-29 · HU-44 — Reenviar una invitación
-1. Crea un asesor nuevo y conserva el primer enlace de activación de la consola.
-2. Desde A-01, reenvía la invitación y localiza el nuevo enlace en la consola.
-3. Intenta activar con el enlace anterior y luego con el nuevo.
+### V-36 · HU-44 — Reenviar una invitación (**Pendiente de repetir**)
+1. Crea un asesor de prueba y conserva el enlace original de la consola.
+2. Desde A-01, reenvía la invitación y copia el enlace nuevo.
+3. Abre primero el enlace antiguo y confirma que se rechaza.
+4. Abre después el enlace nuevo, establece la contraseña y confirma la activación.
 
-**Resultado esperado:** ¿el enlace anterior se rechaza, el nuevo permite activar la cuenta y A-01 refleja el estado actualizado?
+**Resultado esperado:** el enlace antiguo no sirve; el nuevo permite activar la cuenta.
 
-| Quién | Cuándo | Qué vi | Resultado |
-|---|---|---|---|
-| Sebas | 2026-10-30 | El backend respondió 200 al reenvío desde A-01, imprimió un nuevo enlace en la consola y confirmó que, al existir dos enlaces, el antiguo ya no sirve | **Aprobado** |
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30 17:41:36–17:41:37 | El reenvío respondió 200 y se imprimieron enlaces en consola; el log no demuestra que se probara primero el enlace antiguo y después el nuevo | Pendiente; destino: `evidence/HU-44/V-36.png` | **Pendiente de repetir** |
 
-### V-30 · HU-44 — Desactivar un asesor, impedir su acceso y liberar sus propiedades
-1. Crea y activa un asesor de prueba; inicia sesión con él y registra una propiedad.
-2. Cierra sesión, vuelve a entrar como administrador en A-01 y desactiva al asesor con un motivo.
-3. Intenta iniciar sesión con el asesor desactivado y verifica en `GET /api/auth/properties/` o el admin de Django que la propiedad aún existe y tiene `agent: null`.
+### V-37 · HU-44 — Desactivar un asesor, ver el motivo y liberar sus propiedades (**Pendiente de repetir**)
+1. Con datos locales de prueba, crea y activa un asesor con una propiedad asignada.
+2. Como administrador, desactívalo indicando un motivo.
+3. En A-01, vuelve a abrir el usuario y verifica que el motivo se muestra.
+4. Comprueba que la propiedad sigue existiendo y su responsable queda vacío (`agent: null`).
+5. Intenta iniciar sesión con el asesor y confirma que se rechaza.
 
-**Resultado esperado:** ¿A-01 conserva la cuenta como inactiva y muestra el motivo, el asesor no puede iniciar sesión y la propiedad sigue existiendo pero queda sin responsable?
+**Resultado esperado:** se ve el motivo; la propiedad persiste sin responsable; el asesor inactivo no inicia sesión.
 
-| Quién | Cuándo | Qué vi | Resultado |
-|---|---|---|---|
-| Sebas | 2026-10-30 | Desde A-01 desactivó una cuenta de asesor. El asesor no pudo iniciar sesión y sus propiedades permanecieron registradas, sin responsable asignado | **Aprobado** |
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30 17:40:45; hora de los demás pasos no registrada | `POST /api/auth/users/5/deactivate/` respondió 200; se informó que el login posterior fue rechazado. No quedó comprobado en la evidencia aportada que A-01 mostrara el motivo ni que la propiedad tuviera `agent: null` | Pendiente; destino: `evidence/HU-44/V-37.png` | **Pendiente de repetir** |
 
-### V-31 · HU-44 — Restringir A-01 a administradores
+### V-38 · HU-44 — Bloquear A-01 incluso mediante URL directa (**Pendiente de repetir**)
 1. Inicia sesión con un asesor.
-2. Comprueba que la navegación no ofrece A-01 e intenta abrir directamente `/dashboard/users`.
-3. Comprueba que `GET /api/auth/users/` responde 403 para ese asesor.
+2. Escribe directamente `/dashboard/users` en la barra del navegador.
+3. Confirma que la página no permite ver ni gestionar usuarios.
+4. Comprueba que `GET /api/auth/users/` responde 403.
 
-**Resultado esperado:** ¿el asesor no ve ni puede acceder a la lista o las acciones de A-01, incluso al usar la URL directa?
+**Resultado esperado:** el asesor no accede a A-01 por navegación ni URL directa; la API responde 403.
 
-| Quién | Cuándo | Qué vi | Resultado |
-|---|---|---|---|
-| Sebas | 2026-10-30 | Con sesión de asesor, no pudo ver A-01 y comprobó desde la consola del navegador que `GET /api/auth/users/` respondió 403 | **Aprobado** |
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30; hora no registrada | Se informó que la API rechazó la petición con 403 y A-01 no aparecía en navegación; no consta la prueba abriendo la URL directa | Pendiente; destino: `evidence/HU-44/V-38.png` | **Pendiente de repetir** |
 
-### V-32 · A-01 — Validar el celular ecuatoriano
-1. En `/dashboard/users`, crea o edita una cuenta con un celular como `0991234567`; también prueba escribirlo con espacios, guiones o paréntesis.
-2. Prueba un número que no empiece con `09`, uno con letras y uno internacional con `+593`.
+### V-39 · A-01 — Rechazar celulares inválidos (**Pendiente de repetir**)
+1. En `/dashboard/users`, edita un usuario de prueba y confirma un celular válido de 10 dígitos que empiece con `09`.
+2. Prueba un número de 10 dígitos que no empiece con `09`.
+3. Prueba una entrada con letras y otra con prefijo `+593`.
+4. Guarda cada valor inválido y comprueba el mensaje de validación.
 
-**Resultado esperado:** el celular local de 10 dígitos se guarda normalizado como `09XXXXXXXX`; los valores inválidos se rechazan con un mensaje y no se acepta el formato internacional.
+**Resultado esperado:** el número válido se acepta; el que no empieza en `09`, el que contiene letras y el internacional `+593` se rechazan con un mensaje claro.
 
-| Quién | Cuándo | Qué vi | Resultado |
-|---|---|---|---|
-| Sebas | 2026-10-30 | Confirmó que los cambios finales funcionan: solo se pueden ingresar hasta 10 dígitos, el teléfono se ve en la lista y el formulario aparece a la vista | **Aprobado** |
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30; hora no registrada | Se confirmó que el campo limita a 10 dígitos, el teléfono aparece en la lista y el formulario queda a la vista; no hay evidencia de pruebas con prefijo distinto de `09`, letras y `+593` | Pendiente; destino: `evidence/HU-44/V-39.png` | **Pendiente de repetir** |
 
 ---
 
-## Estado actual (2026-10-30)
+## Estado actual (2026-10-31)
 
 - **Ronda 3 validada** (V-20 a V-25, Pablo, 2026-10-29 y 2026-10-30): las 6 aprobadas.
-- **HU-44 (Fase B):** rama local reconstruida sobre `origin/develop` (`9801bc9`); se conserva el respaldo `respaldo/HU-44-antes-de-faseB`. **Suite backend: 116/116 OK** con SQLite y correo de consola (53/53 en `apps.users.tests`). Sebas confirmó V-26 a V-32, incluida la invalidación del enlace anterior, el 403 de la API y los ajustes finales de usabilidad del teléfono. La validación manual anterior se hizo el 2026-10-30 usando Supabase PostgreSQL según Sebas. Los commits están publicados en la rama; falta crear la PR a `develop` desde GitHub.
-- **Seguridad de pruebas (FX-19):** `UserManagementApiTests` fuerza el proveedor de consola y las dos pruebas específicas de Resend parchean el punto de uso en `apps.users.serializers`; así una `.env` local con Resend no dispara llamadas externas durante la suite.
-- **Migraciones:** `users.0007` y `users.0008` aplicadas en la base PostgreSQL conectada. `showmigrations` aún muestra pendientes `appraisals.0002` y `appraisals.0003`; no se aplicaron durante esta tarea. `makemigrations --check --dry-run` propone únicamente `documents/0002_alter_document_file.py` (DT-77); no se generó el archivo.
-- **Frontend:** `npm run build` y `npx tsc --noEmit -p .` aprobados; ESLint sin errores y con 2 warnings previos de `SiteNav` no usado.
+- **HU-44 (Fase B), PR #9:** rama `feat/URB-02-HU-44-gestion-usuarios`; suite backend 116/116 con SQLite y correo de consola (53/53 en `apps.users.tests`). La validación manual informada por Sebas el 2026-10-30 fue contra Supabase PostgreSQL. V-33..V-35 constan aprobadas; V-36..V-39 están **Pendiente de repetir**.
+- **Seguridad de pruebas (FX-20):** `UserManagementApiTests` fuerza el proveedor de consola y las dos pruebas específicas de Resend parchean el punto de uso en `apps.users.serializers`; la `.env` local no dispara llamadas externas durante la suite.
+- **Migraciones:** Sebas indicó que `users.0007`/`0008` ya se aplicaron en Supabase antes de esta corrección. La edición de `0007` aquí no remedia las cuentas ya migradas allí; no se ejecutó ni se debe ejecutar `migrate` contra Supabase (DT-93). `appraisals.0002`/`0003` aparecían pendientes al iniciar el servidor; no se aplicaron. `makemigrations --check --dry-run` detectó la diferencia `documents/0002_alter_document_file.py` (DT-92); no se generó migración.
+- **Frontend:** `npm run build` y `npx tsc --noEmit -p .` aprobados previamente; `npm run lint` el 2026-10-31: 0 errores y 2 warnings por `SiteNav` sin usar en `app/page.tsx` y `app/properties/page.tsx` (DT-24).
 - **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. La suite base de `origin/develop` fue 90/90.
 - **Hallazgos nuevos:** DT-80, DT-81 y DT-82; N-05 ampliada (pregunta también para la empresa); evidencia nueva en DT-01 y DT-74.
-- **Siguiente:** PR a `develop`. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
+- **Siguiente:** completar las repeticiones V-36..V-39 y adjuntar capturas; la PR #9 ya existe. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
 
 ### Estado anterior (2026-10-28, noche)
 
@@ -494,7 +502,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 - **Hallazgos nuevos:** DT-74 (un borrador impide recalcular), DT-75 (la antigüedad del dato se mide con `updated_at`) y DT-76 (I-11 muestra datos de mercado de otros asesores).
 - **Preguntas para el tutor:** C-02 frente a RF-11, la superficie en viviendas y el resto, en la conversación del 2026-10-28.
 - **Avisar a Sebas:**
-  - ejecutar `migrate` y `setup_comparables_demo`;
+  - verificar que la base sea SQLite local antes de `migrate`; ejecutar `setup_comparables_demo` solo en desarrollo;
   - inutilizar las 3 cuentas publicadas en su copia (DT-65);
   - no se tocó ningún archivo compartido de GPS §3.
 
@@ -597,7 +605,7 @@ Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a 
 ### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
 1. ~~Fase 3 de DT-40~~ Hecha el 2026-10-25 (`3783919`).
 2. Registrar el resultado de las validaciones de Pablo (quién, cuándo, qué se vio) y, si pasan, cerrar DT-40 y marcar como validados los criterios de HU-08 y HU-53 en Avance de épicas.
-3. ~~Abrir las PR en orden: URB-15 → `develop`~~ (fusionada el 2026-10-27) y después URB-13 (DS-09). Tras fusionar, cada copia ejecuta `migrate`. **Avisar a Sebas** de que la fase 3 modificó `dashboard/page.tsx`.
+3. ~~Abrir las PR en orden: URB-15 → `develop`~~ (fusionada el 2026-10-27) y después URB-13 (DS-09). Tras fusionar, cada copia verifica la base seleccionada antes de aplicar migraciones locales; nunca contra Supabase. **Avisar a Sebas** de que la fase 3 modificó `dashboard/page.tsx`.
 4. Decidir DT-45 (qué hacer con `frontend/CLAUDE.md`) y DT-23 (borrar `next.config.ts`).
 5. Resolver DT-39 junto con C-08.
 
@@ -629,7 +637,7 @@ Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a 
 - **No ejecutado:** validación visual en el navegador de ninguno de los tres cambios (pendiente; ver abajo).
 
 ### Migraciones / endpoints nuevos
-- Migración `appraisals/0001_initial`. **Aplicada en la BD local de Pablo el 2026-10-24** (`showmigrations appraisals` → `[X] 0001_initial`). Su `db.sqlite3` cambió pero **no se sube** (DT-02). ⚠️ **Para el próximo desarrollo:** quien haga pull de esta rama (Sebas incluido) debe ejecutar `pipenv run python manage.py migrate` antes de levantar el servidor, o `/api/appraisals/` y la publicación fallarán con `no such table: appraisals_appraisal` (DT-43).
+- Migración `appraisals/0001_initial`. **Aplicada en la BD local de Pablo el 2026-10-24** (`showmigrations appraisals` → `[X] 0001_initial`). Su `db.sqlite3` cambió pero **no se sube** (DT-02). Antes de `migrate`, verificar que el motor sea SQLite local; nunca ejecutar contra Supabase. Si una copia local carece de la tabla, aplicar allí las migraciones para que `/api/appraisals/` y la publicación funcionen (DT-43).
 - `GET/POST /api/appraisals/`, `GET/PATCH /api/appraisals/<uuid>/`, `POST /api/appraisals/<uuid>/approve/`.
 - Cambio de contrato: `POST /api/auth/properties/<id>/publish/` ahora puede responder **400** `{detail, missing_requirements[{code, message}]}` o **409** (no está en captación).
 - Archivos compartidos tocados: `backend/config/settings.py` (`INSTALLED_APPS`) y `backend/config/urls.py`, una línea cada uno. **Avisar a Sebas.**
@@ -649,7 +657,7 @@ Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a 
 - **DT-39 (P1):** un usuario autenticado con rol `cliente` todavía ve propiedades en captación.
 - **DT-40 (P1):** **bloqueo funcional esperado de HU-53**: sin pantallas I-11/I-12 un avalúo solo se aprueba por la API, así que hoy **no se puede publicar desde la interfaz**. Es el comportamiento correcto del proceso.
 - **DT-41:** el comando de pruebas ahora incluye `apps.appraisals.tests`.
-- **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración aplicada en la copia de Pablo; las demás copias deben ejecutar `migrate`.
+- **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración aplicada en la copia SQLite local de Pablo; cada copia verifica el motor antes de aplicar migraciones y nunca las ejecuta contra Supabase.
 
 ### Validaciones pendientes (requieren a una persona)
 Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este archivo (V-01, V-02, V-11 y V-12).
@@ -659,7 +667,7 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 - HU-53 y HU-01 ya no tienen bloqueos técnicos de backend; falta validación en la UI (DT-40) y DT-39.
 
 ### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
-1. **Abrir el PR** de `feat/URB-15-HU-53-proceso-publicacion` (ya en `origin`) hacia `develop`, revisarlo y fusionarlo con autorización del responsable de integración. Tras fusionar, cada copia ejecuta `migrate`.
+1. **Abrir el PR** de `feat/URB-15-HU-53-proceso-publicacion` (ya en `origin`) hacia `develop`, revisarlo y fusionarlo con autorización del responsable de integración. Tras fusionar, cada copia verifica el motor y aplica migraciones solo a su base local de desarrollo, nunca a Supabase.
 2. ~~Cerrar DT-09 (P0)~~ Hecho el 2026-10-24 (FX-11).
 3. **Pantalla I-12** (calibrar y aprobar avalúo) + `frontend/types/appraisal.ts` en una ruta nueva; conectar la fila "Avalúo aprobado" del Expediente y mostrar `missing_requirements` al publicar (DT-40).
 4. Resolver DT-39 junto con C-08 (¿se mantiene el rol `cliente`?).
@@ -673,7 +681,7 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 2. ~~**🧪 URGENTE — Validaciones V-13 a V-18**~~ **Hechas el 2026-10-28 (15:30–16:05): las 6 aprobadas**, registradas en "Ronda 2". Queda V-19 (corta).
 3. ~~**🔑 DT-65:** cambiar las contraseñas de las cuentas de la `db.sqlite3` publicada~~ **Hecho en la copia de Pablo el 2026-10-28 (DS-24):** contraseñas inutilizables y sin superusuario. Falta la copia de Sebas.
 4. ~~Abrir la PR de la tarea 3~~ **Fusionada el 2026-10-28 (PR #6).** **Nuevo orden (DS-22):** primero el motor (HU-04 y HU-06, con I-11) y después la tarea 4 (filtros P-02, DS-16).
-5. **🧪 Ronda 3 (motor DS-21):** V-20 a V-25. Antes, `migrate` y `setup_comparables_demo`. *(Sigue pendiente al archivar: ver "Pendiente ahora".)*
+5. **🧪 Ronda 3 (motor DS-21):** V-20 a V-25. Antes, verificar el motor; `migrate` y `setup_comparables_demo` se ejecutan solo en SQLite local de desarrollo. *(Sigue pendiente al archivar: ver "Pendiente ahora".)*
 
 ### Sesión anterior (registro hasta 2026-10-22)
 - **Sprint:** Sprint 1
