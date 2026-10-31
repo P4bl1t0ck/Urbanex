@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Propósito | Inventario de riesgos de seguridad e infraestructura del código actual, con su plan de corrección, y opciones documentadas para las decisiones pendientes (D-05 sesión/JWT, DT-42 folio, almacenamiento y base de datos) |
-| Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3 |
+| Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-10-31:** referencias DT-90/DT-91 para credenciales de Supabase y Resend; C-08/DS-30 confirma que clientes no tienen cuenta |
 | Método | Lectura del código del backend y del frontend. **No se hicieron pruebas de intrusión.** Lo que no se comprobó en ejecución está marcado **Por verificar** |
 | Alcance | Control de acceso · sesión y JWT · validación de entradas y archivos · folio de avalúos · infraestructura y almacenamiento · requisitos previos al despliegue |
 | Registro oficial | Cada riesgo tiene su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md); el estado se actualiza allí y en la tabla de §0 |
@@ -41,6 +41,8 @@
 | SEC-11 | Exposición de datos | Creación de documentos y avalúos (`DocumentUploadSerializer`, `AppraisalCreateSerializer`) | Baja | Abierto · Por verificar | Mensajes de error uniformes (§1.2) | [DT-67](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
 | SEC-08 | Validación de archivos | Contenido de los documentos (`DocumentUploadSerializer`) | Baja (mitigada) | Abierto · Confirmado (código) | Análisis de contenido al migrar el almacenamiento (§3.2) | [DT-30](URBANEX_DEUDA_TECNICA.md#p2--calidad-y-mantenibilidad) |
 | SEC-12 | Integridad | Folio del avalúo (`generate_folio()` en `backend/apps/appraisals/models.py`) | Baja | Abierto · Confirmado (código + validación) | Formato POR CONFIRMAR (§4) | [DT-42](URBANEX_DEUDA_TECNICA.md#p3--menores), [DT-55](URBANEX_DEUDA_TECNICA.md#p2--calidad-y-mantenibilidad), [DT-66](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
+| SEC-13 | Gestión de secretos | Credenciales de Supabase PostgreSQL (`DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`) | Media | Abierto · Sebas indica que solo él tiene acceso; rotación en el proveedor por confirmar | Mantener solo en `backend/.env` local y variables de entorno del servicio; conceder acceso invitando al proyecto, no compartiendo contraseñas; confirmar rotación y fecha | [DT-90](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
+| SEC-14 | Gestión de secretos | API key de Resend (`RESEND_API_KEY`) | Media | Abierto · Sebas indica que solo él tiene acceso; dominio sin verificar; rotación por confirmar | Mantener solo en `backend/.env` local y variables de entorno del backend; verificar un dominio propio para enviar a otros destinatarios | [DT-91](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
 | INF-01 | Infraestructura | Base de datos SQLite local | Media (bloquea el despliegue) | Abierto · Confirmado | Migrar a PostgreSQL externo (§5.1) | [DT-68](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
 | INF-02 | Infraestructura | Archivos en disco local (`media/`, `private_media/`) | Media (bloquea el despliegue) | Abierto · Confirmado | Almacenamiento externo (§5.2) | [DT-69](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27) |
 | INF-03 | Repositorio | `db.sqlite3` y `media/` versionados | Media | Abierto · Confirmado | Dejar de versionarlos; el seeder los reemplaza (§5.3) | [DT-70](URBANEX_DEUDA_TECNICA.md#seguridad-e-infraestructura-2026-10-27), DT-02, N-04 |
@@ -209,16 +211,18 @@ Hasta entonces, **no** se acorta la vida del token sin un flujo de renovación.
 
 | | Detalle | Estado |
 |---|---|---|
-| Hoy | SQLite en un archivo local (`backend/db.sqlite3`) | Confirmado (`settings.py`) |
+| Hoy | SQLite en un archivo local (`backend/db.sqlite3`) por defecto; PostgreSQL en Supabase es opcional mediante `DB_ENGINE=postgresql` y las variables `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` y `DB_SSLMODE` | Confirmado en `backend/config/settings.py`; SQLite sigue siendo el valor por defecto |
 | Objetivo | **PostgreSQL administrado en Supabase** | **Decidido** en el contexto maestro §2 ("Stack y Contenedores") y en el README. Contradicción C-07 ya registrada |
+| Estado de Supabase | `users.0007` y `users.0008` están aplicadas; Sebas confirmó que copió datos de SQLite a PostgreSQL y probó HU-44 el 2026-10-30 | Confirmado por Sebas; las migraciones de Avalúos `0002`/`0003` seguían pendientes al iniciar el servidor |
 | Respaldo | Copia diaria automatizada de PostgreSQL, con RTO < 2 h y restauración documentada y medida | **Decidido** (RNF-06, contexto maestro §5) |
-| Cuándo se migra | Sprint 8 / URB-55 ("pruebas integrales y despliegue") según C-07 | **POR CONFIRMAR** |
+| Cuándo se usa en cada ambiente | PostgreSQL/Supabase opcional; la base activa de cada ambiente debe confirmarse antes de ejecutar migraciones | **POR CONFIRMAR** |
 | Cómo se migran los datos | Recomendación: no migrar los datos de desarrollo. Partir de las migraciones de Django + `setup_demo_data` (o un seeder específico de demostración) | **POR CONFIRMAR** |
 | Proveedor del despliegue de demostración | **Supabase** (DS-19) | **Confirmado por Pablo (2026-10-27)** |
 
 Antes de migrar:
-- probar las migraciones y las pruebas contra PostgreSQL, porque algunas restricciones y el bloqueo de filas (`select_for_update`) se comportan distinto que en SQLite (*Por verificar*);
-- leer la conexión desde una variable de entorno (`DATABASE_URL` o equivalente).
+- probar las migraciones y la suite contra PostgreSQL, porque algunas restricciones y el bloqueo de filas (`select_for_update`) se comportan distinto que en SQLite (*Pendiente*);
+- documentar copias de seguridad y restauración según RNF-06 (*Pendiente*);
+- guardar las credenciales solo en variables de entorno; no versionar ni compartir valores reales.
 
 ### 5.2 Archivos (INF-02, DT-69)
 

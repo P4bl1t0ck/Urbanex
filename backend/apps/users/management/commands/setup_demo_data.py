@@ -142,13 +142,13 @@ class Command(BaseCommand):
     # ---------- Usuarios ----------
 
     def _upsert_user(self, email, username, role, password, *, is_staff):
-        # User.email aun no es unico (DT-13): si hay duplicados no se adivina cual usar.
-        matches = User.objects.filter(email=email)
+        matches = User.objects.filter(email__iexact=email)
         if matches.count() > 1:
             raise CommandError(f'Hay mas de un usuario con el correo {email} (DT-13). Resuelvelo a mano.')
 
         user = matches.first()
-        if user is None:
+        is_new_user = user is None
+        if is_new_user:
             if User.objects.filter(username=username).exists():
                 raise CommandError(f'El username {username} ya existe con otro correo.')
             user = User(email=email, username=username)
@@ -156,9 +156,14 @@ class Command(BaseCommand):
         user.role = role
         user.is_staff = is_staff
         user.is_superuser = False
-        user.is_active = True
-        user.is_locked = False
-        user.failed_attempts = 0
+        if is_new_user:
+            user.is_active = True
+            user.is_locked = False
+            user.failed_attempts = 0
+        elif not user.is_active:
+            self.stdout.write(self.style.WARNING(
+                f'  {user.email} sigue inactivo; setup_demo_data no reactiva cuentas desactivadas.'
+            ))
         try:
             password_validation.validate_password(password, user)
         except ValidationError as error:
@@ -219,7 +224,7 @@ class Command(BaseCommand):
                 f'  #{property_obj.id}: tiene un avalúo en borrador; no se aprueba automaticamente.'
             ))
             return
-        # Sin motor (D-04): registro manual, sin valor sugerido (DS-02).
+        # Registro manual de demo; no inventa un valor sugerido del motor.
         appraisal = Appraisal.create_draft(property=property_obj, agent=agent)
         appraisal.calibrate(
             calibrated_value=property_obj.price,

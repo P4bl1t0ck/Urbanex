@@ -11,6 +11,8 @@ python-decouple = "*"
 django-extensions = "*"
 django-cors-headers = "*"
 pillow = "*"
+psycopg = {extras = ["binary"], version = "*"}
+resend = "*"
 
 [dev-packages]
 

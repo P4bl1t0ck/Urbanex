@@ -5,7 +5,7 @@
 | Propósito | Retomar el desarrollo, empezando por Avalúos (HU-04, HU-06, HU-08), sin depender de explicaciones orales |
 | Fecha de auditoría | 2026-10-22 · rama `develop` |
 | Estado | Instantánea. **Actualízala** al cerrar cada HU (ver Paso 5) |
-| Última actualización | 2026-10-30 · ronda 3 validada (V-20 a V-25), FX-18 y 90 pruebas. Antes: 2026-10-29 · al día con el motor DS-21 (FX-17) y el seeder (FX-15): usuarios demo, D-04 resuelta provisionalmente, HU-04 y HU-06 implementadas (visual pendiente), 88 pruebas, 10 documentos en `docs/handoff/`. Antes: 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
+| Última actualización | 2026-10-31 · HU-44: 53/53 users y 116/116 total en SQLite; validación manual reportada por Sebas en Supabase PostgreSQL; V-36..V-39 pendientes de repetir; cuidado para no migrar Supabase. Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25), FX-18 y 90 pruebas. Antes: 2026-10-29 · al día con el motor DS-21 (FX-17) y el seeder (FX-15): usuarios demo, D-04 resuelta provisionalmente, HU-04 y HU-06 implementadas (visual pendiente), 88 pruebas, 10 documentos en `docs/handoff/`. Antes: 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
 
 ---
 
@@ -54,10 +54,11 @@ git pull origin develop
 # 1. Backend (Python 3.14 + Pipenv)
 cd backend
 pipenv install                     # (no ejecutado en la auditoría; el entorno ya existía)
-#   Crea backend/.env con las variables SECRET_KEY, DEBUG y ALLOWED_HOSTS
-#   (pide los valores a Pablo; no hay .env.example — DT-21). Pipenv carga .env solo.
-pipenv run python manage.py migrate                # crea también la tabla de avalúos (DT-43)
-pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 90 tests OK (2026-10-30)
+#   backend/.env.example es una plantilla; si aún no tienes backend/.env, copia la plantilla.
+#   Conserva los valores reales solo en backend/.env local, nunca la subas.
+pipenv run python manage.py showmigrations         # lectura del estado; no aplica cambios
+# Antes de migrate, confirma que la base activa sea SQLite local. Nunca migres Supabase.
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests   # esperado: 116 tests OK (53 users, 19 documents, 44 appraisals)
 pipenv run python manage.py runserver          # (no ejecutado) http://127.0.0.1:8000
 
 # 2. Frontend (Node 25 / npm 10)
@@ -67,11 +68,21 @@ npx tsc --noEmit -p .              # esperado: sin errores
 npm run dev                        # (no ejecutado) http://localhost:3000
 ```
 
+En Windows PowerShell, antes de las pruebas, evita que Pipenv cargue la `.env` local con la configuración de base de datos o correo:
+
+```powershell
+$env:PIPENV_DONT_LOAD_ENV = "1"
+$env:DB_ENGINE = "sqlite"
+$env:EMAIL_PROVIDER = "console"
+```
+
+- Comprueba antes de cualquier migración: `pipenv run python manage.py shell -c "from django.conf import settings; print(settings.DATABASES['default']['ENGINE'])"`. Si no indica `django.db.backends.sqlite3`, detente. `showmigrations` solo informa qué migraciones constan aplicadas; `migrate` sí cambia la base conectada. Nunca ejecutes `migrate` mientras apunte a Supabase/PostgreSQL.
+- `backend/Pipfile` declara `psycopg` (controlador PostgreSQL) y `resend` (envío opcional); `pipenv install` los instala. Para las pruebas locales, usa `EMAIL_PROVIDER=console` y no se envían correos.
 - El frontend llama a `http://127.0.0.1:8000` (hardcodeado en el dashboard) y CORS permite `localhost:3000` y `127.0.0.1:3000`.
 - **Comprobar la conexión:** abrir `/login`, entrar y ver "Mis propiedades". Pablo confirmó el 2026-10-22 que el dashboard carga datos.
 - **Ojo:** `manage.py test` **sin etiquetas no encuentra pruebas** (DT-06). Usa siempre las etiquetas.
 
-### Usuarios y datos de prueba (seeder FX-15 y DS-23)
+### Usuarios y datos de prueba (seeder FX-15, DS-23 y HU-44)
 
 Desde el 2026-10-27, los usuarios y las propiedades de prueba se crean con comandos; ya no se crean a mano. El login es **por email**. La contraseña se define localmente y no se versiona:
 
@@ -80,6 +91,10 @@ Desde el 2026-10-27, los usuarios y las propiedades de prueba se crean con coman
 pipenv run python manage.py setup_demo_data          # admin.demo@urbanex.test (admin) y asesor.demo@urbanex.test (asesor) + 4 propiedades demo
 pipenv run python manage.py setup_comparables_demo   # 11 comparables sintéticos en "vendido" para el motor (DS-23)
 ```
+
+La A-01 ya está en `/dashboard/users`; el backend exige el rol `admin`, no basta ocultar el enlace en Next.js. Para crear una cuenta de prueba, un administrador usa **Crear usuario** y la persona define su contraseña desde el enlace de activación. En desarrollo, Django imprime el enlace en la consola del backend; vence en 24 horas y solo se usa una vez. Para V-33..V-39, configura `EMAIL_PROVIDER=console`; no uses Resend ni el `.env` de producción.
+
+Sebas informó que la validación manual de HU-44 el 2026-10-30 se hizo en Supabase PostgreSQL, donde `users.0007` y `users.0008` ya estaban aplicadas. La suite automatizada de esta rama se ejecuta en SQLite. El cambio actual de `users.0007` no corrige datos de Supabase porque esa migración ya se aplicó allí; DT-93 registra el seguimiento. Las migraciones de Avalúos `0002`/`0003` aparecían pendientes al iniciar el servidor; no las apliques en Supabase como parte de HU-44.
 
 Ambos comandos solo corren con `DEBUG=True` y se pueden repetir sin duplicar datos. El seeder no restaura el estado de las propiedades demo (DT-72). Detalle en `Project_Progress.md` → "Validaciones pendientes de Pablo" → Preparación.
 
@@ -112,7 +127,7 @@ Detalle completo en el [GPS §2](URBANEX_GPS_ARCHIVOS.md#2-mapa-de-dependencias-
 Orden recomendado según las dependencias reales:
 
 1. **Desbloquear decisiones (sin código).** Llevar al equipo y al tutor ~~D-04 (fórmula, factores, umbrales)~~ (**resuelta provisionalmente con DS-21**, 2026-10-28), C-02 (1–2 comparables; provisional: manual, falta el tutor), ~~N-02 (qué propiedades son comparables)~~ (resuelta provisionalmente, DS-21) y N-03 (cómo se define la zona; falta la lista de zonas). Registrar las respuestas en `URBANEX_MASTER_CONTEXT.md` §14 y en `PROJECT_PROGRESS.md`.
-2. **Comprobar la línea base:** ejecutar las pruebas (90 al 2026-10-30) y `tsc` (Paso 2) y anotar el resultado.
+2. **Comprobar la línea base:** ejecutar las pruebas (90 en `origin/develop`; 114 en la rama HU-44, 2026-10-30) y `tsc` (Paso 2) y anotar el resultado.
 3. ~~Primer incremento: crear `apps.appraisals` con su inmutabilidad~~ **Hecho el 2026-10-24** (commit `58b968c`). ~~Cerrar DT-09~~ **Hecho el 2026-10-24** (FX-11).
    - ~~Siguiente incremento sin D-04: pantalla I-12 + `frontend/types/appraisal.ts`~~ **Fases 1, 2 y 3 hechas el 2026-10-25** (commits `161f845`, `af9b416`, `3783919`; la fase 3 tocó `dashboard/page.tsx` en un commit propio, DS-13). **Siguiente:** validación visual y funcional de Pablo.
 4. **Campos de `Property` para HU-04/HU-05 (coordinar con Pablo):** una **migración nueva** de `users`, coordinada con Pablo, con los campos acordados. (2026-10-29) No uses el número `0007`: la rama de HU-44 (`feat/URB-02-HU-44-gestion-usuarios`) ya creó `users.0007` y `users.0008`. Actualizar `PropertySerializer`, `frontend/types/property.ts` y la pestaña "Datos generales" del dashboard.
