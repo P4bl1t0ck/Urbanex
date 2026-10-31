@@ -33,6 +33,16 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
+## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-10-31 · Pablo (con Claude Code) · rama `docs/reglas-ia-y-deuda`
+- **Hecho:** `AGENTS.md` en la raíz como única fuente de reglas para la IA (DS-25); `CLAUDE.md` y `.github/copilot-instructions.md` apuntan a él; ficha `docs/handoff/PLANTILLA_TAREA.md` y plantilla de PR; `backend/db.sqlite3` y `frontend/CLAUDE.md` ya no se versionan (DT-45 resuelto, FX-21); Guía, pasos 5 y 6; registrados DT-77, DT-78 y DT-79.
+- **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
+- **Falta:** el PR a `develop` (lo abre Pablo), con la auditoría de solo lectura de `AGENTS.md` §11 antes; la rotación de credenciales de DT-79 (POR CONFIRMAR); DT-77 y DT-78 sin corregir.
+- **Siguiente paso:** auditoría de solo lectura → PR de `docs/reglas-ia-y-deuda` → avisar a Sebas del respaldo de `db.sqlite3` antes de su pull.
+
+---
+
 ## 🧭 Pendiente ahora (2026-10-30)
 
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
