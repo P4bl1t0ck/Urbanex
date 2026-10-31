@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4: suite contra PostgreSQL y plantilla de PR; §5: `makemigrations --check` y archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -53,6 +53,8 @@ Principio rector (DoD del equipo): *"Ninguna funcionalidad se considera completa
 
 ## 4. Pruebas y Definition of Done por HU
 
+> Las reglas de trabajo (Fase 0, alcance, entrega, validaciones y auditoría) están en [`AGENTS.md`](../../AGENTS.md) (DS-25). Esta sección detalla el DoD y los comandos; si algo no coincide, manda `AGENTS.md`. Cada PR usa la plantilla [`.github/pull_request_template.md`](../../.github/pull_request_template.md).
+
 Copiar este checklist en el PR o en el registro de la HU. **No marcar una casilla sin evidencia**; si no aplica, escribir "N/A" y el motivo.
 
 ```md
@@ -66,6 +68,8 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] `npx tsc --noEmit -p .` y `npx eslint .` sin errores nuevos
 - [ ] `npx next build` aprobado (si se tocó el frontend)
 - [ ] `manage.py makemigrations --check --dry-run` sin cambios pendientes
+- [ ] Suite contra PostgreSQL antes del PR (mayúsculas y tildes, unicidad, longitud de textos, zona horaria DT-01), o "N/A + motivo"
+- [ ] Plantilla de PR (`.github/pull_request_template.md`) completa, con la auditoría de solo lectura (`AGENTS.md` §11)
 - [ ] Errores y casos límite comprobados (403 de otro asesor, 400 de datos inválidos, vacío)
 - [ ] Flujo validado en la interfaz por una persona — quién, cuándo, qué se vio:
 - [ ] Sin regresiones conocidas (pruebas previas siguen pasando)
@@ -97,6 +101,8 @@ Si una validación depende del usuario (por ejemplo, la visual), queda **Pendien
 
 ## 5. GitFlow y colaboración
 
+> Resumen; la fuente de reglas de Git (ramas, commits, prohibiciones y quién toca qué) es [`AGENTS.md`](../../AGENTS.md) §4 y §5. Si algo no coincide, manda `AGENTS.md`.
+
 **Situación real** (2026-10-22): ramas `master` (principal; `origin/HEAD`), `develop` (integración) y `test` (uso POR CONFIRMAR). No hay CI ni reglas de protección comprobadas.
 
 **Convención:** el contexto maestro define `feat/URB-XX-descripcion`, y el prompt de auditoría propone `feature/HU-XX-…`. **El equipo debe elegir una** (contradicción C-06). Propuesta que combina ambas trazas:
@@ -113,8 +119,8 @@ Reglas mínimas:
 2. `git status` y `git pull` antes de empezar; no descartar ni sobrescribir cambios ajenos (`git checkout -- .`, `git reset --hard` y `git stash drop` solo con acuerdo).
 3. Revisar `git diff` antes de cada commit; commits pequeños con el mensaje `tipo(URB-XX): descripción`.
 4. **Coordinar antes de tocar** `backend/apps/users/models.py`, `backend/apps/users/migrations/`, `backend/config/settings.py`, `frontend/types/property.ts` y `frontend/app/dashboard/page.tsx` (ver [GPS](URBANEX_GPS_ARCHIVOS.md#3-archivos-compartidos-que-requieren-coordinación)).
-5. Ejecutar las pruebas pertinentes antes de integrar y pegar el resultado en el PR.
+5. Ejecutar las pruebas pertinentes antes de integrar (la suite de §4, `makemigrations --check --dry-run` y la suite contra PostgreSQL) y pegar el resultado en la plantilla de PR (`.github/pull_request_template.md`).
 6. No hacer commit, push ni merge sin la autorización del responsable de la integración.
-7. No hacer commit de `backend/.env`, `backend/private_media/` ni datos reales de clientes.
+7. No hacer commit de `backend/.env`, `backend/db.sqlite3`, `backend/media/`, `backend/private_media/` ni datos reales de clientes; revisar `git diff --cached --name-only` antes de cada commit.
 8. (2026-10-25) **Windows / PowerShell 5.1:** si el mensaje del commit tiene comillas dobles, escríbelo en un archivo y usa `git commit -F <archivo>`; con `-m @'…'@` PowerShell parte el mensaje y el commit falla (DT-49).
 9. (2026-10-25) Si una HU toca una página nueva y un archivo compartido, van en **commits separados** (primero la página y después el compartido), para aislar regresiones (DS-13).

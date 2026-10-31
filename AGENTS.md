@@ -43,12 +43,14 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 | FX | FX-01..19, FX-21..29 | FX-20, FX-30..39 |
 | DS | DS-25..28, DS-31..39 | DS-29, DS-30, DS-40..49 |
 
+- **Manda esta tabla.** Si un documento o un ID antiguo no coincide con ella, no se renumera nada: los IDs ya usados se quedan como están.
 - **Documentos:** solo se agregan filas; nunca se reescriben las del otro.
 - Antes de usar un ID, **búscalo en `develop` y en las ramas remotas** (`git fetch`, luego `git show origin/<rama>:<archivo>`). No lo copies de memoria.
 
 ## 5. Git
 
 - Una historia por rama (`feat/URB-XX-HU-YY-descripcion`), **siempre desde `develop` actualizado**. Vuelve a `develop` solo por PR.
+- **Excepción:** una tarea solo de documentación o configuración, sin HU, va en una rama `docs/<descripcion>` con commits `docs(DS-xx): …` o `chore(DT-xx): …`, citando la decisión o el hallazgo que la origina.
 - Antes de pedir el PR: `git pull origin develop` y resolver los conflictos.
 - Commits pequeños por capa (modelo · API y pruebas · pantalla · docs); un archivo compartido va en su propio commit. Mensaje `tipo(URB-XX): descripción`; en PowerShell, `git commit -F <archivo>`.
 - Antes de **cada** commit: `git diff --cached --name-only` y muéstralo. Nunca `git add -A`, `git add .` ni `git commit -a`.
