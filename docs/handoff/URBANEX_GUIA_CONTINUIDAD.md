@@ -5,7 +5,7 @@
 | Propósito | Retomar el desarrollo, empezando por Avalúos (HU-04, HU-06, HU-08), sin depender de explicaciones orales |
 | Fecha de auditoría | 2026-10-22 · rama `develop` |
 | Estado | Instantánea. **Actualízala** al cerrar cada HU (ver Paso 5) |
-| Última actualización | 2026-10-30 · ronda 3 validada (V-20 a V-25), FX-18 y 90 pruebas. Antes: 2026-10-29 · al día con el motor DS-21 (FX-17) y el seeder (FX-15): usuarios demo, D-04 resuelta provisionalmente, HU-04 y HU-06 implementadas (visual pendiente), 88 pruebas, 10 documentos en `docs/handoff/`. Antes: 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
+| Última actualización | 2026-10-31 · Pasos 5 y 6: las reglas para la IA están en `AGENTS.md` (DS-25); `frontend/CLAUDE.md` deja de versionarse (DT-45, FX-21). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25), FX-18 y 90 pruebas. Antes: 2026-10-29 · al día con el motor DS-21 (FX-17) y el seeder (FX-15): usuarios demo, D-04 resuelta provisionalmente, HU-04 y HU-06 implementadas (visual pendiente), 88 pruebas, 10 documentos en `docs/handoff/`. Antes: 2026-10-25 · Pasos 1, 3 y 4: pantalla I-12 hecha (fases 1 y 2 de DT-40) en `feat/URB-13-HU-08-pantalla-avaluo`, que sale de la rama de URB-15 (DS-09). Antes: 2026-10-24, `apps.appraisals` y bloqueo de publicación. Regla obligatoria: [Directiva de continuidad (GPS)](../../PROJECT_PROGRESS.md) |
 
 ---
 
@@ -128,7 +128,7 @@ Orden recomendado según las dependencias reales:
 ## Paso 5. Coordinar el trabajo y mantener la trazabilidad
 
 - **Ramas:** una por HU desde `develop` (convención en [Estándares §5](URBANEX_ESTANDARES_DOD.md#5-gitflow-y-colaboración)). **Excepción vigente (DS-09):** `feat/URB-13-HU-08-pantalla-avaluo` sale de `feat/URB-15-HU-53-proceso-publicacion`; su PR se integra **después** de la de URB-15.
-- **Asistentes de IA en `frontend/`:** `frontend/CLAUDE.md` apunta a `@AGENTS.md`, que ya no existe (DT-45). Hasta corregirlo, la IA del frontend no recibe instrucciones propias: dale tú la directiva GPS.
+- **Asistentes de IA (2026-10-31, DS-25):** las reglas están en [`AGENTS.md`](../../AGENTS.md), en la raíz. Claude Code lo carga desde `CLAUDE.md` (también al trabajar dentro de `frontend/`) y Copilot desde `.github/copilot-instructions.md`. `frontend/CLAUDE.md` y `frontend/AGENTS.md` ya no se versionan (DT-45 resuelto, FX-21): si `next dev` los crea en tu copia, se quedan solo en tu máquina.
 - **Aviso previo** en el canal del equipo antes de tocar `backend/apps/users/models.py`, `backend/apps/users/migrations/`, `backend/config/settings.py`, `frontend/types/property.ts` o `frontend/app/dashboard/page.tsx`.
 - **Migraciones:** hacer pull antes de `makemigrations`. Si dos personas crean `users.0007`, resolver con `makemigrations --merge` y avisar.
 
@@ -151,6 +151,8 @@ Si una persona no ha validado visualmente un flujo, la validación queda **Pendi
 Al cerrar cada HU, cambiar también la **fecha de auditoría** de los documentos actualizados, para que nadie confunda una instantánea vieja con el estado actual.
 
 ## Paso 6. Directiva obligatoria para la IA de Sebas
+
+**Desde 2026-10-31 (DS-25), la directiva es [`AGENTS.md`](../../AGENTS.md)**, la única fuente de reglas para cualquier asistente. Antes de cada tarea, llena la ficha [`PLANTILLA_TAREA.md`](PLANTILLA_TAREA.md) y pégala en el prompt. Lo que sigue queda como resumen; si no coincide con `AGENTS.md`, manda `AGENTS.md`.
 
 Instrucciones previas para el asistente:
 - Las fuentes de requisitos mandan sobre el código; si se contradicen, documenta la contradicción y pregunta.
