@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-10-30 · §4: 114 pruebas tras HU-44 (FX-19); 90 en `origin/develop`. Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-10-31 · §4: 116 pruebas (53 users, 19 documents, 44 appraisals; 26 nuevas sobre `origin/develop`) y `makemigrations --check --dry-run` (FX-20, DT-92). Antes: 2026-10-30 · 90 pruebas en `origin/develop`. Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -74,12 +74,14 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] Listo para revisión por el otro desarrollador
 ```
 
-**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-30 con HU-44 (FX-19); resultado esperado: **114 pruebas OK** (90 en `origin/develop` + 24 de HU-44):
+**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-31 con HU-44 (FX-20); resultado esperado: **116 pruebas OK** (53 users + 19 documents + 44 appraisals; 90 en `origin/develop` + 26 nuevas):
 
 ```bash
 pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests
 pipenv run python manage.py makemigrations --check --dry-run
 ```
+
+En Windows, fija antes de la suite `PIPENV_DONT_LOAD_ENV=1`, `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; comprueba el motor activo. La validación manual reportada por Sebas en Supabase PostgreSQL es independiente de esta suite. Nunca ejecutes `migrate` contra Supabase. La comprobación de migraciones actualmente detecta `documents/0002_alter_document_file.py` (DT-92), por lo que su resolución sigue pendiente.
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 
@@ -115,6 +117,6 @@ Reglas mínimas:
 4. **Coordinar antes de tocar** `backend/apps/users/models.py`, `backend/apps/users/migrations/`, `backend/config/settings.py`, `frontend/types/property.ts` y `frontend/app/dashboard/page.tsx` (ver [GPS](URBANEX_GPS_ARCHIVOS.md#3-archivos-compartidos-que-requieren-coordinación)).
 5. Ejecutar las pruebas pertinentes antes de integrar y pegar el resultado en el PR.
 6. No hacer commit, push ni merge sin la autorización del responsable de la integración.
-7. No hacer commit de `backend/.env`, `backend/private_media/` ni datos reales de clientes.
+7. No hacer commit de `backend/.env` real, `backend/db.sqlite3`, `backend/media/`, `backend/private_media/` ni datos reales de clientes. `backend/.env.example` es una plantilla sin secretos y sí se puede versionar.
 8. (2026-10-25) **Windows / PowerShell 5.1:** si el mensaje del commit tiene comillas dobles, escríbelo en un archivo y usa `git commit -F <archivo>`; con `-m @'…'@` PowerShell parte el mensaje y el commit falla (DT-49).
 9. (2026-10-25) Si una HU toca una página nueva y un archivo compartido, van en **commits separados** (primero la página y después el compartido), para aislar regresiones (DS-13).
