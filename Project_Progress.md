@@ -1,8 +1,14 @@
 # Urbanex — Progreso
 
+| Campo | Valor |
+|---|---|
+| Última actualización | 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
+
 ---
 
 ## ⚠️ DIRECTIVA DE CONTINUIDAD (GPS) — Regla estricta y obligatoria
+
+> Resumen; la fuente de reglas es [`AGENTS.md`](AGENTS.md).
 
 > **La carpeta `docs/handoff/` es el ecosistema central de navegación del proyecto y la única fuente de verdad.**
 > Ningún desarrollador ni asistente de IA debe escribir código, implementar una HU, alterar modelos compartidos ni modificar flujos de negocio **sin antes consultar obligatoriamente** estos tres documentos:
@@ -33,8 +39,20 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
+## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-10-31 · Pablo (con Claude Code) · rama `docs/reglas-ia-y-deuda`
+- **Hecho:** `AGENTS.md` en la raíz como única fuente de reglas para la IA (DS-25); `CLAUDE.md` y `.github/copilot-instructions.md` apuntan a él; ficha `docs/handoff/PLANTILLA_TAREA.md` y plantilla de PR; `backend/db.sqlite3` y `frontend/CLAUDE.md` ya no se versionan (DT-45 resuelto, FX-21); Guía, pasos 5 y 6; registrados DT-77, DT-78 y DT-79.
+- **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
+- **Correcciones de auditoría (mismo día):** FX-22 (`db.sqlite3`, `9872e98`); DT-02, DT-65/SEC-09, DT-70, N-04 y Seguridad §5.3 alineados; DS-24 → DS-25; DT-79 = SEC-15; Estándares §4/§5, directiva GPS y contexto maestro §13.3 remiten a `AGENTS.md`; excepción de ramas `docs/…` en `AGENTS.md` §5.
+- **Falta:** el PR a `develop` (lo abre Pablo), con la auditoría de solo lectura de `AGENTS.md` §11 antes; la rotación de credenciales de DT-79 (POR CONFIRMAR); DT-77 y DT-78 sin corregir.
+- **Siguiente paso:** auditoría de solo lectura → PR de `docs/reglas-ia-y-deuda` → avisar a Sebas del respaldo de `db.sqlite3` antes de su pull.
+
+---
+
 ## 🧭 Pendiente ahora (2026-10-30)
 
+> - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
