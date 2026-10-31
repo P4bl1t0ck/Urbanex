@@ -1,19 +1,23 @@
+import hashlib
+import importlib
 import io
 import os
 import shutil
 import tempfile
-import hashlib
 from datetime import timedelta
 from decimal import Decimal
+from types import SimpleNamespace
 from unittest import mock
 from resend.exceptions import ResendError
 
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
+from django.apps import apps as django_apps
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
 from django.utils import timezone
 from django.core import mail
 from rest_framework.test import APIClient
@@ -504,8 +508,35 @@ class UserManagementApiTests(TestCase):
             password="Secure-Root-2026!",
         )
 
+        User.objects.filter(pk=superuser.pk).update(role="cliente")
+        legacy_advisor = User.objects.create_user(
+            username="legacy.client",
+            email="legacy.client@urbanex.test",
+            password="test-password-for-migration",
+            role="asesor",
+        )
+        User.objects.filter(pk=legacy_advisor.pk).update(role="cliente")
+
+        migration = importlib.import_module(
+            "apps.users.migrations."
+            "0007_user_deactivation_reason_user_phone_alter_user_email_and_more"
+        )
+        migration.migrate_legacy_roles(
+            django_apps,
+            SimpleNamespace(connection=connection),
+        )
+
         self.assertTrue(superuser.is_superuser)
+        superuser.refresh_from_db()
         self.assertEqual(superuser.role, "admin")
+        self.assertTrue(superuser.is_active)
+        legacy_advisor.refresh_from_db()
+        self.assertEqual(legacy_advisor.role, "asesor")
+        self.assertFalse(legacy_advisor.is_active)
+        self.assertEqual(
+            legacy_advisor.deactivation_reason,
+            "rol cliente eliminado (C-08)",
+        )
 
     def test_only_admin_can_list_users(self):
         response = self.client.get("/api/auth/users/")

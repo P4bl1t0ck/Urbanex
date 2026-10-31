@@ -10,7 +10,11 @@ def migrate_legacy_roles(apps, schema_editor):
     User = apps.get_model("users", "User")
     manager = User.objects.using(schema_editor.connection.alias)
     manager.filter(role="cliente", is_superuser=True).update(role="admin")
-    manager.filter(role="cliente", is_superuser=False).update(role="asesor")
+    manager.filter(role="cliente", is_superuser=False).update(
+        role="asesor",
+        is_active=False,
+        deactivation_reason="rol cliente eliminado (C-08)",
+    )
 
 
 class Migration(migrations.Migration):
