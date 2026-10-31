@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Medir el avance real de EP-1 y EP-2 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-31 · HU-44: el estado Validado permanece en **0/6** porque V-36..V-39 están pendientes de repetir; EP-2 sin cambios (**10/24 validados, 41,7 %**). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
+| Última actualización | 2026-10-31 · HU-44: Validado sigue **0/6**; V-36, V-38 y V-39 confirmadas por Sebas; V-37 manual parcial, con desasignación cubierta por prueba automática; EP-2 sin cambios (**10/24 validados, 41,7 %**). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
 | Fuentes | Composición de épicas: tesis, Anexo 4 (columna "Épica"), y contexto maestro §9.1 y §10. Criterios: tesis, Anexo 2. Evidencia: [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) |
 | No disponible | Tablero de Jira y planillas Excel (no están en el repositorio). El estado en Jira es **POR CONFIRMAR** |
 
@@ -43,7 +43,7 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 
 | HU | Criterio | Impl. | Verif. | Valid. | Motivo |
 |---|---|:-:|:-:|:-:|---|
-| HU-44 | Cada usuario tiene correo único | ✔ | ✔ | ✗ | Modelo, migraciones y API cubiertos; `apps.users.tests` 53/53 y suite backend 116/116 con SQLite. V-36..V-39 pendientes; `0007` editada localmente, pero ya estaba aplicada en Supabase |
+| HU-44 | Cada usuario tiene correo único | ✔ | ✔ | ✗ | Modelo, migraciones y API cubiertos; `apps.users.tests` 53/53 y suite backend 116/116 con SQLite. V-36, V-38 y V-39 confirmadas por Sebas; V-37 manual parcial, desasignación cubierta por prueba automática; `0007` editada localmente, pero ya estaba aplicada en Supabase |
 | HU-44 | Admin no puede desactivar su propia cuenta | ✔ | ✔ | ✗ | Endpoint API probado; HU-44 no se marca validada hasta aprobar todas las V-33..V-39 y adjuntar la evidencia pendiente |
 | HU-45 | Solo el administrador desbloquea | ✗ | ✗ | ✗ | Sin endpoint ni UI |
 | HU-45 | Bloqueo tras cinco intentos fallidos | ✔ | ✔ | ✗ | `LoginView` y prueba automatizada de cinco intentos |
@@ -57,7 +57,7 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | Validado | 0/6 = **0 %** |
 | HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
 
-**Lectura:** HU-44 cuenta con API, migraciones y pantalla A-01; el backend pasó 53/53 pruebas de usuarios y la suite general 116/116 con SQLite. V-33..V-35 constan aprobadas; V-36..V-39 están pendientes de repetir, por lo que las dos filas de HU-44 siguen con Valid. = ✗. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
+**Lectura:** HU-44 cuenta con API, migraciones y pantalla A-01; el backend pasó 53/53 pruebas de usuarios y la suite general 116/116 con SQLite. V-33..V-36 y V-38..V-39 constan aprobadas; V-37 es manual parcial, aunque el comportamiento de desasignación tiene cobertura automática, por lo que Valid. = ✗. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
 
 ## 4. EP-2 — Gestión de propiedades y avalúos
 

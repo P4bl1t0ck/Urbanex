@@ -36,7 +36,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 🧭 Pendiente ahora (2026-10-31)
 
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** revisión de la PR existente de `feat/URB-10-11-motor-avaluos` a `develop`.
-> - **HU-44 (Fase B), PR #9:** 53/53 pruebas de users y 116/116 backend con SQLite. V-33..V-35 constan aprobadas; V-36..V-39 están **Pendiente de repetir** y tienen los pasos abajo. No se debe marcar HU-44 validada hasta aprobar todas las V.
+> - **HU-44 (Fase B), PR #9:** 53/53 pruebas de users y 116/116 backend con SQLite. Sebas confirma V-36, V-38 y V-39 aprobadas el 2026-10-31; V-37 se comprobó parcialmente y falta verificar `agent: null`. No se debe marcar HU-44 validada hasta completar todas las V.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
 > - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
@@ -83,7 +83,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 >
 > **Cómo usarla:** sigue los pasos de cada prueba y responde la pregunta del resultado esperado. Después llena la fila: **quién** la hizo, **cuándo** (fecha y hora), **qué viste** (textos, estados, capturas si las hay) y el resultado (**Aprobado** / **Fallido**). Si algo falla, anota exactamente qué apareció; con eso se abre o actualiza el DT correspondiente. Ninguna fila se marca como Aprobada por inferencia.
 >
-> **HU-44:** implementación y pruebas automatizadas aprobadas; la validación manual sigue incompleta. V-33..V-35 se registran como aprobadas según los datos disponibles; V-36..V-39 requieren repetición y capturas.
+> **HU-44:** implementación y pruebas automatizadas aprobadas; la validación manual sigue incompleta. V-33..V-36 y V-38..V-39 se registran como aprobadas según la evidencia disponible. V-37 tiene comprobación parcial (motivo, baja y propiedad presente); falta comprobar `agent: null`.
 
 **Preparación (antes de empezar):**
 1. Desde `backend/`, configura el entorno local de pruebas para SQLite y correo `console`, confirma el motor con `settings.DATABASES['default']['ENGINE']` y luego inicia `pipenv run python manage.py runserver`. No ejecutes `migrate` si el motor es PostgreSQL/Supabase.
@@ -423,7 +423,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 |---|---|---|---|---|
 | Sebas | 2026-10-30; hora no registrada | Sebas informó que, después de activar la cuenta, el enlace usado fue rechazado al volver a abrirlo; no se aportó el detalle visual ni una hora verificable | No aportada; destino: `evidence/HU-44/V-35.png` | **Aprobado según confirmación; evidencia visual pendiente** |
 
-### V-36 · HU-44 — Reenviar una invitación (**Pendiente de repetir**)
+### V-36 · HU-44 — Reenviar una invitación (**Aprobada según confirmación de Sebas**)
 1. Crea un asesor de prueba y conserva el enlace original de la consola.
 2. Desde A-01, reenvía la invitación y copia el enlace nuevo.
 3. Abre primero el enlace antiguo y confirma que se rechaza.
@@ -433,22 +433,22 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
 |---|---|---|---|---|
-| Sebas | 2026-10-30 17:41:36–17:41:37 | El reenvío respondió 200 y se imprimieron enlaces en consola; el log no demuestra que se probara primero el enlace antiguo y después el nuevo | Pendiente; destino: `evidence/HU-44/V-36.png` | **Pendiente de repetir** |
+| Sebas | 2026-10-31, 01:31 (hora del reporte) | Confirma que probó el enlace antiguo y fue rechazado, y que el enlace nuevo permitió activar la cuenta | Sin captura adjunta | **Aprobada según confirmación de Sebas** |
 
-### V-37 · HU-44 — Desactivar un asesor, ver el motivo y liberar sus propiedades (**Pendiente de repetir**)
+### V-37 · HU-44 — Desactivar un asesor, ver el motivo y liberar sus propiedades (**Verificación manual parcial; comportamiento cubierto por prueba automática**)
 1. Con datos locales de prueba, crea y activa un asesor con una propiedad asignada.
 2. Como administrador, desactívalo indicando un motivo.
 3. En A-01, vuelve a abrir el usuario y verifica que el motivo se muestra.
-4. Comprueba que la propiedad sigue existiendo y su responsable queda vacío (`agent: null`).
+4. Comprueba que la propiedad sigue existiendo y su responsable queda vacío (`agent: null`). La tabla del frontend no muestra a qué asesor está asociada. Sebas no necesita usar herramientas técnicas para esta comprobación: la prueba automática `test_deactivation_keeps_user_and_unassigns_properties` verifica que la propiedad queda sin asesor; si se exige evidencia manual adicional, debe revisarla alguien con acceso a una vista técnica adecuada.
 5. Intenta iniciar sesión con el asesor y confirma que se rechaza.
 
 **Resultado esperado:** se ve el motivo; la propiedad persiste sin responsable; el asesor inactivo no inicia sesión.
 
 | Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
 |---|---|---|---|---|
-| Sebas | 2026-10-30 17:40:45; hora de los demás pasos no registrada | `POST /api/auth/users/5/deactivate/` respondió 200; se informó que el login posterior fue rechazado. No quedó comprobado en la evidencia aportada que A-01 mostrara el motivo ni que la propiedad tuviera `agent: null` | Pendiente; destino: `evidence/HU-44/V-37.png` | **Pendiente de repetir** |
+| Sebas | 2026-10-31 01:26–01:27 | `POST /api/auth/users/2/deactivate/` respondió 200; confirmó que el asesor quedó inactivo y no pudo iniciar sesión, que A-01 muestra el motivo y que la propiedad sigue apareciendo. No pudo confirmar desde la interfaz si `agent: null`; la prueba automática `test_deactivation_keeps_user_and_unassigns_properties` sí verifica que el asesor queda desasignado en la base de pruebas | Sin captura | **Prueba manual parcial; comportamiento cubierto automáticamente** |
 
-### V-38 · HU-44 — Bloquear A-01 incluso mediante URL directa (**Pendiente de repetir**)
+### V-38 · HU-44 — Bloquear A-01 incluso mediante URL directa (**Aprobada según confirmación de Sebas**)
 1. Inicia sesión con un asesor.
 2. Escribe directamente `/dashboard/users` en la barra del navegador.
 3. Confirma que la página no permite ver ni gestionar usuarios.
@@ -458,9 +458,9 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
 |---|---|---|---|---|
-| Sebas | 2026-10-30; hora no registrada | Se informó que la API rechazó la petición con 403 y A-01 no aparecía en navegación; no consta la prueba abriendo la URL directa | Pendiente; destino: `evidence/HU-44/V-38.png` | **Pendiente de repetir** |
+| Sebas | 2026-10-31, 01:31 (hora del reporte) | Confirma que abrió directamente `/dashboard/users` con rol asesor y que el acceso quedó bloqueado; confirma también la respuesta 403 de la API | Sin captura adjunta | **Aprobada según confirmación de Sebas** |
 
-### V-39 · A-01 — Rechazar celulares inválidos (**Pendiente de repetir**)
+### V-39 · A-01 — Rechazar celulares inválidos (**Aprobada según confirmación de Sebas**)
 1. En `/dashboard/users`, edita un usuario de prueba y confirma un celular válido de 10 dígitos que empiece con `09`.
 2. Prueba un número de 10 dígitos que no empiece con `09`.
 3. Prueba una entrada con letras y otra con prefijo `+593`.
@@ -470,20 +470,20 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
 |---|---|---|---|---|
-| Sebas | 2026-10-30; hora no registrada | Se confirmó que el campo limita a 10 dígitos, el teléfono aparece en la lista y el formulario queda a la vista; no hay evidencia de pruebas con prefijo distinto de `09`, letras y `+593` | Pendiente; destino: `evidence/HU-44/V-39.png` | **Pendiente de repetir** |
+| Sebas | 2026-10-31, 01:31 (hora del reporte) | Confirma que el celular válido se aceptó y que se rechazaron los tres casos inválidos: sin prefijo `09`, con letras y con `+593` | Sin captura adjunta | **Aprobada según confirmación de Sebas** |
 
 ---
 
 ## Estado actual (2026-10-31)
 
 - **Ronda 3 validada** (V-20 a V-25, Pablo, 2026-10-29 y 2026-10-30): las 6 aprobadas.
-- **HU-44 (Fase B), PR #9:** rama `feat/URB-02-HU-44-gestion-usuarios`; suite backend 116/116 con SQLite y correo de consola (53/53 en `apps.users.tests`). La validación manual informada por Sebas el 2026-10-30 fue contra Supabase PostgreSQL. V-33..V-35 constan aprobadas; V-36..V-39 están **Pendiente de repetir**.
+- **HU-44 (Fase B), PR #9:** rama `feat/URB-02-HU-44-gestion-usuarios`; suite backend 116/116 con SQLite y correo de consola (53/53 en `apps.users.tests`). La validación manual informada por Sebas el 2026-10-30 fue contra Supabase PostgreSQL. V-33..V-36 y V-38..V-39 constan aprobadas; V-37 se observó parcialmente el 2026-10-31.
 - **Seguridad de pruebas (FX-20):** `UserManagementApiTests` fuerza el proveedor de consola y las dos pruebas específicas de Resend parchean el punto de uso en `apps.users.serializers`; la `.env` local no dispara llamadas externas durante la suite.
 - **Migraciones:** Sebas indicó que `users.0007`/`0008` ya se aplicaron en Supabase antes de esta corrección. La edición de `0007` aquí no remedia las cuentas ya migradas allí; no se ejecutó ni se debe ejecutar `migrate` contra Supabase (DT-93). `appraisals.0002`/`0003` aparecían pendientes al iniciar el servidor; no se aplicaron. `makemigrations --check --dry-run` detectó la diferencia `documents/0002_alter_document_file.py` (DT-92); no se generó migración.
 - **Frontend:** `npm run build` y `npx tsc --noEmit -p .` aprobados previamente; `npm run lint` el 2026-10-31: 0 errores y 2 warnings por `SiteNav` sin usar en `app/page.tsx` y `app/properties/page.tsx` (DT-24).
 - **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. La suite base de `origin/develop` fue 90/90.
 - **Hallazgos nuevos:** DT-80, DT-81 y DT-82; N-05 ampliada (pregunta también para la empresa); evidencia nueva en DT-01 y DT-74.
-- **Siguiente:** completar las repeticiones V-36..V-39 y adjuntar capturas; la PR #9 ya existe. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
+- **Siguiente:** en V-37, comprobar si la propiedad quedó sin responsable (`agent: null`) y registrar captura si es posible. La PR #9 ya existe. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
 
 ### Estado anterior (2026-10-28, noche)
 
