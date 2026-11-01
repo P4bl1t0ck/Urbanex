@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-10-30 (tarde) · §4: `apps.opportunities.tests` en el comando y 125 pruebas (FX-19). Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-11-01 · §4: regla de roles en las pruebas (solo `admin` y `asesor`; el cliente es anónimo; sin `role='cliente'`; C-08, FX-23). Antes: 2026-10-30 (tarde) · §4: `apps.opportunities.tests` en el comando y 125 pruebas (FX-19). Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -82,6 +82,8 @@ pipenv run python manage.py makemigrations --check --dry-run
 ```
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
+
+**Roles en las pruebas (C-08, 2026-11-01):** el sistema solo tiene dos roles de usuario, `admin` y `asesor`. El cliente **no es usuario**: no inicia sesión y llega como visitante anónimo. **No crees pruebas con `role='cliente'`.** Para probar que alguien sin cuenta no entra, usa un cliente de pruebas sin `force_authenticate` (401). Para probar la regla de dueño, usa un segundo asesor que no sea el dueño (403). Mientras HU-44 no se fusione, el modelo todavía admite `cliente` y es el valor por defecto (DT-105, DT-106 y DT-107).
 
 **Ojo (DT-06):** usa la etiqueta del **módulo** de pruebas (`apps.appraisals.tests`), no la del paquete. `pipenv run python manage.py test apps.appraisals` falla con `ImportError: attempted relative import with no known parent package`, porque falta `backend/apps/__init__.py` y `tests.py` importa con `from .engine import …`. Verificado el 2026-10-29: con `apps.appraisals.tests`, 42 OK.
 

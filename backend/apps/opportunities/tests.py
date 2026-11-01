@@ -264,12 +264,8 @@ class OpportunityOpenApiTests(OpportunityApiMixin, TestCase):
         self.assertEqual(opportunity.assigned_agent, self.other_agent)
         self.assertEqual(opportunity.status_history.get().changed_by, self.admin)
 
-    def test_only_internal_users_can_open(self):
-        client_user = User.objects.create_user(
-            username='cliente', email='cliente@correo.ec', password='Password123!', role='cliente',
-        )
-        self.assertEqual(self.open(client_user).status_code, status.HTTP_403_FORBIDDEN)
-        self.client.force_authenticate(None)
+    def test_anonymous_cannot_open(self):
+        # C-08: el cliente no tiene cuenta; quien no es interno llega como visitante anonimo.
         response = self.client.post(OPPORTUNITIES_URL, self.payload(), format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertFalse(Opportunity.objects.exists())
@@ -337,12 +333,9 @@ class OpportunityListApiTests(OpportunityApiMixin, TestCase):
         self.assertEqual(set(row['property']), {'id', 'title', 'sector', 'property_type'})
         self.assertEqual(row['assigned_agent']['id'], self.agent.id)
 
-    def test_client_role_cannot_list(self):
-        client_user = User.objects.create_user(
-            username='cliente', email='cliente@correo.ec', password='Password123!', role='cliente',
-        )
-        self.client.force_authenticate(client_user)
-        self.assertEqual(self.client.get(OPPORTUNITIES_URL).status_code, status.HTTP_403_FORBIDDEN)
+    def test_anonymous_cannot_list(self):
+        self.assertEqual(self.client.get(OPPORTUNITIES_URL).status_code,
+                         status.HTTP_401_UNAUTHORIZED)
 
 
 class EligiblePropertiesApiTests(OpportunityApiMixin, TestCase):

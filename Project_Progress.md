@@ -463,6 +463,15 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 ---
 
+## Notas de cierre de sesión
+
+### 2026-11-01 · Pablo (con Claude Code) · `feat/URB-30-34-HU-27-HU-34-oportunidades`
+
+- **Hecho:** DT-105 resuelto en código (FX-23). Las dos pruebas de oportunidades que usaban `role='cliente'` ahora comprueban el 401 de un visitante anónimo (`test_anonymous_cannot_open`, `test_anonymous_cannot_list`). C-08 confirmada por Pablo: solo hay roles `admin` y `asesor`, y el cliente es anónimo. Regla nueva en Estándares §4. Suite **125/125 OK**; `makemigrations --check` sin cambios.
+- **Sin tocar (reportado):** `backend/apps/users/models.py:11-14` sigue con `cliente` en `ROLE_CHOICES` y como valor por defecto (lo quita HU-44, PR #9, con `users.0007`). `backend/apps/users/tests.py` sigue usando `client_user` (DT-107, carpeta de Sebas).
+- **Falta:** comprobar DT-105 con HU-44 fusionada; DT-106 (el 403 de `IsInternalUser` sin prueba) y DT-107, ambos después del PR #9. DT-14 y DT-39 todavía citan C-08 como abierta.
+- **Siguiente paso:** commit local sin push (orden de Pablo); luego seguir con V-26 a V-32.
+
 ## Estado actual (2026-10-30, tarde)
 
 - **PR #7 (motor) fusionada** en `develop` (`9801bc9`).
