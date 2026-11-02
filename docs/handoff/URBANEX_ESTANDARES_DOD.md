@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**. Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -85,7 +85,9 @@ pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appr
 pipenv run python manage.py makemigrations --check --dry-run
 ```
 
-En Windows, fija antes de la suite `PIPENV_DONT_LOAD_ENV=1`, `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; comprueba el motor activo. La validación manual reportada por Sebas en Supabase PostgreSQL es independiente de esta suite. Nunca ejecutes `migrate` contra Supabase. La comprobación de migraciones actualmente detecta `documents/0002_alter_document_file.py` (DT-92), por lo que su resolución sigue pendiente.
+En Windows, fija antes de la suite `PIPENV_DONT_LOAD_ENV=1`, `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; comprueba el motor activo. La validación manual reportada por Sebas en Supabase PostgreSQL es independiente de esta suite. La suite local contra PostgreSQL: **No ejecutado**. Nunca ejecutes `migrate` contra Supabase. La comprobación de migraciones actualmente detecta `documents/0002_alter_document_file.py` (DT-92), por lo que su resolución sigue pendiente.
+
+**Ejecución registrada (2026-11-02):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → 116 pruebas, **OK** (exit 0; SQLite). `pipenv run python manage.py makemigrations --check --dry-run` → exit 1; detecta `apps/documents/migrations/0002_alter_document_file.py`; no se generó ni aplicó migración. En `frontend/`: `npm run build` → exit 0; `npx tsc --noEmit -p .` → exit 0; `npx eslint .` → exit 0, 0 errores y 2 avisos ya registrados en DT-24. Suite local contra PostgreSQL: **No ejecutado**.
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 
