@@ -1,18 +1,44 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { cache } from "react";
 import SiteNav from "@/components/SiteNav";
 import { getPropertyById } from "@/lib/api";
+import {
+  buildPropertyMetadata,
+  UNAVAILABLE_PROPERTY_METADATA,
+} from "@/lib/propertyMetadata";
+
+// Una sola consulta a la API por petición, compartida por generateMetadata y la página.
+const getProperty = cache(getPropertyById);
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+type PropertyDetailParams = { params: Promise<{ id: string }> };
+
+// HU-12 / URB-17: metaetiquetas para compartir la ficha. La API devuelve 404 a
+// las fichas no públicas sin sesión; buildPropertyMetadata lo vuelve a comprobar.
+export async function generateMetadata({
+  params,
+}: PropertyDetailParams): Promise<Metadata> {
+  const { id } = await params;
+  const metadataBase = new URL(SITE_URL);
+
+  try {
+    return { metadataBase, ...buildPropertyMetadata(await getProperty(id)) };
+  } catch {
+    return { metadataBase, ...UNAVAILABLE_PROPERTY_METADATA };
+  }
+}
 
 export default async function PropertyDetailPage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+}: PropertyDetailParams) {
   const { id } = await params;
   let property: Awaited<ReturnType<typeof getPropertyById>>;
 
   try {
-    property = await getPropertyById(id);
+    property = await getProperty(id);
   } catch {
     return (
       <>
