@@ -167,7 +167,7 @@ Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Crite
 | Validado | 4/20 = **20 %** (validación visual aprobada 2026-11-01, V-26 a V-32, Pablo) |
 | HU completas / puntos | 0/9 HU · 0/32 pts = **0 %** (2026-11-01: los 4 criterios de HU-27 y HU-34 están validados, pero las dos siguen en **Pruebas** por decisión de Pablo: falta comprobar DT-105 con HU-44 fusionada, la auditoría y el merge) |
 
-**Lectura:** el primer corte cubre los dos criterios de HU-27 y los dos de HU-34 en el backend y en la interfaz, y su validación visual se aprobó el 2026-11-01 (V-26 a V-32). Cuando HU-27 (3 pts) y HU-34 (3 pts) salgan de Pruebas quedarán completas: **2/9 HU · 6/32 pts (18,8 %)**.
+**Lectura:** el primer corte cubre los dos criterios de HU-27 y los dos de HU-34 en el backend y en la interfaz, y su validación visual se aprobó el 2026-11-01 (V-26 a V-32). HU-27 (3 pts) y HU-34 (3 pts) pasarán a completas (**2/9 HU · 6/32 pts, 18,8 %**) cuando se fusionen en `develop` después de la auditoría (criterio conservador, decisión de Pablo del 2026-11-01).
 
 ## 6. Bloqueos y dependencias que afectan al avance
 
