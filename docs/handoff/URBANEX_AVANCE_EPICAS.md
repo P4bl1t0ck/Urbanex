@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Medir el avance real de EP-1, EP-2 y EP-5 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-10-30 (tarde) · nueva sección **EP-5** (§5), primer corte (FX-19): **4/20 implementados y verificados (20 %)**, 0/20 validados (V-26 a V-32 pendientes). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
+| Última actualización | 2026-11-01 · EP-5: validación visual aprobada 2026-11-01 (V-26 a V-32, Pablo): **4/20 validados (20 %)**; HU-27 y HU-34 siguen en Pruebas (0/9 HU completas). Antes: 2026-10-30 (tarde) · nueva sección **EP-5** (§5), primer corte (FX-19): **4/20 implementados y verificados (20 %)**, 0/20 validados (V-26 a V-32 pendientes). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
 | Fuentes | Composición de épicas: tesis, Anexo 4 (columna "Épica"), y contexto maestro §9.1 y §10. Criterios: tesis, Anexo 2. Evidencia: [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) |
 | No disponible | Tablero de Jira y planillas Excel (no están en el repositorio). El estado en Jira es **POR CONFIRMAR** |
 
@@ -140,8 +140,8 @@ Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Crite
 |---|---|:-:|:-:|:-:|---|
 | HU-26 | Lista las conversaciones pendientes | ✗ | ✗ | ✗ | No iniciado (`InitialConversation`, Messenger) |
 | HU-26 | El asesor puede marcarlas como atendidas | ✗ | ✗ | ✗ | No iniciado |
-| HU-27 | Exige un teléfono válido | ✔ | ✔ | ✗ | (2026-10-30, FX-19) Celular de Ecuador normalizado (DS-28). `NormalizePhoneTests`, `test_invalid_phone_is_rejected_and_nothing_is_created`. Validación visual pendiente (V-27) |
-| HU-27 | Reutiliza el contacto si ya existe | ✔ | ✔ | ✗ | (2026-10-30) Por teléfono, sin cambiar sus datos y con aviso (DS-28). `test_existing_contact_is_reused_without_changing_its_data`. Pendiente (V-28) |
+| HU-27 | Exige un teléfono válido | ✔ | ✔ | ✔ | (2026-10-30, FX-19) Celular de Ecuador normalizado (DS-28). `NormalizePhoneTests`, `test_invalid_phone_is_rejected_and_nothing_is_created`. Validación visual aprobada 2026-11-01 (V-27, Pablo) |
+| HU-27 | Reutiliza el contacto si ya existe | ✔ | ✔ | ✔ | (2026-10-30) Por teléfono, sin cambiar sus datos y con aviso (DS-28). `test_existing_contact_is_reused_without_changing_its_data`. Validación visual aprobada 2026-11-01 (V-28, Pablo) |
 | HU-28 | La reasignación exige un motivo | ✗ | ✗ | ✗ | No iniciado (`AssignmentHistory`) |
 | HU-28 | Notifica al asesor entrante y al saliente | ✗ | ✗ | ✗ | No iniciado |
 | HU-29 | Avanza en la secuencia de RF-06 | ✗ | ✗ | ✗ | Corte posterior (DS-26); los estados existen en el modelo, sin transiciones |
@@ -156,18 +156,18 @@ Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Crite
 | HU-32 | No se duplican para la misma oportunidad | ✗ | ✗ | ✗ | No iniciado |
 | HU-33 | Muestra estado, interacciones y documentos vinculados | ✗ | ✗ | ✗ | Sin I-06A; los documentos dependen de DT-31 |
 | HU-33 | El historial se presenta en orden cronológico | ✗ | ✗ | ✗ | El modelo ya ordena por fecha, pero no hay pantalla que lo muestre |
-| HU-34 | Los filtros se combinan | ✔ | ✔ | ✗ | (2026-10-30) Asesor, propiedad, estado y fechas en hora de Ecuador. `test_filters_combine`, `test_date_range_is_read_in_ecuador_time`. Pendiente (V-30) |
-| HU-34 | El asesor ve su cartera; el administrador ve todas | ✔ | ✔ | ✗ | (2026-10-30) `test_agent_sees_only_his_portfolio_and_admin_sees_all`, `test_agent_filter_does_not_leak_other_portfolios`. Pendiente (V-31) |
+| HU-34 | Los filtros se combinan | ✔ | ✔ | ✔ | (2026-10-30) Asesor, propiedad, estado y fechas en hora de Ecuador. `test_filters_combine`, `test_date_range_is_read_in_ecuador_time`. Validación visual aprobada 2026-11-01 (V-30, Pablo) |
+| HU-34 | El asesor ve su cartera; el administrador ve todas | ✔ | ✔ | ✔ | (2026-10-30) `test_agent_sees_only_his_portfolio_and_admin_sees_all`, `test_agent_filter_does_not_leak_other_portfolios`. Validación visual aprobada 2026-11-01 (V-31, Pablo) |
 
 | Métrica | Valor |
 |---|---|
 | Total de criterios | 20 |
 | Implementado | 4/20 = **20 %** (2026-10-30) |
 | Verificado | 4/20 = **20 %** (backend: 35 pruebas de `apps.opportunities.tests`; las pantallas I-06 e I-07 compilan con `tsc`, `eslint` y `next build`, sin pruebas automáticas, DT-37) |
-| Validado | 0/20 = **0 %** (V-26 a V-32 pendientes de Pablo) |
-| HU completas / puntos | 0/9 HU · 0/32 pts = **0 %** |
+| Validado | 4/20 = **20 %** (validación visual aprobada 2026-11-01, V-26 a V-32, Pablo) |
+| HU completas / puntos | 0/9 HU · 0/32 pts = **0 %** (2026-11-01: los 4 criterios de HU-27 y HU-34 están validados, pero las dos siguen en **Pruebas** por decisión de Pablo: falta comprobar DT-105 con HU-44 fusionada, la auditoría y el merge) |
 
-**Lectura:** el primer corte cubre los dos criterios de HU-27 y los dos de HU-34 en el backend y en la interfaz. Si Pablo aprueba V-26 a V-32, HU-27 (3 pts) y HU-34 (3 pts) quedarían completas: **2/9 HU · 6/32 pts (18,8 %)**.
+**Lectura:** el primer corte cubre los dos criterios de HU-27 y los dos de HU-34 en el backend y en la interfaz, y su validación visual se aprobó el 2026-11-01 (V-26 a V-32). Cuando HU-27 (3 pts) y HU-34 (3 pts) salgan de Pruebas quedarán completas: **2/9 HU · 6/32 pts (18,8 %)**.
 
 ## 6. Bloqueos y dependencias que afectan al avance
 
