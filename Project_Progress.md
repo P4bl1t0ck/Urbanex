@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización | 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
+| Última actualización | 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
 
 ---
 
@@ -41,6 +41,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
+- **Hecho:** Pablo validó HU-12 en local (incógnito, `localhost:3001`): **V-60, V-61 y V-62 aprobadas**. V-63 sigue Pendiente (DT-110: necesita una URL pública). Registrado **DT-112**: la ficha inexistente dice "Verifica la conexión con el servidor".
+- **Observaciones de la validación:** sin hora ni capturas (`AGENTS.md` §9 pide ambas); V-60 se hizo con `/properties/1` y V-61 con `/properties/7`, no con `#33` y `#35`.
+- **Falta:** V-63 (al desplegar), DT-111 (`slug`, tras el PR #9), auditoría de solo lectura (`AGENTS.md` §11), push y PR (lo abre Pablo).
+- **Siguiente paso:** auditoría en un chat nuevo → corregir lo que reporte → push → PR.
+
 ### 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
 - **Hecho:** HU-12 / URB-17, solo frontend. `generateMetadata` en la ficha P-03 con título, descripción (precio referencial), imagen principal, Open Graph y Twitter, solo para fichas Disponibles o Reservadas. Las demás dan "Propiedad no disponible \| Urbanex" con `noindex` (FX-24). 9 pruebas con `npm test` (`node --test`, sin dependencias). Commits `2305868` y `d690286`, más el de documentación.
 - **Cómo se trabajó:** en un worktree aparte (`../Urbanex-hu12`, desde `develop` `3748e7f`), por decisión de Pablo, para no tocar su carpeta ni su `db.sqlite3`. La rama no tiene upstream; **no se hizo push**.
@@ -60,7 +66,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 🧭 Pendiente ahora (2026-10-30)
 
-> - **(2026-11-01) 🧪 HU-12 (URB-17):** validaciones **V-60 a V-63** en la "Ronda HU-12", más abajo. Rama `feat/URB-17-HU-12-compartir-ficha` en el worktree `../Urbanex-hu12`, sin push.
+> - ~~**(2026-11-01) 🧪 HU-12 (URB-17):** validaciones **V-60 a V-63**~~ **(2026-11-02) V-60 a V-62 aprobadas por Pablo; V-63 Pendiente (DT-110).** **Siguiente:** auditoría de solo lectura (`AGENTS.md` §11), push y PR de `feat/URB-17-HU-12-compartir-ficha` (worktree `../Urbanex-hu12`).
 > - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
@@ -407,7 +413,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 |---|---|---|---|
 | Pablo (`admin.demo`) | 2026-10-29 / 2026-10-30 | **Primer intento (2026-10-29): Fallido.** Django decía que `admin.demo` no tenía permiso para ver ni editar nada, y "Parámetros del motor" no aparecía. Causa: el admin de θ solo daba por rol el permiso de agregar (FX-18). **Tras FX-18 (2026-10-30):** `admin.demo` ve "Parámetros del motor" y creó la **v2** (`alfa` = 0), que quedó activa con `created_by = admin.demo`; la v1 se desactivó. Después reactivó la v1. Observación: el admin muestra las fechas en UTC (DT-01). No se anotó si la v1 se ve de solo lectura | **Aprobado** (tras FX-18) |
 
-### Ronda HU-12 — Compartir la ficha (rama `feat/URB-17-HU-12-compartir-ficha`; Pendiente)
+### Ronda HU-12 — Compartir la ficha (rama `feat/URB-17-HU-12-compartir-ficha`; validada en local el 2026-11-02: V-60 a V-62 aprobadas, V-63 Pendiente por DT-110)
 
 > **Preparación.** Esta ronda usa tu backend de siempre (`http://127.0.0.1:8000`, en tu carpeta) y el frontend del worktree:
 > 1. Arranca el backend como siempre, desde tu carpeta principal.
@@ -424,7 +430,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | Usó `/properties/1` en lugar de `#33`. Vio `og:title`, `og:description`, `og:image`, `og:image:alt`, `og:type`, `og:locale`, `twitter:card` = `summary_large_image`, `twitter:title`, `twitter:description` y `twitter:image`. No se anotó si vio `og:url`, `og:site_name` ni la canónica | **Aprobado** |
 
 ### V-61 · HU-12 — Una ficha que no es pública no muestra datos
 1. Sin sesión, abre `http://localhost:3001/properties/35` (Tumbaco, en captación). Si ya no está en captación, usa cualquier propiedad en captación o no disponible del dashboard.
@@ -435,7 +441,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | `/properties/99999` (no existe) y `/properties/7` (en captación): solo `noindex`, sin etiquetas `og:` ni `twitter:`. **Observación:** en `/properties/99999` la pantalla dice "No se pudo cargar esta propiedad. Verifica la conexión con el servidor", lo que confunde cuando la propiedad no existe → **DT-112**. La navbar duplicada ya es DT-25 | **Aprobado** |
 
 ### V-62 · HU-12 — La ficha se ve igual y consulta la API una sola vez
 1. Abre `http://localhost:3001/properties/33` y recarga la página una vez.
@@ -445,7 +451,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | La ficha se ve igual que antes; cada recarga hace un solo `GET` en el backend | **Aprobado** |
 
 ### V-63 · HU-12 / DT-110 — La previsualización real en una red (Pendiente hasta tener una URL pública)
 1. Con la aplicación desplegada en una URL pública y `NEXT_PUBLIC_SITE_URL` con ese dominio, pega el enlace de una ficha Disponible en un chat de WhatsApp (o en el depurador de enlaces de Facebook).
@@ -454,7 +460,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| — | — | No se puede hacer en local (DT-110); confirmado por Pablo el 2026-11-02 | Pendiente |
 
 ---
 
