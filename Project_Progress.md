@@ -42,9 +42,9 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
 ### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
-- **Hecho:** merge de `origin/develop` en `8ff1e9f`; stash aplicado sin conflictos. Se conserva sin incluir en commits el cambio local de `.vscode/settings.json` y un archivo sin seguimiento con nombre anómalo. Documentación de HU-44, ambiente, deuda y decisiones actualizada. Suite backend: 116/116 OK; `npm run build` y `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py`.
+- **Hecho:** merge de `origin/develop` en `8ff1e9f`; stash aplicado sin conflictos. Se conserva sin incluir en commits el cambio local de `.vscode/settings.json` y un archivo sin seguimiento con nombre anómalo. Documentación de HU-44, ambiente, deuda y decisiones actualizada en `27724a8`; commit y push normales completados. Suite backend: 116/116 OK; `npm run build` y `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py`.
 - **Falta:** validación humana V-33..V-42 y suite local contra PostgreSQL (**No ejecutado**); no resolver la diferencia de migración en este alcance.
-- **Siguiente paso:** revisar el diff documental, crear el commit de documentación y hacer el push normal solicitado a la rama feature; luego coordinar las validaciones humanas y DT-96 con Pablo.
+- **Siguiente paso:** coordinar con Pablo la evidencia humana pendiente y el acuerdo DT-96; confirmar respaldo y ambiente antes de cualquier restablecimiento o migración.
 
 ### 2026-10-31 · Pablo (con Claude Code) · rama `docs/reglas-ia-y-deuda`
 - **Hecho:** `AGENTS.md` en la raíz como única fuente de reglas para la IA (DS-25); `CLAUDE.md` y `.github/copilot-instructions.md` apuntan a él; ficha `docs/handoff/PLANTILLA_TAREA.md` y plantilla de PR; `backend/db.sqlite3` y `frontend/CLAUDE.md` ya no se versionan (DT-45 resuelto, FX-21); Guía, pasos 5 y 6; registrados DT-77, DT-78 y DT-79.
