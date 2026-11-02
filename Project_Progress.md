@@ -42,6 +42,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
 ### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
+- **Hecho:** se añadió el registro histórico reportado del cambio de `717d55b` a `3f8bed8` mediante rebase/force push, con aprobación posterior atribuida a Pablo el 2026-10-31. Git confirma ambos commits y sus metadatos, pero no demuestra por sí solo el force push ni esa aprobación. Se conserva `2c07f7d8` como referencia histórica de GPS y FX-05/DS-13.
+- **Falta:** el texto íntegro del prompt original no está en el repositorio; este registro se limita a los datos compartidos en la conversación. Siguen pendientes V-33..V-42 y la suite local contra PostgreSQL.
+- **Siguiente paso:** conservar los cambios locales restaurados del stash; coordinar la evidencia humana y la validación PostgreSQL según los pendientes ya documentados.
+
+### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
 - **Hecho:** merge de `origin/develop` en `8ff1e9f`; stash aplicado sin conflictos. Se conserva sin incluir en commits el cambio local de `.vscode/settings.json` y un archivo sin seguimiento con nombre anómalo. Documentación de HU-44, ambiente, deuda y decisiones actualizada en `27724a8`; commit y push normales completados. Suite backend: 116/116 OK; `npm run build` y `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py`.
 - **Falta:** validación humana V-33..V-42 y suite local contra PostgreSQL (**No ejecutado**); no resolver la diferencia de migración en este alcance.
 - **Siguiente paso:** coordinar con Pablo la evidencia humana pendiente y el acuerdo DT-96; confirmar respaldo y ambiente antes de cualquier restablecimiento o migración.
