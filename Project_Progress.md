@@ -383,7 +383,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 ### Ronda 4 — EP-5, primer corte: HU-27 (I-07) y HU-34 (I-06) (rama `feat/URB-30-34-HU-27-HU-34-oportunidades`)
 
-> **Estado: las 7 pruebas están Pendientes (Pablo).** Ninguna se marca como aprobada por inferencia.
+> **Estado (2026-11-01): las 7 pruebas Aprobadas por Pablo** en el navegador, sin capturas. Observaciones registradas como DT-108 (propiedades #1 y #2 indistinguibles) y DT-109 (BD local con datos basura). ~~Las 7 pruebas están Pendientes (Pablo).~~
 
 **Preparación (desde `backend/`):**
 1. `pipenv run python manage.py migrate`: aplica `opportunities.0001`. Tu `db.sqlite3` cambia: **no la incluyas en ningún commit** (DT-02).
@@ -400,7 +400,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | **Pendiente** |
+| Pablo (navegador, sin captura) | 2026-11-01, 19:56 (hora de la fila creada) | Como `asesor.demo`: "Prueba Uno", `0991112233`, sin correo, propiedad #1 (Departamento Moderno en La Carolina). El modal avisa que la apertura no se puede eliminar. Aviso verde "Oportunidad #1 abierta en Contacto inicial". Fila: `+593991112233`, Contacto inicial, Captación manual, "1 nov 2026 7:56 p. m." | **Aprobado** |
 
 ### V-27 · HU-27 — Celular inválido y política de privacidad
 1. En I-07, con otra propiedad, escribe el fijo `022345678` → "Abrir oportunidad" → confirma.
@@ -410,7 +410,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | **Pendiente** |
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Con el fijo `022345678` (propiedad #31 Casa de 4 pisos), bajo "Celular" salió el error de celular de Ecuador válido. Con `0994445566` y la privacidad desmarcada, el error salió bajo la casilla sin abrir el modal. No se creó ninguna fila | **Aprobado** |
 
 ### V-28 · HU-27 — Reutiliza el contacto existente
 1. En I-07: nombre `Otro Nombre`, celular `+593 99 111 2233` (el de V-26 con otro formato), correo `otro@correo.ec`, **otra propiedad** (no la de V-26), privacidad marcada → confirma.
@@ -419,7 +419,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | **Pendiente** |
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | "Otro Nombre", `+593 99 111 2233`, `otro@correo.ec`, propiedad #2. Modal "Se usó un contacto existente" con Prueba Uno, `+593991112233`, sin correo. La oportunidad #2 quedó con el contacto Prueba Uno. Pablo lo comprobó también en la BD: la #1 tiene `property_id` 1 y la #2, `property_id` 2 | **Aprobado** |
 
 ### V-29 · RF-05 — Una sola oportunidad activa por contacto e inmueble
 1. En I-07 repite el celular `0991112233` con **la misma propiedad de V-26** → confirma.
@@ -428,7 +428,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | **Pendiente** |
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | `0991112233` con la propiedad #1: aviso "El contacto ya tiene una oportunidad activa sobre este inmueble (oportunidad #1)". "Ver oportunidades" abrió I-06 filtrada por esa propiedad. No se creó otra fila | **Aprobado** |
 
 ### V-30 · HU-34 — Los filtros se combinan
 1. En I-06 elige la propiedad de V-26 y el estado "Contacto inicial" → "Filtrar".
@@ -439,7 +439,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | **Pendiente** |
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Propiedad #1 + Contacto inicial + desde 01/11: solo la #1. Desde 02/11: "No hay oportunidades con estos filtros." (el enlace para abrir una oportunidad funciona). Desde 02/11 hasta 01/11: error "La fecha final no puede ser anterior a la inicial." "Limpiar" restaura la lista | **Aprobado** |
 
 ### V-31 · HU-34 / DS-28 — El asesor ve su cartera y el admin ve todas
 1. Cierra sesión e inicia como `admin.demo`. Abre `/dashboard/opportunities`.
@@ -450,7 +450,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | **Pendiente** |
+| Pablo (navegador, sin captura) | 2026-11-01, 21:14 (hora de la fila creada) | Como `admin.demo`: título "Oportunidades del equipo", filtro y columna "Asesor". Sin asesor: "Elija el asesor responsable.". Con `asesor.demo` se abrió la #3 (Prueba 3, `0997778899`, propiedad #31, 9:14 p. m.). Como `asesor.demo`: "Mi cartera de oportunidades", sin columna ni filtro de asesor, y la #3 aparece | **Aprobado** |
 
 ### V-32 · DS-28 — El selector de I-07 solo muestra datos públicos
 1. En I-07 (como `asesor.demo`), revisa las tarjetas de "Propiedad de interés".
@@ -459,11 +459,18 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | **Pendiente** |
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Las tarjetas muestran solo foto, título, sector, tipo y precio, sin asesor. Son 8 tarjetas (las 8 disponibles de la BD local) y ninguna `[DEMO]` (las #32 a #35 están en captación). Observación: la #1 y la #2 no se distinguen (DT-108) | **Aprobado** |
 
 ---
 
 ## Notas de cierre de sesión
+
+### 2026-11-01 (noche) · Pablo (con Claude Code) · `feat/URB-30-34-HU-27-HU-34-oportunidades`
+
+- **Hecho:** ronda 4 validada por Pablo en el navegador (sin capturas): **V-26 a V-32 Aprobadas**. Antes se aplicó `migrate` en la BD local (`opportunities.0001`, y además `appraisals.0002` y `0003`, que estaban pendientes) y se corrió `setup_demo_data` (propiedades #32 a #35 en captación). Quedaron en la BD local las oportunidades #1 a #3.
+- **Hallazgos nuevos:** DT-108 (la #1 y la #2 tienen el mismo título y la misma dirección, y no se distinguen en I-06 ni en I-07) y DT-109 (BD local con datos basura). No se corrigen ahora.
+- **Falta:** que Pablo decida si HU-27 y HU-34 pasan de **Pruebas** a **Listo** (Estado de procesos, FX-19 y Avance de épicas siguen diciendo "validación Pendiente"); el commit 4 (enlace en el menú, DT-101) solo con su orden; la PR (la abre Pablo).
+- **Siguiente paso:** decidir el estado de HU-27 y HU-34 y actualizar esos documentos.
 
 ### 2026-11-01 · Pablo (con Claude Code) · `feat/URB-30-34-HU-27-HU-34-oportunidades`
 
