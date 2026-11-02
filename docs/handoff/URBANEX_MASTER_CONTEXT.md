@@ -479,6 +479,8 @@ Secuencia ordinaria: `CONTACTO_INICIAL → VISITA_PROGRAMADA → EN_NEGOCIACION 
 
 ### 13.3 Instrucción para cualquier asistente de programación
 
+> Resumen; la fuente de reglas es [`AGENTS.md`](../../AGENTS.md) (DS-25, 2026-10-31).
+
 Al recibir `Implementar URB-XX`:
 1. Leer primero sección 10 y extraer HU/RF/pantalla/modelos/sprint; consultar las secciones 4, 6 y 7 relevantes.
 2. Confirmar el alcance específico y las precondiciones de la historia; no implementar RF completos no planificados.
