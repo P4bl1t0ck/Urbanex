@@ -471,6 +471,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 - **Hallazgos nuevos:** DT-108 (la #1 y la #2 tienen el mismo título y la misma dirección, y no se distinguen en I-06 ni en I-07) y DT-109 (BD local con datos basura). No se corrigen ahora.
 - **Falta:** que Pablo decida si HU-27 y HU-34 pasan de **Pruebas** a **Listo** (Estado de procesos, FX-19 y Avance de épicas siguen diciendo "validación Pendiente"); el commit 4 (enlace en el menú, DT-101) solo con su orden; la PR (la abre Pablo).
 - **Siguiente paso:** decidir el estado de HU-27 y HU-34 y actualizar esos documentos.
+- **Auditoría del PR #9 (HU-44), punto obligatorio:** el commit `906cc0d` hace que `users.0007` también **desactive** a los usuarios `cliente` que no son superusuarios. Hay que comprobar qué pasa con los usuarios creados con `createsuperuser` (rol por defecto `cliente`) y que ningún admin quede desactivado. Detalle en DT-105.
 
 ### 2026-11-01 · Pablo (con Claude Code) · `feat/URB-30-34-HU-27-HU-34-oportunidades`
 
