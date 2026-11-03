@@ -1,4 +1,5 @@
-from django.shortcuts import render
+import hashlib
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status, viewsets
@@ -7,14 +8,31 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
-from rest_framework.decorators import action
-from .serializers import LoginSerializer, PropertySerializer, PropertyImageSerializer
-from .models import Property, PropertyImage
-from rest_framework import permissions
+from .serializers import (
+    LoginSerializer,
+    ManagedUserSerializer,
+    PropertySerializer,
+    PropertyImageSerializer,
+    UserActivationSerializer,
+    UserDeactivationSerializer,
+    send_activation_email,
+)
+from .models import Property, PropertyImage, UserActivationToken
 from apps.appraisals.models import Appraisal
 from apps.documents.models import Document
 
 User = get_user_model()
+
+
+class IsAdminRole(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.is_active
+            and request.user.role == User.Role.ADMIN
+        )
+
 
 # DT-07 / HU-01: estados visibles en el catalogo publico. 'reservador' es el valor
 # real guardado hoy (errata DT-16); cambiar a 'reservado' cuando se migre.
@@ -95,24 +113,26 @@ class LoginView(APIView):
     def post(self, request): #Post Function WEB
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data["email"]
+        email = serializer.validated_data["email"].strip().lower()
         password = serializer.validated_data["password"]
 
-        user = User.objects.filter(email=email).first()
+        user = User.objects.filter(email__iexact=email).first()
+
+        if not user or not user.is_active:
+            return Response({"detail": "Credenciales inválidas."}, status=401)
 
         if user and user.is_locked:
             return Response({"detail": "Cuenta bloqueada. Contacta al administrador."}, status=403)
 
-        if not user or not user.check_password(password): #Regla de negocio.
-            if user:
-                user.failed_attempts += 1
-                if user.failed_attempts >= 5:
-                    user.is_locked = True
-                user.save()
+        if not user.check_password(password): #Regla de negocio.
+            user.failed_attempts += 1
+            if user.failed_attempts >= 5:
+                user.is_locked = True
+            user.save(update_fields=["failed_attempts", "is_locked"])
             return Response({"detail": "Credenciales inválidas."}, status=401)
 
         user.failed_attempts = 0
-        user.save()
+        user.save(update_fields=["failed_attempts"])
 
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -120,6 +140,112 @@ class LoginView(APIView):
             "refresh": str(refresh),
             "role": user.role,
         })
+
+
+class UserListCreateView(generics.ListCreateAPIView):
+    queryset = User.objects.order_by("last_name", "first_name", "email")
+    serializer_class = ManagedUserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminRole]
+
+
+class UserDetailView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = ManagedUserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminRole]
+    http_method_names = ["get", "patch", "head", "options"]
+
+
+class UserDeactivateView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdminRole]
+
+    def post(self, request, pk):
+        serializer = UserDeactivationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            user = get_object_or_404(User.objects.select_for_update(), pk=pk)
+            if user.pk == request.user.pk:
+                return Response(
+                    {"detail": "No puedes desactivar tu propia cuenta."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not user.is_active:
+                return Response(
+                    {"detail": "La cuenta ya está desactivada."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            if user.role == User.Role.ADVISOR:
+                Property.objects.filter(agent=user).update(agent=None)
+
+            user.is_active = False
+            user.deactivation_reason = serializer.validated_data["reason"]
+            user.save(update_fields=["is_active", "deactivation_reason"])
+            UserActivationToken.objects.filter(
+                user=user,
+                used_at__isnull=True,
+            ).update(used_at=timezone.now())
+
+        return Response(ManagedUserSerializer(user).data, status=status.HTTP_200_OK)
+
+
+class UserResendActivationView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdminRole]
+
+    def post(self, request, pk):
+        with transaction.atomic():
+            user = get_object_or_404(User.objects.select_for_update(), pk=pk)
+            if user.is_active or user.deactivation_reason:
+                return Response(
+                    {"detail": "La cuenta está activa o fue desactivada y no puede reactivarse desde este enlace."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+            UserActivationToken.objects.filter(
+                user=user,
+                used_at__isnull=True,
+            ).update(used_at=timezone.now())
+            send_activation_email(user)
+
+        return Response(
+            {"detail": "Se envió un nuevo enlace de activación."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class UserActivationView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = UserActivationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        activation = serializer.validated_data["activation"]
+        token_hash = hashlib.sha256(
+            serializer.validated_data["token"].encode("utf-8")
+        ).hexdigest()
+
+        with transaction.atomic():
+            activation = get_object_or_404(
+                UserActivationToken.objects.select_for_update().select_related("user"),
+                pk=activation.pk,
+                token_hash=token_hash,
+                used_at__isnull=True,
+                expires_at__gt=timezone.now(),
+                user__is_active=False,
+                user__deactivation_reason="",
+            )
+            user = activation.user
+            user.set_password(serializer.validated_data["password"])
+            user.is_active = True
+            user.deactivation_reason = ""
+            user.save(update_fields=["password", "is_active", "deactivation_reason"])
+            activation.used_at = timezone.now()
+            activation.save(update_fields=["used_at"])
+
+        return Response(
+            {"detail": "Cuenta activada. Ya puedes iniciar sesión."},
+            status=status.HTTP_200_OK,
+        )
         
 class PropertyListCreateView(generics.ListCreateAPIView):
     queryset = Property.objects.all()
