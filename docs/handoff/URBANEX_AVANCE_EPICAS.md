@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Medir el avance real de EP-1 y EP-2 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
-| Última actualización | 2026-11-02 · HU-12 validada en local (V-60 a V-62): **sin cambio de métricas** (rama sin fusionar; EP-3 no se mide aquí). Antes: 2026-11-01 · HU-12 (EP-3, rama `feat/URB-17-HU-12-compartir-ficha`, FX-24): **sin cambio de métricas**. EP-3 no se mide aquí; la fila de HU-53 "URL con metaetiquetas" anota el avance (metaetiquetas implementadas en una rama sin fusionar ni validar; sin `slug`, DT-111). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
+| Última actualización | 2026-11-02 · HU-44 sigue con **0/6 criterios validados**; V-33..V-42 Pendiente. Las observaciones previas de V-33..V-39 se atribuyen a Sebas; no hay evidencia visual adjunta. Suite automatizada reportada en SQLite (116/116); prueba local contra PostgreSQL **No ejecutado**. EP-2 sin cambios (**10/24 validados, 41,7 %**). Antes: 2026-10-31 · HU-44, Validado **0/6**; EP-2 sin cambios. Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 · Rama HU-12: 2026-11-02 · HU-12 validada en local (V-60 a V-62): **sin cambio de métricas** (rama sin fusionar; EP-3 no se mide aquí). Antes: 2026-11-01 · HU-12 (EP-3, rama `feat/URB-17-HU-12-compartir-ficha`, FX-24): **sin cambio de métricas**. EP-3 no se mide aquí; la fila de HU-53 "URL con metaetiquetas" anota el avance (metaetiquetas implementadas en una rama sin fusionar ni validar; sin `slug`, DT-111). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 |
 | Fuentes | Composición de épicas: tesis, Anexo 4 (columna "Épica"), y contexto maestro §9.1 y §10. Criterios: tesis, Anexo 2. Evidencia: [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) |
 | No disponible | Tablero de Jira y planillas Excel (no están en el repositorio). El estado en Jira es **POR CONFIRMAR** |
 
@@ -43,21 +43,21 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 
 | HU | Criterio | Impl. | Verif. | Valid. | Motivo |
 |---|---|:-:|:-:|:-:|---|
-| HU-44 | Cada usuario tiene correo único | ✗ | ✗ | ✗ | `email` no es único |
-| HU-44 | Admin no puede desactivar su propia cuenta | ✗ | ✗ | ✗ | Sin gestión de usuarios |
+| HU-44 | Cada usuario tiene correo único | ✔ | ✔ | ✗ | `apps.users.tests` 53/53 y suite backend 116/116 reportadas en SQLite. V-33..V-39 Pendiente; observaciones históricas atribuidas a Sebas, sin capturas. `users.0007` editada localmente después de aplicarse en Supabase; seguimiento en DT-93/DT-96 |
+| HU-44 | Admin no puede desactivar su propia cuenta | ✔ | ✔ | ✗ | Endpoint API probado; HU-44 no se marca validada hasta completar las V-33..V-42 con la evidencia humana requerida |
 | HU-45 | Solo el administrador desbloquea | ✗ | ✗ | ✗ | Sin endpoint ni UI |
-| HU-45 | Bloqueo tras cinco intentos fallidos | ✔ | ✗ | ✗ | Implementado en `LoginView`; la prueba solo cubre el primer intento |
-| HU-46 | Solo usuarios activos inician sesión | ✗ | ✗ | ✗ | Se emite token a usuarios inactivos |
+| HU-45 | Bloqueo tras cinco intentos fallidos | ✔ | ✔ | ✗ | `LoginView` y prueba automatizada de cinco intentos |
+| HU-46 | Solo usuarios activos inician sesión | ✔ | ✔ | ✗ | Inactivos rechazados antes de emitir JWT; prueba API |
 | HU-46 | Enlace de recuperación de 60 min y de un solo uso | ✗ | ✗ | ✗ | No existe |
 
 | Métrica | Valor |
 |---|---|
-| Implementado | 1/6 = **16,7 %** |
-| Verificado | 0/6 = **0 %** |
+| Implementado | 4/6 = **66,7 %** |
+| Verificado | 4/6 = **66,7 %** |
 | Validado | 0/6 = **0 %** |
 | HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
 
-**Lectura:** EP-1 (Sprint 1) tiene un login operativo que permite usar el sistema, pero **ninguno de sus criterios de aceptación está cumplido y probado**.
+**Lectura:** HU-44 cuenta con API, migraciones y pantalla A-01; la suite automatizada de esta rama se ejecuta en SQLite. V-33..V-42 siguen Pendiente y Valid. = ✗; las observaciones reportadas por Sebas no sustituyen la evidencia humana. La validación manual del 2026-10-30 fue informada como realizada en Supabase PostgreSQL; no se ejecutó una suite local contra PostgreSQL. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
 
 ## 4. EP-2 — Gestión de propiedades y avalúos
 

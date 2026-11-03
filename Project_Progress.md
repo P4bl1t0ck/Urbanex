@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización | 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
+| Última actualización | 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
 
 ---
 
@@ -21,13 +21,13 @@
 Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expediente + avalúo → publicación → …), no solo un CRUD. Cada vez que se programó sin mirar el handoff aparecieron fallas de proceso: catálogo con fichas internas (DT-07), publicación sin requisitos (DT-08). Esta directiva evita perder el hilo entre sesiones, entre personas y entre asistentes de IA.
 
 ### Protocolo de inicio (cada sesión, antes de cualquier cambio)
-1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos. Si el pull trae migraciones nuevas, ejecutar `pipenv run python manage.py migrate` (`showmigrations` para verificar).
+1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos. Si el pull trae cambios en `Pipfile`, ejecutar `pipenv sync`. Si trae migraciones nuevas: revisar `showmigrations`, confirmar que la conexión activa es la SQLite local (`DB_ENGINE=sqlite` en `backend/.env`) y recién entonces ejecutar `pipenv run python manage.py migrate`. Nunca ejecutar `migrate` contra Supabase. (corregido por Pablo, 2026-11-03)
 2. Leer este archivo completo (sobre todo **Próxima tarea**).
 3. Leer **Estado de procesos** → la HU objetivo y sus criterios.
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → hoy **90 OK** (desde FX-18, 2026-10-30; antes 88 con el motor DS-21). Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → `develop`: **90 OK** (FX-18); con HU-44 fusionada: **116 OK** (53 de `users`), con SQLite y correo de consola. (corregido por Pablo, 2026-11-03) Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -40,6 +40,26 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador)
+- **Hecho:** merge de `origin/develop` (`d71c7f2`, trae el PR #9) en `77d68cd`, sin conflictos. En [`URBANEX_USM_TRAZABILIDAD.md`](docs/handoff/URBANEX_USM_TRAZABILIDAD.md) (`2347fa2`), §4: la columna **Código** quedó completa con archivos y endpoints de `develop` (Parcial, Rama sin fusionar o No implementado), y HU-12, HU-27 y HU-34 se citan con su rama sin fusionar. Las anclas `#hu-xx` se comprobaron: 13 existen y las de HU-27 y HU-34 no existían. Las HU de EP-3 a EP-6 sin sección en ningún documento quedan con "—", por decisión de Pablo. HU-44 ya no figura como "sin fusionar". En el §6, la fila 7 dice que C-08 está confirmada (DS-30). Fila del USM en el GPS §3 (`10d2ccc`). Suite después del merge: `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 OK** (SQLite); `makemigrations --check --dry-run` → "No changes detected", exit 0. Antes del merge, la línea base dio 90 OK.
+- **Falta:** el corte del 60 % (§2) y el §6 siguen como **PROPUESTA**, y el recálculo va aparte. Entre lo que queda está la fila 8 del §6: D-05 solo cubre JWT y sesión. Avance de épicas cubre solo EP-1 y EP-2; por decisión de Pablo no se abre DT. También falta la auditoría de solo lectura (`AGENTS.md` §11) y agregar la tarjeta de HU-05 en Miro.
+- **Siguiente paso:** auditoría en un chat nuevo → Pablo marca el PR #13 como listo y lo fusiona. Cuando se fusionen HU-12 o la rama de oportunidades, quitar la marca "Rama sin fusionar" en el §4 del USM.
+
+### 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`
+- **Hecho:** corrección de la documentación según la auditoría del PR #9, solo en `.md` (sin código ni migraciones). Filas de `develop` restauradas con su texto exacto: FX-05, FX-17, DT-12, DT-14 (a su lugar), DT-15, DT-21, DT-24, DT-26, DT-39, DT-43, DT-65, DT-68, DT-82, DS-13, DS-24 y DS-25; lo nuevo de Sebas pasó a notas añadidas con autor y fecha. DT-13 sin contradicción y **no resuelto**. El reinicio de Supabase (DT-96) queda como **propuesta POR CONFIRMAR** en Deuda, Progress, Seguridad, GPS y Guía. Nuevos **DT-115** (desactivar un asesor borra el captador; aceptado por ahora, se corrige en HU-02) y **DT-116** (riesgos de `users.0007`). Restaurados el historial de "Última actualización" y tres puntos de "Pendiente ahora" (PR #11, ronda 3, DT-65).
+- **Falta:** la decisión sobre DT-96. (Los pasos 1 y 6 del protocolo de inicio, que Sebas había cambiado, los combinó Pablo en un commit aparte.) La PR #11 ya se fusionó (`3748e7f`), pero su punto se restauró con el texto de `develop`.
+- **Siguiente paso:** Sebas hace pull de esta rama antes de volver a escribir en ella.
+
+### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
+- **Hecho:** se añadió el registro histórico reportado del cambio de `717d55b` a `3f8bed8` mediante rebase/force push, con aprobación posterior atribuida a Pablo el 2026-10-31. Git confirma ambos commits y sus metadatos, pero no demuestra por sí solo el force push ni esa aprobación. Se conserva `2c07f7d8` como referencia histórica de GPS y FX-05/DS-13.
+- **Falta:** el texto íntegro del prompt original no está en el repositorio; este registro se limita a los datos compartidos en la conversación. Siguen pendientes V-33..V-42 y la suite local contra PostgreSQL.
+- **Siguiente paso:** conservar los cambios locales restaurados del stash; coordinar la evidencia humana y la validación PostgreSQL según los pendientes ya documentados.
+
+### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
+- **Hecho:** merge de `origin/develop` en `8ff1e9f`; stash aplicado sin conflictos. Se conserva sin incluir en commits el cambio local de `.vscode/settings.json` y un archivo sin seguimiento con nombre anómalo. Documentación de HU-44, ambiente, deuda y decisiones actualizada en `27724a8`; commit y push normales completados. Suite backend: 116/116 OK; `npm run build` y `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py`.
+- **Falta:** validación humana V-33..V-42 y suite local contra PostgreSQL (**No ejecutado**); no resolver la diferencia de migración en este alcance.
+- **Siguiente paso:** coordinar con Pablo la evidencia humana pendiente y la propuesta DT-96 (POR CONFIRMAR) (corregido por Pablo, 2026-11-03); confirmar respaldo y ambiente antes de cualquier restablecimiento o migración.
 
 ### 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
 - **Hecho:** Pablo validó HU-12 en local (incógnito, `localhost:3001`): **V-60, V-61 y V-62 aprobadas**. V-63 sigue Pendiente (DT-110: necesita una URL pública). Registrado **DT-112**: la ficha inexistente dice "Verifica la conexión con el servidor".
@@ -65,14 +85,19 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## 🧭 Pendiente ahora (2026-10-30)
+## 🧭 Pendiente ahora (2026-11-02)
 
+> - **HU-44, PR #9 existente:** merge con `origin/develop` guardado en `8ff1e9f`; el stash se aplicó sin conflictos. No abrir otra PR.
+> - **Validación humana pendiente:** V-33..V-39 quedan en **Pendiente**; las observaciones reportadas previamente por Sebas se conservan, pero no sustituyen la evidencia requerida por `AGENTS.md` §9. V-40..V-42 también quedan **Pendiente**.
+> - **Pruebas (2026-11-02):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 tests, OK** (55.180 s, exit 0), SQLite + `EMAIL_PROVIDER=console`. `makemigrations --check --dry-run` → exit 1; detecta `documents/0002_alter_document_file.py` (DT-92), no se generó ni aplicó migración. Suite local contra PostgreSQL **No ejecutado**. No ejecutar migraciones contra Supabase en esta tarea.
+> - **Frontend (2026-11-02):** `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos preexistentes de `SiteNav` sin usar (`app/page.tsx` y `app/properties/page.tsx`).
+> - **DT-96:** el restablecimiento de la base de desarrollo y la migración desde `develop` con Pablo son una **propuesta de Sebas, POR CONFIRMAR** por Pablo; no se ha ejecutado. Si se aprueba, documentarla con respaldo y confirmación de ambiente (corregido por Pablo, 2026-11-03).
 > - ~~**(2026-11-01) 🧪 HU-12 (URB-17):** validaciones **V-60 a V-63**~~ **(2026-11-02) V-60 a V-62 aprobadas por Pablo; V-63 Pendiente (DT-110).** **Siguiente:** auditoría de solo lectura (`AGENTS.md` §11), push y PR de `feat/URB-17-HU-12-compartir-ficha` (worktree `../Urbanex-hu12`).
 > - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
-> - Los pendientes del 2026-10-28 ya resueltos están archivados en [Historial](#historial).
+> - Los pendientes anteriores ya resueltos están archivados en [Historial](#historial).
 
 ---
 
@@ -115,9 +140,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 > **Por qué existe esta sección:** el DoD del equipo exige que cada flujo se compruebe **en la interfaz** ("no basta con Postman"). Estas pruebas se acumularon desde el 2026-10-22 sin hacerse. Mientras sigan en **Pendiente**, DT-40 no se cierra y HU-01, HU-03, HU-05, HU-08 y HU-53 no pueden marcarse como validadas en la parte funcional ni en la visual.
 >
 > **Cómo usarla:** sigue los pasos de cada prueba y responde la pregunta del resultado esperado. Después llena la fila: **quién** la hizo, **cuándo** (fecha y hora), **qué viste** (textos, estados, capturas si las hay) y el resultado (**Aprobado** / **Fallido**). Si algo falla, anota exactamente qué apareció; con eso se abre o actualiza el DT correspondiente. Ninguna fila se marca como Aprobada por inferencia.
+>
+> **HU-44:** implementación registrada; la suite automatizada se ejecutó en SQLite (resultado vigente en "Estado actual"). La validación manual V-33..V-39 queda **Pendiente**. Se conservan como observaciones atribuidas a Sebas los reportes previos; V-37 fue parcial (motivo, baja y propiedad presente) y falta comprobar visualmente `agent: null`.
 
 **Preparación (antes de empezar):**
-1. Desde `backend/`: `pipenv run python manage.py migrate` y luego `pipenv run python manage.py runserver`.
+1. Desde `backend/`, configura el entorno local de pruebas para SQLite y correo `console`, confirma el motor con `settings.DATABASES['default']['ENGINE']` y luego inicia `pipenv run python manage.py runserver`. No ejecutes `migrate` si el motor es PostgreSQL/Supabase.
 2. Desde `frontend/`: `npm run dev` y abrir `http://localhost:3000`.
 3. Carga los datos demo (DT-14, FX-15). Agrega a `backend/.env` (no se versiona) la línea `DEMO_PASSWORD=<una contraseña de 8+ caracteres, no solo números>` y ejecuta desde `backend/`: `pipenv run python manage.py setup_demo_data`. El comando imprime el id de cada propiedad y lo que le falta para publicar. Se puede repetir sin duplicar nada.
    - Inicia sesión como **`asesor.demo@urbanex.test`** con esa contraseña (el admin es `admin.demo@urbanex.test`).
@@ -349,7 +376,7 @@ El enlace "Ir al avalúo" **dentro del modal** de requisitos y el caso "falta so
 **Preparación (en este orden, desde `backend/`):**
 > **Hecho el 2026-10-28 en la copia de Pablo:** las migraciones ya estaban aplicadas y `setup_comparables_demo` creó los 11 comparables (La Carolina 1–6 = #40–#45; casas de Cumbayá = #46–#48). Verificado por consola contra la BD: V-21 da $143.861,35 (≈ $143.900, ALTO, CV 1,63 %), V-22 da MEDIO (CV 21,27 %), La Mariscal tiene 2 candidatos y Tumbaco 0, y #32 a #35 no tienen borradores abiertos. Puedes saltar los pasos 1 y 2.
 
-1. `pipenv run python manage.py migrate`: aplica `appraisals.0002` y `0003` (θ v1). Tu `db.sqlite3` cambia: **no la incluyas en ningún commit** (DT-02).
+1. Solo si estás trabajando en una base local de desarrollo y verificaste que el motor activo es SQLite: `pipenv run python manage.py migrate` aplica `appraisals.0002` y `0003` (θ v1). La BD local cambia: **no la incluyas en ningún commit** (DT-02). Nunca ejecutar contra Supabase.
 2. `pipenv run python manage.py setup_comparables_demo`: crea 11 comparables sintéticos en "Vendido" (no salen en el catálogo ni en "Mis propiedades").
 3. Reinicia `runserver` y `npm run dev`. Inicia sesión como `asesor.demo`.
 
@@ -468,12 +495,142 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 ---
 
-## Estado actual (2026-10-30)
+### Ronda 5 — HU-44 · Invitaciones y administración de usuarios
+
+> **Antes de repetir la ronda:** usa `EMAIL_PROVIDER=console` con SQLite local. Los enlaces aparecen en la consola del backend; no uses Resend ni Supabase para estas pruebas. La ejecución manual reportada por Sebas el 2026-10-30 fue en Supabase PostgreSQL; no se verificó en esta sesión. La suite automatizada registrada se ejecutó con SQLite.
+>
+> **Capturas:** no se encontraron imágenes de esta ronda en el repositorio. Las rutas indicadas son destinos para guardar las capturas al repetir la prueba, no archivos ya existentes.
+
+### V-33 · HU-44 — Crear usuario y localizar el enlace de activación
+1. Inicia sesión como administrador y abre `/dashboard/users`.
+2. Crea un asesor con un correo nuevo de prueba.
+3. Busca en la consola el correo de activación y el enlace `/activate#...`.
+
+**Resultado esperado:** A-01 confirma la creación y la cuenta queda pendiente/inactiva; el enlace aparece en consola sin contraseña temporal ni correo externo.
+
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30 17:41:23 | `POST /api/auth/users/` respondió 201; el correo "Activa tu cuenta de Urbanex" y el enlace local aparecieron en la consola con proveedor `console` | No aportada; destino: `evidence/HU-44/V-33.png` | **Pendiente** |
+
+### V-34 · HU-44 — Activar la cuenta e iniciar sesión
+1. Desde el enlace de V-33, establece una contraseña válida.
+2. Inicia sesión con el correo y la contraseña recién establecida.
+3. Comprueba en A-01 que la cuenta figura activa.
+
+**Resultado esperado:** la activación concluye, el usuario inicia sesión y A-01 refleja su estado activo.
+
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30 17:41:55; 17:43:14 | `POST /api/auth/users/activate/` respondió 200 y después `POST /api/auth/login/` respondió 200 | No aportada; destino: `evidence/HU-44/V-34.png` | **Pendiente** |
+
+### V-35 · HU-44 — Rechazar un enlace de activación usado
+1. Activa una cuenta desde su invitación.
+2. Abre de nuevo el mismo enlace e intenta enviar otra vez la contraseña.
+
+**Resultado esperado:** el segundo uso se rechaza como inválido o vencido y no cambia la contraseña ya establecida. La expiración de 24 horas se cubre en pruebas automatizadas.
+
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-30; hora no registrada | Sebas informó que, después de activar la cuenta, el enlace usado fue rechazado al volver a abrirlo; no se aportó el detalle visual ni una hora verificable | No aportada; destino: `evidence/HU-44/V-35.png` | **Pendiente** |
+
+### V-36 · HU-44 — Reenviar una invitación
+1. Crea un asesor de prueba y conserva el enlace original de la consola.
+2. Desde A-01, reenvía la invitación y copia el enlace nuevo.
+3. Abre primero el enlace antiguo y confirma que se rechaza.
+4. Abre después el enlace nuevo, establece la contraseña y confirma la activación.
+
+**Resultado esperado:** el enlace antiguo no sirve; el nuevo permite activar la cuenta.
+
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-31, 01:31 (hora del reporte) | Confirma que probó el enlace antiguo y fue rechazado, y que el enlace nuevo permitió activar la cuenta | Sin captura adjunta | **Pendiente** |
+
+### V-37 · HU-44 — Desactivar un asesor, ver el motivo y liberar sus propiedades (**Verificación manual parcial; comportamiento cubierto por prueba automática**)
+1. Con datos locales de prueba, crea y activa un asesor con una propiedad asignada.
+2. Como administrador, desactívalo indicando un motivo.
+3. En A-01, vuelve a abrir el usuario y verifica que el motivo se muestra.
+4. Comprueba que la propiedad sigue existiendo y su responsable queda vacío (`agent: null`). La tabla del frontend no muestra a qué asesor está asociada. Sebas no necesita usar herramientas técnicas para esta comprobación: la prueba automática `test_deactivation_keeps_user_and_unassigns_properties` verifica que la propiedad queda sin asesor; si se exige evidencia manual adicional, debe revisarla alguien con acceso a una vista técnica adecuada.
+5. Intenta iniciar sesión con el asesor y confirma que se rechaza.
+
+**Resultado esperado:** se ve el motivo; la propiedad persiste sin responsable; el asesor inactivo no inicia sesión.
+
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-31 01:26–01:27 | `POST /api/auth/users/2/deactivate/` respondió 200; confirmó que el asesor quedó inactivo y no pudo iniciar sesión, que A-01 muestra el motivo y que la propiedad sigue apareciendo. No pudo confirmar desde la interfaz si `agent: null`; la prueba automática `test_deactivation_keeps_user_and_unassigns_properties` sí verifica que el asesor queda desasignado en la base de pruebas | Sin captura | **Pendiente; observación manual parcial** |
+
+### V-38 · HU-44 — Bloquear A-01 incluso mediante URL directa
+1. Inicia sesión con un asesor.
+2. Escribe directamente `/dashboard/users` en la barra del navegador.
+3. Confirma que la página no permite ver ni gestionar usuarios.
+4. Comprueba que `GET /api/auth/users/` responde 403.
+
+**Resultado esperado:** el asesor no accede a A-01 por navegación ni URL directa; la API responde 403.
+
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-31, 01:31 (hora del reporte) | Confirma que abrió directamente `/dashboard/users` con rol asesor y que el acceso quedó bloqueado; confirma también la respuesta 403 de la API | Sin captura adjunta | **Pendiente** |
+
+### V-39 · A-01 — Rechazar celulares inválidos
+1. En `/dashboard/users`, edita un usuario de prueba y confirma un celular válido de 10 dígitos que empiece con `09`.
+2. Prueba un número de 10 dígitos que no empiece con `09`.
+3. Prueba una entrada con letras y otra con prefijo `+593`.
+4. Guarda cada valor inválido y comprueba el mensaje de validación.
+
+**Resultado esperado:** el número válido se acepta; el que no empieza en `09`, el que contiene letras y el internacional `+593` se rechazan con un mensaje claro.
+
+| Quién | Fecha y hora | Qué se observó exactamente | Captura | Resultado |
+|---|---|---|---|---|
+| Sebas | 2026-10-31, 01:31 (hora del reporte) | Confirma que el celular válido se aceptó y que se rechazaron los tres casos inválidos: sin prefijo `09`, con letras y con `+593` | Sin captura adjunta | **Pendiente** |
+
+### V-40 · HU-44 — Acceso a A-01 desde el dashboard
+1. Inicia sesión con un administrador y abre el dashboard.
+2. Comprueba que el botón **Administrar usuarios** aparece y abre `/dashboard/users`.
+3. Inicia sesión con un asesor y comprueba que el botón no aparece.
+
+**Resultado esperado:** solo el administrador ve el acceso a A-01 y llega a la pantalla de gestión.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+
+**Estado: Pendiente.**
+
+### V-41 · HU-44 — Cierre de sesión desde la navegación global
+1. Inicia sesión y abre A-01.
+2. Usa la acción de cierre de sesión de `SiteNav`.
+3. Comprueba que se cierra la sesión y que una ruta protegida ya no muestra información de usuarios.
+
+**Resultado esperado:** la navegación global cierra la sesión de forma consistente y la ruta protegida requiere volver a iniciar sesión.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+
+**Estado: Pendiente.**
+
+### V-42 · HU-44 — Mensaje de sesión vencida en pantallas autenticadas
+1. En un entorno de prueba, invalida o deja vencer el token de sesión.
+2. Abre una pantalla autenticada que use `authFetch` (I-06, I-07, I-11 o I-12).
+3. Registra el mensaje que aparece y si la persona puede volver a iniciar sesión.
+
+**Resultado esperado:** la persona recibe un mensaje comprensible y un camino claro para recuperar la sesión; registra cualquier confusión entre un token vencido y otros errores 401 (DT-97).
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+
+**Estado: Pendiente.**
+
+---
+
+## Estado actual (2026-11-02)
 
 - **Ronda 3 validada** (V-20 a V-25, Pablo, 2026-10-29 y 2026-10-30): las 6 aprobadas.
-- **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. **Suite: 90/90 OK**; `makemigrations --check` sin cambios.
+- **HU-44 (Fase B), PR #9 existente:** rama `feat/URB-02-HU-44-gestion-usuarios`; V-33..V-39 quedan **Pendiente**. Se conservan las observaciones atribuidas a Sebas del 2026-10-30/31, sin tratarlas como validación aprobada ni reemplazar la evidencia visual pendiente. V-40..V-42 aún no se han realizado.
+- **Ambientes:** Sebas informó que la ronda manual del 2026-10-30 se hizo en Supabase PostgreSQL; esa información no se verificó en esta sesión. La suite automatizada de la rama se ejecuta en SQLite con `EMAIL_PROVIDER=console`; la suite local contra PostgreSQL: **No ejecutado**.
+- **Seguridad de pruebas (FX-20):** `UserManagementApiTests` fuerza el proveedor de consola y las dos pruebas específicas de Resend parchean el punto de uso en `apps.users.serializers`; la `.env` local no dispara llamadas externas durante la suite.
+- **Migraciones:** Sebas indicó que `users.0007`/`0008` ya se aplicaron en Supabase antes de editar el archivo histórico. Sebas propuso restablecer la base de desarrollo y migrar desde `develop` junto a Pablo (DT-96): propuesta **POR CONFIRMAR**, no ejecutada (corregido por Pablo, 2026-11-03). No correr `migrate` contra Supabase en esta tarea. `appraisals.0002`/`0003` aparecían pendientes al iniciar el servidor; no se aplicaron. `makemigrations --check --dry-run` detectó la diferencia `documents/0002_alter_document_file.py` (DT-92); no se generó migración.
+- **Frontend (2026-11-02):** `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, con 0 errores y 2 avisos por `SiteNav` sin usar en `app/page.tsx` y `app/properties/page.tsx` (DT-24).
+- **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. La suite base de `origin/develop` fue 90/90.
 - **Hallazgos nuevos:** DT-80, DT-81 y DT-82; N-05 ampliada (pregunta también para la empresa); evidencia nueva en DT-01 y DT-74.
-- **Siguiente:** PR a `develop`. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
+- **Siguiente:** repetir V-33..V-42 y registrar evidencia humana; aclarar la diferencia de mayúsculas en email (DT-95), decidir la propuesta de base de datos de Sebas, **POR CONFIRMAR** (DT-96) (corregido por Pablo, 2026-11-03) y revisar los mensajes 401 (DT-97). La PR #9 ya existe. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
 
 ### Estado anterior (2026-10-28, noche)
 
@@ -492,7 +649,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 - **Hallazgos nuevos:** DT-74 (un borrador impide recalcular), DT-75 (la antigüedad del dato se mide con `updated_at`) y DT-76 (I-11 muestra datos de mercado de otros asesores).
 - **Preguntas para el tutor:** C-02 frente a RF-11, la superficie en viviendas y el resto, en la conversación del 2026-10-28.
 - **Avisar a Sebas:**
-  - ejecutar `migrate` y `setup_comparables_demo`;
+  - verificar que la base sea SQLite local antes de `migrate`; ejecutar `setup_comparables_demo` solo en desarrollo;
   - inutilizar las 3 cuentas publicadas en su copia (DT-65);
   - no se tocó ningún archivo compartido de GPS §3.
 
@@ -595,7 +752,7 @@ Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a 
 ### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
 1. ~~Fase 3 de DT-40~~ Hecha el 2026-10-25 (`3783919`).
 2. Registrar el resultado de las validaciones de Pablo (quién, cuándo, qué se vio) y, si pasan, cerrar DT-40 y marcar como validados los criterios de HU-08 y HU-53 en Avance de épicas.
-3. ~~Abrir las PR en orden: URB-15 → `develop`~~ (fusionada el 2026-10-27) y después URB-13 (DS-09). Tras fusionar, cada copia ejecuta `migrate`. **Avisar a Sebas** de que la fase 3 modificó `dashboard/page.tsx`.
+3. ~~Abrir las PR en orden: URB-15 → `develop`~~ (fusionada el 2026-10-27) y después URB-13 (DS-09). Tras fusionar, cada copia verifica la base seleccionada antes de aplicar migraciones locales; nunca contra Supabase. **Avisar a Sebas** de que la fase 3 modificó `dashboard/page.tsx`.
 4. Decidir DT-45 (qué hacer con `frontend/CLAUDE.md`) y DT-23 (borrar `next.config.ts`).
 5. Resolver DT-39 junto con C-08.
 
@@ -627,7 +784,7 @@ Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a 
 - **No ejecutado:** validación visual en el navegador de ninguno de los tres cambios (pendiente; ver abajo).
 
 ### Migraciones / endpoints nuevos
-- Migración `appraisals/0001_initial`. **Aplicada en la BD local de Pablo el 2026-10-24** (`showmigrations appraisals` → `[X] 0001_initial`). Su `db.sqlite3` cambió pero **no se sube** (DT-02). ⚠️ **Para el próximo desarrollo:** quien haga pull de esta rama (Sebas incluido) debe ejecutar `pipenv run python manage.py migrate` antes de levantar el servidor, o `/api/appraisals/` y la publicación fallarán con `no such table: appraisals_appraisal` (DT-43).
+- Migración `appraisals/0001_initial`. **Aplicada en la BD local de Pablo el 2026-10-24** (`showmigrations appraisals` → `[X] 0001_initial`). Su `db.sqlite3` cambió pero **no se sube** (DT-02). Antes de `migrate`, verificar que el motor sea SQLite local; nunca ejecutar contra Supabase. Si una copia local carece de la tabla, aplicar allí las migraciones para que `/api/appraisals/` y la publicación funcionen (DT-43).
 - `GET/POST /api/appraisals/`, `GET/PATCH /api/appraisals/<uuid>/`, `POST /api/appraisals/<uuid>/approve/`.
 - Cambio de contrato: `POST /api/auth/properties/<id>/publish/` ahora puede responder **400** `{detail, missing_requirements[{code, message}]}` o **409** (no está en captación).
 - Archivos compartidos tocados: `backend/config/settings.py` (`INSTALLED_APPS`) y `backend/config/urls.py`, una línea cada uno. **Avisar a Sebas.**
@@ -647,7 +804,7 @@ Las validaciones de esta sesión se movieron, con pasos y resultado esperado, a 
 - **DT-39 (P1):** un usuario autenticado con rol `cliente` todavía ve propiedades en captación.
 - **DT-40 (P1):** **bloqueo funcional esperado de HU-53**: sin pantallas I-11/I-12 un avalúo solo se aprueba por la API, así que hoy **no se puede publicar desde la interfaz**. Es el comportamiento correcto del proceso.
 - **DT-41:** el comando de pruebas ahora incluye `apps.appraisals.tests`.
-- **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración aplicada en la copia de Pablo; las demás copias deben ejecutar `migrate`.
+- **DT-42:** formato del `folio` POR CONFIRMAR. **DT-43:** migración aplicada en la copia SQLite local de Pablo; cada copia verifica el motor antes de aplicar migraciones y nunca las ejecuta contra Supabase.
 
 ### Validaciones pendientes (requieren a una persona)
 Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este archivo (V-01, V-02, V-11 y V-12).
@@ -657,7 +814,7 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 - HU-53 y HU-01 ya no tienen bloqueos técnicos de backend; falta validación en la UI (DT-40) y DT-39.
 
 ### Próxima tarea (de esa sesión; la vigente está en "Estado actual")
-1. **Abrir el PR** de `feat/URB-15-HU-53-proceso-publicacion` (ya en `origin`) hacia `develop`, revisarlo y fusionarlo con autorización del responsable de integración. Tras fusionar, cada copia ejecuta `migrate`.
+1. **Abrir el PR** de `feat/URB-15-HU-53-proceso-publicacion` (ya en `origin`) hacia `develop`, revisarlo y fusionarlo con autorización del responsable de integración. Tras fusionar, cada copia verifica el motor y aplica migraciones solo a su base local de desarrollo, nunca a Supabase.
 2. ~~Cerrar DT-09 (P0)~~ Hecho el 2026-10-24 (FX-11).
 3. **Pantalla I-12** (calibrar y aprobar avalúo) + `frontend/types/appraisal.ts` en una ruta nueva; conectar la fila "Avalúo aprobado" del Expediente y mostrar `missing_requirements` al publicar (DT-40).
 4. Resolver DT-39 junto con C-08 (¿se mantiene el rol `cliente`?).
@@ -671,7 +828,7 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 2. ~~**🧪 URGENTE — Validaciones V-13 a V-18**~~ **Hechas el 2026-10-28 (15:30–16:05): las 6 aprobadas**, registradas en "Ronda 2". Queda V-19 (corta).
 3. ~~**🔑 DT-65:** cambiar las contraseñas de las cuentas de la `db.sqlite3` publicada~~ **Hecho en la copia de Pablo el 2026-10-28 (DS-24):** contraseñas inutilizables y sin superusuario. Falta la copia de Sebas.
 4. ~~Abrir la PR de la tarea 3~~ **Fusionada el 2026-10-28 (PR #6).** **Nuevo orden (DS-22):** primero el motor (HU-04 y HU-06, con I-11) y después la tarea 4 (filtros P-02, DS-16).
-5. **🧪 Ronda 3 (motor DS-21):** V-20 a V-25. Antes, `migrate` y `setup_comparables_demo`. *(Sigue pendiente al archivar: ver "Pendiente ahora".)*
+5. **🧪 Ronda 3 (motor DS-21):** V-20 a V-25. Antes, verificar el motor; `migrate` y `setup_comparables_demo` se ejecutan solo en SQLite local de desarrollo. *(Sigue pendiente al archivar: ver "Pendiente ahora".)*
 
 ### Sesión anterior (registro hasta 2026-10-22)
 - **Sprint:** Sprint 1

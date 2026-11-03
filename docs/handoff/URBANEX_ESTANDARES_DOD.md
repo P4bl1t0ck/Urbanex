@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-11-01 · §4: `npm test` en el frontend (9 pruebas, HU-12, FX-24). Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4: suite contra PostgreSQL y plantilla de PR; §5: `makemigrations --check` y archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**. Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama HU-12: 2026-11-01 · §4: `npm test` en el frontend (9 pruebas, HU-12, FX-24). Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4: suite contra PostgreSQL y plantilla de PR; §5: `makemigrations --check` y archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -78,12 +78,16 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] Listo para revisión por el otro desarrollador
 ```
 
-**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-24 con `apps.appraisals` (DT-41); resultado esperado: **90 pruebas OK** (52 + 6 del comando `setup_demo_data` + 6 del endpoint de requisitos de publicación, 2026-10-27; + 24 del motor de avalúos DS-21, 2026-10-28; + 2 del admin de θ, FX-18, 2026-10-30):
+**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-31 con HU-44 (FX-20); resultado esperado: **116 pruebas OK** (53 users + 19 documents + 44 appraisals; 90 en `origin/develop` + 26 nuevas):
 
 ```bash
 pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests
 pipenv run python manage.py makemigrations --check --dry-run
 ```
+
+En Windows, fija antes de la suite `PIPENV_DONT_LOAD_ENV=1`, `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; comprueba el motor activo. La validación manual reportada por Sebas en Supabase PostgreSQL es independiente de esta suite. La suite local contra PostgreSQL: **No ejecutado**. Nunca ejecutes `migrate` contra Supabase. La comprobación de migraciones actualmente detecta `documents/0002_alter_document_file.py` (DT-92), por lo que su resolución sigue pendiente.
+
+**Ejecución registrada (2026-11-02):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → 116 pruebas, **OK** (exit 0; SQLite). `pipenv run python manage.py makemigrations --check --dry-run` → exit 1; detecta `apps/documents/migrations/0002_alter_document_file.py`; no se generó ni aplicó migración. En `frontend/`: `npm run build` → exit 0; `npx tsc --noEmit -p .` → exit 0; `npx eslint .` → exit 0, 0 errores y 2 avisos ya registrados en DT-24. Suite local contra PostgreSQL: **No ejecutado**.
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 
@@ -124,6 +128,6 @@ Reglas mínimas:
 4. **Coordinar antes de tocar** `backend/apps/users/models.py`, `backend/apps/users/migrations/`, `backend/config/settings.py`, `frontend/types/property.ts` y `frontend/app/dashboard/page.tsx` (ver [GPS](URBANEX_GPS_ARCHIVOS.md#3-archivos-compartidos-que-requieren-coordinación)).
 5. Ejecutar las pruebas pertinentes antes de integrar (la suite de §4, `makemigrations --check --dry-run` y la suite contra PostgreSQL) y pegar el resultado en la plantilla de PR (`.github/pull_request_template.md`).
 6. No hacer commit, push ni merge sin la autorización del responsable de la integración.
-7. No hacer commit de `backend/.env`, `backend/db.sqlite3`, `backend/media/`, `backend/private_media/` ni datos reales de clientes; revisar `git diff --cached --name-only` antes de cada commit.
+7. No hacer commit de `backend/.env`, `backend/db.sqlite3`, `backend/media/`, `backend/private_media/` ni datos reales de clientes. `backend/.env.example` es una plantilla sin secretos y sí se puede versionar; revisar `git diff --cached --name-only` antes de cada commit.
 8. (2026-10-25) **Windows / PowerShell 5.1:** si el mensaje del commit tiene comillas dobles, escríbelo en un archivo y usa `git commit -F <archivo>`; con `-m @'…'@` PowerShell parte el mensaje y el commit falla (DT-49).
 9. (2026-10-25) Si una HU toca una página nueva y un archivo compartido, van en **commits separados** (primero la página y después el compartido), para aislar regresiones (DS-13).

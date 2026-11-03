@@ -231,7 +231,7 @@ Configuración DRF (`settings.py`): solo `JWTAuthentication`; **sin `DEFAULT_PER
 
 Antes de la auditoría, durante la sesión de desarrollo (2026-10-21/22), se ejecutó `pipenv run python manage.py migrate` sobre `db.sqlite3`, con copia de respaldo previa en el scratchpad de la sesión. La auditoría no ejecutó migraciones.
 
-**No ejecutado:** servidores `runserver`/`npm run dev` (lo hizo el usuario: confirmó que el dashboard obtiene datos tras migrar), pruebas E2E (no existen), pruebas del frontend (no existe framework de pruebas), Lighthouse ni Core Web Vitals.
+**No ejecutado en esta auditoría:** servidores `runserver`/`npm run dev` (Sebas los ejecutó en la sesión de desarrollo y confirmó que el dashboard obtiene datos tras migrar), pruebas E2E (no existen), pruebas del frontend (no existe framework de pruebas), Lighthouse ni Core Web Vitals.
 
 ---
 
@@ -248,7 +248,7 @@ Detalle, prioridad y criterio de cierre en [Deuda técnica](URBANEX_DEUDA_TECNIC
 7. `TIME_ZONE = 'UTC'` (DT-01).
 
 ## 8. Limitaciones de esta auditoría
-- No se ejecutó la aplicación en el navegador; la validación visual se basa en lo que el usuario reportó.
+- No se ejecutó la aplicación en el navegador durante esta auditoría; la validación visual se basa en lo que Sebas reportó.
 - No se leyeron los valores de `backend/.env` (solo los nombres de las variables).
 - No hay registros de Jira ni Excel en el repositorio: el estado en Jira es **POR CONFIRMAR**.
 - Las imágenes de pantallas (Figma) de la tesis están embebidas como base64 y no se analizaron.
