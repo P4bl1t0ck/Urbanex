@@ -188,7 +188,7 @@ Impacto para Avalúos: bajo. Impacto para co-intermediación (RF-07): alto. Ver 
 
 **Pruebas (`frontend/`, `npm test`):** 9 en `frontend/lib/propertyMetadata.test.mjs`: disponible con foto, reservada, sin fotos, descripción larga recortada, descripción vacía o con saltos de línea, y `captacion`, `vendido`, `arrendado` y `no_disponible` sin datos.
 
-**Validación de Pablo (2026-11-02, incógnito, `localhost:3001`, sin hora ni capturas):** V-60 (`/properties/1`), V-61 (`/properties/99999` y `/properties/7`) y V-62 aprobadas; V-63 Pendiente. Hallazgo: la ficha inexistente dice "Verifica la conexión con el servidor" (DT-112). HU-12 sigue en **Pruebas** hasta V-63.
+**Validación de Pablo (2026-11-02, incógnito, `localhost:3001`):** V-60 (`/properties/1`), V-61 (`/properties/99999` y `/properties/7`) y V-62 aprobadas; V-63 Pendiente. Primero sin hora ni capturas; **repetidas el mismo día con hora y captura** (21:51 a 22:12, 6 capturas en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\`, detalle en `Project_Progress.md`). Hallazgo: la ficha inexistente dice "Verifica la conexión con el servidor" (DT-112). HU-12 sigue en **Pruebas** hasta V-63.
 
 **Fuera de alcance:** `slug` estable (contexto maestro §10, DT-111: necesita una migración en `apps/users`, que espera al PR #9). La navbar duplicada de la ficha es DT-25.
 

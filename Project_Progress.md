@@ -43,7 +43,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ### 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
 - **Hecho:** Pablo validó HU-12 en local (incógnito, `localhost:3001`): **V-60, V-61 y V-62 aprobadas**. V-63 sigue Pendiente (DT-110: necesita una URL pública). Registrado **DT-112**: la ficha inexistente dice "Verifica la conexión con el servidor".
-- **Observaciones de la validación:** sin hora ni capturas (`AGENTS.md` §9 pide ambas); V-60 se hizo con `/properties/1` y V-61 con `/properties/7`, no con `#33` y `#35`.
+- **Observaciones de la validación:** la primera vez fue sin hora ni capturas (`AGENTS.md` §9 pide ambas). **Pablo repitió V-60 a V-62 el mismo día con hora y captura** (6 capturas en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\`, revisadas por Claude Code). V-60 se hizo con `/properties/1` y V-61 con `/properties/7`, no con `#33` y `#35`. La #1 tiene `property_type` = `"no_disponible"` (dato local, DT-109; revisar en HU-05).
 - **Falta:** V-63 (al desplegar), DT-111 (`slug`, tras el PR #9), auditoría de solo lectura (`AGENTS.md` §11), push y PR (lo abre Pablo).
 - **Siguiente paso:** auditoría en un chat nuevo → corregir lo que reporte → push → PR.
 
@@ -431,6 +431,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | Usó `/properties/1` en lugar de `#33`. Vio `og:title`, `og:description`, `og:image`, `og:image:alt`, `og:type`, `og:locale`, `twitter:card` = `summary_large_image`, `twitter:title`, `twitter:description` y `twitter:image`. No se anotó si vio `og:url`, `og:site_name` ni la canónica | **Aprobado** |
+| Pablo (incógnito, `localhost:3001`), repetición con captura | 2026-11-02, 22:12 | Código fuente de `/properties/1`, búsqueda `og:` → "1 de 16": `<title>` "Departamento Moderno en La Carolina \| Urbanex", descripción, canónica, `og:title`, `og:description`, `og:url`, `og:site_name`, `og:locale` (`es_EC`), `og:image`, `og:image:alt`, `og:type` (`website`), `twitter:card` = `summary_large_image`, `twitter:title`, `twitter:description` y `twitter:image`. **Observaciones:** (1) la #1 tiene `property_type` = `"no_disponible"`, por eso la ficha y la descripción dicen "no_disponible". Es un dato basura local (DT-109): el modelo sí limita los valores (`choices` en `backend/apps/users/models.py:21,26`) y DRF los valida, así que el valor no entró por la API normal (origen No verificado); revisarlo en HU-05. (2) Su foto principal es `/media/properties/images/Error.png`, también un dato local. (3) `og:url` y la canónica apuntan a `localhost:3000` por el valor por defecto de `NEXT_PUBLIC_SITE_URL` (esperado en local). Captura: `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\OG_1_HU12_New.png` | **Aprobado** |
 
 ### V-61 · HU-12 — Una ficha que no es pública no muestra datos
 1. Sin sesión, abre `http://localhost:3001/properties/35` (Tumbaco, en captación). Si ya no está en captación, usa cualquier propiedad en captación o no disponible del dashboard.
@@ -442,6 +443,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | `/properties/99999` (no existe) y `/properties/7` (en captación): solo `noindex`, sin etiquetas `og:` ni `twitter:`. **Observación:** en `/properties/99999` la pantalla dice "No se pudo cargar esta propiedad. Verifica la conexión con el servidor", lo que confunde cuando la propiedad no existe → **DT-112**. La navbar duplicada ya es DT-25 | **Aprobado** |
+| Pablo (incógnito, `localhost:3001`), repetición con captura | 2026-11-02: `/properties/99999` a las 21:31 y 21:34 y `/properties/7` a las 21:32 (horas del log del backend: `404` en ambas); capturas a las 21:51 y 21:54 | En las dos: `<title>` "Propiedad no disponible \| Urbanex", `<meta name="robots" content="noindex, nofollow">` y búsqueda `og:` → "Sin coincidencias". Capturas en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\`: `noindex_99999_hu12.png` y `og_99999_hu12.png` (21:51); `noindex_7_hu12.png` y `og_7_hu12_.png` (21:54) | **Aprobado** |
 
 ### V-62 · HU-12 — La ficha se ve igual y consulta la API una sola vez
 1. Abre `http://localhost:3001/properties/33` y recarga la página una vez.
@@ -452,6 +454,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | La ficha se ve igual que antes; cada recarga hace un solo `GET` en el backend | **Aprobado** |
+| Pablo (incógnito, `localhost:3001`), repetición con captura | 2026-11-02, 21:35 (captura a las 21:54) | La ficha `/properties/1` se ve normal; el log del backend muestra un solo `GET /api/auth/properties/1/` por recarga (21:35:02, 21:35:35, 21:50:41 y 21:54:05, todos `200`). En la captura también se ve la navbar duplicada (DT-25). Captura: `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\Get_1_HU12.png` | **Aprobado** |
 
 ### V-63 · HU-12 / DT-110 — La previsualización real en una red (Pendiente hasta tener una URL pública)
 1. Con la aplicación desplegada en una URL pública y `NEXT_PUBLIC_SITE_URL` con ese dominio, pega el enlace de una ficha Disponible en un chat de WhatsApp (o en el depurador de enlaces de Facebook).
