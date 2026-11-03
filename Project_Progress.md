@@ -21,13 +21,13 @@
 Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expediente + avalúo → publicación → …), no solo un CRUD. Cada vez que se programó sin mirar el handoff aparecieron fallas de proceso: catálogo con fichas internas (DT-07), publicación sin requisitos (DT-08). Esta directiva evita perder el hilo entre sesiones, entre personas y entre asistentes de IA.
 
 ### Protocolo de inicio (cada sesión, antes de cualquier cambio)
-1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos. Si el pull trae migraciones nuevas, revisa `showmigrations` y verifica la conexión activa; nunca ejecutes `migrate` contra Supabase.
+1. `git status --short --branch` y `git pull`: confirmar rama y cambios ajenos. Si el pull trae cambios en `Pipfile`, ejecutar `pipenv sync`. Si trae migraciones nuevas: revisar `showmigrations`, confirmar que la conexión activa es la SQLite local (`DB_ENGINE=sqlite` en `backend/.env`) y recién entonces ejecutar `pipenv run python manage.py migrate`. Nunca ejecutar `migrate` contra Supabase. (corregido por Pablo, 2026-11-03)
 2. Leer este archivo completo (sobre todo **Próxima tarea**).
 3. Leer **Estado de procesos** → la HU objetivo y sus criterios.
 4. Leer **Deuda técnica** → P0/P1 que afecten a la HU; decisiones `D-xx`/`N-xx`/`C-xx` pendientes y `DS-xx` tomadas.
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
-   `origin/develop`: **90/90 OK** (FX-18, 2026-10-30). HU-44: **53/53 users y 116/116 total**, con SQLite y correo de consola; ver "Estado actual". Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → `develop`: **90 OK** (FX-18); con HU-44 fusionada: **116 OK** (53 de `users`), con SQLite y correo de consola. (corregido por Pablo, 2026-11-03) Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -43,7 +43,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ### 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`
 - **Hecho:** corrección de la documentación según la auditoría del PR #9, solo en `.md` (sin código ni migraciones). Filas de `develop` restauradas con su texto exacto: FX-05, FX-17, DT-12, DT-14 (a su lugar), DT-15, DT-21, DT-24, DT-26, DT-39, DT-43, DT-65, DT-68, DT-82, DS-13, DS-24 y DS-25; lo nuevo de Sebas pasó a notas añadidas con autor y fecha. DT-13 sin contradicción y **no resuelto**. El reinicio de Supabase (DT-96) queda como **propuesta POR CONFIRMAR** en Deuda, Progress, Seguridad, GPS y Guía. Nuevos **DT-115** (desactivar un asesor borra el captador; aceptado por ahora, se corrige en HU-02) y **DT-116** (riesgos de `users.0007`). Restaurados el historial de "Última actualización" y tres puntos de "Pendiente ahora" (PR #11, ronda 3, DT-65).
-- **Falta:** Pablo decide los pasos 1 y 6 del protocolo de inicio (Sebas los cambió; no se tocaron); la decisión sobre DT-96. La PR #11 ya se fusionó (`3748e7f`), pero su punto se restauró con el texto de `develop`.
+- **Falta:** la decisión sobre DT-96. (Los pasos 1 y 6 del protocolo de inicio, que Sebas había cambiado, los combinó Pablo en un commit aparte.) La PR #11 ya se fusionó (`3748e7f`), pero su punto se restauró con el texto de `develop`.
 - **Siguiente paso:** Sebas hace pull de esta rama antes de volver a escribir en ella.
 
 ### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
