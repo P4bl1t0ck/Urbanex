@@ -55,6 +55,7 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 - Commits pequeños por capa (modelo · API y pruebas · pantalla · docs); un archivo compartido va en su propio commit. Mensaje `tipo(URB-XX): descripción`; en PowerShell, `git commit -F <archivo>`.
 - Antes de **cada** commit: `git diff --cached --name-only` y muéstralo. Nunca `git add -A`, `git add .` ni `git commit -a`.
 - Commit y push solo si la orden de la persona lo incluye. **El PR lo abre la persona.**
+- **`gh` solo para consultas** (`gh pr view`, `gh pr list`, `gh pr checks`). Crear, editar, comentar, pasar a listo o fusionar un PR solo con **orden explícita de Pablo** que indique la rama destino y el contenido (DS-31).
 
 **Prohibido:** push o merge a `develop`/`master` · force push (también `--force-with-lease`) **sin aprobación explícita de Pablo** (avisar no basta) · abrir un PR sin orden · commitear `backend/db.sqlite3`, `.env`, `backend/media/` o `backend/private_media/` · editar fuera del alcance.
 
