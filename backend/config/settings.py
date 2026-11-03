@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -99,12 +100,43 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").strip().lower()
+
+if DB_ENGINE == "sqlite":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+elif DB_ENGINE == "postgresql":
+    required_db_settings = ("DB_NAME", "DB_USER", "DB_PASSWORD", "DB_HOST")
+    missing_db_settings = [
+        setting for setting in required_db_settings if not os.getenv(setting)
+    ]
+    if missing_db_settings:
+        raise ValueError(
+            "PostgreSQL requires these environment variables: "
+            + ", ".join(missing_db_settings)
+        )
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["DB_NAME"],
+            "USER": os.environ["DB_USER"],
+            "PASSWORD": os.environ["DB_PASSWORD"],
+            "HOST": os.environ["DB_HOST"],
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "OPTIONS": {
+                "sslmode": os.getenv("DB_SSLMODE", "require"),
+            },
+        }
+    }
+else:
+    raise ValueError(
+        "Unsupported DB_ENGINE. Use 'sqlite' or 'postgresql'."
+    )
 
 
 # Password validation
@@ -150,11 +182,27 @@ STATIC_URL = 'static/'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "console").strip().lower()
+if EMAIL_PROVIDER not in {"console", "resend"}:
+    raise ImproperlyConfigured("EMAIL_PROVIDER debe ser 'console' o 'resend'.")
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
+if EMAIL_PROVIDER == "resend":
+    if not RESEND_API_KEY:
+        raise ImproperlyConfigured(
+            "RESEND_API_KEY es obligatorio cuando EMAIL_PROVIDER=resend."
+        )
+
+EMAIL_BACKEND = os.getenv(
+    "DEFAULT_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Urbanex <no-reply@localhost>")
+if EMAIL_PROVIDER == "resend" and "localhost" in DEFAULT_FROM_EMAIL.lower():
+    raise ImproperlyConfigured(
+        "Configura DEFAULT_FROM_EMAIL con una dirección de un dominio verificado en Resend."
+    )
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
 
 APPEND_SLASH = False  # Nos permitira el pasar la información si tiene el slash al final de la api que hace fecth.
 
