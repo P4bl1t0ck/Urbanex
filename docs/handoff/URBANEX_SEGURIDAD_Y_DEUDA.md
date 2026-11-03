@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Propósito | Inventario de riesgos de seguridad e infraestructura del código actual, con su plan de corrección, y opciones documentadas para las decisiones pendientes (D-05 sesión/JWT, DT-42 folio, almacenamiento y base de datos) |
-| Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3. **Actualizado el 2026-10-31:** SEC-15 / DT-79 (incidente de credenciales, sin valores); SEC-09 y §5.3: `db.sqlite3` ya no se versiona (DS-25, FX-22) |
+| Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3. **Actualizado el 2026-10-31:** SEC-15 / DT-79 (incidente de credenciales, sin valores); SEC-09 y §5.3: `db.sqlite3` ya no se versiona (DS-25, FX-22). **Actualizado el 2026-11-02:** §3.1, "XSS almacenado": metaetiquetas de HU-12 (FX-24), comprobación del escape Pendiente |
 | Método | Lectura del código del backend y del frontend. **No se hicieron pruebas de intrusión.** Lo que no se comprobó en ejecución está marcado **Por verificar** |
 | Alcance | Control de acceso · sesión y JWT · validación de entradas y archivos · folio de avalúos · infraestructura y almacenamiento · requisitos previos al despliegue |
 | Registro oficial | Cada riesgo tiene su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md); el estado se actualiza allí y en la tabla de §0 |
@@ -143,7 +143,7 @@ Hasta entonces, **no** se acorta la vida del token sin un flujo de renovación.
 | Aspecto | Estado |
 |---|---|
 | Inyección SQL | ✔ Solo ORM con parámetros; no hay SQL crudo |
-| XSS almacenado | ✔ Mitigado en la UI actual (React escapa). **Regla:** si se agrega texto enriquecido o metaetiquetas (HU-53), escapar o sanitizar en el servidor |
+| XSS almacenado | ✔ Mitigado en la UI actual (React escapa). **Regla:** si se agrega texto enriquecido o metaetiquetas (HU-53), escapar o sanitizar en el servidor. **(2026-11-02, HU-12, FX-24)** Las metaetiquetas de la ficha ya existen (`frontend/lib/propertyMetadata.ts`; las escribe Next a partir del título y la descripción). **Pendiente: comprobación del escape de metaetiquetas programada tras reiniciar la BD local (DT-109, registrada en la rama de oportunidades, sin fusionar)** |
 | Rangos numéricos y coordenadas | ⚠️ Solo se validan en el frontend. El servidor debe validar precio y área mayores que 0, y latitud y longitud dentro de su rango (*Por verificar* el comportamiento con valores no finitos) |
 | Longitud de textos | Parcial: título y ubicación tienen límite; la descripción y la justificación no |
 | Parámetros de consulta | ✔ Los filtros por propiedad se validan como numéricos |
