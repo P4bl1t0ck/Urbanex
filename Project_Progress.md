@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización | 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
+| Última actualización | 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
 
 ---
 
@@ -41,6 +41,20 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
+- **Hecho:** correcciones de la auditoría de solo lectura (No apto por documentación), sin tocar código. (1) Las rutas de las 6 capturas de V-60 a V-62 apuntan a `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\Pruebas anteriores (cambiar)\`, donde están ahora (no se movió ningún archivo). (2) DT-111 y "Fuera de alcance" de HU-12: el PR #9 ya se fusionó (`d71c7f2`); la migración del `slug` en `apps/users` se coordina con Sebas (HU-45). (3) Seguridad §3.1: el payload RSC se cita como `\u003c/script\u003e`. Decidido por Pablo: no se reordena el texto de `develop` en las cabeceras; la regla de `gh` va en la rama aparte `docs/regla-gh-solo-consultas` (DS-31).
+- **Evidencia (en `ed396fd`; el código no cambió después):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → `Found 116 test(s)`, **OK**; `makemigrations --check --dry-run` → exit 1, propone `documents/0002_alter_document_file.py` (DT-77/DT-92, no se creó); `npm test` → `tests 9 · pass 9 · fail 0`.
+- **PostgreSQL (N/A decidido por Pablo, 2026-11-03; texto para el checklist DoD del PR, lo pega Pablo):** "Suite contra PostgreSQL: N/A. Motivo: cambio solo de frontend (`frontend/app/properties/[id]/page.tsx`, `frontend/lib/propertyMetadata.ts`, su prueba y `frontend/package.json`); no hay modelos, migraciones, vistas ni consultas nuevas en el backend. Suite en SQLite: 116 OK; `npm test`: 9/9."
+- **PR (consultado con `gh pr list` y `gh pr view 14`, sin modificarlo):** #14, borrador, abierto, base `master`, cabeza `294358a`. Su descripción es una sola línea ("PR that it just for test and draft…"): **no tiene checklist DoD** ni el texto de PostgreSQL. La base `master` no coincide con `AGENTS.md` §5 (se vuelve a `develop` por PR); hallazgo para Pablo, no se tocó.
+- **Falta:** V-63 (DT-110, al desplegar), DT-111 (`slug`, con Sebas), pegar el texto de PostgreSQL en el PR, nueva auditoría de solo lectura y pasar el PR a listo (Pablo).
+- **Siguiente paso:** auditoría de solo lectura → Pablo pasa el PR a listo.
+
+### 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
+- **Hecho:** merge de `origin/develop` (`a071b97`, trae los PR #9 y #13) en `40dd147`. Hubo 7 conflictos, todos de documentación; se resolvieron sumando filas, sin reescribir las ajenas, y un script comprobó a tres bandas que no se perdió ninguna línea editada. **BD del worktree reiniciada** (DT-109; la BD de la carpeta principal la reinicia Pablo aparte): el `db.sqlite3` del worktree estaba vacío (0 bytes, respaldo en el Escritorio), `pipenv sync`, `migrate` (SQLite local, comprobado antes) y `setup_demo_data`. **V-64 aprobada por Pablo**: un título malicioso sale escapado en `<title>`, Open Graph y Twitter (Seguridad §3.1). En Seguridad se restauraron, por decisión de Pablo, dos frases de la celda "Fecha" que `develop` había perdido.
+- **Evidencia:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 OK**; `makemigrations --check --dry-run` propone `documents/0002_alter_document_file.py` (síntoma del worktree, DT-77/DT-92; no se creó). Frontend: `npm test` 9/9, `tsc` exit 0, `eslint` 0 errores y 2 avisos previos, `next build` exit 0. Línea base antes del merge: backend no ejecutable (Django sin instalar en el entorno del worktree); `npm test` 9/9.
+- **Falta:** V-63 (al desplegar, DT-110), DT-111 (`slug`), suite contra PostgreSQL (No ejecutada), auditoría de solo lectura (`AGENTS.md` §11), push y PR (lo abre Pablo).
+- **Siguiente paso:** auditoría en un chat nuevo → corregir → push (cuando Pablo lo diga) → PR.
+
 ### 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador)
 - **Hecho:** merge de `origin/develop` (`d71c7f2`, trae el PR #9) en `77d68cd`, sin conflictos. En [`URBANEX_USM_TRAZABILIDAD.md`](docs/handoff/URBANEX_USM_TRAZABILIDAD.md) (`2347fa2`), §4: la columna **Código** quedó completa con archivos y endpoints de `develop` (Parcial, Rama sin fusionar o No implementado), y HU-12, HU-27 y HU-34 se citan con su rama sin fusionar. Las anclas `#hu-xx` se comprobaron: 13 existen y las de HU-27 y HU-34 no existían. Las HU de EP-3 a EP-6 sin sección en ningún documento quedan con "—", por decisión de Pablo. HU-44 ya no figura como "sin fusionar". En el §6, la fila 7 dice que C-08 está confirmada (DS-30). Fila del USM en el GPS §3 (`10d2ccc`). Suite después del merge: `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 OK** (SQLite); `makemigrations --check --dry-run` → "No changes detected", exit 0. Antes del merge, la línea base dio 90 OK.
 - **Falta:** el corte del 60 % (§2) y el §6 siguen como **PROPUESTA**, y el recálculo va aparte. Entre lo que queda está la fila 8 del §6: D-05 solo cubre JWT y sesión. Avance de épicas cubre solo EP-1 y EP-2; por decisión de Pablo no se abre DT. También falta la auditoría de solo lectura (`AGENTS.md` §11) y agregar la tarjeta de HU-05 en Miro.
@@ -61,6 +75,21 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Falta:** validación humana V-33..V-42 y suite local contra PostgreSQL (**No ejecutado**); no resolver la diferencia de migración en este alcance.
 - **Siguiente paso:** coordinar con Pablo la evidencia humana pendiente y la propuesta DT-96 (POR CONFIRMAR) (corregido por Pablo, 2026-11-03); confirmar respaldo y ambiente antes de cualquier restablecimiento o migración.
 
+### 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
+- **Hecho:** Pablo validó HU-12 en local (incógnito, `localhost:3001`): **V-60, V-61 y V-62 aprobadas**. V-63 sigue Pendiente (DT-110: necesita una URL pública). Registrado **DT-112**: la ficha inexistente dice "Verifica la conexión con el servidor".
+- **Observaciones de la validación:** la primera vez fue sin hora ni capturas (`AGENTS.md` §9 pide ambas). **Pablo repitió V-60 a V-62 el mismo día con hora y captura** (6 capturas en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\Pruebas anteriores (cambiar)\`, ruta actualizada el 2026-11-03; revisadas por Claude Code). V-60 se hizo con `/properties/1` y V-61 con `/properties/7`, no con `#33` y `#35`. La #1 tiene `property_type` = `"no_disponible"` (dato local, DT-109, registrada en la rama de oportunidades, sin fusionar; revisar en HU-05).
+- **Falta:** V-63 (al desplegar), DT-111 (`slug`, tras el PR #9), auditoría de solo lectura (`AGENTS.md` §11), push y PR (lo abre Pablo).
+- **Siguiente paso:** auditoría en un chat nuevo → corregir lo que reporte → push → PR.
+- **Correcciones de la auditoría (mismo día, sin tocar código):** el párrafo "Validación funcional pendiente" vuelve a HU-53 en Estado de procesos; las primeras filas de V-60 a V-62 quedan como "Reemplazada por la repetición con captura"; DT-109 se cita como registrada en la rama de oportunidades, sin fusionar; Pablo confirma "Técnica: Aprobado" de HU-12; nuevos **DT-113** (el mismo patrón en 9 HU anteriores, sin tocarlas) y **DT-114** (Progress y Deuda fuera de GPS §3). **Pendiente:** la prueba de escape de las metaetiquetas (XSS), que hace Pablo; el resultado va en Seguridad §3.1. **Aplazada al 2026-11-03:** la #1 pertenece a un usuario borrado y no se puede editar; Pablo reiniciará la BD local (DT-109) con `migrate` y el seeder y hará la prueba con una ficha pública de `asesor.demo`. Queda anotada como Pendiente en Seguridad §3.1. Nota: el frontend del worktree debe correr en el puerto 3000 para iniciar sesión (CORS solo permite 3000 en `backend/config/settings.py`). **El PR se abre después de fusionar el #9.**
+
+### 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
+- **Hecho:** HU-12 / URB-17, solo frontend. `generateMetadata` en la ficha P-03 con título, descripción (precio referencial), imagen principal, Open Graph y Twitter, solo para fichas Disponibles o Reservadas. Las demás dan "Propiedad no disponible \| Urbanex" con `noindex` (FX-24). 9 pruebas con `npm test` (`node --test`, sin dependencias). Commits `2305868` y `d690286`, más el de documentación.
+- **Cómo se trabajó:** en un worktree aparte (`../Urbanex-hu12`, desde `develop` `3748e7f`), por decisión de Pablo, para no tocar su carpeta ni su `db.sqlite3`. La rama no tiene upstream; **no se hizo push**.
+- **Evidencia:** backend 90/90 OK (línea base, sin cambios); `npm test` 9/9; `next build` y `tsc` exit 0; `eslint` con los mismos 6 problemas previos. El backend de Pablo no estaba corriendo, así que el HTML se comprobó con un backend falso: disponible con foto, reservada sin foto y 404.
+- **Falta:** V-60 a V-63 (Pablo); la previsualización real necesita una URL pública (DT-110); `slug` tras el PR #9 (DT-111); auditoría de solo lectura (`AGENTS.md` §11) y PR.
+- **Observación de la línea base:** en el worktree, `makemigrations --check` propone `documents/0002_alter_document_file.py`. Es el síntoma de DT-77 (ruta absoluta en `documents.0001`), que aparece porque el worktree vive en otra carpeta. No se creó ninguna migración.
+- **Siguiente paso:** Pablo hace V-60 a V-63 → auditoría → push y PR.
+
 ### 2026-10-31 · Pablo (con Claude Code) · rama `docs/reglas-ia-y-deuda`
 - **Hecho:** `AGENTS.md` en la raíz como única fuente de reglas para la IA (DS-25); `CLAUDE.md` y `.github/copilot-instructions.md` apuntan a él; ficha `docs/handoff/PLANTILLA_TAREA.md` y plantilla de PR; `backend/db.sqlite3` y `frontend/CLAUDE.md` ya no se versionan (DT-45 resuelto, FX-21); Guía, pasos 5 y 6; registrados DT-77, DT-78 y DT-79.
 - **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
@@ -77,6 +106,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 > - **Pruebas (2026-11-02):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 tests, OK** (55.180 s, exit 0), SQLite + `EMAIL_PROVIDER=console`. `makemigrations --check --dry-run` → exit 1; detecta `documents/0002_alter_document_file.py` (DT-92), no se generó ni aplicó migración. Suite local contra PostgreSQL **No ejecutado**. No ejecutar migraciones contra Supabase en esta tarea.
 > - **Frontend (2026-11-02):** `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos preexistentes de `SiteNav` sin usar (`app/page.tsx` y `app/properties/page.tsx`).
 > - **DT-96:** el restablecimiento de la base de desarrollo y la migración desde `develop` con Pablo son una **propuesta de Sebas, POR CONFIRMAR** por Pablo; no se ha ejecutado. Si se aprueba, documentarla con respaldo y confirmación de ambiente (corregido por Pablo, 2026-11-03).
+> - ~~**(2026-11-01) 🧪 HU-12 (URB-17):** validaciones **V-60 a V-63**~~ **(2026-11-02) V-60 a V-62 aprobadas por Pablo; V-63 Pendiente (DT-110).** **(2026-11-03) Merge de `develop` (`40dd147`) y V-64 (escape de metaetiquetas) aprobada por Pablo.** **Siguiente:** auditoría de solo lectura (`AGENTS.md` §11), push y PR de `feat/URB-17-HU-12-compartir-ficha` (worktree `../Urbanex-hu12`).
 > - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
@@ -424,6 +454,74 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (`admin.demo`) | 2026-10-29 / 2026-10-30 | **Primer intento (2026-10-29): Fallido.** Django decía que `admin.demo` no tenía permiso para ver ni editar nada, y "Parámetros del motor" no aparecía. Causa: el admin de θ solo daba por rol el permiso de agregar (FX-18). **Tras FX-18 (2026-10-30):** `admin.demo` ve "Parámetros del motor" y creó la **v2** (`alfa` = 0), que quedó activa con `created_by = admin.demo`; la v1 se desactivó. Después reactivó la v1. Observación: el admin muestra las fechas en UTC (DT-01). No se anotó si la v1 se ve de solo lectura | **Aprobado** (tras FX-18) |
+
+### Ronda HU-12 — Compartir la ficha (rama `feat/URB-17-HU-12-compartir-ficha`; validada en local el 2026-11-02: V-60 a V-62 aprobadas, V-63 Pendiente por DT-110; 2026-11-03: V-64, escape de metaetiquetas, aprobada)
+
+> **Preparación.** Esta ronda usa tu backend de siempre (`http://127.0.0.1:8000`, en tu carpeta) y el frontend del worktree:
+> 1. Arranca el backend como siempre, desde tu carpeta principal.
+> 2. En otra terminal: `cd ..\Urbanex-hu12\frontend` y `npm run dev -- -p 3001` (el puerto 3001 evita chocar con tu frontend).
+> 3. Usa una **ventana de incógnito sin sesión**: así ves la ficha como un cliente.
+>
+> Para ver las etiquetas: abre la ficha y pulsa **Ctrl+U** (código fuente); luego **Ctrl+F** y busca `og:`. Las pruebas automáticas ya cubren la ficha Reservada y la ficha sin fotos; si tienes una a mano, puedes comprobarla también en V-60.
+
+### V-60 · HU-12 — La ficha publicada tiene sus metaetiquetas
+1. Abre `http://localhost:3001/properties/33` (La Carolina, Disponible, con foto). Si no está disponible, usa cualquier ficha que salga en `/properties`.
+2. Mira el título de la pestaña y luego el código fuente (Ctrl+U).
+
+**Resultado esperado:** ¿la pestaña dice **"<título de la propiedad> | Urbanex"**? ¿En el código fuente aparecen `og:title`, `og:description` (tipo, ubicación, precio y "(precio referencial)"), `og:image` con la URL de la foto principal, `og:url` con `http://localhost:3000/properties/33` (dice 3000 aunque abras en 3001: sale del valor por defecto de `NEXT_PUBLIC_SITE_URL`), y `twitter:card` con `summary_large_image`? ¿Hay `<link rel="canonical">`?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | Usó `/properties/1` en lugar de `#33`. Vio `og:title`, `og:description`, `og:image`, `og:image:alt`, `og:type`, `og:locale`, `twitter:card` = `summary_large_image`, `twitter:title`, `twitter:description` y `twitter:image`. No se anotó si vio `og:url`, `og:site_name` ni la canónica | Reemplazada por la repetición con captura (ver fila siguiente) |
+| Pablo (incógnito, `localhost:3001`), repetición con captura | 2026-11-02, 22:12 | Código fuente de `/properties/1`, búsqueda `og:` → "1 de 16": `<title>` "Departamento Moderno en La Carolina \| Urbanex", descripción, canónica, `og:title`, `og:description`, `og:url`, `og:site_name`, `og:locale` (`es_EC`), `og:image`, `og:image:alt`, `og:type` (`website`), `twitter:card` = `summary_large_image`, `twitter:title`, `twitter:description` y `twitter:image`. **Observaciones:** (1) la #1 tiene `property_type` = `"no_disponible"`, por eso la ficha y la descripción dicen "no_disponible". Es un dato basura local (DT-109, registrada en la rama de oportunidades, sin fusionar): el modelo sí limita los valores (`choices` en `backend/apps/users/models.py:21,26`) y DRF los valida, así que el valor no entró por la API normal (origen No verificado); revisarlo en HU-05. (2) Su foto principal es `/media/properties/images/Error.png`, también un dato local. (3) `og:url` y la canónica apuntan a `localhost:3000` por el valor por defecto de `NEXT_PUBLIC_SITE_URL` (esperado en local). Captura: `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\Pruebas anteriores (cambiar)\OG_1_HU12_New.png` (ruta actualizada el 2026-11-03: la captura está en esa subcarpeta) | **Aprobado** |
+
+### V-61 · HU-12 — Una ficha que no es pública no muestra datos
+1. Sin sesión, abre `http://localhost:3001/properties/35` (Tumbaco, en captación). Si ya no está en captación, usa cualquier propiedad en captación o no disponible del dashboard.
+2. Abre también `http://localhost:3001/properties/99999` (no existe).
+3. En cada una, mira la pestaña y el código fuente (Ctrl+U).
+
+**Resultado esperado:** ¿las dos dicen **"Propiedad no disponible | Urbanex"** en la pestaña, con `<meta name="robots" content="noindex, nofollow">`? ¿**No** hay ninguna etiqueta `og:` ni `twitter:`, ni el título, la ubicación o el precio de la propiedad? ¿La página muestra "No se pudo cargar esta propiedad"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | `/properties/99999` (no existe) y `/properties/7` (en captación): solo `noindex`, sin etiquetas `og:` ni `twitter:`. **Observación:** en `/properties/99999` la pantalla dice "No se pudo cargar esta propiedad. Verifica la conexión con el servidor", lo que confunde cuando la propiedad no existe → **DT-112**. La navbar duplicada ya es DT-25 | Reemplazada por la repetición con captura (ver fila siguiente) |
+| Pablo (incógnito, `localhost:3001`), repetición con captura | 2026-11-02: `/properties/99999` a las 21:31 y 21:34 y `/properties/7` a las 21:32 (horas del log del backend: `404` en ambas); capturas a las 21:51 y 21:54 | En las dos: `<title>` "Propiedad no disponible \| Urbanex", `<meta name="robots" content="noindex, nofollow">` y búsqueda `og:` → "Sin coincidencias". Capturas en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\Pruebas anteriores (cambiar)\` (ruta actualizada el 2026-11-03): `noindex_99999_hu12.png` y `og_99999_hu12.png` (21:51); `noindex_7_hu12.png` y `og_7_hu12_.png` (21:54) | **Aprobado** |
+
+### V-62 · HU-12 — La ficha se ve igual y consulta la API una sola vez
+1. Abre `http://localhost:3001/properties/33` y recarga la página una vez.
+2. Mira la terminal del backend (`runserver`).
+
+**Resultado esperado:** ¿la ficha se ve igual que antes (foto, precio, características, descripción)? ¿Cada recarga produce **una sola** línea `GET /api/auth/properties/33/` en el backend, y no dos? (El modo de desarrollo puede repetir la petición la primera vez que compila la página; cuenta la de la recarga.)
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (incógnito, `localhost:3001`) | 2026-11-02 (hora no anotada; sin captura) | La ficha se ve igual que antes; cada recarga hace un solo `GET` en el backend | Reemplazada por la repetición con captura (ver fila siguiente) |
+| Pablo (incógnito, `localhost:3001`), repetición con captura | 2026-11-02, 21:35 (captura a las 21:54) | La ficha `/properties/1` se ve normal; el log del backend muestra un solo `GET /api/auth/properties/1/` por recarga (21:35:02, 21:35:35, 21:50:41 y 21:54:05, todos `200`). En la captura también se ve la navbar duplicada (DT-25). Captura: `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\Pruebas anteriores (cambiar)\Get_1_HU12.png` (ruta actualizada el 2026-11-03) | **Aprobado** |
+
+### V-63 · HU-12 / DT-110 — La previsualización real en una red (Pendiente hasta tener una URL pública)
+1. Con la aplicación desplegada en una URL pública y `NEXT_PUBLIC_SITE_URL` con ese dominio, pega el enlace de una ficha Disponible en un chat de WhatsApp (o en el depurador de enlaces de Facebook).
+
+**Resultado esperado:** ¿la tarjeta muestra el título, el resumen con el precio referencial y la foto principal? **No se puede hacer en local** (DT-110): WhatsApp no llega a `localhost` ni a las fotos de `127.0.0.1:8000`. Queda Pendiente hasta el despliegue (DS-20).
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| — | — | No se puede hacer en local (DT-110); confirmado por Pablo el 2026-11-02 | Pendiente |
+
+### V-64 · HU-12 / Seguridad §3.1 — Un título malicioso sale escapado en las metaetiquetas
+> **Preparación (2026-11-03, Claude Code, solo SQLite local):** worktree `../Urbanex-hu12` en `40dd147` (merge de `develop`), BD recién creada con `migrate` + `setup_demo_data`, `next build` + `next start` en `localhost:3000` y `runserver` en `127.0.0.1:8000`. El título de la #1 ("[DEMO] Casa en Cumbayá - lista para publicar") se cambió con `manage.py shell` y se restauró al terminar.
+
+1. Como `asesor.demo`, publica la #1, que tiene el título `XSS-HU12 </title><script>alert('titulo')</script> "><img src=x onerror=alert('atributo')> & 'fin'`.
+2. Sin sesión (incógnito), abre `http://localhost:3000/properties/1`.
+3. Abre el código fuente (Ctrl+U) y busca `XSS-HU12`.
+4. En PowerShell: `curl.exe -s -A "facebookexternalhit/1.1" http://localhost:3000/properties/1 | Select-String -Pattern 'og:title' -AllMatches`.
+
+**Resultado esperado:** ¿no aparece ninguna alerta? ¿El título se ve como texto literal en el dashboard, en la pestaña y en la ficha? ¿En el código fuente `<title>`, `og:title`, `og:image:alt` y `twitter:title` tienen `&lt;`, `&gt;`, `&quot;` y `&amp;`, sin `<script>` ni `<img src=x` literales? ¿Hay **un solo** `og:title` y su `content="…"` se cierra al final del título?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (incógnito, `localhost:3000`), guiado por Gemini | 2026-11-03: pasos 1 y 2 a las 13:33 y 13:37; pasos 3 y 4 a las 13:50–13:53 (hora del reloj de las capturas) (corregido por Pablo, 2026-11-03: hora aproximada, vale la de las capturas) | Paso 1: dashboard con la #1 Disponible y el título como texto plano, sin alerta (`Prueba 1.2.png`, 13:33); catálogo con sesión (`Prueba 1.png`, 13:33). Paso 2: ficha `/properties/1` con el título literal en la pestaña y en el encabezado, sin alerta (`Captura de pantalla (11).png`, 13:37); catálogo sin sesión (`Captura de pantalla (12).png`, 13:37). Paso 3: código fuente de `/properties/1`, búsqueda `XSS-HU12` → 12 coincidencias, título escapado (`&lt;/title&gt;&lt;script&gt;…`) en `<title>`, `og:title`, `og:image:alt`, `twitter:title`, `alt` de la imagen y `<h1>`, sin `<script>` literal (`Captura de pantalla (14).png`, 13:50, y `(15)`, 13:51). Paso 4: `curl` como `facebookexternalhit/1.1` → una sola etiqueta `og:title`, con el `content` escapado y cerrado al final (`Captura de pantalla (16).png`, 13:53). **Observación:** el primer intento del paso 3 se hizo sobre `/properties` (catálogo) y no sobre la ficha (`Captura de pantalla (13).png`, 13:38); se repitió sobre `/properties/1`. Capturas en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\`, revisadas por Claude Code | **Aprobado** (Pablo, 2026-11-03) |
+
+> **Comprobación técnica complementaria (Claude Code, 2026-11-03 13:45:08; no sustituye la validación de Pablo):** `Invoke-WebRequest` a `/properties/1` con agente de navegador y con `facebookexternalhit/1.1`. En los dos: `<script>alert` literal = 0, `<img src=x` literal = 0, `og:title` = 1 (dentro de `<head>`). `<title>`, `og:title`, `og:image:alt` y `twitter:title` salen como `XSS-HU12 &lt;/title&gt;&lt;script&gt;alert(&#x27;titulo&#x27;)&lt;/script&gt; &quot;&gt;&lt;img src=x onerror=alert(&#x27;atributo&#x27;)&gt; &amp; &#x27;fin&#x27;`, y en `self.__next_f` como `\u003c/title\u003e\u003cscript\u003e…`.
 
 ---
 

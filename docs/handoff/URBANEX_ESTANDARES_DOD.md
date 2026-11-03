@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**. Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**. Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama HU-12: 2026-11-01 · §4: `npm test` en el frontend (9 pruebas, HU-12, FX-24). Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4: suite contra PostgreSQL y plantilla de PR; §5: `makemigrations --check` y archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -96,10 +96,13 @@ Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 Desde `frontend/`:
 
 ```bash
+npm test
 npx tsc --noEmit -p .
 npx eslint .
 npx next build
 ```
+
+`npm test` (desde 2026-11-01, HU-12, FX-24) ejecuta `node --test "lib/**/*.test.mjs"`, sin dependencias nuevas. Resultado esperado: **9 pruebas OK**. Necesita un Node que ejecute TypeScript sin flags (v22.18+ o v23.6+). Cubre solo lógica pura de `frontend/lib/`; no hay pruebas de componentes ni E2E (DT-37).
 
 Si una validación depende del usuario (por ejemplo, la visual), queda **Pendiente** hasta su confirmación. No se da por buena por inferencia.
 
