@@ -42,7 +42,7 @@ class UrbanexCoreTests(TestCase):
             role="asesor"
         )
         
-        # Usuario Cliente público para pruebas
+        # Segundo asesor, no dueño de las propiedades de prueba (C-08: el cliente no tiene cuenta; DT-107)
         self.client_user = User.objects.create_user(
             username="cliente.test",
             email="cliente.test@urbanex.ec",
@@ -955,3 +955,61 @@ class UserManagementApiTests(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PropertyOwnershipTests(TestCase):
+    """DT-107: la regla de dueño se prueba con dos asesores (A dueño, B no dueño), sin rol cliente."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.owner = User.objects.create_user(
+            username="asesor.a",
+            email="asesor.a@urbanex.ec",
+            password="Password123!",
+            role="asesor",
+        )
+        self.other_agent = User.objects.create_user(
+            username="asesor.b",
+            email="asesor.b@urbanex.ec",
+            password="Password123!",
+            role="asesor",
+        )
+        self.property = Property.objects.create(
+            agent=self.owner,
+            title="Casa del asesor A",
+            description="Captación de A",
+            property_type="casa",
+            price=150000,
+            area_m2=120,
+            location="Cumbayá",
+            status="captacion",
+        )
+        self.detail_url = f"/api/auth/properties/{self.property.id}/"
+
+    def test_owner_can_view_and_edit_his_property(self):
+        self.client.force_authenticate(user=self.owner)
+
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.patch(self.detail_url, {"title": "Casa editada por A"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.title, "Casa editada por A")
+
+    def test_non_owner_agent_cannot_edit_publish_or_read_requirements(self):
+        # El GET de B sobre una captación de A sigue abierto: DT-39 / SEC-01, sin arreglar aquí.
+        self.client.force_authenticate(user=self.other_agent)
+
+        response = self.client.patch(self.detail_url, {"title": "Casa editada por B"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.post(f"{self.detail_url}publish/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.get(f"{self.detail_url}publication-requirements/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.title, "Casa del asesor A")
+        self.assertEqual(self.property.status, "captacion")
