@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización | 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
+| Última actualización | 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
 
 ---
 
@@ -92,7 +92,9 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## 🧭 Pendiente ahora (2026-11-02)
+## 🧭 Pendiente ahora (2026-11-03)
+
+> (corregido por Pablo, 2026-11-03: antes el título decía "2026-11-02"; los puntos de ese día se conservan.)
 
 > - **HU-44, PR #9 existente:** merge con `origin/develop` guardado en `8ff1e9f`; el stash se aplicó sin conflictos. No abrir otra PR.
 > - **Validación humana pendiente:** V-33..V-39 quedan en **Pendiente**; las observaciones reportadas previamente por Sebas se conservan, pero no sustituyen la evidencia requerida por `AGENTS.md` §9. V-40..V-42 también quedan **Pendiente**.
@@ -100,7 +102,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 > - **Frontend (2026-11-02):** `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos preexistentes de `SiteNav` sin usar (`app/page.tsx` y `app/properties/page.tsx`).
 > - **DT-96:** el restablecimiento de la base de desarrollo y la migración desde `develop` con Pablo son una **propuesta de Sebas, POR CONFIRMAR** por Pablo; no se ha ejecutado. Si se aprueba, documentarla con respaldo y confirmación de ambiente (corregido por Pablo, 2026-11-03).
 > - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
-> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32**, todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **con push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`, 2026-10-30) y **sin PR todavía** (la abre Pablo). El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo. **(corregido por Pablo, 2026-11-03): V-26 a V-32 Aprobadas el 2026-11-01; la PR existe en borrador y la rama ya trae `develop`.**
+> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32** ~~todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **con push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`, 2026-10-30) y **sin PR todavía** (la abre Pablo).~~ **Aprobadas el 2026-11-01, sin captura; falta repetirlas con hora y captura (AGENTS §9).** La PR existe en borrador y la rama ya trae `develop`. El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo (corregido por Pablo, 2026-11-03).
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. ~~**Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.~~ **Fusionada (PR #7, `9801bc9`).**
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
