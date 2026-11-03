@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-11-01 · §4: regla de roles en las pruebas (solo `admin` y `asesor`; el cliente es anónimo; sin `role='cliente'`; C-08, FX-23). Antes: 2026-10-30 (tarde) · §4: `apps.opportunities.tests` en el comando y 125 pruebas (FX-19). Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) |
+| Última actualización | 2026-11-03 · Pablo (con Claude Code), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`a071b97`, con los PR #9 y #13); se conservan las entradas de ambos lados. Antes (develop): 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**. Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) Antes (rama de oportunidades, sin develop): 2026-11-01 · §4: regla de roles en las pruebas (solo `admin` y `asesor`; el cliente es anónimo; sin `role='cliente'`; C-08, FX-23). Antes: 2026-10-30 (tarde) · §4: `apps.opportunities.tests` en el comando y 125 pruebas (FX-19). |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 
@@ -53,6 +53,8 @@ Principio rector (DoD del equipo): *"Ninguna funcionalidad se considera completa
 
 ## 4. Pruebas y Definition of Done por HU
 
+> Las reglas de trabajo (Fase 0, alcance, entrega, validaciones y auditoría) están en [`AGENTS.md`](../../AGENTS.md) (DS-25). Esta sección detalla el DoD y los comandos; si algo no coincide, manda `AGENTS.md`. Cada PR usa la plantilla [`.github/pull_request_template.md`](../../.github/pull_request_template.md).
+
 Copiar este checklist en el PR o en el registro de la HU. **No marcar una casilla sin evidencia**; si no aplica, escribir "N/A" y el motivo.
 
 ```md
@@ -66,6 +68,8 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] `npx tsc --noEmit -p .` y `npx eslint .` sin errores nuevos
 - [ ] `npx next build` aprobado (si se tocó el frontend)
 - [ ] `manage.py makemigrations --check --dry-run` sin cambios pendientes
+- [ ] Suite contra PostgreSQL antes del PR (mayúsculas y tildes, unicidad, longitud de textos, zona horaria DT-01), o "N/A + motivo"
+- [ ] Plantilla de PR (`.github/pull_request_template.md`) completa, con la auditoría de solo lectura (`AGENTS.md` §11)
 - [ ] Errores y casos límite comprobados (403 de otro asesor, 400 de datos inválidos, vacío)
 - [ ] Flujo validado en la interfaz por una persona — quién, cuándo, qué se vio:
 - [ ] Sin regresiones conocidas (pruebas previas siguen pasando)
@@ -74,12 +78,18 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] Listo para revisión por el otro desarrollador
 ```
 
-**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-24 con `apps.appraisals` (DT-41); resultado esperado: **125 pruebas OK** (52 + 6 del comando `setup_demo_data` + 6 del endpoint de requisitos de publicación, 2026-10-27; + 24 del motor de avalúos DS-21, 2026-10-28; + 2 del admin de θ, FX-18, 2026-10-30; + 35 de `apps.opportunities`, FX-19, 2026-10-30):
+**Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-31 con HU-44 (FX-20); resultado esperado: **116 pruebas OK** (53 users + 19 documents + 44 appraisals; 90 en `origin/develop` + 26 nuevas):
+
+(2026-11-03) En la rama de oportunidades, con `apps.opportunities.tests` en el comando: **151 pruebas OK** (116 + 35 de `apps.opportunities`, FX-19) tras fusionar `develop`. Antes, sin `develop`: 125 (2026-10-30).
 
 ```bash
 pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests
 pipenv run python manage.py makemigrations --check --dry-run
 ```
+
+En Windows, fija antes de la suite `PIPENV_DONT_LOAD_ENV=1`, `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; comprueba el motor activo. La validación manual reportada por Sebas en Supabase PostgreSQL es independiente de esta suite. La suite local contra PostgreSQL: **No ejecutado**. Nunca ejecutes `migrate` contra Supabase. La comprobación de migraciones actualmente detecta `documents/0002_alter_document_file.py` (DT-92), por lo que su resolución sigue pendiente.
+
+**Ejecución registrada (2026-11-02):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → 116 pruebas, **OK** (exit 0; SQLite). `pipenv run python manage.py makemigrations --check --dry-run` → exit 1; detecta `apps/documents/migrations/0002_alter_document_file.py`; no se generó ni aplicó migración. En `frontend/`: `npm run build` → exit 0; `npx tsc --noEmit -p .` → exit 0; `npx eslint .` → exit 0, 0 errores y 2 avisos ya registrados en DT-24. Suite local contra PostgreSQL: **No ejecutado**.
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 
@@ -99,6 +109,8 @@ Si una validación depende del usuario (por ejemplo, la visual), queda **Pendien
 
 ## 5. GitFlow y colaboración
 
+> Resumen; la fuente de reglas de Git (ramas, commits, prohibiciones y quién toca qué) es [`AGENTS.md`](../../AGENTS.md) §4 y §5. Si algo no coincide, manda `AGENTS.md`.
+
 **Situación real** (2026-10-22): ramas `master` (principal; `origin/HEAD`), `develop` (integración) y `test` (uso POR CONFIRMAR). No hay CI ni reglas de protección comprobadas.
 
 **Convención:** el contexto maestro define `feat/URB-XX-descripcion`, y el prompt de auditoría propone `feature/HU-XX-…`. **El equipo debe elegir una** (contradicción C-06). Propuesta que combina ambas trazas:
@@ -115,8 +127,8 @@ Reglas mínimas:
 2. `git status` y `git pull` antes de empezar; no descartar ni sobrescribir cambios ajenos (`git checkout -- .`, `git reset --hard` y `git stash drop` solo con acuerdo).
 3. Revisar `git diff` antes de cada commit; commits pequeños con el mensaje `tipo(URB-XX): descripción`.
 4. **Coordinar antes de tocar** `backend/apps/users/models.py`, `backend/apps/users/migrations/`, `backend/config/settings.py`, `frontend/types/property.ts` y `frontend/app/dashboard/page.tsx` (ver [GPS](URBANEX_GPS_ARCHIVOS.md#3-archivos-compartidos-que-requieren-coordinación)).
-5. Ejecutar las pruebas pertinentes antes de integrar y pegar el resultado en el PR.
+5. Ejecutar las pruebas pertinentes antes de integrar (la suite de §4, `makemigrations --check --dry-run` y la suite contra PostgreSQL) y pegar el resultado en la plantilla de PR (`.github/pull_request_template.md`).
 6. No hacer commit, push ni merge sin la autorización del responsable de la integración.
-7. No hacer commit de `backend/.env`, `backend/private_media/` ni datos reales de clientes.
+7. No hacer commit de `backend/.env`, `backend/db.sqlite3`, `backend/media/`, `backend/private_media/` ni datos reales de clientes. `backend/.env.example` es una plantilla sin secretos y sí se puede versionar; revisar `git diff --cached --name-only` antes de cada commit.
 8. (2026-10-25) **Windows / PowerShell 5.1:** si el mensaje del commit tiene comillas dobles, escríbelo en un archivo y usa `git commit -F <archivo>`; con `-m @'…'@` PowerShell parte el mensaje y el commit falla (DT-49).
 9. (2026-10-25) Si una HU toca una página nueva y un archivo compartido, van en **commits separados** (primero la página y después el compartido), para aislar regresiones (DS-13).
