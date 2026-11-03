@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización | 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002` |
+| Última actualización | 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
 
 ---
 
@@ -41,6 +41,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`
+- **Hecho:** corrección de la documentación según la auditoría del PR #9, solo en `.md` (sin código ni migraciones). Filas de `develop` restauradas con su texto exacto: FX-05, FX-17, DT-12, DT-14 (a su lugar), DT-15, DT-21, DT-24, DT-26, DT-39, DT-43, DT-65, DT-68, DT-82, DS-13, DS-24 y DS-25; lo nuevo de Sebas pasó a notas añadidas con autor y fecha. DT-13 sin contradicción y **no resuelto**. El reinicio de Supabase (DT-96) queda como **propuesta POR CONFIRMAR** en Deuda, Progress, Seguridad, GPS y Guía. Nuevos **DT-115** (desactivar un asesor borra el captador; aceptado por ahora, se corrige en HU-02) y **DT-116** (riesgos de `users.0007`). Restaurados el historial de "Última actualización" y tres puntos de "Pendiente ahora" (PR #11, ronda 3, DT-65).
+- **Falta:** Pablo decide los pasos 1 y 6 del protocolo de inicio (Sebas los cambió; no se tocaron); la decisión sobre DT-96. La PR #11 ya se fusionó (`3748e7f`), pero su punto se restauró con el texto de `develop`.
+- **Siguiente paso:** Sebas hace pull de esta rama antes de volver a escribir en ella.
+
 ### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
 - **Hecho:** se añadió el registro histórico reportado del cambio de `717d55b` a `3f8bed8` mediante rebase/force push, con aprobación posterior atribuida a Pablo el 2026-10-31. Git confirma ambos commits y sus metadatos, pero no demuestra por sí solo el force push ni esa aprobación. Se conserva `2c07f7d8` como referencia histórica de GPS y FX-05/DS-13.
 - **Falta:** el texto íntegro del prompt original no está en el repositorio; este registro se limita a los datos compartidos en la conversación. Siguen pendientes V-33..V-42 y la suite local contra PostgreSQL.
@@ -49,7 +54,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ### 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`
 - **Hecho:** merge de `origin/develop` en `8ff1e9f`; stash aplicado sin conflictos. Se conserva sin incluir en commits el cambio local de `.vscode/settings.json` y un archivo sin seguimiento con nombre anómalo. Documentación de HU-44, ambiente, deuda y decisiones actualizada en `27724a8`; commit y push normales completados. Suite backend: 116/116 OK; `npm run build` y `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py`.
 - **Falta:** validación humana V-33..V-42 y suite local contra PostgreSQL (**No ejecutado**); no resolver la diferencia de migración en este alcance.
-- **Siguiente paso:** coordinar con Pablo la evidencia humana pendiente y el acuerdo DT-96; confirmar respaldo y ambiente antes de cualquier restablecimiento o migración.
+- **Siguiente paso:** coordinar con Pablo la evidencia humana pendiente y la propuesta DT-96 (POR CONFIRMAR) (corregido por Pablo, 2026-11-03); confirmar respaldo y ambiente antes de cualquier restablecimiento o migración.
 
 ### 2026-10-31 · Pablo (con Claude Code) · rama `docs/reglas-ia-y-deuda`
 - **Hecho:** `AGENTS.md` en la raíz como única fuente de reglas para la IA (DS-25); `CLAUDE.md` y `.github/copilot-instructions.md` apuntan a él; ficha `docs/handoff/PLANTILLA_TAREA.md` y plantilla de PR; `backend/db.sqlite3` y `frontend/CLAUDE.md` ya no se versionan (DT-45 resuelto, FX-21); Guía, pasos 5 y 6; registrados DT-77, DT-78 y DT-79.
@@ -66,8 +71,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 > - **Validación humana pendiente:** V-33..V-39 quedan en **Pendiente**; las observaciones reportadas previamente por Sebas se conservan, pero no sustituyen la evidencia requerida por `AGENTS.md` §9. V-40..V-42 también quedan **Pendiente**.
 > - **Pruebas (2026-11-02):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 tests, OK** (55.180 s, exit 0), SQLite + `EMAIL_PROVIDER=console`. `makemigrations --check --dry-run` → exit 1; detecta `documents/0002_alter_document_file.py` (DT-92), no se generó ni aplicó migración. Suite local contra PostgreSQL **No ejecutado**. No ejecutar migraciones contra Supabase en esta tarea.
 > - **Frontend (2026-11-02):** `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos preexistentes de `SiteNav` sin usar (`app/page.tsx` y `app/properties/page.tsx`).
-> - **DT-96:** el restablecimiento de la base de desarrollo y la migración desde `develop` con Pablo están registrados como acuerdo informado por Sebas; falta ejecutarlo y documentarlo con respaldo y confirmación de ambiente.
+> - **DT-96:** el restablecimiento de la base de desarrollo y la migración desde `develop` con Pablo son una **propuesta de Sebas, POR CONFIRMAR** por Pablo; no se ha ejecutado. Si se aprueba, documentarla con respaldo y confirmación de ambiente (corregido por Pablo, 2026-11-03).
+> - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
+> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
+> - **DT-65:** falta la copia de Sebas.
 > - Los pendientes anteriores ya resueltos están archivados en [Historial](#historial).
 
 ---
@@ -545,11 +553,11 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 - **HU-44 (Fase B), PR #9 existente:** rama `feat/URB-02-HU-44-gestion-usuarios`; V-33..V-39 quedan **Pendiente**. Se conservan las observaciones atribuidas a Sebas del 2026-10-30/31, sin tratarlas como validación aprobada ni reemplazar la evidencia visual pendiente. V-40..V-42 aún no se han realizado.
 - **Ambientes:** Sebas informó que la ronda manual del 2026-10-30 se hizo en Supabase PostgreSQL; esa información no se verificó en esta sesión. La suite automatizada de la rama se ejecuta en SQLite con `EMAIL_PROVIDER=console`; la suite local contra PostgreSQL: **No ejecutado**.
 - **Seguridad de pruebas (FX-20):** `UserManagementApiTests` fuerza el proveedor de consola y las dos pruebas específicas de Resend parchean el punto de uso en `apps.users.serializers`; la `.env` local no dispara llamadas externas durante la suite.
-- **Migraciones:** Sebas indicó que `users.0007`/`0008` ya se aplicaron en Supabase antes de editar el archivo histórico. Según Sebas, se acordó restablecer la base de desarrollo y migrar desde `develop` junto a Pablo (DT-96); no se ha ejecutado. No correr `migrate` contra Supabase en esta tarea. `appraisals.0002`/`0003` aparecían pendientes al iniciar el servidor; no se aplicaron. `makemigrations --check --dry-run` detectó la diferencia `documents/0002_alter_document_file.py` (DT-92); no se generó migración.
+- **Migraciones:** Sebas indicó que `users.0007`/`0008` ya se aplicaron en Supabase antes de editar el archivo histórico. Sebas propuso restablecer la base de desarrollo y migrar desde `develop` junto a Pablo (DT-96): propuesta **POR CONFIRMAR**, no ejecutada (corregido por Pablo, 2026-11-03). No correr `migrate` contra Supabase en esta tarea. `appraisals.0002`/`0003` aparecían pendientes al iniciar el servidor; no se aplicaron. `makemigrations --check --dry-run` detectó la diferencia `documents/0002_alter_document_file.py` (DT-92); no se generó migración.
 - **Frontend (2026-11-02):** `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, con 0 errores y 2 avisos por `SiteNav` sin usar en `app/page.tsx` y `app/properties/page.tsx` (DT-24).
 - **FX-18 (2026-10-30):** el admin de θ da por rol admin, además de agregar, los permisos de ver la app y la lista (`backend/apps/appraisals/admin.py`), con 2 pruebas nuevas (`EngineParametersAdminTests`). Sin la corrección, la prueba falla igual que V-25. La suite base de `origin/develop` fue 90/90.
 - **Hallazgos nuevos:** DT-80, DT-81 y DT-82; N-05 ampliada (pregunta también para la empresa); evidencia nueva en DT-01 y DT-74.
-- **Siguiente:** repetir V-33..V-42 y registrar evidencia humana; aclarar la diferencia de mayúsculas en email (DT-95), completar el acuerdo de base de datos (DT-96) y revisar los mensajes 401 (DT-97). La PR #9 ya existe. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
+- **Siguiente:** repetir V-33..V-42 y registrar evidencia humana; aclarar la diferencia de mayúsculas en email (DT-95), decidir la propuesta de base de datos de Sebas, **POR CONFIRMAR** (DT-96) (corregido por Pablo, 2026-11-03) y revisar los mensajes 401 (DT-97). La PR #9 ya existe. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
 
 ### Estado anterior (2026-10-28, noche)
 
