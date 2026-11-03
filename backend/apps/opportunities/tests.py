@@ -180,6 +180,17 @@ class OpportunityApiMixin(OpportunityTestMixin):
         self.client.force_authenticate(user)
         return self.client.post(OPPORTUNITIES_URL, self.payload(**overrides), format='json')
 
+    def legacy_client_user(self):
+        # C-08 (DS-30): una base puede conservar el valor heredado 'cliente' aunque User.Role
+        # ya solo tenga admin y asesor. Se escribe con update(), como lo dejaria una migracion.
+        user = User.objects.create_user(
+            username='cliente.heredado', email='cliente.heredado@urbanex.ec',
+            password='Password123!', role='asesor',
+        )
+        User.objects.filter(pk=user.pk).update(role='cliente')
+        user.refresh_from_db()
+        return user
+
 
 class OpportunityOpenApiTests(OpportunityApiMixin, TestCase):
     def test_agent_opens_a_manual_opportunity_for_himself(self):
@@ -270,6 +281,12 @@ class OpportunityOpenApiTests(OpportunityApiMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertFalse(Opportunity.objects.exists())
 
+    def test_user_without_internal_role_cannot_open(self):
+        # DT-106: rama del 403 de IsInternalUser (sesion iniciada, rol no interno).
+        response = self.open(self.legacy_client_user())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertFalse(Opportunity.objects.exists())
+
 
 class OpportunityListApiTests(OpportunityApiMixin, TestCase):
     def setUp(self):
@@ -336,6 +353,13 @@ class OpportunityListApiTests(OpportunityApiMixin, TestCase):
     def test_anonymous_cannot_list(self):
         self.assertEqual(self.client.get(OPPORTUNITIES_URL).status_code,
                          status.HTTP_401_UNAUTHORIZED)
+
+    def test_user_without_internal_role_cannot_list(self):
+        # DT-106: con sesion pero sin rol interno, 403 y ninguna oportunidad en la respuesta.
+        self.client.force_authenticate(self.legacy_client_user())
+        response = self.client.get(OPPORTUNITIES_URL)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertNotIn('results', response.data)
 
 
 class EligiblePropertiesApiTests(OpportunityApiMixin, TestCase):
