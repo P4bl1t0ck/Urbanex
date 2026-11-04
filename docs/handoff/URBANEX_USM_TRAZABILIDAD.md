@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
-| Última actualización | 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
+| Última actualización | 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: §4, HU-27 (PROC-03 paso 5) y HU-34 (PROC-05 paso 1) ya no son "Rama sin fusionar" (fusionadas en `develop`, `043cfb5`, DS-32) y su columna Estado enlaza a Estado de procesos. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
 | Fuentes | User Story Mapping de Miro (exportado el 2026-10-31); tesis `ProyectoCapstoneV4 (3).md` (RF-01 a RF-16, Anexo 2); [Contexto maestro](URBANEX_MASTER_CONTEXT.md) (§4 RF/RNF, pantallas, §10 backlog) |
 | Rama | `docs/user-story-mapping` (PR #13, borrador) |
 | Regla | **Este documento no copia estados.** El avance vive en [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Avance de épicas](URBANEX_AVANCE_EPICAS.md); la evidencia (V-xx), en [`Project_Progress.md`](../../Project_Progress.md); los archivos y su riesgo, en el [GPS](URBANEX_GPS_ARCHIVOS.md). Aquí solo se enlazan |
@@ -150,7 +150,7 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 2 | Interés por formulario (con LOPDP) | HU-16 | P-05 | No implementado | — |
 | 3 | Messenger: respuesta automática que pide el número | HU-17 | (webhook), I-04 | No implementado | — |
 | 4 | El asesor atiende conversaciones sin número | HU-26 | I-04, I-04A | No implementado | — |
-| 5 | El asesor abre contacto y oportunidad a mano | HU-27 | I-07 | **Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`): `opportunities/models.py`, `opportunities/services.py`, `opportunities/validators.py`, `opportunities/serializers.py`, `opportunities/views.py` (`OpportunityViewSet.create`, `eligible_properties`, `agents`) · `POST opportunities/`, `GET opportunities/eligible-properties/`, `GET opportunities/agents/` · `app/dashboard/opportunities/new/page.tsx`, `lib/opportunities.ts`, `types/opportunity.ts` | — |
+| 5 | El asesor abre contacto y oportunidad a mano | HU-27 | I-07 | ~~**Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`):~~ (2026-11-04: fusionada en `develop` por el PR #15, `043cfb5`, DS-32) `opportunities/models.py`, `opportunities/services.py`, `opportunities/validators.py`, `opportunities/serializers.py`, `opportunities/views.py` (`OpportunityViewSet.create`, `eligible_properties`, `agents`) · `POST opportunities/`, `GET opportunities/eligible-properties/`, `GET opportunities/agents/` · `app/dashboard/opportunities/new/page.tsx`, `lib/opportunities.ts`, `types/opportunity.ts` | [HU-27](URBANEX_ESTADO_PROCESOS.md#hu-27) |
 
 ### PROC-04 · Agendamiento y visitas
 
@@ -169,7 +169,7 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 
 | # | Paso | HU | Pantalla | Código | Estado |
 |---|---|---|---|---|---|
-| 1 | El asesor ve su cartera (admin: todas) con filtros | HU-34 | I-06 | **Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`): `opportunities/views.py` (`OpportunityViewSet.get_queryset`, `filter_opportunities`, `OpportunityPagination`), `opportunities/serializers.py` · `GET opportunities/` · `app/dashboard/opportunities/page.tsx`, `lib/opportunities.ts` | — |
+| 1 | El asesor ve su cartera (admin: todas) con filtros | HU-34 | I-06 | ~~**Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`):~~ (2026-11-04: fusionada en `develop` por el PR #15, `043cfb5`, DS-32) `opportunities/views.py` (`OpportunityViewSet.get_queryset`, `filter_opportunities`, `OpportunityPagination`), `opportunities/serializers.py` · `GET opportunities/` · `app/dashboard/opportunities/page.tsx`, `lib/opportunities.ts` | [HU-34](URBANEX_ESTADO_PROCESOS.md#hu-34) |
 | 2 | Consulta una oportunidad y su historial | HU-33 | I-06A | No implementado | — |
 | 3 | Avanza el estado hasta Pendiente de Cierre (precio final) | HU-29 | I-06A | No implementado | — |
 | 4 | Registra interacciones y negociación (no cambia el precio público) | HU-30 | I-06A | No implementado | — |
