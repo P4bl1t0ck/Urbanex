@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización | 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
+| Última actualización | 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama de oportunidades: 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. |
 
 ---
 
@@ -28,6 +28,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 5. Leer **GPS de archivos** → archivos implicados, riesgo y si son compartidos.
 6. Ejecutar la línea base de pruebas (desde `backend/`) y anotar el resultado:
    `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → `develop`: **90 OK** (FX-18); con HU-44 fusionada: **116 OK** (53 de `users`), con SQLite y correo de consola. (corregido por Pablo, 2026-11-03) Si la sesión toca el frontend, también `npx tsc --noEmit -p .` (desde `frontend/`).
+   Rama de oportunidades: el comando lleva además `apps.opportunities.tests` → **155 OK** (55 users, 19 documents, 44 appraisals, 37 opportunities; FX-25, 2026-11-03). Antes: 151 al fusionar `develop`; sin `develop`, 125 (FX-19). **(2026-11-04)** Tras fusionar `develop` `5fb3910` (PR #14 y #16, sin pruebas de backend nuevas): **155 OK** otra vez; en `frontend/`, `npm test` → 9/9 (HU-12).
 
 ### Reglas
 - **No inventar decisiones pendientes** (D-04 fórmula del motor, C-02, N-02, N-03, etc.). Si una HU depende de una, se usa un placeholder documentado y se pregunta.
@@ -40,6 +41,26 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-04 (noche) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR #15, borrador)
+- **Hecho:** auditoría de solo lectura sobre `105cfd6`: **No apto**, solo por documentación. Código, migraciones, IDs y merge sin problemas: de las 305 líneas que agregaron los PR #14 y #16 no se perdió ninguna; hay una sola sección de notas y no quedan marcadores de conflicto. `gh pr view 15` → `mergeable: MERGEABLE` (BLOCKED: borrador y sin revisión). Con el "ok" de Pablo: nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado de procesos y Avance de épicas, y nueva sección **Traza de la rama** (abajo). Cuerpo del PR y mensaje para Sebas redactados en un borrador de correo para Pablo; el PR lo edita Pablo en GitHub (DS-31).
+- **Evidencia:** `connection.vendor` = `sqlite`; `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → `Ran 155 tests in 305.362s` · `OK`; `makemigrations --check --dry-run` → "No changes detected", exit 0. Frontend: `npx tsc --noEmit -p .` exit 0; `npx eslint .` 0 errores y 2 avisos (DT-24); `npm test` 9/9. `npm run build`: **No ejecutado** en esta sesión (escribe `.next`). Suite contra PostgreSQL: **No ejecutado** (DT-01).
+- **Hallazgos sin arreglar:** `settings.py` y `urls.py` van en commits mezclados (`257ba1c`, `4282a87`), contra `AGENTS.md` §5; se explica en el PR, sin reescribir el historial. Las filas de V-26..V-32 del 2026-11-01 siguen como "Aprobado" sin captura; quedan como antecedente.
+- **Falta:** ~~suite contra PostgreSQL o N/A con motivo (decisión de Pablo); `npm run build`; enviar el aviso a Sebas; pegar el cuerpo del PR; push de este commit (con la orden de Pablo);~~ nueva auditoría de solo lectura en un chat nuevo. **(2026-11-04, más tarde)** Push de `6cfdd53` hecho con la orden de Pablo. `npm run build` lo corrió Pablo en `frontend/`: "Compiled successfully", 11/11 páginas, incluidas `/dashboard/opportunities` y `/dashboard/opportunities/new` (Next.js 16.3.4). Pablo envió el aviso a Sebas. PostgreSQL: pendiente por decisión de Pablo (no hay PostgreSQL local), registrado como nota en DT-68. Pablo pega el cuerpo del PR (corregido por Pablo, 2026-11-04).
+- **Siguiente paso:** PostgreSQL y build → aviso a Sebas → push → auditoría → PR #15 listo → merge → quitar "Rama sin fusionar" de HU-27 y HU-34 en el USM.
+
+### 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR #15, borrador)
+- **Hecho:** merge de `origin/develop` (`5fb3910`, con el PR #14 de HU-12 y el PR #16 de DS-31) en `2fac92d`, sin rebase ni squash. Hubo 13 conflictos, todos en los 7 `.md` del handoff. Se conservaron las filas y notas de ambos lados: en las celdas "Última actualización", la entrada del merge, el texto completo de `develop` y las entradas propias de la rama; una sola sección de notas de cierre, con las del mismo día ordenadas por la hora de sus commits; V-26..V-32 y V-60..V-64 sin tocar. Sin IDs repetidos entre los dos lados (DT, FX, DS, SEC y V). Un script comparó a tres bandas que no se perdiera ninguna línea. En `386fb45`, por decisión de Pablo: en la Deuda se quitaron la línea en blanco y el fragmento duplicado de DS-31 que dejó `23ae175` y que cortaban la tabla.
+- **Evidencia:** `connection.vendor` = `sqlite`; `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → `Ran 155 tests` · `OK` (igual que la línea base antes del merge); `makemigrations --check --dry-run` → "No changes detected", exit 0. Frontend: `npm test` → 9/9; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, 0 errores y los 2 avisos de `SiteNav` (DT-24); `npm run build` exit 0. No se corrió `migrate`. Suite contra PostgreSQL: **No ejecutado** (DT-01).
+- **Falta:** ~~el push de estos 3 commits (con la orden de Pablo, sin force);~~ push hecho: `origin/feat/URB-30-34-HU-27-HU-34-oportunidades` = `105cfd6`, comprobado con `git ls-remote` (corregido por Pablo, 2026-11-04); la auditoría de solo lectura en un chat nuevo (`AGENTS.md` §11); el texto del PR; avisar a Sebas de `PropertyOwnershipTests`; que Pablo marque el PR #15 como listo y lo fusione.
+- **Siguiente paso:** auditoría → PR #15 listo → merge → quitar "Rama sin fusionar" de HU-27 y HU-34 en el USM.
+
+### 2026-11-03 (noche) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR #15, borrador)
+- **Hecho:** correcciones de la auditoría de solo lectura (`ceb4a70`); DT-117/SEC-16, datos personales de EP-5 (`0f7292b`); DT-109 resuelto: BD local reiniciada con respaldo en el Escritorio, `migrate` en SQLite y `setup_demo_data` (`c3cf5ed`). Pablo publicó A (Casa en Cumbayá) y B (Local en La Mariscal, con PDF de corretaje) y repitió **V-26 a V-32 con hora y captura** (22:51 a 23:49), todas **Aprobadas** por él. Hay una fila nueva en cada V, con las rutas de las capturas en OneDrive, fuera del repo.
+- **Evidencia:** suite → `Ran 155 tests` · `OK` (SQLite); `makemigrations --check --dry-run` → "No changes detected". Suite contra PostgreSQL: **No ejecutado** (DT-01).
+- **Observaciones:** el correo de Gemini del 2026-11-03 da por hechas la validación de fechas cruzadas y V-32 antes de que se hicieran (luego se hicieron, 23:46 y ~23:50) y menciona un merge que no se decidió. Se toma como fuente el dictado de Pablo y las capturas. ~~Pregunta abierta: ¿se registra como DT-118 que el catálogo vacío diga "No hay propiedades registradas aún" cuando sí hay propiedades, pero ninguna disponible?~~ Registrado como **DT-118** (P3) por decisión de Pablo (corregido por Pablo, 2026-11-03).
+- **Falta:** ~~push de los commits locales (con orden de Pablo);~~ push hecho con la orden de Pablo, sin auditoría nueva por su decisión (corregido por Pablo, 2026-11-03); el texto del PR (nota sobre `settings.py` y `urls.py` en `257ba1c` y `4282a87`); avisar a Sebas de `PropertyOwnershipTests`; una nueva auditoría de solo lectura si Pablo la pide; marcar el PR como listo y fusionarlo (decisión de Pablo).
+- **Siguiente paso:** Pablo autoriza el push → PR #15 listo → merge → quitar "Rama sin fusionar" de HU-27 y HU-34 en el USM.
 
 ### 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`
 - **Hecho:** correcciones de la auditoría de solo lectura (No apto por documentación), sin tocar código. (1) Las rutas de las 6 capturas de V-60 a V-62 apuntan a `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\HU-12\Pruebas anteriores (cambiar)\`, donde están ahora (no se movió ningún archivo). (2) DT-111 y "Fuera de alcance" de HU-12: el PR #9 ya se fusionó (`d71c7f2`); la migración del `slug` en `apps/users` se coordina con Sebas (HU-45). (3) Seguridad §3.1: el payload RSC se cita como `\u003c/script\u003e`. Decidido por Pablo: no se reordena el texto de `develop` en las cabeceras; la regla de `gh` va en la rama aparte `docs/regla-gh-solo-consultas` (DS-31).
@@ -54,6 +75,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Evidencia:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 OK**; `makemigrations --check --dry-run` propone `documents/0002_alter_document_file.py` (síntoma del worktree, DT-77/DT-92; no se creó). Frontend: `npm test` 9/9, `tsc` exit 0, `eslint` 0 errores y 2 avisos previos, `next build` exit 0. Línea base antes del merge: backend no ejecutable (Django sin instalar en el entorno del worktree); `npm test` 9/9.
 - **Falta:** V-63 (al desplegar, DT-110), DT-111 (`slug`), suite contra PostgreSQL (No ejecutada), auditoría de solo lectura (`AGENTS.md` §11), push y PR (lo abre Pablo).
 - **Siguiente paso:** auditoría en un chat nuevo → corregir → push (cuando Pablo lo diga) → PR.
+
+### 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador)
+- **Hecho:** merge de `origin/develop` (`a071b97`, con los PR #9 y #13) en `46033df`. Hubo conflictos solo en documentación; se conservaron las filas de ambos lados, quedó una sola sección de notas de cierre y C-08 tiene el texto de `develop`, con una nota añadida. `frontend/CLAUDE.md` deja de versionarse (FX-21); la copia local sigue ignorada. En `bc53be6`: notas en DT-14 y DT-39 (C-08 confirmada, DS-30; SEC-01 sigue abierto) y DT-105/FX-23 resueltos, comprobados con HU-44 fusionada. En `36d1cec`: DT-106, dos pruebas del 403 de `IsInternalUser` con el rol heredado `cliente`. En `1ee3c1b`: DT-107, `PropertyOwnershipTests` en `users/tests.py` (asesor A dueño, 200; asesor B, 403 en PATCH, publish y requisitos), sin renombrar `client_user`. Registro: FX-25.
+- **Evidencia:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → `Ran 155 tests` · `OK` (SQLite, `connection.vendor` = `sqlite`); `makemigrations --check --dry-run` → "No changes detected", exit 0. Frontend: `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con los 2 avisos de `SiteNav` (DT-24); `npm run build` exit 0. No se corrió `migrate` (ni local ni contra Supabase). Suite contra PostgreSQL: **No ejecutado** (DT-01).
+- **Falta:** la auditoría de solo lectura en un chat nuevo (`AGENTS.md` §11); ~~que Pablo confirme cómo leer el criterio de cierre de DT-107 (POR CONFIRMAR, ver su fila);~~ DT-107 Resuelto: el criterio se lee como "ninguna prueba usa `cliente` como rol válido" (corregido por Pablo, 2026-11-03); el commit 4 (enlace en el menú, DT-101) solo con su orden; avisar a Sebas de que `users/tests.py` tiene una clase nueva al final (choca con HU-45 si él también agrega al final). No hay V-xx nuevas: no cambia la interfaz.
+- **Siguiente paso:** auditoría en un chat nuevo → Pablo marca el PR como listo y lo fusiona → quitar "Rama sin fusionar" de HU-27 y HU-34 en el §4 del USM.
 
 ### 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador)
 - **Hecho:** merge de `origin/develop` (`d71c7f2`, trae el PR #9) en `77d68cd`, sin conflictos. En [`URBANEX_USM_TRAZABILIDAD.md`](docs/handoff/URBANEX_USM_TRAZABILIDAD.md) (`2347fa2`), §4: la columna **Código** quedó completa con archivos y endpoints de `develop` (Parcial, Rama sin fusionar o No implementado), y HU-12, HU-27 y HU-34 se citan con su rama sin fusionar. Las anclas `#hu-xx` se comprobaron: 13 existen y las de HU-27 y HU-34 no existían. Las HU de EP-3 a EP-6 sin sección en ningún documento quedan con "—", por decisión de Pablo. HU-44 ya no figura como "sin fusionar". En el §6, la fila 7 dice que C-08 está confirmada (DS-30). Fila del USM en el GPS §3 (`10d2ccc`). Suite después del merge: `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → **116 OK** (SQLite); `makemigrations --check --dry-run` → "No changes detected", exit 0. Antes del merge, la línea base dio 90 OK.
@@ -90,6 +117,21 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Observación de la línea base:** en el worktree, `makemigrations --check` propone `documents/0002_alter_document_file.py`. Es el síntoma de DT-77 (ruta absoluta en `documents.0001`), que aparece porque el worktree vive en otra carpeta. No se creó ninguna migración.
 - **Siguiente paso:** Pablo hace V-60 a V-63 → auditoría → push y PR.
 
+### 2026-11-01 (noche) · Pablo (con Claude Code) · `feat/URB-30-34-HU-27-HU-34-oportunidades`
+
+- **Hecho:** ronda 4 validada por Pablo en el navegador (sin capturas): **V-26 a V-32 Aprobadas**. Antes se aplicó `migrate` en la BD local (`opportunities.0001`, y además `appraisals.0002` y `0003`, que estaban pendientes) y se corrió `setup_demo_data` (propiedades #32 a #35 en captación). Quedaron en la BD local las oportunidades #1 a #3.
+- **Hallazgos nuevos:** DT-108 (la #1 y la #2 tienen el mismo título y la misma dirección, y no se distinguen en I-06 ni en I-07) y DT-109 (BD local con datos basura). No se corrigen ahora.
+- **Falta:** que Pablo decida si HU-27 y HU-34 pasan de **Pruebas** a **Listo** (Estado de procesos, FX-19 y Avance de épicas siguen diciendo "validación Pendiente"); el commit 4 (enlace en el menú, DT-101) solo con su orden; la PR (la abre Pablo).
+- **Siguiente paso:** decidir el estado de HU-27 y HU-34 y actualizar esos documentos.
+- **Auditoría del PR #9 (HU-44), punto obligatorio:** el commit `906cc0d` hace que `users.0007` también **desactive** a los usuarios `cliente` que no son superusuarios. Hay que comprobar qué pasa con los usuarios creados con `createsuperuser` (rol por defecto `cliente`) y que ningún admin quede desactivado. Detalle en DT-105.
+
+### 2026-11-01 · Pablo (con Claude Code) · `feat/URB-30-34-HU-27-HU-34-oportunidades`
+
+- **Hecho:** DT-105 resuelto en código (FX-23). Las dos pruebas de oportunidades que usaban `role='cliente'` ahora comprueban el 401 de un visitante anónimo (`test_anonymous_cannot_open`, `test_anonymous_cannot_list`). C-08 confirmada por Pablo: solo hay roles `admin` y `asesor`, y el cliente es anónimo. Regla nueva en Estándares §4. Suite **125/125 OK**; `makemigrations --check` sin cambios.
+- **Sin tocar (reportado):** `backend/apps/users/models.py:11-14` sigue con `cliente` en `ROLE_CHOICES` y como valor por defecto (lo quita HU-44, PR #9, con `users.0007`). `backend/apps/users/tests.py` sigue usando `client_user` (DT-107, carpeta de Sebas).
+- **Falta:** comprobar DT-105 con HU-44 fusionada; DT-106 (el 403 de `IsInternalUser` sin prueba) y DT-107, ambos después del PR #9. DT-14 y DT-39 todavía citan C-08 como abierta.
+- **Siguiente paso:** commit local sin push (orden de Pablo); luego seguir con V-26 a V-32.
+
 ### 2026-10-31 · Pablo (con Claude Code) · rama `docs/reglas-ia-y-deuda`
 - **Hecho:** `AGENTS.md` en la raíz como única fuente de reglas para la IA (DS-25); `CLAUDE.md` y `.github/copilot-instructions.md` apuntan a él; ficha `docs/handoff/PLANTILLA_TAREA.md` y plantilla de PR; `backend/db.sqlite3` y `frontend/CLAUDE.md` ya no se versionan (DT-45 resuelto, FX-21); Guía, pasos 5 y 6; registrados DT-77, DT-78 y DT-79.
 - **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
@@ -99,7 +141,52 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ---
 
-## 🧭 Pendiente ahora (2026-11-02)
+## 🧾 Traza de la rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR #15)
+
+> Para revisiones futuras: qué hizo la rama, dónde y con qué IDs. Comparada con `origin/develop` `5fb3910` (2026-11-04). Cabeza al redactarla: `105cfd6`, más el commit de correcciones de esta misma sesión. Si la rama recibe más commits, se agregan filas; no se reescriben estas.
+
+**Historias:** HU-27 (URB-30, apertura manual, pantalla I-07) y HU-34 (URB-34, cartera con filtros, pantalla I-06), EP-5, adelantadas por DS-26. Estado: **Pruebas**, hasta el merge en `develop`.
+
+**Commits** (de los más antiguos a los más recientes; 25 sobre `develop` antes de las correcciones):
+
+| Capa | Commits |
+|---|---|
+| Modelo | `257ba1c` modelos `Contact`, `Opportunity` y `OpportunityStatusHistory`, más `opportunities.0001` (incluye la línea de `settings.py`) |
+| API y pruebas | `4282a87` API de apertura y cartera (incluye la línea de `urls.py`) · `033b845` DT-105, fuera el rol `cliente` · `36d1cec` DT-106 (403 de `IsInternalUser`) · `1ee3c1b` DT-107 (`PropertyOwnershipTests` en `users/tests.py`, de Sebas, en commit propio) |
+| Pantallas | `199294a` I-07 e I-06 |
+| Merges de `develop` | `46033df` (PR #9 y #13) · `2fac92d` (`5fb3910`, PR #14 y #16) |
+| Documentación | `9254a26`, `2982406`, `5a3f71f`, `cd5e7c1`, `04fc6c8`, `6264780`, `bc53be6`, `f2cb2fc`, `6d30093`, `0f7292b`, `ceb4a70`, `c3cf5ed`, `b59290d`, `ce90537`, `386fb45`, `105cfd6` y el commit de correcciones del 2026-11-04 (noche) |
+| Otros | `a6cde69` `frontend/CLAUDE.md` (sigue ignorado, `.gitignore:34`; no queda en el diff neto) |
+
+**Archivos** (28 en `git diff origin/develop...HEAD --name-only`):
+- **Backend, app nueva** (de Pablo): `backend/apps/opportunities/` → `__init__.py`, `admin.py`, `apps.py`, `models.py`, `validators.py`, `services.py`, `serializers.py`, `views.py`, `urls.py`, `tests.py` (37 pruebas), `migrations/__init__.py` y `migrations/0001_initial.py` (depende de `users.0006`).
+- **Compartidos:** `backend/config/settings.py` (+1 línea, `INSTALLED_APPS`) y `backend/config/urls.py` (+1 línea, `api/opportunities/`).
+- **De Sebas:** `backend/apps/users/tests.py` (clase `PropertyOwnershipTests` al final y un comentario en `setUp`).
+- **Frontend** (de Pablo): `frontend/types/opportunity.ts`, `frontend/lib/opportunities.ts`, `frontend/app/dashboard/opportunities/page.tsx` (I-06) y `frontend/app/dashboard/opportunities/new/page.tsx` (I-07).
+- **Documentación:** `Project_Progress.md` y, en `docs/handoff/`: `URBANEX_AVANCE_EPICAS.md`, `URBANEX_DEUDA_TECNICA.md`, `URBANEX_ESTADO_PROCESOS.md`, `URBANEX_ESTANDARES_DOD.md`, `URBANEX_GPS_ARCHIVOS.md`, `URBANEX_GUIA_CONTINUIDAD.md`, `URBANEX_MASTER_CONTEXT.md` y `URBANEX_SEGURIDAD_Y_DEUDA.md`.
+
+**Endpoints nuevos:** `GET` y `POST /api/opportunities/`, `GET /api/opportunities/eligible-properties/` y `GET /api/opportunities/agents/` (solo admin).
+
+**IDs nuevos** (todos del rango de Pablo, `AGENTS.md` §4; sin repetidos en `develop` ni en las ramas remotas, comprobado el 2026-11-04):
+
+| Tipo | IDs |
+|---|---|
+| FX | FX-19 (primer corte de EP-5) · FX-23 (DT-105) · FX-25 (DT-106 y DT-107) |
+| DS | DS-26 (EP-5 antes de la tarea 4) · DS-27 (`apps.opportunities`, no `apps.crm`) · DS-28 (reglas del primer corte: celular de Ecuador, LOPDP, solo propiedades disponibles…) |
+| DT abiertos | DT-100 (copia vieja del contexto maestro en la raíz) · DT-101 (sin enlace en el menú) · DT-102 ("sector" = `location`) · DT-103 (el filtro solo ofrece propiedades disponibles, Potencial) · DT-104 (sin auditoría RF-14) · DT-108 (propiedades indistinguibles) · DT-117 / SEC-16 (datos personales, LOPDP) · DT-118 (texto del catálogo vacío) |
+| DT resueltos | DT-105 · DT-106 · DT-107 · DT-109 (BD local reiniciada) |
+| SEC | SEC-16 (= DT-117) |
+| V | V-26 a V-32 (Ronda 4): Aprobadas por Pablo el 2026-11-01 sin captura y repetidas con hora y captura el 2026-11-03, 22:50 a 23:49 |
+
+**Filas existentes con notas añadidas** (sin borrar el texto original): DT-14, DT-31 y DT-39 (Deuda); C-08 (Estado de procesos); filas de `settings.py` y `urls.py` (GPS §3); cabeceras "Última actualización" de todos los documentos del handoff.
+
+**Pruebas al cierre de la traza:** 155 OK (55 users, 19 documents, 44 appraisals y 37 opportunities), en SQLite. PostgreSQL: No ejecutado.
+
+---
+
+## 🧭 Pendiente ahora (2026-11-03)
+
+> (corregido por Pablo, 2026-11-03: antes el título decía "2026-11-02"; los puntos de ese día se conservan.)
 
 > - **HU-44, PR #9 existente:** merge con `origin/develop` guardado en `8ff1e9f`; el stash se aplicó sin conflictos. No abrir otra PR.
 > - **Validación humana pendiente:** V-33..V-39 quedan en **Pendiente**; las observaciones reportadas previamente por Sebas se conservan, pero no sustituyen la evidencia requerida por `AGENTS.md` §9. V-40..V-42 también quedan **Pendiente**.
@@ -108,7 +195,8 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 > - **DT-96:** el restablecimiento de la base de desarrollo y la migración desde `develop` con Pablo son una **propuesta de Sebas, POR CONFIRMAR** por Pablo; no se ha ejecutado. Si se aprueba, documentarla con respaldo y confirmación de ambiente (corregido por Pablo, 2026-11-03).
 > - ~~**(2026-11-01) 🧪 HU-12 (URB-17):** validaciones **V-60 a V-63**~~ **(2026-11-02) V-60 a V-62 aprobadas por Pablo; V-63 Pendiente (DT-110).** **(2026-11-03) Merge de `develop` (`40dd147`) y V-64 (escape de metaetiquetas) aprobada por Pablo.** **Siguiente:** auditoría de solo lectura (`AGENTS.md` §11), push y PR de `feat/URB-17-HU-12-compartir-ficha` (worktree `../Urbanex-hu12`).
 > - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
-> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. **Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.
+> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32** ~~todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **con push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`, 2026-10-30) y **sin PR todavía** (la abre Pablo).~~ **Aprobadas el 2026-11-01, sin captura;** ~~falta repetirlas con hora y captura (AGENTS §9).~~ **repetidas y Aprobadas con hora y captura el 2026-11-03 (corregido por Pablo, 2026-11-03).** La PR existe en borrador y la rama ya trae `develop`. El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo (corregido por Pablo, 2026-11-03).
+> - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. ~~**Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.~~ **Fusionada (PR #7, `9801bc9`).**
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
 > - Los pendientes anteriores ya resueltos están archivados en [Historial](#historial).
@@ -455,6 +543,95 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 |---|---|---|---|
 | Pablo (`admin.demo`) | 2026-10-29 / 2026-10-30 | **Primer intento (2026-10-29): Fallido.** Django decía que `admin.demo` no tenía permiso para ver ni editar nada, y "Parámetros del motor" no aparecía. Causa: el admin de θ solo daba por rol el permiso de agregar (FX-18). **Tras FX-18 (2026-10-30):** `admin.demo` ve "Parámetros del motor" y creó la **v2** (`alfa` = 0), que quedó activa con `created_by = admin.demo`; la v1 se desactivó. Después reactivó la v1. Observación: el admin muestra las fechas en UTC (DT-01). No se anotó si la v1 se ve de solo lectura | **Aprobado** (tras FX-18) |
 
+### Ronda 4 — EP-5, primer corte: HU-27 (I-07) y HU-34 (I-06) (rama `feat/URB-30-34-HU-27-HU-34-oportunidades`)
+
+> **(2026-11-03) Repetida con hora y captura** tras reiniciar la BD (DT-109): las 7 **Aprobadas por Pablo** (fila nueva en cada V; capturas en `OneDrive\Documentos\Urbanex\evidencias\HU-27_34\`, fuera del repo). Propiedades: A = [DEMO] Casa en Cumbayá y B = [DEMO] Local en La Mariscal, publicadas por Pablo antes de la ronda.
+>
+> **Estado (2026-11-01): las 7 pruebas Aprobadas por Pablo** en el navegador, sin capturas. Observaciones registradas como DT-108 (propiedades #1 y #2 indistinguibles) y DT-109 (BD local con datos basura). ~~Las 7 pruebas están Pendientes (Pablo).~~
+
+**Preparación (desde `backend/`):**
+1. `pipenv run python manage.py migrate`: aplica `opportunities.0001`. Tu `db.sqlite3` cambia: **no la incluyas en ningún commit** (DT-02).
+2. Reinicia `runserver` y `npm run dev`. Inicia sesión como `asesor.demo`.
+3. Las pantallas aún **no tienen enlace en el menú** (DT-101): entra escribiendo la URL `http://localhost:3000/dashboard/opportunities`.
+4. Usa datos ficticios (los celulares de abajo). **Ojo:** las oportunidades y su historial **no se pueden borrar** (el historial es inmutable y la oportunidad está protegida); quedan en tu BD local.
+
+### V-26 · HU-27 — Abrir una oportunidad manual (asesor)
+1. En I-06 pulsa "+ Abrir oportunidad".
+2. Nombre `Prueba Uno`, celular `0991112233`, sin correo; elige `#33 La Carolina` (o cualquier tarjeta disponible); marca la casilla de la política de privacidad.
+3. "Abrir oportunidad" → confirma en el modal.
+
+**Resultado esperado:** ¿el modal pide confirmar y avisa que la apertura no se puede eliminar? ¿Vuelve a I-06 con el aviso verde "Oportunidad #N abierta en Contacto inicial" y la fila resaltada, con el celular `+593991112233`, el estado **Contacto inicial**, el canal **Captación manual** y la fecha y hora de Ecuador?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, sin captura) | 2026-11-01, 19:56 (hora de la fila creada) | Como `asesor.demo`: "Prueba Uno", `0991112233`, sin correo, propiedad #1 (Departamento Moderno en La Carolina). El modal avisa que la apertura no se puede eliminar. Aviso verde "Oportunidad #1 abierta en Contacto inicial". Fila: `+593991112233`, Contacto inicial, Captación manual, "1 nov 2026 7:56 p. m." | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 22:51 (captura); apertura 22:50 | Como `asesor.demo`, BD nueva: "PruebaUno", `0991112233`, sin correo, propiedad **[DEMO] Casa en Cumbayá** (A). El modal avisó que la apertura no se puede eliminar. Aviso verde "Oportunidad #1 abierta en Contacto inicial". Fila: `+593991112233`, Contacto inicial, Captación manual, "3 nov 2026, 10:50 p. m.". Captura: `OneDrive\Documentos\Urbanex\evidencias\HU-27_34\V26.png` (fuera del repo) | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
+
+### V-27 · HU-27 — Celular inválido y política de privacidad
+1. En I-07, con otra propiedad, escribe el fijo `022345678` → "Abrir oportunidad" → confirma.
+2. Corrige el celular a `0994445566`, desmarca la casilla de privacidad y pulsa "Abrir oportunidad".
+
+**Resultado esperado:** en el paso 1, ¿aparece bajo "Celular" el error "Ingrese un celular de Ecuador válido: 09XXXXXXXX o +5939XXXXXXXX."? En el paso 2, ¿aparece el error bajo la casilla **sin abrir el modal**? ¿En I-06 no aparece ninguna oportunidad nueva?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Con el fijo `022345678` (propiedad #31 Casa de 4 pisos), bajo "Celular" salió el error de celular de Ecuador válido. Con `0994445566` y la privacidad desmarcada, el error salió bajo la casilla sin abrir el modal. No se creó ninguna fila | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 22:54 | Como `asesor.demo`, "PruebaDos", propiedad [DEMO] Local en La Mariscal (B). Con el fijo `022345678` y la privacidad marcada salió bajo "Celular": "Ingrese un celular de Ecuador válido: 09XXXXXXXX o +5939XXXXXXXX.". Con `0994445566` y la privacidad desmarcada salió bajo la casilla: "Confirme que el interesado aceptó la política de privacidad (LOPDP).", sin abrir el modal. No se creó ninguna fila. Capturas: `…\HU-27_34\V-27_1_celular_2_.png` y `…\HU-27_34\V-27_2_privacidad.png`. Extra (2026-11-03, 23:37, como `admin.demo`): el mismo error de privacidad con un asesor elegido, `…\HU-27_34\V32_privacidad.png` | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
+
+### V-28 · HU-27 — Reutiliza el contacto existente
+1. En I-07: nombre `Otro Nombre`, celular `+593 99 111 2233` (el de V-26 con otro formato), correo `otro@correo.ec`, **otra propiedad** (no la de V-26), privacidad marcada → confirma.
+
+**Resultado esperado:** ¿aparece el modal "Se usó un contacto existente" con los datos guardados (`Prueba Uno`, `+593991112233`, sin correo)? Al pulsar "Ver oportunidades", ¿la fila nueva muestra **Prueba Uno**, no "Otro Nombre"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | "Otro Nombre", `+593 99 111 2233`, `otro@correo.ec`, propiedad #2. Modal "Se usó un contacto existente" con Prueba Uno, `+593991112233`, sin correo. La oportunidad #2 quedó con el contacto Prueba Uno. Pablo lo comprobó también en la BD: la #1 tiene `property_id` 1 y la #2, `property_id` 2 | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:02 (captura); apertura 23:01 | "Otro Nombre", `0991112233`, `otro@correo.ec`, propiedad B (Local en La Mariscal). Tras confirmar, aviso naranja "Se usó un contacto existente" (según el dictado de Pablo; no está en la captura): datos guardados PruebaUno `+593991112233`, sin cambios. En "Ver oportunidades", la #2 (Local en La Mariscal, 3 nov 2026, 11:01 p. m.) quedó con el contacto **PruebaUno**, no "Otro Nombre". Captura: `…\HU-27_34\V-28_contacto_existente.png` | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
+
+### V-29 · RF-05 — Una sola oportunidad activa por contacto e inmueble
+1. En I-07 repite el celular `0991112233` con **la misma propiedad de V-26** → confirma.
+
+**Resultado esperado:** ¿aparece el aviso ámbar "El contacto ya tiene una oportunidad activa sobre este inmueble. (oportunidad #N)" con el número de V-26? ¿"Ver oportunidades" abre I-06 filtrada por esa propiedad? ¿No se creó otra fila?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | `0991112233` con la propiedad #1: aviso "El contacto ya tiene una oportunidad activa sobre este inmueble (oportunidad #1)". "Ver oportunidades" abrió I-06 filtrada por esa propiedad. No se creó otra fila | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:06 | "PRUEBA TRES", `0991112233`, propiedad A (Casa en Cumbayá). Aviso ámbar "El contacto ya tiene una oportunidad activa sobre este inmueble. (oportunidad #1)" (según el dictado de Pablo). "Ver oportunidades" abrió I-06 con la propiedad A ya en el filtro: 1 oportunidad (#1 PruebaUno, 10:50 p. m.), sin duplicado. Captura: `…\HU-27_34\V-29_oportunidad_activa_duplicada.png` | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
+
+### V-30 · HU-34 — Los filtros se combinan
+1. En I-06 elige la propiedad de V-26 y el estado "Contacto inicial" → "Filtrar".
+2. "Abierta desde" y "Abierta hasta" = **hoy** → "Filtrar". Luego "Abierta desde" = **mañana** → "Filtrar".
+3. "Abierta desde" = mañana y "Abierta hasta" = hoy → "Filtrar". Al final, "Limpiar".
+
+**Resultado esperado:** ¿en el paso 1 solo quedan las filas de esa propiedad? En el paso 2, ¿con hoy aparecen y con mañana sale "No hay oportunidades con estos filtros."? En el paso 3, ¿aparece bajo "Abierta hasta" el error "La fecha final no puede ser anterior a la inicial."? ¿"Limpiar" vuelve a la lista completa?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Propiedad #1 + Contacto inicial + desde 01/11: solo la #1. Desde 02/11: "No hay oportunidades con estos filtros." (el enlace para abrir una oportunidad funciona). Desde 02/11 hasta 01/11: error "La fecha final no puede ser anterior a la inicial." "Limpiar" restaura la lista | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:13 a 23:49 | Como `asesor.demo`: propiedad A + Contacto inicial → solo las filas de A. Con 03/11 a 03/11 aparecen (a las 23:45: PRUEBA TRES 11:15 p. m. y PruebaUno 10:50 p. m.). Con 04/11 a 05/11: "No hay oportunidades con estos filtros." y el enlace "Abrir una oportunidad". Con 04/11 a 03/11: bajo "Abierta hasta", "La fecha final no puede ser anterior a la inicial." y el aviso "Revisa los filtros marcados.". "Limpiar" vuelve a las 3 oportunidades. Capturas: `…\HU-27_34\V32_Filtro.png` (23:46, fechas cruzadas; Pablo la nombró V32, pero es de V-30), `…\HU-27_34\V32_Filtro2.png` (23:49, después de Limpiar) y `…\HU-27_34\V-30_filtros.png` (23:13) | **Aprobado** (Pablo, dictado del 2026-11-03) |
+
+### V-31 · HU-34 / DS-28 — El asesor ve su cartera y el admin ve todas
+1. Cierra sesión e inicia como `admin.demo`. Abre `/dashboard/opportunities`.
+2. "+ Abrir oportunidad": llena los datos con el celular `0997778899`, sin elegir asesor → "Abrir oportunidad". Después elige `asesor.demo` como responsable → confirma.
+3. Vuelve a entrar como `asesor.demo` y abre `/dashboard/opportunities`.
+
+**Resultado esperado:** como admin, ¿el título dice "Oportunidades del equipo", hay una columna "Asesor" y un filtro "Asesor"? En el paso 2, ¿sin asesor sale el error "Elija el asesor responsable." y, con él, la oportunidad se abre a cargo de `asesor.demo`? En el paso 3, ¿el título dice "Mi cartera de oportunidades", sin columna ni filtro de asesor, y la oportunidad del paso 2 aparece en su lista?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, sin captura) | 2026-11-01, 21:14 (hora de la fila creada) | Como `admin.demo`: título "Oportunidades del equipo", filtro y columna "Asesor". Sin asesor: "Elija el asesor responsable.". Con `asesor.demo` se abrió la #3 (Prueba 3, `0997778899`, propiedad #31, 9:14 p. m.). Como `asesor.demo`: "Mi cartera de oportunidades", sin columna ni filtro de asesor, y la #3 aparece | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:15 (apertura) a 23:37 | Como `admin.demo`: "Oportunidades del equipo", filtro de 5 campos (con "Asesor") y columna "Asesor". "PRUEBA TRES", `0997778899`, propiedad A, sin asesor → bajo el campo "Elija el asesor responsable." (según el dictado de Pablo; en `V32_Asesor.png` se ve el selector vacío, pero el error no). Con `asesor.demo` elegido se abrió la #3 (11:15 p. m.). Como `asesor.demo`: "Mi cartera de oportunidades", filtro de 4 campos sin asesor, y la #3 PRUEBA TRES arriba de las otras dos. Capturas: `…\HU-27_34\V-31_roles_admin_asesor.png` (23:17, vista del asesor) y `…\HU-27_34\V32_Asesor.png` (23:37, formulario del admin) | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
+
+### V-32 · DS-28 — El selector de I-07 solo muestra datos públicos
+1. En I-07 (como `asesor.demo`), revisa las tarjetas de "Propiedad de interés".
+
+**Resultado esperado:** ¿cada tarjeta muestra solo la foto (o "Sin foto"), el título, el sector, el tipo y el precio, **sin** el nombre del asesor ni datos internos? ¿Solo aparecen propiedades **disponibles** (una en captación, por ejemplo una nueva que registres, no sale)?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Las tarjetas muestran solo foto, título, sector, tipo y precio, sin asesor. Son 8 tarjetas (las 8 disponibles de la BD local) y ninguna `[DEMO]` (las #32 a #35 están en captación). Observación: la #1 y la #2 no se distinguen (DT-108) | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 22:54 (asesor) y 23:37 (admin) | Pablo confirma (dictado del 2026-11-03, ~23:50): el selector de I-07 muestra **solo las 2 propiedades disponibles**, A (Casa en Cumbayá, Casa, $285.000,00) y B (Local en La Mariscal, Local Comercial, $120.000,00). Cada tarjeta tiene foto, título, sector, tipo y precio, **sin el asesor**. Las dos [DEMO] en captación (Departamento en La Carolina y Terreno en Tumbaco) no aparecen. Capturas: `…\HU-27_34\V-27_2_privacidad.png` (como asesor) y `…\HU-27_34\V32_privacidad.png` (como admin) | **Aprobado** (Pablo, dictado del 2026-11-03) |
+
 ### Ronda HU-12 — Compartir la ficha (rama `feat/URB-17-HU-12-compartir-ficha`; validada en local el 2026-11-02: V-60 a V-62 aprobadas, V-63 Pendiente por DT-110; 2026-11-03: V-64, escape de metaetiquetas, aprobada)
 
 > **Preparación.** Esta ronda usa tu backend de siempre (`http://127.0.0.1:8000`, en tu carpeta) y el frontend del worktree:
@@ -662,6 +839,22 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 - **Hallazgos nuevos:** DT-80, DT-81 y DT-82; N-05 ampliada (pregunta también para la empresa); evidencia nueva en DT-01 y DT-74.
 - **Siguiente:** repetir V-33..V-42 y registrar evidencia humana; aclarar la diferencia de mayúsculas en email (DT-95), decidir la propuesta de base de datos de Sebas, **POR CONFIRMAR** (DT-96) (corregido por Pablo, 2026-11-03) y revisar los mensajes 401 (DT-97). La PR #9 ya existe. HU-04, HU-06 y HU-08 completas: **POR CONFIRMAR** (C-02 y θ v1 provisionales, pendientes del tutor).
 
+### Estado anterior (2026-10-30, tarde) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`
+
+- **PR #7 (motor) fusionada** en `develop` (`9801bc9`).
+- **EP-5, primer corte (FX-19)** en la rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (desde `develop` `9801bc9`), en 4 commits:
+  - `257ba1c`: commit 1, modelos y migración de `apps.opportunities`;
+  - `4282a87`: commit 2, servicio, API y pruebas;
+  - `199294a`: commit 3, pantallas I-07 e I-06;
+  - el commit de documentación (este registro).
+- **Pruebas:** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → **125/125 OK** (2026-10-30); `makemigrations --check` sin cambios; `tsc`, `eslint` de los archivos nuevos y `next build` exit 0; `eslint .` con los mismos 2 errores y 4 avisos previos de DT-24.
+- **Migraciones nuevas:** `opportunities.0001_initial`. **Endpoints nuevos:** `POST` y `GET /api/opportunities/`, `GET /api/opportunities/eligible-properties/` y `GET /api/opportunities/agents/`.
+- **Decisiones aprobadas:** DS-26 (EP-5 antes de la tarea 4), DS-27 (`apps.opportunities`; §1 y §7 del contexto maestro corregidos en `docs/handoff/`) y DS-28 (reglas del corte).
+- **Hallazgos nuevos:** DT-100 (la copia de la raíz del contexto maestro está obsoleta), DT-101 (sin enlace en el menú), DT-102 ("sector" = `location`), DT-103 (filtro de propiedad limitado) y DT-104 (sin auditoría RF-14). DT-31 al día.
+- **Archivos compartidos (GPS §3):** una línea en `backend/config/settings.py` y una en `backend/config/urls.py`. **No se tocaron** `backend/apps/users/`, `dashboard/page.tsx`, `SiteNav.tsx` ni `lib/api.ts`.
+- **Pendiente:** validación de Pablo (V-26 a V-32); el commit 4 (enlace en el menú) solo con su orden. La rama **ya tiene push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`); **la PR todavía no existe** (la abre Pablo). Al integrar HU-44, revisar DT-105.
+- **Avisar a Sebas:** ejecutar `migrate` (`opportunities.0001`); el cambio en `settings.py` es una línea en `INSTALLED_APPS`.
+
 ### Estado anterior (2026-10-28, noche)
 
 - **PR #6 (tarea 3) fusionada** en `develop` (`44ccd2e`).
@@ -734,7 +927,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
    3. comparables sintéticos (DS-23);
    4. backend de HU-04 y HU-06;
    5. pantalla I-11 y resultado en I-12.
-7. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16). **Se pospone hasta después del motor (DS-22).**
+7. **Tarea 4:** filtros del catálogo P-02 (HU-10 / URB-16, adelantada) solo con los campos existentes (DS-16). **Se pospone hasta después del motor (DS-22).** **(2026-10-30) Se pospone otra vez, hasta después del primer corte de EP-5 (DS-26).**
+8. **EP-5 "Seguimiento de oportunidades", primer corte (DS-26, 2026-10-30):** HU-27 (I-07) y HU-34 (I-06) en `feat/URB-30-34-HU-27-HU-34-oportunidades`. La máquina de estados de RF-06 (HU-29, HU-31, I-06A) va en un corte posterior.
 
 Las tareas 4 a 6 empiezan después de fusionar la PR del seeder, cada una en su rama desde `develop` (DS-14).
 
