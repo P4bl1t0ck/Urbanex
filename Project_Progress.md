@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización | 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
+| Última actualización | 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión |
 
 ---
 
@@ -41,6 +41,13 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-03 (noche) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR #15, borrador)
+- **Hecho:** correcciones de la auditoría de solo lectura (`ceb4a70`); DT-117/SEC-16, datos personales de EP-5 (`0f7292b`); DT-109 resuelto: BD local reiniciada con respaldo en el Escritorio, `migrate` en SQLite y `setup_demo_data` (`c3cf5ed`). Pablo publicó A (Casa en Cumbayá) y B (Local en La Mariscal, con PDF de corretaje) y repitió **V-26 a V-32 con hora y captura** (22:51 a 23:49), todas **Aprobadas** por él. Hay una fila nueva en cada V, con las rutas de las capturas en OneDrive, fuera del repo.
+- **Evidencia:** suite → `Ran 155 tests` · `OK` (SQLite); `makemigrations --check --dry-run` → "No changes detected". Suite contra PostgreSQL: **No ejecutado** (DT-01).
+- **Observaciones:** el correo de Gemini del 2026-11-03 da por hechas la validación de fechas cruzadas y V-32 antes de que se hicieran (luego se hicieron, 23:46 y ~23:50) y menciona un merge que no se decidió. Se toma como fuente el dictado de Pablo y las capturas. Pregunta abierta: ¿se registra como DT-118 que el catálogo vacío diga "No hay propiedades registradas aún" cuando sí hay propiedades, pero ninguna disponible?
+- **Falta:** push de los commits locales (con orden de Pablo); el texto del PR (nota sobre `settings.py` y `urls.py` en `257ba1c` y `4282a87`); avisar a Sebas de `PropertyOwnershipTests`; una nueva auditoría de solo lectura si Pablo la pide; marcar el PR como listo y fusionarlo (decisión de Pablo).
+- **Siguiente paso:** Pablo autoriza el push → PR #15 listo → merge → quitar "Rama sin fusionar" de HU-27 y HU-34 en el USM.
 
 ### 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador)
 - **Hecho:** merge de `origin/develop` (`a071b97`, con los PR #9 y #13) en `46033df`. Hubo conflictos solo en documentación; se conservaron las filas de ambos lados, quedó una sola sección de notas de cierre y C-08 tiene el texto de `develop`, con una nota añadida. `frontend/CLAUDE.md` deja de versionarse (FX-21); la copia local sigue ignorada. En `bc53be6`: notas en DT-14 y DT-39 (C-08 confirmada, DS-30; SEC-01 sigue abierto) y DT-105/FX-23 resueltos, comprobados con HU-44 fusionada. En `36d1cec`: DT-106, dos pruebas del 403 de `IsInternalUser` con el rol heredado `cliente`. En `1ee3c1b`: DT-107, `PropertyOwnershipTests` en `users/tests.py` (asesor A dueño, 200; asesor B, 403 en PATCH, publish y requisitos), sin renombrar `client_user`. Registro: FX-25.
@@ -102,7 +109,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 > - **Frontend (2026-11-02):** `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos preexistentes de `SiteNav` sin usar (`app/page.tsx` y `app/properties/page.tsx`).
 > - **DT-96:** el restablecimiento de la base de desarrollo y la migración desde `develop` con Pablo son una **propuesta de Sebas, POR CONFIRMAR** por Pablo; no se ha ejecutado. Si se aprueba, documentarla con respaldo y confirmación de ambiente (corregido por Pablo, 2026-11-03).
 > - **(2026-10-31) PR de `docs/reglas-ia-y-deuda` → `develop`** (lo abre Pablo): `AGENTS.md` como única fuente de reglas (DS-25), plantillas, `db.sqlite3` y `frontend/CLAUDE.md` fuera del repositorio (FX-22, FX-21), DT-77 a DT-79. **⚠️ Antes de hacer pull de develop con este cambio, copia tu `backend/db.sqlite3` fuera del repo; Git lo va a borrar de tu carpeta.**
-> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32** ~~todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **con push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`, 2026-10-30) y **sin PR todavía** (la abre Pablo).~~ **Aprobadas el 2026-11-01, sin captura; falta repetirlas con hora y captura (AGENTS §9).** La PR existe en borrador y la rama ya trae `develop`. El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo (corregido por Pablo, 2026-11-03).
+> - **🧪 Ronda 4 (EP-5, primer corte):** validaciones **V-26 a V-32** ~~todas **Pendientes (Pablo)**. Rama `feat/URB-30-34-HU-27-HU-34-oportunidades`, **con push** (`origin/feat/URB-30-34-HU-27-HU-34-oportunidades`, 2026-10-30) y **sin PR todavía** (la abre Pablo).~~ **Aprobadas el 2026-11-01, sin captura;** ~~falta repetirlas con hora y captura (AGENTS §9).~~ **repetidas y Aprobadas con hora y captura el 2026-11-03 (corregido por Pablo, 2026-11-03).** La PR existe en borrador y la rama ya trae `develop`. El commit 4 (enlace en el menú, DT-101) espera la orden de Pablo (corregido por Pablo, 2026-11-03).
 > - ~~**🧪 Ronda 3 (motor DS-21):** validaciones V-20 a V-25~~ **Hechas el 2026-10-29 y el 2026-10-30: las 6 aprobadas**. V-25 pasó tras la corrección FX-18. ~~**Siguiente:** la PR de `feat/URB-10-11-motor-avaluos` a `develop`.~~ **Fusionada (PR #7, `9801bc9`).**
 > - **POR CONFIRMAR (Pablo / tutor):** si HU-04, HU-06 y HU-08 cuentan como completas (C-02 y θ v1 siguen provisionales). Pregunta para la empresa: N-05 (¿el avalúo aprobado actualiza el precio?), ampliada el 2026-10-30.
 > - **DT-65:** falta la copia de Sebas.
@@ -452,6 +459,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 ### Ronda 4 — EP-5, primer corte: HU-27 (I-07) y HU-34 (I-06) (rama `feat/URB-30-34-HU-27-HU-34-oportunidades`)
 
+> **(2026-11-03) Repetida con hora y captura** tras reiniciar la BD (DT-109): las 7 **Aprobadas por Pablo** (fila nueva en cada V; capturas en `OneDrive\Documentos\Urbanex\evidencias\HU-27_34\`, fuera del repo). Propiedades: A = [DEMO] Casa en Cumbayá y B = [DEMO] Local en La Mariscal, publicadas por Pablo antes de la ronda.
+>
 > **Estado (2026-11-01): las 7 pruebas Aprobadas por Pablo** en el navegador, sin capturas. Observaciones registradas como DT-108 (propiedades #1 y #2 indistinguibles) y DT-109 (BD local con datos basura). ~~Las 7 pruebas están Pendientes (Pablo).~~
 
 **Preparación (desde `backend/`):**
@@ -470,6 +479,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, sin captura) | 2026-11-01, 19:56 (hora de la fila creada) | Como `asesor.demo`: "Prueba Uno", `0991112233`, sin correo, propiedad #1 (Departamento Moderno en La Carolina). El modal avisa que la apertura no se puede eliminar. Aviso verde "Oportunidad #1 abierta en Contacto inicial". Fila: `+593991112233`, Contacto inicial, Captación manual, "1 nov 2026 7:56 p. m." | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 22:51 (captura); apertura 22:50 | Como `asesor.demo`, BD nueva: "PruebaUno", `0991112233`, sin correo, propiedad **[DEMO] Casa en Cumbayá** (A). El modal avisó que la apertura no se puede eliminar. Aviso verde "Oportunidad #1 abierta en Contacto inicial". Fila: `+593991112233`, Contacto inicial, Captación manual, "3 nov 2026, 10:50 p. m.". Captura: `OneDrive\Documentos\Urbanex\evidencias\HU-27_34\V26.png` (fuera del repo) | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
 
 ### V-27 · HU-27 — Celular inválido y política de privacidad
 1. En I-07, con otra propiedad, escribe el fijo `022345678` → "Abrir oportunidad" → confirma.
@@ -480,6 +490,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Con el fijo `022345678` (propiedad #31 Casa de 4 pisos), bajo "Celular" salió el error de celular de Ecuador válido. Con `0994445566` y la privacidad desmarcada, el error salió bajo la casilla sin abrir el modal. No se creó ninguna fila | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 22:54 | Como `asesor.demo`, "PruebaDos", propiedad [DEMO] Local en La Mariscal (B). Con el fijo `022345678` y la privacidad marcada salió bajo "Celular": "Ingrese un celular de Ecuador válido: 09XXXXXXXX o +5939XXXXXXXX.". Con `0994445566` y la privacidad desmarcada salió bajo la casilla: "Confirme que el interesado aceptó la política de privacidad (LOPDP).", sin abrir el modal. No se creó ninguna fila. Capturas: `…\HU-27_34\V-27_1_celular_2_.png` y `…\HU-27_34\V-27_2_privacidad.png`. Extra (2026-11-03, 23:37, como `admin.demo`): el mismo error de privacidad con un asesor elegido, `…\HU-27_34\V32_privacidad.png` | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
 
 ### V-28 · HU-27 — Reutiliza el contacto existente
 1. En I-07: nombre `Otro Nombre`, celular `+593 99 111 2233` (el de V-26 con otro formato), correo `otro@correo.ec`, **otra propiedad** (no la de V-26), privacidad marcada → confirma.
@@ -489,6 +500,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | "Otro Nombre", `+593 99 111 2233`, `otro@correo.ec`, propiedad #2. Modal "Se usó un contacto existente" con Prueba Uno, `+593991112233`, sin correo. La oportunidad #2 quedó con el contacto Prueba Uno. Pablo lo comprobó también en la BD: la #1 tiene `property_id` 1 y la #2, `property_id` 2 | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:02 (captura); apertura 23:01 | "Otro Nombre", `0991112233`, `otro@correo.ec`, propiedad B (Local en La Mariscal). Tras confirmar, aviso naranja "Se usó un contacto existente" (según el dictado de Pablo; no está en la captura): datos guardados PruebaUno `+593991112233`, sin cambios. En "Ver oportunidades", la #2 (Local en La Mariscal, 3 nov 2026, 11:01 p. m.) quedó con el contacto **PruebaUno**, no "Otro Nombre". Captura: `…\HU-27_34\V-28_contacto_existente.png` | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
 
 ### V-29 · RF-05 — Una sola oportunidad activa por contacto e inmueble
 1. En I-07 repite el celular `0991112233` con **la misma propiedad de V-26** → confirma.
@@ -498,6 +510,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | `0991112233` con la propiedad #1: aviso "El contacto ya tiene una oportunidad activa sobre este inmueble (oportunidad #1)". "Ver oportunidades" abrió I-06 filtrada por esa propiedad. No se creó otra fila | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:06 | "PRUEBA TRES", `0991112233`, propiedad A (Casa en Cumbayá). Aviso ámbar "El contacto ya tiene una oportunidad activa sobre este inmueble. (oportunidad #1)" (según el dictado de Pablo). "Ver oportunidades" abrió I-06 con la propiedad A ya en el filtro: 1 oportunidad (#1 PruebaUno, 10:50 p. m.), sin duplicado. Captura: `…\HU-27_34\V-29_oportunidad_activa_duplicada.png` | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
 
 ### V-30 · HU-34 — Los filtros se combinan
 1. En I-06 elige la propiedad de V-26 y el estado "Contacto inicial" → "Filtrar".
@@ -509,6 +522,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Propiedad #1 + Contacto inicial + desde 01/11: solo la #1. Desde 02/11: "No hay oportunidades con estos filtros." (el enlace para abrir una oportunidad funciona). Desde 02/11 hasta 01/11: error "La fecha final no puede ser anterior a la inicial." "Limpiar" restaura la lista | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:13 a 23:49 | Como `asesor.demo`: propiedad A + Contacto inicial → solo las filas de A. Con 03/11 a 03/11 aparecen (a las 23:45: PRUEBA TRES 11:15 p. m. y PruebaUno 10:50 p. m.). Con 04/11 a 05/11: "No hay oportunidades con estos filtros." y el enlace "Abrir una oportunidad". Con 04/11 a 03/11: bajo "Abierta hasta", "La fecha final no puede ser anterior a la inicial." y el aviso "Revisa los filtros marcados.". "Limpiar" vuelve a las 3 oportunidades. Capturas: `…\HU-27_34\V32_Filtro.png` (23:46, fechas cruzadas; Pablo la nombró V32, pero es de V-30), `…\HU-27_34\V32_Filtro2.png` (23:49, después de Limpiar) y `…\HU-27_34\V-30_filtros.png` (23:13) | **Aprobado** (Pablo, dictado del 2026-11-03) |
 
 ### V-31 · HU-34 / DS-28 — El asesor ve su cartera y el admin ve todas
 1. Cierra sesión e inicia como `admin.demo`. Abre `/dashboard/opportunities`.
@@ -520,6 +534,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, sin captura) | 2026-11-01, 21:14 (hora de la fila creada) | Como `admin.demo`: título "Oportunidades del equipo", filtro y columna "Asesor". Sin asesor: "Elija el asesor responsable.". Con `asesor.demo` se abrió la #3 (Prueba 3, `0997778899`, propiedad #31, 9:14 p. m.). Como `asesor.demo`: "Mi cartera de oportunidades", sin columna ni filtro de asesor, y la #3 aparece | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 23:15 (apertura) a 23:37 | Como `admin.demo`: "Oportunidades del equipo", filtro de 5 campos (con "Asesor") y columna "Asesor". "PRUEBA TRES", `0997778899`, propiedad A, sin asesor → bajo el campo "Elija el asesor responsable." (según el dictado de Pablo; en `V32_Asesor.png` se ve el selector vacío, pero el error no). Con `asesor.demo` elegido se abrió la #3 (11:15 p. m.). Como `asesor.demo`: "Mi cartera de oportunidades", filtro de 4 campos sin asesor, y la #3 PRUEBA TRES arriba de las otras dos. Capturas: `…\HU-27_34\V-31_roles_admin_asesor.png` (23:17, vista del asesor) y `…\HU-27_34\V32_Asesor.png` (23:37, formulario del admin) | **Aprobado** (Pablo, dictado y bitácora del 2026-11-03) |
 
 ### V-32 · DS-28 — El selector de I-07 solo muestra datos públicos
 1. En I-07 (como `asesor.demo`), revisa las tarjetas de "Propiedad de interés".
@@ -529,6 +544,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, sin captura) | 2026-11-01 (hora no indicada) | Las tarjetas muestran solo foto, título, sector, tipo y precio, sin asesor. Son 8 tarjetas (las 8 disponibles de la BD local) y ninguna `[DEMO]` (las #32 a #35 están en captación). Observación: la #1 y la #2 no se distinguen (DT-108) | **Aprobado** |
+| Pablo (navegador, con captura; repetición tras DT-109) | 2026-11-03, 22:54 (asesor) y 23:37 (admin) | Pablo confirma (dictado del 2026-11-03, ~23:50): el selector de I-07 muestra **solo las 2 propiedades disponibles**, A (Casa en Cumbayá, Casa, $285.000,00) y B (Local en La Mariscal, Local Comercial, $120.000,00). Cada tarjeta tiene foto, título, sector, tipo y precio, **sin el asesor**. Las dos [DEMO] en captación (Departamento en La Carolina y Terreno en Tumbaco) no aparecen. Capturas: `…\HU-27_34\V-27_2_privacidad.png` (como asesor) y `…\HU-27_34\V32_privacidad.png` (como admin) | **Aprobado** (Pablo, dictado del 2026-11-03) |
 
 ---
 
