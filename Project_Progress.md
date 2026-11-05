@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Actualización HU-45 | 2026-11-04 · Rama avanzada a `origin/develop` (`043cfb5`, PR #15); se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`. Según Sebas, V-43 cubrió bloqueo tras cinco intentos y desbloqueo por admin. Suite integrada: 159/159 OK en SQLite; migraciones detectan `documents/0002_alter_document_file.py` (DT-92), sin generarla ni aplicarla. |
 | Última actualización | 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama de oportunidades: 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. |
 
 ---
@@ -41,6 +42,13 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-04 · Copilot con Sebas · rama `feat/URB-03-HU-45-desbloquear-cuenta`
+- **Hecho:** rama adelantada por fast-forward a `043cfb5` (PR #15 integrado en `develop`); se restauraron los cambios guardados sin borrar los stashes, se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`, y se resolvieron los seis conflictos. Según Sebas, V-43 se ejecutó después del último ajuste e incluyó el bloqueo tras cinco intentos, el desbloqueo en A-01 y el login posterior.
+- **Evidencia backend:** desde `backend/`, con `DB_ENGINE=sqlite` y `PIPENV_DONT_LOAD_ENV=1` (sin cargar `.env`; `EMAIL_PROVIDER` quedó en su valor por defecto `console`), `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → `Ran 159 tests`, **OK** (exit 0). La advertencia JWT y el rechazo de Resend corresponden a pruebas; el rechazo está simulado con `mock.patch` en `apps/users/tests.py`.
+- **Evidencia adicional:** desde `backend/`, `pipenv run python manage.py makemigrations --check --dry-run` → exit 1; detecta `apps/documents/migrations/0002_alter_document_file.py` (DT-92). No se generó ni aplicó migración. Desde `frontend/`: `npm test` 9/9; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0 con 2 avisos de `SiteNav`; `npm run build` exit 0 (11/11 páginas).
+- **Pendiente:** PostgreSQL no verificado. El intento con la configuración por defecto abortó antes de correr pruebas porque ya existe `test_postgres`; no se borró ni reutilizó esa base. Coordinar con Pablo el entorno PostgreSQL autorizado y DT-92; después, hacer la auditoría de solo lectura en un chat nuevo. No se hizo commit, push ni PR.
+- **Siguiente paso:** coordinar con Pablo la base de pruebas PostgreSQL y el tratamiento de DT-92; cuando estén resueltos, completar la auditoría previa al PR.
 
 ### 2026-11-04 (noche) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR #15, borrador)
 - **Hecho:** auditoría de solo lectura sobre `105cfd6`: **No apto**, solo por documentación. Código, migraciones, IDs y merge sin problemas: de las 305 líneas que agregaron los PR #14 y #16 no se perdió ninguna; hay una sola sección de notas y no quedan marcadores de conflicto. `gh pr view 15` → `mergeable: MERGEABLE` (BLOCKED: borrador y sin revisión). Con el "ok" de Pablo: nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado de procesos y Avance de épicas, y nueva sección **Traza de la rama** (abajo). Cuerpo del PR y mensaje para Sebas redactados en un borrador de correo para Pablo; el PR lo edita Pablo en GitHub (DS-31).
@@ -826,6 +834,28 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 **Estado: Pendiente.**
 
 ---
+
+### V-43 · HU-45 — Un administrador desbloquea una cuenta bloqueada
+1. Inicia sesión con una cuenta de administrador y abre A-01 (`/dashboard/users`).
+2. En un usuario de prueba activo, provoca el bloqueo con cinco intentos de inicio de sesión incorrectos.
+3. Comprueba que A-01 muestra el estado bloqueado y los intentos fallidos.
+4. Pulsa **Desbloquear** y comprueba que desaparece el estado bloqueado y la acción.
+5. Inicia sesión con la contraseña correcta de la cuenta de prueba.
+
+**Resultado esperado:** solo el administrador puede desbloquear desde A-01; el desbloqueo reinicia el contador a 0 y permite el acceso. El texto del login no distingue una cuenta bloqueada de credenciales incorrectas.
+
+**Comprobaciones adicionales de interfaz (2026-11-04):** al fallar el login, la contraseña debe borrarse y el correo conservarse. El mensaje debe ser breve y neutral, sin explicar la regla de bloqueo ni confirmar el estado de una cuenta. Probar que el mensaje se mantiene igual para una contraseña incorrecta y para una cuenta bloqueada.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-11-04, 18:59 | Probé el inicio de sesión con contraseña incorrecta y con la cuenta bloqueada: apareció el mismo mensaje, se borró la contraseña y el correo permaneció. Desbloqueé la cuenta en `/dashboard/users` y pude iniciar sesión con la contraseña correcta. | [Captura V-43](evidence/HU-45/V-43.png) — Aprobado |
+
+
+### Evidencia técnica HU-45 (2026-11-03)
+
+- **Suite backend (desde `backend/`):** `pipenv run python -c "import os, sys; os.environ['DB_ENGINE']='sqlite'; os.environ['EMAIL_PROVIDER']='console'; import config.settings as settings; print('Engine aislado:', settings.DATABASES['default']['ENGINE']); print('Correo:', os.environ['EMAIL_PROVIDER']); settings.DATABASES['default']['NAME']=':memory:'; sys.modules['urbanex_test_settings']=settings; from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','test','--settings=urbanex_test_settings','apps.users.tests','apps.documents.tests','apps.appraisals.tests'])"` → `Engine aislado: django.db.backends.sqlite3`; `Correo: console`; `Found 120 test(s)`; `Ran 120 tests in 58.160s`; `OK`; exit 0. El registro de rechazo de Resend corresponde a `test_resend_failure_returns_gateway_error_and_rolls_back_user_creation`, que simula el error con `mock.patch`; no hubo envío externo confirmado.
+- **Migraciones (desde `backend/`):** `pipenv run python -c "import os, sys; os.environ['DB_ENGINE']='sqlite'; import config.settings as settings; settings.DATABASES['default']['NAME']=':memory:'; sys.modules['urbanex_test_settings']=settings; from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','makemigrations','--check','--dry-run','--settings=urbanex_test_settings'])"` → detecta `apps\documents\migrations\0002_alter_document_file.py`; exit 1. No genera ni aplica migraciones.
+- **Frontend (desde `frontend/`):** `npm run build` → exit 0; `npx tsc --noEmit -p .` → exit 0; `npx eslint .` → exit 0, 2 avisos preexistentes en `app/page.tsx` y `app/properties/page.tsx` por `SiteNav` sin usar.
 
 ## Estado actual (2026-11-02)
 

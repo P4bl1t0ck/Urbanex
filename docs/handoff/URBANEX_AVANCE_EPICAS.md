@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Actualización HU-45 (2026-11-04) | Según Sebas, V-43 cubrió ambos criterios de HU-45 después del último ajuste. Suite integrada: 159/159 OK en SQLite. Ver actualización de EP-1 |
 | Propósito | Medir el avance real de EP-1, EP-2 y EP-5 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
 | Última actualización | 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría del PR #15: EP-5 cita también la repetición con hora y captura de V-26 a V-32 (2026-11-03); **métricas sin cambio**. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-02 · HU-44 sigue con **0/6 criterios validados**; V-33..V-42 Pendiente. Las observaciones previas de V-33..V-39 se atribuyen a Sebas; no hay evidencia visual adjunta. Suite automatizada reportada en SQLite (116/116); prueba local contra PostgreSQL **No ejecutado**. EP-2 sin cambios (**10/24 validados, 41,7 %**). Antes: 2026-10-31 · HU-44, Validado **0/6**; EP-2 sin cambios. Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 · Rama HU-12: 2026-11-02 · HU-12 validada en local (V-60 a V-62): **sin cambio de métricas** (rama sin fusionar; EP-3 no se mide aquí). Antes: 2026-11-01 · HU-12 (EP-3, rama `feat/URB-17-HU-12-compartir-ficha`, FX-24): **sin cambio de métricas**. EP-3 no se mide aquí; la fila de HU-53 "URL con metaetiquetas" anota el avance (metaetiquetas implementadas en una rama sin fusionar ni validar; sin `slug`, DT-111). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 · Rama de oportunidades: 2026-11-03 (noche) · correcciones de la auditoría: EP-5 verificado con 37 pruebas y sin la razón vieja de DT-105; métricas sin cambio. Antes: 2026-11-03 (tarde) · rama de oportunidades: pruebas de DT-106 y DT-107 (FX-25, suite 155 OK); **sin cambio de métricas** (EP-5 sigue en 4/20 validados; HU-27 y HU-34 en Pruebas hasta el merge). Antes: 2026-11-03 · Pablo (con Claude Code), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`a071b97`, con los PR #9 y #13); se conservan las entradas de ambos lados. Antes (rama de oportunidades, sin develop): 2026-11-01 · EP-5: validación visual aprobada 2026-11-01 (V-26 a V-32, Pablo): **4/20 validados (20 %)**; HU-27 y HU-34 siguen en Pruebas (0/9 HU completas). Antes: 2026-10-30 (tarde) · nueva sección **EP-5** (§5), primer corte (FX-19): **4/20 implementados y verificados (20 %)**, 0/20 validados (V-26 a V-32 pendientes). |
@@ -59,6 +60,42 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
 
 **Lectura:** HU-44 cuenta con API, migraciones y pantalla A-01; la suite automatizada de esta rama se ejecuta en SQLite. V-33..V-42 siguen Pendiente y Valid. = ✗; las observaciones reportadas por Sebas no sustituyen la evidencia humana. La validación manual del 2026-10-30 fue informada como realizada en Supabase PostgreSQL; no se ejecutó una suite local contra PostgreSQL. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
+
+### Actualización aditiva de EP-1 para HU-45 (2026-11-03)
+
+| HU | Criterio | Impl. | Verif. | Valid. | Evidencia |
+|---|---|:-:|:-:|:-:|---|
+| HU-45 | Solo el administrador desbloquea | ✔ | ✔ | ✗ | Endpoint, A-01 y pruebas incluidas en la suite de 120 OK en SQLite en memoria; V-43 Pendiente |
+
+| Métrica EP-1 actualizada | Valor |
+|---|---|
+| Implementado | 5/6 = **83,3 %** |
+| Verificado | 5/6 = **83,3 %** |
+| Validado | 0/6 = **0 %** |
+| HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
+
+### Actualización aditiva de HU-45 (2026-11-04)
+
+La pantalla de inicio de sesión ahora borra la contraseña después de un rechazo `401` y muestra «No se pudo iniciar sesión. Revisa tus credenciales.». Según Sebas, V-43 se completó después del último ajuste y cubrió el flujo de desbloqueo y el comportamiento del login; ver el registro detallado en `Project_Progress.md`.
+
+| Actualización de validación EP-1 (2026-11-04) | Valor |
+|---|---|
+| Criterio HU-45 «Solo el administrador desbloquea» | Validado por Sebas mediante V-43; los estados Pendiente de la nota del 2026-11-03 quedan supersedidos |
+| Validado | 1/6 = **16,7 %** |
+| HU completas / puntos | 0/3 HU · 0/8 pts = **0 %**; HU-45 conserva otro criterio sin validación registrada |
+
+### Actualización de validación HU-45 tras integrar `develop` (2026-11-04)
+
+Esta actualización supersede la lectura anterior de hoy: el flujo detallado de V-43 sí incluyó los dos criterios de HU-45. Según Sebas, la validación se realizó después del último ajuste y cubrió bloquear la cuenta tras cinco intentos, desbloquearla como administrador y volver a iniciar sesión. DT-117 (notificación persistente al administrador) sigue fuera del alcance de HU-45.
+
+| Métrica / criterio | Resultado vigente |
+|---|---|
+| HU-45: bloqueo tras cinco intentos fallidos | Validado por Sebas mediante V-43 |
+| HU-45: solo el administrador desbloquea | Validado por Sebas mediante V-43 |
+| EP-1 implementado | 5/6 = **83,3 %** |
+| EP-1 verificado | 5/6 = **83,3 %**; suite backend integrada 159/159 OK en SQLite |
+| EP-1 validado | 2/6 = **33,3 %** |
+| HU completas / puntos | 1/3 HU · 2/8 pts = **25 %**; HU-45 aporta 2 puntos según `URBANEX_MASTER_CONTEXT.md` §10 |
 
 ## 4. EP-2 — Gestión de propiedades y avalúos
 
