@@ -4,8 +4,7 @@
 |---|---|
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
-<<<<<<< HEAD
-| Última actualización | 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` conservando filas del mapa y la traza de HU-45. Se mantiene la nota del PR #15 (HU-27 y HU-34 ya no son "Rama sin fusionar") y la aclaración de PROC-08/HU-45 de la rama `origin/develop`. Antes: 2026-11-05 · Sebas (con Copilot) · PROC-08/HU-45: se aclara que la fila inicial sobre el desbloqueo es histórica y que la actualización del 2026-11-04 describe el flujo implementado; notificación pendiente referida a DT-120. Antes: 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: §4, HU-27 (PROC-03 paso 5) y HU-34 (PROC-05 paso 1) ya no son "Rama sin fusionar" (fusionadas en `develop`, `043cfb5`, DS-32) y su columna Estado enlaza a Estado de procesos. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
+| Última actualización | 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` conservando filas del mapa y la traza de HU-45. Se mantiene la nota del PR #15 (HU-27 y HU-34 ya no son "Rama sin fusionar"), se actualiza HU-12 en §4 (PR #14 ya está en `develop`) y se aclara la nota de PROC-08/HU-45 de la rama `origin/develop`. Antes: 2026-11-05 · Sebas (con Copilot) · PROC-08/HU-45: se aclara que la fila inicial sobre el desbloqueo es histórica y que la actualización del 2026-11-04 describe el flujo implementado; notificación pendiente referida a DT-120. Antes: 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: §4, HU-27 (PROC-03 paso 5) y HU-34 (PROC-05 paso 1) ya no son "Rama sin fusionar" (fusionadas en `develop`, `043cfb5`, DS-32) y su columna Estado enlaza a Estado de procesos. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
 | Actualización aditiva HU-45 | 2026-11-03 · Se agrega la fila de implementación del desbloqueo en PROC-08; no se modifican las filas ya existentes |
 | Actualización HU-45 y V-43 | 2026-11-04 · Se agrega una fila vigente para los dos criterios validados por Sebas en V-43; no se modifican las filas anteriores |
 | Fuentes | User Story Mapping de Miro (exportado el 2026-10-31); tesis `ProyectoCapstoneV4 (3).md` (RF-01 a RF-16, Anexo 2); [Contexto maestro](URBANEX_MASTER_CONTEXT.md) (§4 RF/RNF, pantallas, §10 backlog) |
@@ -75,6 +74,8 @@ Alternativas consideradas:
 
 ## 3. Procesos de la empresa **[PROPUESTA]**
 
+Los procesos oficiales están aquí: [URBANEX_PROCESOS_EMPRESA.md](URBANEX_PROCESOS_EMPRESA.md) y [URBANEX_CHECKLIST_TOBE.md](URBANEX_CHECKLIST_TOBE.md).
+
 La tesis describe los procesos, pero no los numera. Los códigos son nuestros. Se usa **PROC-xx** (no "PR-xx") para no confundirlos con los pull requests.
 
 ### 3.1 Cómo trabaja hoy la empresa (AS-IS) y qué necesidad ataca el sistema
@@ -141,7 +142,7 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 |---|---|---|---|---|---|
 | 1 | El cliente filtra el catálogo (solo Disponible/Reservado) | HU-10 | P-01, P-02 | **Parcial:** `users/views.py` (`PropertyListCreateView` con `PUBLIC_STATUSES` para anónimos) · `GET auth/properties/` · `app/properties/page.tsx`, `components/PropertyCard.tsx`, `lib/api.ts` (`getProperties`). Sin filtros | — |
 | 2 | Consulta la ficha (precio referencial) | HU-11 | P-03 | `users/views.py` (`PropertyDetailView`, `PUBLIC_STATUSES`) · `GET auth/properties/<id>/` · `app/properties/[id]/page.tsx`, `lib/api.ts` (`getPropertyById`) | — |
-| 3 | Comparte la URL con metaetiquetas | HU-12 | P-03 | **Rama sin fusionar** (`feat/URB-17-HU-12-compartir-ficha`): `lib/propertyMetadata.ts` (`buildPropertyMetadata`), `app/properties/[id]/page.tsx` (`generateMetadata`) | — |
+| 3 | Comparte la URL con metaetiquetas | HU-12 | P-03 | ~~**Rama sin fusionar** (`feat/URB-17-HU-12-compartir-ficha`):~~ (2026-11-06: fusionada en `develop` por el PR #14) `lib/propertyMetadata.ts` (`buildPropertyMetadata`), `app/properties/[id]/page.tsx` (`generateMetadata`) | — |
 | 4 | Si está Reservada, deja su interés (Lista de Interesados) | HU-13 | P-04, P-06 | No implementado | — |
 | 5 | Recibe aviso si la reserva se libera | HU-14 | (notificación) | No implementado | — |
 
