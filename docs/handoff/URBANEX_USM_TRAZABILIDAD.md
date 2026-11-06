@@ -4,7 +4,7 @@
 |---|---|
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
-| Última actualización | 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
+| Última actualización | 2026-11-05 · Sebas (con Copilot) · PROC-08/HU-45: se aclara que la fila inicial sobre el desbloqueo es histórica y que la actualización del 2026-11-04 describe el flujo implementado; notificación pendiente referida a DT-120. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
 | Actualización aditiva HU-45 | 2026-11-03 · Se agrega la fila de implementación del desbloqueo en PROC-08; no se modifican las filas ya existentes |
 | Actualización HU-45 y V-43 | 2026-11-04 · Se agrega una fila vigente para los dos criterios validados por Sebas en V-43; no se modifican las filas anteriores |
 | Fuentes | User Story Mapping de Miro (exportado el 2026-10-31); tesis `ProyectoCapstoneV4 (3).md` (RF-01 a RF-16, Anexo 2); [Contexto maestro](URBANEX_MASTER_CONTEXT.md) (§4 RF/RNF, pantallas, §10 backlog) |
@@ -213,6 +213,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 7 | Compara avalúos (motor vs calibrado) | HU-50 | A-05 | No implementado (solo el admin de Django de solo lectura, `appraisals/admin.py`; no es la pantalla A-05) | — |
 | 8 | Ve inventario y carga por asesor | HU-51 | A-06 | No implementado | — |
 | 9 | Analiza cierres y conversión digital | HU-52 | A-06 | No implementado | — |
+
+**Aclaración aditiva HU-45 (2026-11-05):** la fila inicial de PROC-08 registra el estado previo a implementar el desbloqueo por admin y queda supersedida por las actualizaciones del 2026-11-03 y 2026-11-04, que documentan `UserUnlockView`, `POST auth/users/<id>/unlock/` y la acción en A-01. La actualización del 2026-11-04 también registra el comportamiento neutral del login.
 
 ---
 

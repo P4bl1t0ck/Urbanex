@@ -8,6 +8,8 @@
 | Alcance | Control de acceso · sesión y JWT · validación de entradas y archivos · folio de avalúos · infraestructura y almacenamiento · requisitos previos al despliegue |
 | Actualización HU-45 | 2026-11-03 · El login usa respuesta uniforme para cuentas bloqueadas y credenciales incorrectas; se agregó desbloqueo admin-only. Mitigación parcial SEC-04; V-43 Pendiente; PostgreSQL no verificado |
 | Confirmación V-43 HU-45 | 2026-11-04 · Según Sebas, la validación visual se completó después del último ajuste; ver evidencia registrada en `Project_Progress.md`. PostgreSQL no verificado |
+| Aclaración aditiva HU-45 (2026-11-05) | Las afirmaciones antiguas de §2.5 sobre mensajes no uniformes y falta de desbloqueo describen el estado previo a HU-45; la tabla de actualización y la nota bajo ella documentan lo vigente. DT-117 queda asociado solo a SEC-16/LOPDP; la notificación de HU-45 se sigue en DT-120 |
+| Última actualización aditiva | 2026-11-05 · Copilot con Sebas · afirmaciones históricas aclaradas y SEC-04 mantenido abierto |
 | Registro oficial | Cada riesgo tiene su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md); el estado se actualiza allí y en la tabla de §0 |
 
 > **🔒 Documento publicable.** El repositorio es **público**. Por eso este documento describe **qué** está en riesgo y **cómo se corregirá**, pero **no** incluye pasos de explotación, peticiones, payloads ni comandos de ataque.
@@ -145,7 +147,9 @@ Hasta entonces, **no** se acorta la vida del token sin un flujo de renovación.
 |---|---|---|
 | Respuesta uniforme del login | `LoginView` centraliza `Credenciales inválidas.` y usa el mismo 401 para cuenta bloqueada y contraseña incorrecta; pruebas comparan código y mensaje | Mitigación implementada; SEC-04 sigue Abierto por la ausencia de bloqueo temporal y límites de peticiones |
 | Desbloqueo administrativo | `POST /api/auth/users/<id>/unlock/` exige rol admin y reinicia bloqueo e intentos | Implementado; V-43 completada por Sebas el 2026-11-04, después del último ajuste |
-| Aviso persistente al administrador | Excluido de HU-45, no hay modelo ni migración | No implementado; DT-117 |
+| Aviso persistente al administrador | Excluido de HU-45, no hay modelo ni migración | No implementado; DT-120 |
+
+**Aclaración aditiva (2026-11-05):** las dos primeras viñetas de §2.5 son históricas y describen el estado anterior a HU-45: hoy el login usa una respuesta uniforme y el administrador sí puede desbloquear desde A-01. No se considera cerrado SEC-04: siguen pendientes los límites de peticiones y el bloqueo temporal/espera progresiva. La notificación persistente es otro requisito, aún no implementado, y se rastrea como DT-120.
 
 ---
 
