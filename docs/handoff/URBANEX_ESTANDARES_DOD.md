@@ -7,6 +7,8 @@
 | Última actualización | 2026-11-04 (después del merge) · §4: ejecución registrada tras el merge (155 OK; `npm test` 9/9). Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**. Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama HU-12: 2026-11-01 · §4: `npm test` en el frontend (9 pruebas, HU-12, FX-24). Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4: suite contra PostgreSQL y plantilla de PR; §5: `makemigrations --check` y archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama de oportunidades: 2026-11-03 (noche) · §4: C-08 con fecha 2026-10-31 (DS-30) y regla del valor heredado `cliente` en las pruebas (DT-106, DT-107). Antes: 2026-11-03 (tarde) · §4: **155 pruebas OK** en la rama de oportunidades (FX-25: +2 en `opportunities` y +2 en `users`). Antes: 2026-11-03 · Pablo (con Claude Code), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`a071b97`, con los PR #9 y #13); se conservan las entradas de ambos lados. Antes (rama de oportunidades, sin develop): 2026-11-01 · §4: regla de roles en las pruebas (solo `admin` y `asesor`; el cliente es anónimo; sin `role='cliente'`; C-08, FX-23). Antes: 2026-10-30 (tarde) · §4: `apps.opportunities.tests` en el comando y 125 pruebas (FX-19). |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
+| Evidencia HU-45 | 2026-11-03 · Backend 120/120 OK en SQLite en memoria; build y TypeScript exit 0; ESLint exit 0 con 2 avisos preexistentes; `makemigrations --check --dry-run` exit 1 por `documents/0002_alter_document_file.py`; V-43 Pendiente; PostgreSQL no verificado |
+| Evidencia HU-45 interfaz | 2026-11-04 · Backend 120/120, build y TypeScript exit 0; ESLint exit 0 con 2 avisos previos; `makemigrations --check --dry-run` exit 1 por la diferencia previa de `documents/0002`; según Sebas, V-43 completada después del último ajuste |
 
 Principio rector (DoD del equipo): *"Ninguna funcionalidad se considera completa si solo funciona en Postman. Debe poder ejecutarse a través de la interfaz gráfica."* A esto se suma que **el software debe reflejar el proceso de la inmobiliaria**, no solo exponer un CRUD.
 
@@ -137,3 +139,31 @@ Reglas mínimas:
 7. No hacer commit de `backend/.env`, `backend/db.sqlite3`, `backend/media/`, `backend/private_media/` ni datos reales de clientes. `backend/.env.example` es una plantilla sin secretos y sí se puede versionar; revisar `git diff --cached --name-only` antes de cada commit.
 8. (2026-10-25) **Windows / PowerShell 5.1:** si el mensaje del commit tiene comillas dobles, escríbelo en un archivo y usa `git commit -F <archivo>`; con `-m @'…'@` PowerShell parte el mensaje y el commit falla (DT-49).
 9. (2026-10-25) Si una HU toca una página nueva y un archivo compartido, van en **commits separados** (primero la página y después el compartido), para aislar regresiones (DS-13).
+
+## Evidencia DoD — URB-03 / HU-45 (2026-11-03)
+
+| Criterio | Evidencia y resultado |
+|---|---|
+| Desbloqueo admin-only y reinicio del contador | Implementado en `POST /api/auth/users/<id>/unlock/`; pruebas nuevas y prueba de login comprueban permisos, estado persistido, `failed_attempts=0` y respuesta genérica |
+| Suite backend | `apps.users.tests`, `apps.documents.tests`, `apps.appraisals.tests`: **120 pruebas OK**, exit 0, SQLite en memoria aislada. La orden exacta y el contexto de la configuración están en la nota HU-45 de `Project_Progress.md` |
+| Migraciones | `makemigrations --check --dry-run` exit 1: sigue detectando `documents/0002_alter_document_file.py`, diferencia previa a HU-45. No se generó ni aplicó migración |
+| Frontend | `npm run build` exit 0; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, 2 avisos preexistentes de `SiteNav` sin usar |
+| Suite PostgreSQL | No verificada. La configuración de Pipenv seleccionó PostgreSQL en un intento previo y el destino del servidor no se confirmó; no repetir hasta confirmar un entorno autorizado |
+| Validación visual humana | V-43 completada por Sebas el 2026-11-04, después del último ajuste; ver registro en `Project_Progress.md` |
+
+### Actualización de evidencia HU-45 — interfaz de login (2026-11-04)
+
+La pantalla limpia la contraseña para respuestas `401` y muestra «No se pudo iniciar sesión. Revisa tus credenciales.» ante credenciales incorrectas o cuenta bloqueada. `npm run build` y `npx tsc --noEmit -p .` terminaron exit 0; `npx eslint .` terminó exit 0 con 2 avisos preexistentes. Según Sebas, la validación visual V-43 se completó después del último ajuste; los registros que la marcaban pendiente quedan supersedidos.
+
+### Ejecución tras integrar PR #15 en la rama HU-45 (2026-11-04)
+
+| Comprobación | Comando / resultado |
+|---|---|
+| Suite backend | Desde `backend/`, con `DB_ENGINE=sqlite` y `PIPENV_DONT_LOAD_ENV=1` (sin cargar `.env`; `EMAIL_PROVIDER` quedó en el valor por defecto `console`): `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests` → 159 pruebas, **OK**, exit 0 |
+| Migraciones | Desde `backend/`, con SQLite aislado: `pipenv run python manage.py makemigrations --check --dry-run` → exit 1; detecta `apps/documents/migrations/0002_alter_document_file.py` (DT-92). No creó ni aplicó migraciones |
+| Pruebas frontend | Desde `frontend/`, `npm test` → 9/9, exit 0 |
+| TypeScript | `npx tsc --noEmit -p .` → exit 0 |
+| ESLint | `npx eslint .` → exit 0; 2 avisos conocidos por `SiteNav` sin usar |
+| Build | `npm run build` → exit 0; Next.js compiló y generó 11/11 páginas |
+| Validación humana | Según Sebas, V-43 se ejecutó después del último ajuste y cubrió los dos criterios de HU-45; ver evidencia detallada en `Project_Progress.md` |
+| PostgreSQL | **No verificado**. El intento por defecto abortó antes de ejecutar pruebas porque `test_postgres` ya existía; no se borró ni reutilizó. Suite final ejecutada en SQLite |

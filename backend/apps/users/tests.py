@@ -332,6 +332,7 @@ class UrbanexCoreTests(TestCase):
         self.assertIn("access", response.data)
 
     def test_login_locks_account_after_five_failed_attempts(self):
+        invalid_credentials_message = None
         for _ in range(5):
             response = self.client.post(
                 "/api/auth/login/",
@@ -342,6 +343,7 @@ class UrbanexCoreTests(TestCase):
                 format="json",
             )
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            invalid_credentials_message = response.data["detail"]
 
         self.agent.refresh_from_db()
         self.assertEqual(self.agent.failed_attempts, 5)
@@ -352,7 +354,11 @@ class UrbanexCoreTests(TestCase):
             {"email": self.agent.email, "password": "AnyPassword"},
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.data["detail"], invalid_credentials_message)
+        self.agent.refresh_from_db()
+        self.assertTrue(self.agent.is_locked)
+        self.assertEqual(self.agent.failed_attempts, 5)
 
 # DT-14 / DS-17: comando setup_demo_data
 DEMO_PASSWORD = "Demo-Urbanex-2026!"
@@ -1013,3 +1019,94 @@ class PropertyOwnershipTests(TestCase):
         self.property.refresh_from_db()
         self.assertEqual(self.property.title, "Casa del asesor A")
         self.assertEqual(self.property.status, "captacion")
+
+
+class AccountUnlockApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_user(
+            username="unlock.admin",
+            email="unlock.admin@urbanex.test",
+            password="Admin-test-2026!",
+            role="admin",
+            is_staff=True,
+        )
+        self.advisor = User.objects.create_user(
+            username="unlock.advisor",
+            email="unlock.advisor@urbanex.test",
+            password="Advisor-test-2026!",
+            role="asesor",
+        )
+
+    def test_account_unlock_requires_authentication_and_admin_role(self):
+        endpoint = f"/api/auth/users/{self.advisor.pk}/unlock/"
+
+        anonymous_response = self.client.post(endpoint, {}, format="json")
+        self.assertEqual(anonymous_response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.client.force_authenticate(user=self.advisor)
+        advisor_response = self.client.post(endpoint, {}, format="json")
+        self.assertEqual(advisor_response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_unlocks_account_and_resets_failed_attempts(self):
+        self.advisor.is_locked = True
+        self.advisor.failed_attempts = 5
+        self.advisor.save(update_fields=["is_locked", "failed_attempts"])
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            f"/api/auth/users/{self.advisor.pk}/unlock/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data["is_locked"])
+        self.assertEqual(response.data["failed_attempts"], 0)
+        self.advisor.refresh_from_db()
+        self.assertFalse(self.advisor.is_locked)
+        self.assertEqual(self.advisor.failed_attempts, 0)
+
+    def test_admin_cannot_unlock_an_account_that_is_not_locked(self):
+        self.advisor.failed_attempts = 2
+        self.advisor.save(update_fields=["failed_attempts"])
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.post(
+            f"/api/auth/users/{self.advisor.pk}/unlock/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.advisor.refresh_from_db()
+        self.assertFalse(self.advisor.is_locked)
+        self.assertEqual(self.advisor.failed_attempts, 2)
+
+    def test_locked_and_invalid_credentials_use_the_same_login_response(self):
+        self.advisor.is_locked = True
+        self.advisor.failed_attempts = 5
+        self.advisor.save(update_fields=["is_locked", "failed_attempts"])
+
+        locked_response = self.client.post(
+            "/api/auth/login/",
+            {"email": self.advisor.email, "password": "Advisor-test-2026!"},
+            format="json",
+        )
+        self.advisor.is_locked = False
+        self.advisor.failed_attempts = 0
+        self.advisor.save(update_fields=["is_locked", "failed_attempts"])
+        invalid_response = self.client.post(
+            "/api/auth/login/",
+            {"email": self.advisor.email, "password": "Wrong-password"},
+            format="json",
+        )
+
+        self.assertEqual(locked_response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(locked_response.data["detail"], "Credenciales inválidas.")
+        self.assertEqual(
+            (locked_response.status_code, locked_response.data["detail"]),
+            (invalid_response.status_code, invalid_response.data["detail"]),
+        )
+        self.advisor.refresh_from_db()
+        self.assertEqual(self.advisor.failed_attempts, 1)

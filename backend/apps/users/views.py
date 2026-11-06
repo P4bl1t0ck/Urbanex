@@ -22,6 +22,7 @@ from apps.appraisals.models import Appraisal
 from apps.documents.models import Document
 
 User = get_user_model()
+LOGIN_ERROR_MESSAGE = "Credenciales inválidas."
 
 
 class IsAdminRole(permissions.BasePermission):
@@ -118,18 +119,21 @@ class LoginView(APIView):
 
         user = User.objects.filter(email__iexact=email).first()
 
-        if not user or not user.is_active:
-            return Response({"detail": "Credenciales inválidas."}, status=401)
-
-        if user and user.is_locked:
-            return Response({"detail": "Cuenta bloqueada. Contacta al administrador."}, status=403)
+        if not user or not user.is_active or user.is_locked:
+            return Response(
+                {"detail": LOGIN_ERROR_MESSAGE},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         if not user.check_password(password): #Regla de negocio.
             user.failed_attempts += 1
             if user.failed_attempts >= 5:
                 user.is_locked = True
             user.save(update_fields=["failed_attempts", "is_locked"])
-            return Response({"detail": "Credenciales inválidas."}, status=401)
+            return Response(
+                {"detail": LOGIN_ERROR_MESSAGE},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         user.failed_attempts = 0
         user.save(update_fields=["failed_attempts"])
@@ -185,6 +189,25 @@ class UserDeactivateView(APIView):
                 user=user,
                 used_at__isnull=True,
             ).update(used_at=timezone.now())
+
+        return Response(ManagedUserSerializer(user).data, status=status.HTTP_200_OK)
+
+
+class UserUnlockView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdminRole]
+
+    def post(self, request, pk):
+        with transaction.atomic():
+            user = get_object_or_404(User.objects.select_for_update(), pk=pk)
+            if not user.is_locked:
+                return Response(
+                    {"detail": "La cuenta no está bloqueada."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            user.is_locked = False
+            user.failed_attempts = 0
+            user.save(update_fields=["is_locked", "failed_attempts"])
 
         return Response(ManagedUserSerializer(user).data, status=status.HTTP_200_OK)
 
