@@ -48,9 +48,9 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ### 2026-11-06 · Copilot con Sebas · evidencia V-43 para PR #17
 - **Hecho:** se registró la prueba manual de acceso como Asesor en V-43 para publicar la actualización de la bitácora en la rama `feat/URB-03-HU-45-desbloquear-cuenta`.
-- **Evidencia:** suite backend SQLite: 159 pruebas OK (exit 0). `makemigrations --check --dry-run`: exit 1 por la diferencia conocida `documents/0002_alter_document_file.py` (DT-92), sin generar ni aplicar migraciones. La ruta `evidence/HU-45/V-43-no-admin.png` no existe en este checkout; Sebas confirmó que la captura se adjuntará o ya está adjunta al PR por separado.
-- **Pendiente:** confirmar que el registro aparezca en el PR y que la captura esté adjunta al comentario.
-- **Siguiente paso:** verificar el commit y push en la rama del PR #17.
+- **Evidencia:** commit `2bd4be8` publicado en la rama del PR; suite backend SQLite: 159 pruebas OK (exit 0). `makemigrations --check --dry-run`: exit 1 por la diferencia conocida `documents/0002_alter_document_file.py` (DT-92), sin generar ni aplicar migraciones. La ruta `evidence/HU-45/V-43-no-admin.png` no existe en este checkout; Sebas confirmó que la captura se adjuntará o ya está adjunta al PR por separado.
+- **Pendiente:** confirmar que la captura esté adjunta al comentario del PR.
+- **Siguiente paso:** confirmar que la captura esté adjunta al comentario del PR #17.
 
 ### 2026-11-05 · Copilot con Sebas · aclaración de PR #17
 - **Hecho:** Sebas confirmó que el cambio en `backend/apps/users/views.py` se había coordinado antes; la pregunta pendiente en la nota siguiente queda resuelta. Texto preparado para Pablo, sin publicar: «Según Sebas, el cambio en `backend/apps/users/views.py` fue coordinado previamente. DT-111 (`slug` estable de HU-12) sigue pendiente y fuera de HU-45; DT-49 indica usar `git commit -F <archivo>` en PowerShell 5.1. La notificación persistente de HU-45 se sigue en DT-120. DT-92 (`documents/0002_alter_document_file.py`) es una diferencia conocida; no se generó ni aplicó migración. Suite contra PostgreSQL: **No ejecutado**; se coordinará más adelante con Pablo».
