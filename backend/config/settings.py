@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.documents.apps.DocumentsConfig',  # Expediente digital (RF-10)
     'apps.appraisals.apps.AppraisalsConfig',  # Avalúos (RF-11)
     'apps.opportunities.apps.OpportunitiesConfig',  # Seguimiento de oportunidades (RF-05, RF-06)
+    'apps.visits.apps.VisitsConfig',  # Agendamiento de visitas (RF-09, RF-04)
 ]
 
 MIDDLEWARE = [
