@@ -46,6 +46,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-06 · Copilot con Sebas · evidencia V-43 para PR #17
+- **Hecho:** se registró la prueba manual de acceso como Asesor en V-43 para publicar la actualización de la bitácora en la rama `feat/URB-03-HU-45-desbloquear-cuenta`.
+- **Evidencia:** suite backend SQLite: 159 pruebas OK (exit 0). `makemigrations --check --dry-run`: exit 1 por la diferencia conocida `documents/0002_alter_document_file.py` (DT-92), sin generar ni aplicar migraciones. La ruta `evidence/HU-45/V-43-no-admin.png` no existe en este checkout; Sebas confirmó que la captura se adjuntará o ya está adjunta al PR por separado.
+- **Pendiente:** confirmar que el registro aparezca en el PR y que la captura esté adjunta al comentario.
+- **Siguiente paso:** verificar el commit y push en la rama del PR #17.
+
 ### 2026-11-05 · Copilot con Sebas · aclaración de PR #17
 - **Hecho:** Sebas confirmó que el cambio en `backend/apps/users/views.py` se había coordinado antes; la pregunta pendiente en la nota siguiente queda resuelta. Texto preparado para Pablo, sin publicar: «Según Sebas, el cambio en `backend/apps/users/views.py` fue coordinado previamente. DT-111 (`slug` estable de HU-12) sigue pendiente y fuera de HU-45; DT-49 indica usar `git commit -F <archivo>` en PowerShell 5.1. La notificación persistente de HU-45 se sigue en DT-120. DT-92 (`documents/0002_alter_document_file.py`) es una diferencia conocida; no se generó ni aplicó migración. Suite contra PostgreSQL: **No ejecutado**; se coordinará más adelante con Pablo».
 - **Evidencia:** PR #17 está abierto desde `feat/URB-03-HU-45-desbloquear-cuenta` con destino `master`; `AGENTS.md` §5 indica integrar por PR a `develop`. Suite backend SQLite: 159 pruebas, OK (exit 0). `makemigrations --check --dry-run`: exit 1, detecta `documents/0002_alter_document_file.py` (DT-92). PostgreSQL: **No ejecutado**. No se publicó comentario ni se cambió el destino del PR.
@@ -870,7 +876,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 |---|---|---|---|
 | Sebas | 2026-11-04, 18:59 | Probé el inicio de sesión con contraseña incorrecta y con la cuenta bloqueada: apareció el mismo mensaje, se borró la contraseña y el correo permaneció. Desbloqueé la cuenta en `/dashboard/users` y pude iniciar sesión con la contraseña correcta. | [Captura V-43](evidence/HU-45/V-43.png) — Aprobado |
 
-
+| Sebas | 2026-11-06, 14:03 | Inicié sesión como Asesor, abrí `/dashboard/users` y comprobé que no pude acceder a la gestión de usuarios ni al desbloqueo. | `evidence/HU-45/V-43-no-admin.png` — Aprobado |
 ### Evidencia técnica HU-45 (2026-11-03)
 
 - **Suite backend (desde `backend/`):** `pipenv run python -c "import os, sys; os.environ['DB_ENGINE']='sqlite'; os.environ['EMAIL_PROVIDER']='console'; import config.settings as settings; print('Engine aislado:', settings.DATABASES['default']['ENGINE']); print('Correo:', os.environ['EMAIL_PROVIDER']); settings.DATABASES['default']['NAME']=':memory:'; sys.modules['urbanex_test_settings']=settings; from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','test','--settings=urbanex_test_settings','apps.users.tests','apps.documents.tests','apps.appraisals.tests'])"` → `Engine aislado: django.db.backends.sqlite3`; `Correo: console`; `Found 120 test(s)`; `Ran 120 tests in 58.160s`; `OK`; exit 0. El registro de rechazo de Resend corresponde a `test_resend_failure_returns_gateway_error_and_rolls_back_user_creation`, que simula el error con `mock.patch`; no hubo envío externo confirmado.
