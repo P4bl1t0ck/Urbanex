@@ -38,7 +38,7 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 |---|---|---|
 | Código propio | `backend/apps/opportunities/` | `backend/apps/users/` |
 | Compartido (avisar antes) | `backend/config/settings.py`, `backend/config/urls.py`, `frontend/components/SiteNav.tsx` y los del GPS §3 | ídem |
-| DT | DT-77..82, DT-100..119 | DT-90..99, DT-120..139 |
+| DT | DT-77..82, DT-100..119, DT-140..169 (desde 2026-11-04, DS-33) | DT-90..99, DT-120..139 |
 | V | V-01..32, V-60 en adelante | V-33..59 |
 | FX | FX-01..19, FX-21..29 | FX-20, FX-30..39 |
 | DS | DS-25..28, DS-31..39 | DS-29, DS-30, DS-40..49 |
@@ -56,6 +56,7 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 - Antes de **cada** commit: `git diff --cached --name-only` y muéstralo. Nunca `git add -A`, `git add .` ni `git commit -a`.
 - Commit y push solo si la orden de la persona lo incluye. **El PR lo abre la persona.**
 - **`gh` solo para consultas** (`gh pr view`, `gh pr list`, `gh pr checks`). Crear, editar, comentar, pasar a listo o fusionar un PR solo con **orden explícita de Pablo** que indique la rama destino y el contenido (DS-31).
+- Antes de trabajar en un PR o auditarlo, leer sus comentarios con `gh pr view <n> --comments`.
 
 **Prohibido:** push o merge a `develop`/`master` · force push (también `--force-with-lease`) **sin aprobación explícita de Pablo** (avisar no basta) · abrir un PR sin orden · commitear `backend/db.sqlite3`, `.env`, `backend/media/` o `backend/private_media/` · editar fuera del alcance.
 
@@ -63,6 +64,7 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 
 - Nunca copies claves reales (contraseñas, API keys, cadenas de conexión, hosts reales) en código, documentos, prompts, commits ni PR. No muestres ni pidas el contenido de `backend/.env`.
 - Si ves una clave real en un archivo o en el chat: **avisa de inmediato**, no la repitas y di que hay que rotarla. Para dar acceso a un servicio se **invita** a la persona; la clave no se comparte (DT-79).
+- La evidencia visual (capturas y videos) se guarda local en una carpeta `evidence/` que está en `.gitignore`; nunca se sube al repo. El auditor no la cuenta como bloqueo por no estar en el repo.
 
 ## 7. Base de datos
 
