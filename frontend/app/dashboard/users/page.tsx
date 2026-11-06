@@ -174,6 +174,24 @@ export default function UserManagementPage() {
     }
   }
 
+  async function unlockUser(user: ManagedUser) {
+    setSaving(true);
+    setError("");
+    setNotice("");
+    try {
+      const updated = await authFetch<ManagedUser>(
+        `/api/auth/users/${user.id}/unlock/`,
+        { method: "POST", body: JSON.stringify({}) },
+      );
+      setUsers((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      setNotice(`Cuenta de ${updated.first_name || updated.email} desbloqueada.`);
+    } catch (unlockError: unknown) {
+      setError(getErrorMessage(unlockError));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function resendActivation(user: ManagedUser) {
     setSaving(true);
     setError("");
@@ -395,6 +413,11 @@ export default function UserManagementPage() {
                               ? "Desactivado"
                               : "Pendiente de activación"}
                         </span>
+                        {user.is_locked && (
+                          <span className="mt-2 inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800">
+                            Bloqueado ({user.failed_attempts} intentos fallidos)
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex flex-wrap gap-x-3 gap-y-2">
@@ -409,6 +432,16 @@ export default function UserManagementPage() {
                           {user.is_active && (
                             <button type="button" onClick={() => { setError(""); setDeactivationReason(""); setDeactivatingUser(user); }} className="font-semibold text-red-700 hover:underline">
                               Desactivar
+                            </button>
+                          )}
+                          {user.is_locked && (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => void unlockUser(user)}
+                              className="font-semibold text-blue-700 hover:underline disabled:opacity-50"
+                            >
+                              Desbloquear
                             </button>
                           )}
                         </div>

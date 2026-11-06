@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { ApiError, apiFetch } from "@/lib/api";
 import { notifyAuthSessionChanged } from "@/lib/auth-session";
 import { useRouter } from "next/navigation";
 
@@ -52,8 +52,12 @@ export default function LoginPage(){
 
     }catch (err: unknown){
       console.error("Error al iniciar sesión:", err); //Mas detalle en caso de error de login.
-      setError(err instanceof Error ? err.message : "Credenciales inválidas o cuenta bloqueada.");
-      //Obviusly the main error of what happens if one of the email or password is not correct.
+      if (err instanceof ApiError && err.status === 401) {
+        setPassword("");
+        setError("No se pudo iniciar sesión. Revisa tus credenciales.");
+      } else {
+        setError(err instanceof Error ? err.message : "No se pudo iniciar sesión. Intenta de nuevo.");
+      }
     }
   }
 

@@ -12,6 +12,7 @@ from .views import (
     UserDetailView,
     UserListCreateView,
     UserResendActivationView,
+    UserUnlockView,
 )
 from rest_framework.routers import DefaultRouter
 
@@ -23,6 +24,7 @@ urlpatterns = [
     path("users/activate/", UserActivationView.as_view(), name="user-activate"),
     path("users/<int:pk>/", UserDetailView.as_view(), name="user-detail"),
     path("users/<int:pk>/deactivate/", UserDeactivateView.as_view(), name="user-deactivate"),
+    path("users/<int:pk>/unlock/", UserUnlockView.as_view(), name="user-unlock"),
     path("users/<int:pk>/resend-activation/", UserResendActivationView.as_view(), name="user-resend-activation"),
     path("properties/", PropertyListCreateView.as_view(), name="property-list-create"),  # <-- Agregada esta ruta
     path("properties/mine/", MyPropertiesView.as_view(), name="my-properties"),
