@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-46 | 2026-11-06 · EP-1: recuperación implementada y verificada en SQLite; V-44 Pendiente |
 | Actualización HU-45 (2026-11-04) | Según Sebas, V-43 cubrió ambos criterios de HU-45 después del último ajuste. Suite integrada: 159/159 OK en SQLite. Ver actualización de EP-1 |
 | Propósito | Medir el avance real de EP-1, EP-2 y EP-5 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
@@ -59,7 +60,20 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | Validado | 0/6 = **0 %** |
 | HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
 
-**Lectura:** HU-44 cuenta con API, migraciones y pantalla A-01; la suite automatizada de esta rama se ejecuta en SQLite. V-33..V-42 siguen Pendiente y Valid. = ✗; las observaciones reportadas por Sebas no sustituyen la evidencia humana. La validación manual del 2026-10-30 fue informada como realizada en Supabase PostgreSQL; no se ejecutó una suite local contra PostgreSQL. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
+### Actualización aditiva de EP-1 para HU-46 (2026-11-06)
+
+| HU | Criterio | Impl. | Verif. | Valid. | Evidencia |
+|---|---|:-:|:-:|:-:|---|
+| HU-46 | Enlace de recuperación de 60 min y de un solo uso | ✔ | ✔ | ✗ | Modelo y endpoints con pruebas automáticas; V-44 Pendiente |
+
+El criterio agregado eleva a 6/6 los criterios de EP-1 implementados y verificados según el corte anterior y esta evidencia. La política D-05 está implementada y probada, pero no agrega un criterio al denominador. La validación humana/visual de HU-46 sigue Pendiente; no se declara completa la HU.
+
+| Métrica EP-1 (corte aditivo HU-46) | Valor |
+|---|---|
+| Implementado | 6/6 = **100 %** |
+| Verificado | 6/6 = **100 %** |
+
+**Aclaración aditiva (2026-11-06):** el párrafo «Lectura» y las métricas iniciales son un corte histórico; las actualizaciones aditivas de HU-45 y HU-46 describen el código vigente. V-44 sigue **Pendiente**. Esta sesión actualiza implementación/verificación técnica, no la validación humana ni el avance por puntos.
 
 ### Actualización aditiva de EP-1 para HU-45 (2026-11-03)
 

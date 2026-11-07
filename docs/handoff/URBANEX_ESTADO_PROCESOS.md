@@ -2,8 +2,10 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-46 | 2026-11-06 · I-02 y D-05 implementados; suite SQLite 165/165; V-44 Pendiente |
 | Confirmación V-43 (2026-11-04) | Según Sebas, V-43 se ejecutó después del último ajuste e incluyó bloquear con cinco intentos, desbloquear desde A-01 y volver a iniciar sesión. Suite integrada: 159 pruebas OK en SQLite |
 | Aclaración HU-45 (2026-11-05) | Las filas iniciales de HU-45 describen el estado previo a su implementación; las actualizaciones aditivas del 2026-11-03/04 documentan el endpoint, la acción en A-01 y el login neutral. La notificación persistente continúa pendiente en DT-120 |
+| Actualización HU-46 (2026-11-06) | Implementación de I-02, refresh en cookie y rechazo de JWT anteriores al cambio de contraseña; suite automatizada 165/165 OK en SQLite. Validación humana V-44 **Pendiente** |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · aclaración de HU-45 y referencia DT-120 |
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
@@ -342,6 +344,15 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 - Sesión: `access` en `sessionStorage` (aislado por pestaña), vigencia de 1 día; el `refresh` no se guarda; no hay cierre por inactividad. Depende de la decisión D-05.
 - El pedido original agrupaba HU-44, HU-45 y HU-46 con el "modal de propiedades". En la tesis son historias de acceso (ver C-01). El modal se audita en HU-01, HU-03 y HU-05.
+
+### Actualización aditiva HU-46 (2026-11-06)
+
+| Criterio | Implementación | Evidencia técnica |
+|---|---|---|
+| Recuperar contraseña con enlace de 60 minutos y de un solo uso | I-02, endpoints de solicitud/confirmación, token almacenado como hash y política de contraseña de Django | Pruebas API de solicitud neutral, vencimiento, uso único y cambio de contraseña; suite integrada 165/165 OK en SQLite |
+| Mantener la sesión y rechazar tokens anteriores al cambio de contraseña | Access de 24 h en `sessionStorage`; refresh de 7 días HttpOnly; protección CSRF y cierre de cookie | Pruebas de refresh/CSRF, invalidación de access y refresh antiguos, y logout |
+
+**Estado:** implementación y pruebas automatizadas verificadas en SQLite; validación funcional y visual **Pendiente** hasta que Sebas complete V-44. PostgreSQL **No ejecutado**; el intento inicial encontró que `test_postgres` ya existía y se detuvo sin borrarlo ni reutilizarlo. `makemigrations --check --dry-run` sigue detectando la diferencia preexistente `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó esa migración.
 
 ---
 

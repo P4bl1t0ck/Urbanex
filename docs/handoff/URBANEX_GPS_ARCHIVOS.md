@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-46 | 2026-11-06 · Código, pruebas y documentación de recuperación/sesión; V-44 Pendiente |
 | Actualización HU-45 (2026-11-04) | Se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`; suite integrada 159/159 OK en SQLite. Según Sebas, V-43 cubrió ambos criterios de HU-45 |
 | Propósito | Saber qué archivo implementa qué HU, qué riesgo tiene tocarlo y de qué depende Avalúos |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
@@ -123,6 +124,19 @@ Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una 
 | `backend/apps/users/tests.py` (HU-45, clase nueva al final) | Pruebas API | Cobertura de autorización, desbloqueo, contador, 400 de cuenta desbloqueada y respuesta genérica | 120 pruebas backend OK en SQLite en memoria | Pruebas | Medio | V-43 completada por Sebas el 2026-11-04; la suite PostgreSQL no se verificó |
 | `frontend/app/dashboard/users/page.tsx` (A-01, HU-45) | UI | Estado bloqueado y acción **Desbloquear** solo cuando la cuenta está bloqueada | `npm run build`, TypeScript y ESLint ejecutados; V-43 completada por Sebas | Pruebas | Alto | La API vuelve a autorizar la acción; no cambiar el tipo existente, que ya incluye `is_locked` y `failed_attempts` |
 | `frontend/app/(auth)/login/page.tsx` (HU-45, 2026-11-04) | UI (I-01) | Conserva correo, limpia contraseña tras `401` y muestra «No se pudo iniciar sesión. Revisa tus credenciales.» | `npm run build` y TypeScript exit 0; ESLint exit 0 con 2 avisos preexistentes; V-43 completada por Sebas el 2026-11-04 | Pruebas | Medio | Mantener el mismo mensaje para credenciales incorrectas y cuentas bloqueadas |
+
+**Actualización aditiva HU-46 (2026-11-06):** D-05 personalizado aprobado por Pablo, según Sebas. La suite integrada reportó 165/165 OK en SQLite; V-44 Pendiente; PostgreSQL No ejecutado.
+
+| Ruta | Capa | Responsabilidad HU-46 | Evidencia técnica | Estado | Riesgo | Precauciones |
+|---|---|---|---|---|---|---|
+| `backend/apps/users/models.py` (`User.password_changed_at`, `PasswordResetToken`) y `migrations/0009_password_reset_and_password_changed_at.py` | Modelo y migración | Guarda el cambio de contraseña y hashes de enlaces de un solo uso, vigentes 60 minutos | Suite backend; `makemigrations --check --dry-run` aún detecta solo `documents/0002_alter_document_file.py` (DT-92) | Pruebas | Alto | No editar migraciones históricas ni correr migraciones contra Supabase |
+| `backend/apps/users/authentication.py` | Autenticación | Rechaza access JWT emitidos antes de `password_changed_at` | Pruebas de tokens anteriores al cambio de contraseña | Pruebas | Alto | Mantener el criterio sincronizado con el serializer de refresh |
+| `backend/apps/users/serializers.py` y `views.py` | API | Solicitud neutral, confirmación de recuperación, envío por consola/Resend, refresh y logout con CSRF | Suite backend: 165 OK en SQLite | Pruebas | Alto | El refresh no se devuelve en JSON; envío fallido queda registrado y no revela si existe la cuenta |
+| `backend/apps/users/urls.py`, `backend/config/urls.py` y `backend/config/settings.py` | Rutas y configuración compartida | I-02, cookie refresh, CORS con credenciales, CSRF y autenticación por versión de contraseña | Suite backend y comprobación de configuración | Pruebas | **Alto (compartido)** | En local, ambos servicios deben usar `localhost`; en producción, configurar `CORS_ALLOWED_ORIGINS` y `FRONTEND_BASE_URL` por entorno |
+| `backend/apps/users/tests.py` | Pruebas API | Cobertura de solicitud neutral, vencimiento, uso único, invalidación de JWT, cookie HttpOnly, CSRF y logout | Suite integrada: 165/165 OK en SQLite | Pruebas | Medio | PostgreSQL No ejecutado |
+| `frontend/app/(auth)/forgot-password/page.tsx` y `reset-password/page.tsx` | UI (I-02) | Solicita instrucciones y establece una nueva contraseña; elimina el token del fragmento de URL | `npm test`, TypeScript, ESLint y build | Pruebas | Medio | V-44 visual Pendiente; no incluir tokens ni correos reales en capturas |
+| `frontend/app/(auth)/login/page.tsx` | UI (I-01) | Recibe access en JSON y refresh solo en cookie HttpOnly; enlace a recuperación | TypeScript y build; suite backend | Pruebas | Medio | Mantener respuesta de error neutral |
+| `frontend/lib/api.ts`, `auth-session.ts` y `components/SiteNav.tsx` | Cliente HTTP y navegación compartidos | Renueva access con CSRF, repite la petición, elimina sesión local y borra la cookie al cerrar sesión | TypeScript, ESLint y build; V-44 visual Pendiente | Pruebas | **Alto (compartido)** | Probar rutas protegidas y logout desde la interfaz |
 
 ### HU-27 y HU-34 · Abrir oportunidades y cartera con filtros (EP-5, 2026-10-30) → estado [HU-27](URBANEX_ESTADO_PROCESOS.md#hu-27) · [HU-34](URBANEX_ESTADO_PROCESOS.md#hu-34)
 

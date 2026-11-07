@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-46 | 2026-11-06 · D-05 personalizado implementado; DT-33 resuelto en código; V-44 Pendiente |
 | Actualización HU-45 (2026-11-04) | Según Sebas, V-43 cubrió ambos criterios de HU-45. Suite integrada: 159/159 OK en SQLite. `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó migración. DT-120 sigue fuera del alcance |
 | Corrección de identificador HU-45 (2026-11-05) | La notificación persistente de HU-45 usa DT-120 (rango de Sebas). DT-117 se conserva para SEC-16/LOPDP de EP-5. El identificador se comprobó contra `origin/develop` y las ramas remotas actualizadas |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · aclaración de la colisión DT-117/DT-120 |
@@ -303,6 +304,12 @@ Detalle, severidad y plan en [Seguridad e infraestructura](URBANEX_SEGURIDAD_Y_D
 | N-03 | ¿`zone` es una lista controlada o se deriva de las coordenadas? **(2026-10-28, DS-21)** Destino: una **lista controlada** (opción 1). Provisional: radio entre coordenadas (opción 2). **Falta decidir la lista de zonas** | HU-04, HU-05 | Pregunta de negocio |
 | N-04 | **Resuelto en parte (DS-25, FX-22):** `db.sqlite3` ya no se versiona; `media/`, `.pyc` y el historial siguen. ¿Se dejan de rastrear `db.sqlite3` y `media/`? ¿Con qué seed se reemplazan? (2026-10-27: ya existe `setup_demo_data`, que puede servir de reemplazo) | Equipo | DT-02 |
 | N-05 | **Pregunta para el tutor (2026-10-27):** hoy se puede publicar con un precio muy distinto al del avalúo aprobado (en la validación: precio $123.555 y avalúo $34.000,60). El avalúo no toca el precio (DS-12: el precio es solo una referencia). ¿Aprobar el avalúo debe **actualizar** el precio, **avisar** de la diferencia o mantenerlos **independientes**? **No implementar nada hasta la respuesta**. **(2026-10-28)** Otro caso: `#32 Cumbayá` se publicó (desvío de V-15) con precio $285.000; su avalúo aprobado más reciente es de $123,99 (DT-73). Con DS-06, para publicar basta con **cualquier** avalúo aprobado, no el último. **(2026-10-30, ronda 3, observación O3)** La pregunta se eleva **también a la empresa** (no es técnica): ¿el valor del avalúo aprobado debe actualizar el precio de la propiedad, quedar ligado a él o ser un dato separado? | HU-08, HU-53, RF-11 | Pregunta de negocio de Pablo (tutor y empresa) |
+
+**Actualización aditiva D-05 (2026-11-06):** según Sebas, Pablo confirmó para HU-46 la política personalizada descrita en `URBANEX_MASTER_CONTEXT.md` y `URBANEX_SEGURIDAD_Y_DEUDA.md`. No se usó un ID DT/DS nuevo. La política está implementada en la rama HU-46; V-44 y la revisión humana siguen **Pendiente**.
+
+**Actualización aditiva DT-33 (2026-11-06):** la política de sesión quedó implementada según D-05 personalizado: refresh HttpOnly de 7 días con CSRF e invalidación de access/refresh emitidos antes de `password_changed_at`. Pruebas automatizadas ejecutadas en SQLite; **Resuelto en código; validación visual Pendiente (V-44)**. El logout elimina la cookie local, pero no revoca copias del token.
+
+**Pregunta pendiente HU-46 (sin ID):** al restablecer la contraseña de una cuenta activa bloqueada, ¿también se deben limpiar `is_locked` y `failed_attempts`? Actualmente se conserva el bloqueo; no cambiar hasta confirmar la regla.
 
 ## 4. Decisiones tomadas (sesión 2026-10-24, aprobadas por Pablo)
 

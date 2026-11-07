@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-46 | 2026-11-06 · D-05 personalizado implementado; V-44 Pendiente |
 | Propósito | Inventario de riesgos de seguridad e infraestructura del código actual, con su plan de corrección, y opciones documentadas para las decisiones pendientes (D-05 sesión/JWT, DT-42 folio, almacenamiento y base de datos) |
 | Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-11-03:** SEC-16 / DT-117, datos personales de EP-5 (LOPDP), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`. **Actualizado el 2026-11-02:** DT-96 (edición de `users.0007` tras aplicarse en Supabase; restablecimiento de la base de desarrollo y migración desde `develop` propuestos por Sebas, **POR CONFIRMAR** y no ejecutados (corregido por Pablo, 2026-11-03)); PostgreSQL local **No ejecutado**. **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3 (restaurado por Pablo, 2026-11-03). **Actualizado el 2026-10-31:** SEC-15 / DT-79 (incidente de credenciales, sin valores) (restaurado por Pablo, 2026-11-03); SEC-09 y §5.3: `db.sqlite3` ya no se versiona (DS-25, FX-22); DT-90/DT-91 para credenciales de Supabase y Resend; C-08/DS-30 confirma que clientes no tienen cuenta. **Actualizado el 2026-11-02:** §3.1, "XSS almacenado": metaetiquetas de HU-12 (FX-24), comprobación del escape Pendiente. **Actualizado el 2026-11-03:** §3.1, escape de las metaetiquetas de HU-12 comprobado (V-64, aprobada por Pablo). **Actualizado el 2026-11-03 (tarde):** §3.1, el payload RSC se cita como `\u003c/script\u003e` (corrección de la auditoría de HU-12) |
 | Método | Lectura del código del backend y del frontend. **No se hicieron pruebas de intrusión.** Lo que no se comprobó en ejecución está marcado **Por verificar** |
@@ -133,6 +134,21 @@
 - agregar una política **Content-Security-Policy** en el frontend (*Por verificar*: no se encontró ninguna).
 
 Hasta entonces, **no** se acorta la vida del token sin un flujo de renovación.
+
+### Actualización aditiva D-05 para HU-46 (2026-11-06)
+
+Según Sebas, Pablo aprobó una variante personalizada; no debe etiquetarse como la Opción A literal ni como la recomendación B:
+
+- `access`: 24 horas en `sessionStorage`; `refresh`: 7 días en cookie `HttpOnly; SameSite=Lax`, `Secure` solo cuando `DEBUG=False`.
+- No se usa blacklist ni Redis. La autenticación JWT y el refresh rechazan tokens cuyo `iat` precede `User.password_changed_at`; el campo se actualiza al cambiar la contraseña. El logout elimina la cookie del navegador, pero no revoca una copia robada del refresh.
+- La ruta `POST /api/token/refresh/` exige el cookie CSRF estándar `csrftoken` y `X-CSRFToken`; CORS permite credenciales. En desarrollo ambos servicios deben usar `localhost`.
+- La recuperación responde de forma neutral exista o no una cuenta activa. `PasswordResetTokenGenerator` y `PasswordResetToken` aplican vigencia de 60 minutos y uso único.
+- El código y las pruebas automatizadas están implementados; V-44 y la validación visual siguen **Pendiente**. La variante no elimina la necesidad futura de límites de solicitudes ni de revisar los dominios reales de producción.
+- En producción, configurar `CORS_ALLOWED_ORIGINS` y `FRONTEND_BASE_URL` en el entorno; no se fijan dominios de despliegue no confirmados en el código.
+
+**Estado aditivo SEC-05:** D-05 ya está definido e implementado en la rama HU-46. La vigencia y la renovación de tokens tienen pruebas automatizadas; la validación humana/visual queda Pendiente y el cierre global de SEC-05 no se declara.
+
+**Pregunta pendiente HU-46 (sin ID):** si una cuenta activa bloqueada recupera su contraseña, ¿el restablecimiento debe también limpiar `is_locked` y `failed_attempts`? El código conserva el bloqueo; no se cambia hasta confirmar la regla con el equipo.
 
 ### 2.5 Otros riesgos de autenticación (SEC-04, DT-62)
 
