@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -176,3 +177,93 @@ class AvailabilityException(models.Model):
             errors['exception_date'] = 'No se registran excepciones en fechas pasadas.'
         if errors:
             raise ValidationError(errors)
+
+
+class Visit(models.Model):
+    '''
+    Visita presencial (RF-04; Contexto Maestro §7). Una visita PROGRAMADA ocupa la agenda de su
+    asesor: free_slots() ya no ofrece esa franja (HU-18) y la agenda la muestra (HU-24).
+
+    En el lote 2 las visitas solo se crean desde el admin de Django o con setup_visits_demo; la
+    solicitud del cliente (HU-19, lote 3) las creara con free_slots() dentro de una transaccion
+    y llevara la oportunidad a Visita Programada. Crear una visita aqui NO cambia el estado de
+    la oportunidad.
+
+    agent es el asesor de la visita y no cambia si despues se reasigna la propiedad
+    (Contexto Maestro, RF-08: las visitas confirmadas no se transfieren).
+    '''
+
+    class Status(models.TextChoices):
+        PROGRAMADA = 'PROGRAMADA', 'Programada'
+        REALIZADA = 'REALIZADA', 'Realizada'
+        NO_ASISTIDA = 'NO_ASISTIDA', 'No asistida'
+        CANCELADA = 'CANCELADA', 'Cancelada'
+
+    opportunity = models.ForeignKey(
+        'opportunities.Opportunity',
+        on_delete=models.PROTECT,  # La visita es parte del seguimiento comercial
+        related_name='visits',
+    )
+    property = models.ForeignKey(
+        'users.Property',
+        on_delete=models.PROTECT,
+        related_name='visits',
+    )
+    agent = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='visits',
+    )
+    scheduled_start = models.DateTimeField()
+    scheduled_end = models.DateTimeField()
+    status = models.CharField(max_length=15, choices=Status.choices, default=Status.PROGRAMADA)
+    # Enlace de cancelacion del cliente (HU-20 y HU-21): nunca se expone en endpoints publicos.
+    cancellation_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    outcome_notes = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'visita'
+        verbose_name_plural = 'visitas'
+        ordering = ['scheduled_start']
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(scheduled_end__gt=F('scheduled_start')),
+                name='visit_end_after_start',
+            ),
+        ]
+        indexes = [
+            models.Index(fields=['agent', 'status', 'scheduled_start'], name='visit_agent_status_idx'),
+            models.Index(fields=['scheduled_start'], name='visit_start_idx'),
+        ]
+
+    def __str__(self):
+        start = timezone.localtime(self.scheduled_start, ECUADOR_TZ) if self.scheduled_start else None
+        return f'Visita #{self.pk} · {self.property} · {start:%Y-%m-%d %H:%M}' if start else 'Visita'
+
+    def clean(self):
+        errors = {}
+        if self.scheduled_start and self.scheduled_end and self.scheduled_end <= self.scheduled_start:
+            errors['scheduled_end'] = 'La hora de fin debe ser posterior a la de inicio.'
+        if self.opportunity_id and self.property_id and self.opportunity.property_id != self.property_id:
+            errors['property'] = 'La propiedad debe ser la misma de la oportunidad.'
+        if self.agent_id and getattr(self.agent, 'role', None) != 'asesor':
+            errors['agent'] = 'La visita la atiende un asesor.'
+        if self._state.adding and self.opportunity_id and not self.opportunity.is_active:
+            errors['opportunity'] = 'No se programan visitas en una oportunidad cerrada o perdida.'
+        if errors:
+            raise ValidationError(errors)
+
+        if self.status == self.Status.PROGRAMADA and self.agent_id:
+            # La agenda del asesor no admite dos visitas programadas que se crucen (RF-09).
+            # En PostgreSQL falta la restriccion de exclusion para las carreras (DT-143, HU-19).
+            overlapping = Visit.objects.filter(
+                agent_id=self.agent_id,
+                status=self.Status.PROGRAMADA,
+                scheduled_start__lt=self.scheduled_end,
+                scheduled_end__gt=self.scheduled_start,
+            ).exclude(pk=self.pk)
+            if overlapping.exists():
+                raise ValidationError({
+                    'scheduled_start': 'El asesor ya tiene una visita programada en ese horario.',
+                })
