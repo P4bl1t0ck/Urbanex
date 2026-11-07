@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path , include
-from apps.users.views import LoginView
+from apps.users.views import CookieTokenRefreshView
 
 
 from django.conf import settings #Nesecitamos esas configuraciones de los archivos de la maquina
@@ -25,6 +25,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/token/refresh/", CookieTokenRefreshView.as_view(), name="token-refresh"),
     path("api/auth/", include("apps.users.urls")),
     path("api/documents/", include("apps.documents.urls")),  # Expediente digital (HU-03)
     path("api/appraisals/", include("apps.appraisals.urls")),  # Avalúos (RF-11, HU-08)
