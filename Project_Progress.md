@@ -48,6 +48,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-07 · Copilot con Sebas · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Sebas reportó haber completado los cinco pasos de V-44 en la interfaz. Se preparó el texto para que Sebas registre la evidencia en la tabla; la fila permanece pendiente hasta que la persona la copie allí. Se crearon ocho commits locales de HU-46; no se hizo push ni se abrió PR.
+- **Evidencia:** suite backend 165/165 OK; `npm test` 9/9; TypeScript y build exit 0; ESLint exit 0 con 2 avisos preexistentes. `git diff --check origin/develop...HEAD` exit 0. La captura con token usado queda solo local, fuera de los commits.
+- **Falta:** Sebas debe pegar y guardar la fila V-44, revisar la evidencia y realizar la suite contra PostgreSQL aislado antes del PR. No hacer push a `develop` ni `master`.
+- **Siguiente paso:** completar el registro humano de V-44, crear un commit documental si corresponde y luego subir esta rama para que Sebas abra el PR hacia `develop`.
+
 ### 2026-11-06 · Copilot con Sebas · rama `feat/URB-04-HU-46-recuperar-contrasena`
 - **Hecho:** implementación de HU-46 en backend y frontend: recuperación de contraseña con enlace de 60 minutos y uso único; refresh JWT en cookie HttpOnly, CSRF, logout e invalidación de tokens al cambiar contraseña. D-05 personalizado registrado como confirmado por Pablo, según Sebas.
 - **Evidencia técnica:** suite backend integrada 165/165 OK en SQLite; `npm test` 9/9; TypeScript y build exit 0; ESLint exit 0 con 2 avisos preexistentes. `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó esa migración. PostgreSQL **No ejecutado**: el intento inicial encontró que `test_postgres` ya existía y se detuvo; no se borró ni reutilizó esa base.
