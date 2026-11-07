@@ -698,3 +698,184 @@ class SetupVisitsDemoCommandTests(HU18TestMixin, TestCase):
         output = self.run_command('--with-availability')
         self.assertIn('ya tiene una visita programada', output)
         self.assertEqual(Visit.objects.count(), 1)
+
+
+# === HU-24 (URB-27, I-08): agenda de visitas del asesor ========================================
+
+AGENDA_URL = '/api/visits/agenda/'
+
+
+class AgendaTests(HU18TestMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.week = {'from': self.monday.isoformat(),
+                     'to': (self.monday + timedelta(days=6)).isoformat()}
+
+    def agenda(self, **params):
+        return self.client.get(AGENDA_URL, params)
+
+    # Criterio 1: "Muestra las visitas con propiedad, cliente, fecha y hora"
+    def test_each_visit_shows_property_client_date_and_time(self):
+        visit = self.visit(local(self.monday, 9), local(self.monday, 10))
+        self.login(self.agent)
+        response = self.agenda(**self.week)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['agent'], self.agent.pk)
+        self.assertEqual(response.data['timezone'], 'America/Guayaquil')
+        [item] = response.data['visits']
+        self.assertEqual(set(item), {'id', 'scheduled_start', 'scheduled_end', 'status',
+                                     'status_display', 'property', 'client', 'opportunity'})
+        self.assertEqual(item['id'], visit.pk)
+        self.assertEqual(item['scheduled_start'], local(self.monday, 9).isoformat())
+        self.assertTrue(item['scheduled_end'].endswith('-05:00'))
+        self.assertEqual(item['status_display'], 'Programada')
+        self.assertEqual(item['property'], {'id': self.property.pk, 'title': 'Casa en Cumbayá',
+                                            'location': 'Cumbayá'})
+        self.assertEqual(item['client'], {'full_name': 'Carla Cliente', 'phone': '+593991234567',
+                                          'email': 'carla@correo.ec'})
+        self.assertEqual(item['opportunity'], self.opportunity.pk)
+        self.assertNotIn(str(visit.cancellation_token), response.content.decode())
+
+    def test_client_without_email_returns_empty_email(self):
+        Contact.objects.filter(pk=self.contact.pk).update(email='')
+        self.visit(local(self.monday, 9), local(self.monday, 10))
+        self.login(self.agent)
+        [item] = self.agenda(**self.week).data['visits']
+        self.assertEqual(item['client']['email'], '')
+
+    def test_visits_are_ordered_by_start(self):
+        later = self.visit(local(self.monday + timedelta(days=2), 9),
+                           local(self.monday + timedelta(days=2), 10))
+        earlier = self.visit(local(self.monday, 11), local(self.monday, 12))
+        self.login(self.agent)
+        ids = [item['id'] for item in self.agenda(**self.week).data['visits']]
+        self.assertEqual(ids, [earlier.pk, later.pk])
+
+    # Criterio 2: "Solo muestra la agenda propia del asesor"
+    def test_advisor_sees_only_own_agenda_and_agent_param_is_ignored(self):
+        own = self.visit(local(self.monday, 9), local(self.monday, 10))
+        other_property = Property.objects.create(
+            agent=self.other_agent, title='Del otro asesor', description='Prueba',
+            property_type='casa', price=1, area_m2=1, location='Quito', status='disponible',
+        )
+        other_opportunity = Opportunity.objects.create(
+            contact=self.contact, property=other_property, assigned_agent=self.other_agent,
+            origin_channel=OriginChannel.MANUAL,
+        )
+        self.visit(local(self.monday, 9), local(self.monday, 10), agent=self.other_agent,
+                   opportunity=other_opportunity)
+        self.login(self.agent)
+        for params in [self.week, {**self.week, 'agent': self.other_agent.pk}]:
+            with self.subTest(params=params):
+                response = self.agenda(**params)
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(response.data['agent'], self.agent.pk)
+                self.assertEqual([item['id'] for item in response.data['visits']], [own.pk])
+                self.assertNotIn('Del otro asesor', response.content.decode())
+
+    def test_anonymous_gets_401(self):
+        self.assertEqual(self.agenda().status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_admin_must_choose_an_advisor(self):
+        self.login(self.admin)
+        for agent in [None, 'abc', self.admin.pk, 999999]:
+            with self.subTest(agent=agent):
+                params = dict(self.week) if agent is None else {**self.week, 'agent': agent}
+                response = self.agenda(**params)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn('agent', response.data)
+
+    def test_admin_sees_the_chosen_advisors_agenda_even_if_inactive(self):
+        visit = self.visit(local(self.monday, 9), local(self.monday, 10))
+        self.login(self.admin)
+        response = self.agenda(**self.week, agent=self.agent.pk)
+        self.assertEqual([item['id'] for item in response.data['visits']], [visit.pk])
+        self.assertEqual(self.agenda(**self.week, agent=self.other_agent.pk).data['visits'], [])
+        User.objects.filter(pk=self.agent.pk).update(is_active=False)  # Historial consultable
+        response = self.agenda(**self.week, agent=self.agent.pk)
+        self.assertEqual([item['id'] for item in response.data['visits']], [visit.pk])
+
+    def test_visit_stays_with_its_advisor_after_the_property_is_reassigned(self):
+        visit = self.visit(local(self.monday, 9), local(self.monday, 10))
+        Property.objects.filter(pk=self.property.pk).update(agent=self.other_agent)
+        self.login(self.agent)
+        self.assertEqual([i['id'] for i in self.agenda(**self.week).data['visits']], [visit.pk])
+        self.login(self.other_agent)
+        self.assertEqual(self.agenda(**self.week).data['visits'], [])
+
+    # Rango (respuesta 3 de Pablo, 2026-11-06)
+    def test_default_range_is_the_current_week_monday_to_sunday_in_ecuador(self):
+        today = ecuador_today()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        inside = [
+            self.visit(local(week_start, 0, 0), local(week_start, 1)),
+            self.visit(local(week_end, 23, 0), local(week_end, 23, 30)),  # Lunes 04:00 UTC
+        ]
+        self.visit(local(week_start - timedelta(days=1), 23), local(week_start - timedelta(days=1), 23, 30))
+        self.visit(local(week_end + timedelta(days=1), 0), local(week_end + timedelta(days=1), 1))
+        self.login(self.agent)
+        response = self.agenda()
+        self.assertEqual(response.data['from'], week_start.isoformat())
+        self.assertEqual(response.data['to'], week_end.isoformat())
+        self.assertEqual([item['id'] for item in response.data['visits']], [v.pk for v in inside])
+
+    def test_past_dates_are_accepted_as_history(self):
+        past_day = ecuador_today() - timedelta(days=14)
+        visit = self.visit(local(past_day, 9), local(past_day, 10), status=Visit.Status.REALIZADA)
+        self.login(self.agent)
+        response = self.agenda(**{'from': past_day.isoformat(), 'to': past_day.isoformat()})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([item['id'] for item in response.data['visits']], [visit.pk])
+
+    def test_only_one_date_gives_a_7_day_range(self):
+        self.login(self.agent)
+        response = self.agenda(**{'from': self.monday.isoformat()})
+        self.assertEqual(response.data['to'], (self.monday + timedelta(days=6)).isoformat())
+        response = self.agenda(**{'to': self.monday.isoformat()})
+        self.assertEqual(response.data['from'], (self.monday - timedelta(days=6)).isoformat())
+
+    def test_range_validation(self):
+        self.login(self.agent)
+        start = self.monday
+        cases = [
+            ({'from': start.isoformat(), 'to': (start - timedelta(days=1)).isoformat()}, 'to'),
+            ({'from': start.isoformat(), 'to': (start + timedelta(days=31)).isoformat()}, 'to'),
+            ({'from': '2026/11/09'}, 'from'),
+            ({'to': 'lunes'}, 'to'),
+        ]
+        for params, field in cases:
+            with self.subTest(params=params):
+                response = self.agenda(**params)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn(field, response.data)
+        response = self.agenda(**{'from': start.isoformat(),
+                                  'to': (start + timedelta(days=30)).isoformat()})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)  # 31 dias: el maximo
+
+    # Estados (respuesta 4 de Pablo, 2026-11-06)
+    def test_status_filter_default_single_and_all(self):
+        by_status = {}
+        for hour, visit_status in [(9, Visit.Status.PROGRAMADA), (10, Visit.Status.REALIZADA),
+                                   (11, Visit.Status.NO_ASISTIDA), (12, Visit.Status.CANCELADA)]:
+            by_status[visit_status] = self.visit(local(self.monday, hour),
+                                                 local(self.monday, hour + 1), status=visit_status)
+        self.login(self.agent)
+
+        def ids(**params):
+            response = self.agenda(**self.week, **params)
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            return [item['id'] for item in response.data['visits']]
+
+        # Por defecto: todas menos las canceladas.
+        self.assertEqual(ids(), [by_status[s].pk for s in (
+            Visit.Status.PROGRAMADA, Visit.Status.REALIZADA, Visit.Status.NO_ASISTIDA)])
+        # Un estado concreto, incluida CANCELADA.
+        for visit_status, visit in by_status.items():
+            with self.subTest(status=visit_status):
+                self.assertEqual(ids(status=visit_status), [visit.pk])
+        # all: todas, canceladas incluidas.
+        self.assertEqual(ids(status='all'), [v.pk for v in by_status.values()])
+        response = self.agenda(**self.week, status='ANULADA')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('status', response.data)
