@@ -175,6 +175,10 @@ USE_TZ = True
 
 AUTH_USER_MODEL = "users.User"
 
+# Agendamiento de visitas (HU-18, RF-09): el cliente no ve franjas que empiecen antes de esta
+# antelacion. Valor provisional de Pablo (2026-11-06): 2 horas; pregunta abierta para la empresa.
+VISIT_MIN_LEAD_TIME_MINUTES = 120
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
