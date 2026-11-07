@@ -907,7 +907,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-
+| Sebas | 2026-11-07, 16:19 | Completé los cinco pasos de V-44: comprobé que la respuesta sea igual para un correo registrado y uno no registrado; restablecí la contraseña con el enlace y confirmé que el token desaparece de la URL; el segundo uso del enlace fue rechazado; comprobé la invalidación de la sesión anterior, el refresh en cookie HttpOnly con CSRF y que el logout elimine la cookie y proteja nuevamente la ruta. | [Captura local](evidence/HU-46/Screenshot%202026-11-07%20161628.png) — Aprobado |
 **Estado: Pendiente.** Capturas previstas bajo `evidence/HU-46/`; no se ha registrado evidencia visual en esta sesión.
 
 ### Evidencia técnica HU-45 (2026-11-03)
