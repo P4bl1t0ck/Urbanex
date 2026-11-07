@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ApiError, apiFetch } from "@/lib/api";
 import { notifyAuthSessionChanged } from "@/lib/auth-session";
@@ -32,10 +33,11 @@ export default function LoginPage(){
     e.preventDefault();
     setError("");
     try{
-      const data = await apiFetch<{ access?: string; refresh?: string; role?: string }>("/api/auth/login/", //Fetchs the info from the :8. and then pass the view
+      const data = await apiFetch<{ access?: string; role?: string }>("/api/auth/login/", //Fetchs the info from the :8. and then pass the view
         {
           //Ya debe de estar en formato json, es por eso el error al intentar interpretar un json(json)
           method: "POST",
+          credentials: "include",
           body: JSON.stringify({email, password}),
         });
 
@@ -101,6 +103,12 @@ export default function LoginPage(){
         >
           Entrar
         </button>
+        <Link
+          href="/forgot-password"
+          className="text-center text-sm font-semibold text-blue-700 hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
       </form>
     </main>
   );
