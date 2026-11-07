@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
@@ -14,9 +14,13 @@ from rest_framework.views import APIView
 from apps.appraisals.serializers import to_drf_error
 from apps.opportunities.views import IsInternalUser
 from apps.users.models import Property
-from .models import ECUADOR_TZ, AgentAvailability, AvailabilityException, ecuador_today
-from .serializers import AvailabilityExceptionSerializer, AvailabilitySerializer
-from .services import free_slots, resolve_target_agent
+from .models import ECUADOR_TZ, AgentAvailability, AvailabilityException, Visit, ecuador_today
+from .serializers import (
+    AgendaVisitSerializer,
+    AvailabilityExceptionSerializer,
+    AvailabilitySerializer,
+)
+from .services import free_slots, local_datetime, resolve_target_agent
 
 User = get_user_model()
 
@@ -178,4 +182,99 @@ class PropertyFreeSlotsView(APIView):
             'slots': [
                 {'start': slot.start.isoformat(), 'end': slot.end.isoformat()} for slot in slots
             ],
+        })
+
+
+def parse_agenda_range(params):
+    '''
+    HU-24: semana actual (lunes a domingo, hora de Ecuador) por defecto; maximo 31 dias. Se
+    aceptan fechas pasadas: la agenda es tambien el historial para registrar resultados (HU-25).
+    Con solo una de las fechas, el rango es la semana de 7 dias que empieza o termina en ella.
+    '''
+    errors = {}
+    days = {}
+    for field in ('from', 'to'):
+        value = params.get(field)
+        if value:
+            try:
+                days[field] = date.fromisoformat(value)
+            except ValueError:
+                errors[field] = 'Use el formato AAAA-MM-DD.'
+    if errors:
+        raise serializers.ValidationError(errors)
+
+    if 'from' in days and 'to' in days:
+        date_from, date_to = days['from'], days['to']
+    elif 'from' in days:
+        date_from = days['from']
+        date_to = date_from + timedelta(days=6)
+    elif 'to' in days:
+        date_to = days['to']
+        date_from = date_to - timedelta(days=6)
+    else:
+        today = ecuador_today()
+        date_from = today - timedelta(days=today.weekday())
+        date_to = date_from + timedelta(days=6)
+
+    if date_to < date_from:
+        raise serializers.ValidationError({'to': 'La fecha final no puede ser anterior a la inicial.'})
+    if (date_to - date_from).days + 1 > MAX_RANGE_DAYS:
+        raise serializers.ValidationError({'to': f'El rango no puede superar {MAX_RANGE_DAYS} días.'})
+    return date_from, date_to
+
+
+class AgendaView(APIView):
+    '''
+    HU-24 (I-08, RF-04): agenda de visitas del asesor, ordenada por hora de inicio.
+
+    GET /api/visits/agenda/?from=AAAA-MM-DD&to=AAAA-MM-DD&agent=&status=
+    - el asesor ve solo su agenda; ?agent= se ignora (igual que en HU-22);
+    - el admin elige el asesor con ?agent= (400 si falta o no es un asesor);
+    - status: por defecto todas menos CANCELADA; ?status=<estado> filtra uno (incluida
+      CANCELADA); ?status=all las muestra todas;
+    - anonimo: 401.
+    Filtra por Visit.agent: una visita sigue con su asesor aunque se reasigne la propiedad.
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def resolve_agent(self, request):
+        user = request.user
+        if user.role != 'admin':
+            return user
+        agent_id = request.query_params.get('agent')
+        if not agent_id:
+            raise serializers.ValidationError({'agent': 'Elija el asesor de la agenda.'})
+        if not agent_id.isdigit():
+            raise serializers.ValidationError({'agent': 'Debe ser un id numérico.'})
+        # Tambien un asesor inactivo: su historial de visitas sigue siendo consultable.
+        agent = User.objects.filter(pk=agent_id, role='asesor').first()
+        if agent is None:
+            raise serializers.ValidationError({'agent': 'Debe ser un asesor.'})
+        return agent
+
+    def get(self, request):
+        agent = self.resolve_agent(request)
+        date_from, date_to = parse_agenda_range(request.query_params)
+
+        visits = (Visit.objects
+                  .filter(agent=agent,
+                          scheduled_start__gte=local_datetime(date_from, time.min),
+                          scheduled_start__lt=local_datetime(date_to + timedelta(days=1),
+                                                             time.min))
+                  .select_related('property', 'opportunity__contact')
+                  .order_by('scheduled_start', 'id'))
+        status_value = request.query_params.get('status')
+        if not status_value:
+            visits = visits.exclude(status=Visit.Status.CANCELADA)
+        elif status_value != 'all':
+            if status_value not in Visit.Status.values:
+                raise serializers.ValidationError({'status': 'Estado no válido.'})
+            visits = visits.filter(status=status_value)
+
+        return Response({
+            'agent': agent.pk,
+            'from': date_from.isoformat(),
+            'to': date_to.isoformat(),
+            'timezone': str(ECUADOR_TZ),
+            'visits': AgendaVisitSerializer(visits, many=True).data,
         })

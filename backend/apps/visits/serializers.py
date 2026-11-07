@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from apps.appraisals.serializers import to_drf_error
-from .models import AgentAvailability, AvailabilityException
+from .models import ECUADOR_TZ, AgentAvailability, AvailabilityException, Visit
 
 
 def agent_display_name(user):
@@ -45,6 +45,39 @@ class AvailabilitySerializer(AgentScopedSerializer):
         fields = ['id', 'agent', 'agent_name', 'day_of_week', 'day_name', 'start_time',
                   'end_time', 'slot_duration_minutes']
         read_only_fields = ['agent']
+
+
+class AgendaVisitSerializer(serializers.ModelSerializer):
+    '''
+    Visita en la agenda del asesor (HU-24, I-08): propiedad, cliente, fecha y hora.
+    Datos del cliente como en Oportunidades: nombre, telefono y correo opcional (si cumple la
+    LOPDP es una pregunta abierta para el tutor). Nunca incluye cancellation_token.
+    '''
+    scheduled_start = serializers.SerializerMethodField()
+    scheduled_end = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    property = serializers.SerializerMethodField()
+    client = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Visit
+        fields = ['id', 'scheduled_start', 'scheduled_end', 'status', 'status_display',
+                  'property', 'client', 'opportunity']
+        read_only_fields = fields
+
+    def get_scheduled_start(self, obj):
+        return obj.scheduled_start.astimezone(ECUADOR_TZ).isoformat()
+
+    def get_scheduled_end(self, obj):
+        return obj.scheduled_end.astimezone(ECUADOR_TZ).isoformat()
+
+    def get_property(self, obj):
+        return {'id': obj.property_id, 'title': obj.property.title,
+                'location': obj.property.location}
+
+    def get_client(self, obj):
+        contact = obj.opportunity.contact
+        return {'full_name': contact.full_name, 'phone': contact.phone, 'email': contact.email}
 
 
 class AvailabilityExceptionSerializer(AgentScopedSerializer):

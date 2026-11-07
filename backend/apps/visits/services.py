@@ -47,7 +47,7 @@ class Slot:
     end: datetime
 
 
-def _local(day, moment):
+def local_datetime(day, moment):
     # Ecuador no tiene horario de verano: combinar fecha y hora de pared es exacto.
     return datetime.combine(day, moment, tzinfo=ECUADOR_TZ)
 
@@ -79,15 +79,15 @@ def free_slots(agent, date_from, date_to, *, now=None, lead_time=None):
             blocked_days.add(exception.exception_date)
         else:
             blocked_ranges[exception.exception_date].append((
-                _local(exception.exception_date, exception.start_time),
-                _local(exception.exception_date, exception.end_time),
+                local_datetime(exception.exception_date, exception.start_time),
+                local_datetime(exception.exception_date, exception.end_time),
             ))
 
     busy_visits = list(Visit.objects.filter(
         agent=agent,
         status=Visit.Status.PROGRAMADA,
-        scheduled_start__lt=_local(date_to + timedelta(days=1), time.min),
-        scheduled_end__gt=_local(date_from, time.min),
+        scheduled_start__lt=local_datetime(date_to + timedelta(days=1), time.min),
+        scheduled_end__gt=local_datetime(date_from, time.min),
     ).values_list('scheduled_start', 'scheduled_end'))
 
     slots = []
@@ -96,8 +96,8 @@ def free_slots(agent, date_from, date_to, *, now=None, lead_time=None):
         if day not in blocked_days:
             for rule in rules_by_weekday[day.weekday()]:
                 step = timedelta(minutes=rule.slot_duration_minutes)
-                start = _local(day, rule.start_time)
-                limit = _local(day, rule.end_time)
+                start = local_datetime(day, rule.start_time)
+                limit = local_datetime(day, rule.end_time)
                 while start + step <= limit:
                     end = start + step
                     crosses_exception = any(
