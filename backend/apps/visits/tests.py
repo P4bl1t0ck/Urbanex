@@ -275,7 +275,9 @@ class FreeSlotsTests(VisitsTestMixin, TestCase):
         self.rule(day=0, start=time(9), end=time(12))
         tuesday = monday + timedelta(days=1)
         self.assertEqual(free_slots(self.agent, tuesday, tuesday, now=local(monday, 0)), [])
-        slots = free_slots(self.agent, monday, monday, now=local(monday, 10, 15))
+        # Sin antelacion (HU-18 la prueba aparte): solo se excluye lo que ya empezo.
+        slots = free_slots(self.agent, monday, monday, now=local(monday, 10, 15),
+                           lead_time=timedelta(0))
         self.assertEqual([s.start for s in slots], [local(monday, 11)])
 
     def test_slots_belong_only_to_the_requested_advisor(self):

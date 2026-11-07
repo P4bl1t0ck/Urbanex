@@ -1,9 +1,13 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import AvailabilityExceptionViewSet, AvailabilityViewSet
+from .views import AvailabilityExceptionViewSet, AvailabilityViewSet, PropertyFreeSlotsView
 
 router = DefaultRouter()
 router.register(r'availability', AvailabilityViewSet, basename='availability')
 router.register(r'exceptions', AvailabilityExceptionViewSet, basename='availability-exception')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('properties/<int:property_id>/free-slots/', PropertyFreeSlotsView.as_view(),
+         name='property-free-slots'),
+] + router.urls

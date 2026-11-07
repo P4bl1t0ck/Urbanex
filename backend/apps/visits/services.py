@@ -1,12 +1,13 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
 
 from apps.opportunities.services import assignable_agents
-from .models import ECUADOR_TZ, AgentAvailability, AvailabilityException
+from .models import ECUADOR_TZ, AgentAvailability, AvailabilityException, Visit
 
 '''
 Servicios de agendamiento (RF-09).
@@ -16,9 +17,13 @@ resolve_target_agent(): a nombre de quien se crea una franja o excepcion (HU-22,
 - el admin elige un asesor activo (si falta o no es valido: 400).
 
 free_slots(): base comun de HU-18 (franjas libres para el cliente) y de HU-19 (lote 3: validar
-que la franja pedida sigue libre dentro de la transaccion). En HU-22 aplica las reglas semanales
-y las excepciones; HU-18 le resta las visitas activas y la antelacion minima.
+que la franja pedida sigue libre dentro de la transaccion). Aplica las reglas semanales y las
+excepciones (HU-22), y resta las visitas programadas y la antelacion minima (HU-18).
 '''
+
+
+def default_lead_time():
+    return timedelta(minutes=settings.VISIT_MIN_LEAD_TIME_MINUTES)
 
 
 def resolve_target_agent(user, agent_id):
@@ -47,16 +52,19 @@ def _local(day, moment):
     return datetime.combine(day, moment, tzinfo=ECUADOR_TZ)
 
 
-def free_slots(agent, date_from, date_to, *, now=None):
+def free_slots(agent, date_from, date_to, *, now=None, lead_time=None):
     '''
     Franjas libres del asesor entre date_from y date_to (fechas de Ecuador, ambas incluidas).
     Cada regla semanal se parte en visitas de slot_duration_minutes desde su hora de inicio;
     lo que sobra al final de la regla no forma una franja. Se excluyen:
     - las fechas con excepcion de dia completo;
     - las franjas que se cruzan con una excepcion por horas;
-    - las franjas que ya empezaron (now).
+    - las franjas que se cruzan con una visita PROGRAMADA del asesor (en cualquier propiedad);
+    - las franjas que empiezan antes de now + lead_time (por defecto, la antelacion de settings).
+    Se calcula en cada llamada, sin cache: refleja las visitas en tiempo real (HU-18).
     '''
     now = now or timezone.now()
+    earliest_start = now + (default_lead_time() if lead_time is None else lead_time)
     rules_by_weekday = defaultdict(list)
     for rule in AgentAvailability.objects.filter(agent=agent):
         rules_by_weekday[rule.day_of_week].append(rule)
@@ -75,6 +83,13 @@ def free_slots(agent, date_from, date_to, *, now=None):
                 _local(exception.exception_date, exception.end_time),
             ))
 
+    busy_visits = list(Visit.objects.filter(
+        agent=agent,
+        status=Visit.Status.PROGRAMADA,
+        scheduled_start__lt=_local(date_to + timedelta(days=1), time.min),
+        scheduled_end__gt=_local(date_from, time.min),
+    ).values_list('scheduled_start', 'scheduled_end'))
+
     slots = []
     day = date_from
     while day <= date_to:
@@ -89,7 +104,11 @@ def free_slots(agent, date_from, date_to, *, now=None):
                         start < blocked_end and blocked_start < end
                         for blocked_start, blocked_end in blocked_ranges[day]
                     )
-                    if start >= now and not crosses_exception:
+                    crosses_visit = any(
+                        start < visit_end and visit_start < end
+                        for visit_start, visit_end in busy_visits
+                    )
+                    if start >= earliest_start and not crosses_exception and not crosses_visit:
                         slots.append(Slot(start=start, end=end))
                     start = end
         day += timedelta(days=1)
