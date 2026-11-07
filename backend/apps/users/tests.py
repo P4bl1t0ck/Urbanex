@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from unittest import mock
 from resend.exceptions import ResendError
 
+from django.conf import settings
 from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.apps import apps as django_apps
@@ -22,9 +23,15 @@ from django.utils import timezone
 from django.core import mail
 from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from apps.appraisals.models import Appraisal
 from apps.documents.models import Document
-from apps.users.models import Property, PropertyImage, UserActivationToken
+from apps.users.models import (
+    PasswordResetToken,
+    Property,
+    PropertyImage,
+    UserActivationToken,
+)
 from apps.users.views import get_missing_publication_requirements
 # Create your tests here.
 User = get_user_model()
@@ -359,6 +366,193 @@ class UrbanexCoreTests(TestCase):
         self.agent.refresh_from_db()
         self.assertTrue(self.agent.is_locked)
         self.assertEqual(self.agent.failed_attempts, 5)
+
+
+@override_settings(
+    EMAIL_PROVIDER="console",
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+)
+class PasswordResetAndRefreshApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username="password-reset.test",
+            email="password-reset@urbanex.test",
+            password="Original-Safe-2026!",
+            is_active=True,
+        )
+
+    def _request_password_reset(self):
+        response = self.client.post(
+            "/api/auth/password-reset/request/",
+            {"email": self.user.email},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 1)
+        raw_token = (
+            mail.outbox[0].body.rsplit("#token=", 1)[1].splitlines()[0].strip()
+        )
+        return response, raw_token
+
+    def test_password_reset_request_is_neutral_and_stores_only_token_hash(self):
+        known_response, raw_token = self._request_password_reset()
+        token_record = PasswordResetToken.objects.get(user=self.user)
+        self.assertEqual(
+            token_record.token_hash,
+            hashlib.sha256(raw_token.encode("utf-8")).hexdigest(),
+            mail.outbox[0].body,
+        )
+        self.assertNotEqual(token_record.token_hash, raw_token)
+        self.assertAlmostEqual(
+            (token_record.expires_at - token_record.created_at).total_seconds(),
+            timedelta(hours=1).total_seconds(),
+            delta=1,
+        )
+        self.assertIn("60 minutos", mail.outbox[0].body)
+
+        mail.outbox.clear()
+        unknown_response = self.client.post(
+            "/api/auth/password-reset/request/",
+            {"email": "unknown@urbanex.test"},
+            format="json",
+        )
+        self.assertEqual(unknown_response.status_code, known_response.status_code)
+        self.assertEqual(unknown_response.data, known_response.data)
+        self.assertEqual(mail.outbox, [])
+
+    def test_password_reset_changes_password_and_invalidates_previous_tokens(self):
+        old_access = AccessToken.for_user(self.user)
+        old_refresh = RefreshToken.for_user(self.user)
+        old_issued_at = int((timezone.now() - timedelta(days=1)).timestamp())
+        old_access["iat"] = old_issued_at
+        old_refresh["iat"] = old_issued_at
+        old_password_changed_at = self.user.password_changed_at
+        _, raw_token = self._request_password_reset()
+
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            {"token": raw_token, "password": "New-Safe-Urbanex-2026!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("New-Safe-Urbanex-2026!"))
+        self.assertGreater(self.user.password_changed_at, old_password_changed_at)
+        self.assertTrue(
+            PasswordResetToken.objects.get(user=self.user).is_used
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {old_access}")
+        protected_response = self.client.get("/api/auth/users/")
+        self.assertEqual(
+            protected_response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+
+        self.client.credentials()
+        self.client.cookies[settings.JWT_REFRESH_COOKIE_NAME] = str(old_refresh)
+        csrf_response = self.client.get("/api/auth/csrf/")
+        csrf_token = csrf_response.cookies["csrftoken"].value
+        refresh_response = self.client.post(
+            "/api/token/refresh/",
+            {},
+            format="json",
+            HTTP_X_CSRFTOKEN=csrf_token,
+        )
+        self.assertEqual(
+            refresh_response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+        self.assertNotIn("refresh", refresh_response.data)
+
+        replay_response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            {"token": raw_token, "password": "Another-Safe-2026!"},
+            format="json",
+        )
+        self.assertEqual(replay_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_expired_password_reset_token_is_rejected(self):
+        _, raw_token = self._request_password_reset()
+        record = PasswordResetToken.objects.get(user=self.user)
+        record.expires_at = timezone.now() - timedelta(seconds=1)
+        record.save(update_fields=["expires_at"])
+
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            {"token": raw_token, "password": "New-Safe-Urbanex-2026!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("Original-Safe-2026!"))
+
+    def test_refresh_requires_csrf_and_sets_no_refresh_token_in_response(self):
+        client = APIClient(enforce_csrf_checks=True)
+        refresh = RefreshToken.for_user(self.user)
+        client.cookies[settings.JWT_REFRESH_COOKIE_NAME] = str(refresh)
+
+        rejected_response = client.post(
+            "/api/token/refresh/",
+            {},
+            format="json",
+        )
+        self.assertEqual(
+            rejected_response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+        client.get("/api/auth/csrf/")
+        csrf_token = client.cookies["csrftoken"].value
+        response = client.post(
+            "/api/token/refresh/",
+            {},
+            format="json",
+            HTTP_X_CSRFTOKEN=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+        self.assertNotIn("refresh", response.data)
+
+    def test_logout_requires_csrf_and_deletes_refresh_cookie(self):
+        client = APIClient(enforce_csrf_checks=True)
+        csrf_response = client.get("/api/auth/csrf/")
+        csrf_token = csrf_response.cookies["csrftoken"].value
+        response = client.post(
+            "/api/auth/logout/",
+            {},
+            format="json",
+            HTTP_X_CSRFTOKEN=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        cookie = response.cookies[settings.JWT_REFRESH_COOKIE_NAME]
+        self.assertEqual(cookie["max-age"], 0)
+        self.assertEqual(cookie["path"], settings.JWT_REFRESH_COOKIE_PATH)
+
+    def test_login_places_refresh_token_in_httponly_cookie(self):
+        response = self.client.post(
+            "/api/auth/login/",
+            {
+                "email": self.user.email,
+                "password": "Original-Safe-2026!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+        self.assertNotIn("refresh", response.data)
+        self.assertIn("csrftoken", response.cookies)
+        cookie = response.cookies[settings.JWT_REFRESH_COOKIE_NAME]
+        self.assertTrue(cookie["httponly"])
+        self.assertEqual(cookie["samesite"], "Lax")
+        self.assertEqual(cookie["path"], settings.JWT_REFRESH_COOKIE_PATH)
+
 
 # DT-14 / DS-17: comando setup_demo_data
 DEMO_PASSWORD = "Demo-Urbanex-2026!"
