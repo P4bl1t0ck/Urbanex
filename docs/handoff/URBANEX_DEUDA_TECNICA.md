@@ -398,4 +398,4 @@ No volver a discutirlas sin una razón nueva; si cambian, registrar aquí la rev
 
 | ID | Decisión | Motivo | Dónde se aplica |
 |---|---|---|---|
-| DS-37 | **Antelación mínima de 2 h para las visitas, configurable** con `VISIT_MIN_LEAD_TIME_MINUTES = 120` en `backend/config/settings.py` (commits `ff5c888` y `1960e06`). `free_slots()` no ofrece franjas que empiecen antes de ese margen | Dar tiempo al asesor para prepararse y no ofrecer visitas imposibles; el negocio puede cambiar el valor sin tocar código | HU-18 (P-07), HU-19 en adelante; validado en V-72 (2026-11-07) |
+| DS-37 | **Antelación mínima de 2 h para las visitas, configurable** con `VISIT_MIN_LEAD_TIME_MINUTES = 120` en `backend/config/settings.py` (commits `ff5c888` y `1960e06`). `free_slots()` no ofrece franjas que empiecen antes de ese margen | Dar tiempo al asesor para prepararse y no ofrecer visitas imposibles; el negocio puede cambiar el valor sin tocar código | HU-18 (P-07), HU-19 en adelante; validado en V-72 (2026-11-07). (Nota 2026-11-08, auditoría del PR #19: la constante está solo en `1960e06`; `ff5c888` registra `apps.visits` en `INSTALLED_APPS`.) |

@@ -46,6 +46,13 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-08 (noche) · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, ya no es borrador)
+- **Auditoría de solo lectura (§11):** "Merge con correcciones menores". Suite 228/228 OK, `npm test` 17/17, build/tsc exit 0, eslint 0 errores (2 avisos DT-24), `makemigrations --check` solo `documents/0002` (DT-92).
+- **Decisión (Pablo, 2026-11-08):** las capturas de V-65 a V-77 **no se recapturan**. Queda como evidencia el registro escrito de cada V (quién, cuándo, qué vio).
+- **Corregido:** `clean()` de `AgentAvailability` y `Visit` ya no lanza `ValueError` sin horas (500 en el admin), con la prueba `CleanWithoutTimesTests`; nota en DS-37 (commit de la constante). La nota anterior decía "PR #19, borrador": el PR ya no está en borrador.
+- **Observación sin ID (rango DT por definir):** el límite de 30/min del endpoint público usa la caché local (LocMemCache), así que cuenta por proceso; revisar caché compartida y `NUM_PROXIES` al desplegar.
+- **Falta:** comando de la §4 del DoD con `apps.visits.tests` (228); filas del GPS para los archivos nuevos; decidir el rango de DT-140+ en `AGENTS.md` §4 (DT-143..147 ya usados); título y descripción del PR (orden explícita de Pablo, DS-31); avisar a Sebas del conflicto en `SiteNav.tsx` y `Project_Progress.md` con la rama HU-46; suite en PostgreSQL pendiente (DT-68).
+
 ### 2026-11-08 · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, borrador)
 - **Hecho:** validación visual del lote 2 (HU-22, HU-18, HU-24 y la barra por rol) en el worktree `Urbanex-lote2`, con SQLite local y `EMAIL_PROVIDER=console`: **V-65 a V-77 Aprobadas por Pablo** (2026-11-07, 20:55, a 2026-11-08, 00:28). Ver **Ronda 6**. Sin cambios de código.
 - **Registrado:** DS-37 (antelación mínima de 2 h configurable), DT-143 (exclusión de visitas cruzadas en PostgreSQL, con HU-19) y DT-144 a DT-147 (observaciones de interfaz de la ronda, P3). La agenda (HU-24) muestra nombre, teléfono y correo del cliente al asesor: pregunta abierta para el tutor, anotada en DT-117/SEC-16.
