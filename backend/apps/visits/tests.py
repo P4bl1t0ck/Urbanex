@@ -879,3 +879,13 @@ class AgendaTests(HU18TestMixin, TestCase):
         response = self.agenda(**self.week, status='ANULADA')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('status', response.data)
+
+
+class CleanWithoutTimesTests(VisitsTestMixin, TestCase):
+    '''Auditoria del PR #19 (2026-11-08): sin horas, clean() no debe lanzar ValueError (500 en el admin).'''
+
+    def test_missing_times_give_validation_error_not_value_error(self):
+        for obj in (AgentAvailability(agent=self.agent, day_of_week=0), Visit(agent=self.agent)):
+            with self.subTest(model=type(obj).__name__):
+                with self.assertRaises(ValidationError):
+                    obj.full_clean()

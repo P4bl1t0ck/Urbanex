@@ -111,7 +111,10 @@ class AgentAvailability(models.Model):
         if errors:
             raise ValidationError(errors)
 
-        if self.agent_id is not None and self.day_of_week is not None:
+        # Sin las dos horas no se buscan cruces: el campo vacio ya lo reporta full_clean() y
+        # filtrar con None lanzaria ValueError (500 en el admin de Django).
+        if (self.agent_id is not None and self.day_of_week is not None
+                and self.start_time is not None and self.end_time is not None):
             # Dos franjas se cruzan si una empieza antes de que termine la otra.
             overlapping = AgentAvailability.objects.filter(
                 agent_id=self.agent_id,
@@ -254,7 +257,8 @@ class Visit(models.Model):
         if errors:
             raise ValidationError(errors)
 
-        if self.status == self.Status.PROGRAMADA and self.agent_id:
+        if (self.status == self.Status.PROGRAMADA and self.agent_id
+                and self.scheduled_start and self.scheduled_end):
             # La agenda del asesor no admite dos visitas programadas que se crucen (RF-09).
             # En PostgreSQL falta la restriccion de exclusion para las carreras (DT-143, HU-19).
             overlapping = Visit.objects.filter(
