@@ -6,7 +6,7 @@
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · corrección documental de la auditoría HU-45: DT-120, aclaraciones de Seguridad/USM y pendientes explícitos para el PR |
 | Confirmación para PR #17 (2026-11-05) | Según Sebas, el cambio en `backend/apps/users/views.py` fue coordinado antes. Nota preparada para Pablo: DT-111 (`slug` de HU-12, pendiente y fuera de HU-45), DT-49 (usar `git commit -F` en PowerShell 5.1), DT-120 (notificación persistente fuera de HU-45), DT-92 (diferencia conocida; no se generó ni aplicó migración) y PostgreSQL **No ejecutado**. No se publicó la nota: el PR #17 apunta a `master`, en conflicto con `AGENTS.md` §5; requiere aclaración/corrección por Pablo. |
 | Estado PR #17 (2026-11-06) | El PR ahora apunta a `develop`. DT-120 está registrado localmente en `b30e5c9`, pendiente de push. Sigue pendiente adjuntar al PR la captura solicitada de que una cuenta no administradora no puede desbloquear; la ruta referenciada por V-43 (`evidence/HU-45/V-43.png`) no existe en este checkout. |
-| Última actualización | 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama de oportunidades: 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. |
+| Última actualización | 2026-11-08 · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, borrador): validación visual del lote 2, **Ronda 6** (V-65 a V-77, todas Aprobadas), DS-37, DT-143 a DT-147 y nota de cierre. Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama de oportunidades: 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. |
 
 ---
 
@@ -45,6 +45,20 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-08 (noche) · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, ya no es borrador)
+- **Auditoría de solo lectura (§11):** "Merge con correcciones menores". Suite 228/228 OK, `npm test` 17/17, build/tsc exit 0, eslint 0 errores (2 avisos DT-24), `makemigrations --check` solo `documents/0002` (DT-92).
+- **Decisión (Pablo, 2026-11-08):** las capturas de V-65 a V-77 **no se recapturan**. Queda como evidencia el registro escrito de cada V (quién, cuándo, qué vio).
+- **Corregido:** `clean()` de `AgentAvailability` y `Visit` ya no lanza `ValueError` sin horas (500 en el admin), con la prueba `CleanWithoutTimesTests`; nota en DS-37 (commit de la constante). La nota anterior decía "PR #19, borrador": el PR ya no está en borrador.
+- **Observación sin ID (rango DT por definir):** el límite de 30/min del endpoint público usa la caché local (LocMemCache), así que cuenta por proceso; revisar caché compartida y `NUM_PROXIES` al desplegar.
+- **Falta:** comando de la §4 del DoD con `apps.visits.tests` (228); filas del GPS para los archivos nuevos; decidir el rango de DT-140+ en `AGENTS.md` §4 (DT-143..147 ya usados); título y descripción del PR (orden explícita de Pablo, DS-31); avisar a Sebas del conflicto en `SiteNav.tsx` y `Project_Progress.md` con la rama HU-46; suite en PostgreSQL pendiente (DT-68).
+
+### 2026-11-08 · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, borrador)
+- **Hecho:** validación visual del lote 2 (HU-22, HU-18, HU-24 y la barra por rol) en el worktree `Urbanex-lote2`, con SQLite local y `EMAIL_PROVIDER=console`: **V-65 a V-77 Aprobadas por Pablo** (2026-11-07, 20:55, a 2026-11-08, 00:28). Ver **Ronda 6**. Sin cambios de código.
+- **Registrado:** DS-37 (antelación mínima de 2 h configurable), DT-143 (exclusión de visitas cruzadas en PostgreSQL, con HU-19) y DT-144 a DT-147 (observaciones de interfaz de la ronda, P3). La agenda (HU-24) muestra nombre, teléfono y correo del cliente al asesor: pregunta abierta para el tutor, anotada en DT-117/SEC-16.
+- **Evidencia:** Pablo tomó las capturas de cada V, pero se guardaron en `Urbanex-lote2\capturas\` (dentro del worktree, sin rastrear) y un agente las borró por error con `Remove-Item -Recurse -Force` el 2026-11-08 durante la corrección de este commit. Queda el registro escrito de cada V (quién, cuándo, qué vio). **Pendiente (Pablo): decidir si se recapturan** con la misma BD del worktree; si se hace, se agrega una fila nueva en cada V con la fecha real.
+- **Nota:** `admin.demo` no es staff de Django; en V-73 la visita se creó con `setup_visits_demo` y se canceló por shell.
+- **Falta:** quitar el borrador del PR #19, auditoría de solo lectura (`AGENTS.md` §11) y merge. HU-22, HU-18 y HU-24 siguen en **Pruebas** hasta entonces.
 
 ### 2026-11-06 · Copilot con Sebas · evidencia V-43 para PR #17
 - **Hecho:** se registró la prueba manual de acceso como Asesor en V-43 para publicar la actualización de la bitácora en la rama `feat/URB-03-HU-45-desbloquear-cuenta`.
@@ -882,6 +896,116 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 - **Suite backend (desde `backend/`):** `pipenv run python -c "import os, sys; os.environ['DB_ENGINE']='sqlite'; os.environ['EMAIL_PROVIDER']='console'; import config.settings as settings; print('Engine aislado:', settings.DATABASES['default']['ENGINE']); print('Correo:', os.environ['EMAIL_PROVIDER']); settings.DATABASES['default']['NAME']=':memory:'; sys.modules['urbanex_test_settings']=settings; from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','test','--settings=urbanex_test_settings','apps.users.tests','apps.documents.tests','apps.appraisals.tests'])"` → `Engine aislado: django.db.backends.sqlite3`; `Correo: console`; `Found 120 test(s)`; `Ran 120 tests in 58.160s`; `OK`; exit 0. El registro de rechazo de Resend corresponde a `test_resend_failure_returns_gateway_error_and_rolls_back_user_creation`, que simula el error con `mock.patch`; no hubo envío externo confirmado.
 - **Migraciones (desde `backend/`):** `pipenv run python -c "import os, sys; os.environ['DB_ENGINE']='sqlite'; import config.settings as settings; settings.DATABASES['default']['NAME']=':memory:'; sys.modules['urbanex_test_settings']=settings; from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','makemigrations','--check','--dry-run','--settings=urbanex_test_settings'])"` → detecta `apps\documents\migrations\0002_alter_document_file.py`; exit 1. No genera ni aplica migraciones.
 - **Frontend (desde `frontend/`):** `npm run build` → exit 0; `npx tsc --noEmit -p .` → exit 0; `npx eslint .` → exit 0, 2 avisos preexistentes en `app/page.tsx` y `app/properties/page.tsx` por `SiteNav` sin usar.
+
+### Ronda 6 — Lote 2: HU-22 (I-09), HU-18 (P-07), HU-24 (I-08) y barra por rol (rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas`, PR #19)
+
+> **Estado (2026-11-08): las 13 pruebas Aprobadas por Pablo** (2026-11-07, 20:55, a 2026-11-08, 00:28). Entorno: worktree `Urbanex-lote2`, `backend/db.sqlite3` local migrada (`visits.0001` y `visits.0002`), `EMAIL_PROVIDER=console`; nunca contra Supabase. Usuarios: `asesor.demo` (A), `asesor.b@urbanex.test` (B, creado y activado en la ronda) y `admin.demo`. Guía de pasos fuera del repo: `Urbanex-lote2-validacion\GUIA_VALIDACION_LOTE2.md`. Observaciones registradas como DT-144 a DT-147. Capturas: ver la nota de cierre del 2026-11-08.
+
+**Preparación de V-77 (2026-11-07, ~21:40–21:49):** el admin creó al asesor B en A-01 (estado "Pendiente de activación"); la terminal del backend imprimió el correo "Activa tu cuenta de Urbanex" con el enlace `/activate/#<token>` (POST de creación → 201). La página de activación rechazó una contraseña de menos de 8 caracteres y otra demasiado común, y con una válida mostró "Cuenta activada, ya puedes iniciar sesión". B entra con los 5 enlaces de asesor, sin administración de usuarios, y todo vacío.
+
+### V-65 · SiteNav — Barra sin sesión
+
+**Resultado esperado:** ¿Sin sesión, la barra muestra solo "Propiedades" y "Panel del agente"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, 20:55–21:04 | Incógnito, `/properties`: solo "Propiedades" y "Panel del agente", con la marca Urbanex al otro extremo; catálogo con las 2 propiedades Disponibles de demo (Casa en Cumbayá, Local en La Mariscal). capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-66 · SiteNav — Barra del asesor y ventana angosta
+
+**Resultado esperado:** ¿El asesor ve Propiedades · Panel del agente · Oportunidades · Disponibilidad · Agenda, con una sola pestaña resaltada, y en ventana angosta la fila se desplaza de lado sin romperse?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~21:05–21:16 | Como `asesor.demo`: los 5 enlaces, el nombre y "Cerrar sesión"; en cada enlace solo esa pestaña resaltada (recuadro celeste y subrayado azul). Oportunidades con la cartera y "Abrir oportunidad"; Disponibilidad (I-09) con franjas de lunes a domingo y Excepciones; Agenda (I-08) con la semana del 2 al 8-nov y el sábado 7 como "Hoy". Vista de teléfono (Opera GX, DevTools): la fila de enlaces se desplaza de lado con barra horizontal sin romperse; catálogo, Oportunidades, Disponibilidad y Agenda responsive. Observaciones: el formulario de login sigue visible ~0,5 s tras iniciar sesión (DT-144); en el Panel angosto las acciones requieren desplazamiento horizontal (DT-145, pantalla fuera del lote). capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-67 · SiteNav — Barra del admin
+
+**Resultado esperado:** ¿El admin ve los mismos 5 enlaces, sin "Usuarios" en la barra, y el botón de Usuarios sigue en el Panel?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~21:20–21:40 | Como `admin.demo`: los 5 enlaces; "Usuarios" no está en la barra; en el Panel, "Administrar usuarios" junto a "Registrar propiedad". Disponibilidad y Agenda piden elegir asesor. A-01 lista `admin.demo` y `asesor.demo` activas con Editar y Desactivar. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-68 · HU-22 — Agregar una franja (I-09)
+
+**Resultado esperado:** ¿Lunes 09:00–12:00 con la duración por defecto aparece en "Lunes" con "visitas de 60 min" y el aviso "Franja agregada"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~21:52–21:54 | Como asesor A: aviso verde "Franja agregada"; la franja "09:00–12:00 · visitas de 60 min" en la fila Lunes, con Editar y Eliminar. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-69 · HU-22 — Errores, edición y eliminación (I-09)
+
+**Resultado esperado:** ¿09:00–09:20 da el error de 30 minutos y Lunes 11:00–13:00 el de cruce, en rojo junto al campo? ¿Editar marca la franja en azul y Eliminar pide confirmación?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~21:55–22:00 | (a) 09:00–09:20: error en rojo por el mínimo de 30 min, no se guarda. (b) 11:00–13:00: error en rojo por cruce con otra franja del mismo día, no se guarda. (c) Editar: franja en azul y botones "Guardar cambios" y "Cancelar"; Eliminar: modal de confirmación (se canceló para conservar la franja). capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-70 · HU-22 — Excepciones (I-09)
+
+**Resultado esperado:** ¿Una excepción de día completo y otra de 10:00–11:00 aparecen en la lista, y el calendario no deja elegir fechas pasadas?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~22:02–22:10 | "martes 10 de noviembre · Día completo" y "lunes 16 de noviembre · 10:00–11:00", cada una con Eliminar. El calendario no permitió elegir el 6-nov ni otras fechas pasadas. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-71 · HU-22 — Disponibilidad desde el admin (I-09)
+
+**Resultado esperado:** ¿Sin asesor dice "Elija un asesor…" y la franja que agrega el admin queda a nombre del asesor elegido?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~22:11–22:16 | Sin asesor: "Elija un asesor…". Con A: su franja del lunes y sus dos excepciones. El admin agregó una franja el miércoles → "Franja agregada" en la fila Miércoles de A; B no la tiene. La franja quedó guardada como 14:00–16:00 por error al cargarla y en V-72 se editó a 12:00–16:00. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-72 · HU-18 — Franjas libres en la ficha (P-07)
+
+**Resultado esperado:** ¿Sin sesión, la ficha de una propiedad Disponible muestra "Horarios disponibles para visitas" en hora de Ecuador, sin horas seleccionables, sin datos del asesor, sin nada antes de 2 h y sin las horas de las excepciones?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~22:20–22:30 | Ficha de [DEMO] Casa en Cumbayá: sección con Actualizar, próximos 14 días, pestañas por día y la nota "Pronto podrás solicitar tu visita aquí"; horas no seleccionables; sin nombre, foto, correo ni teléfono del asesor. Lun 9: 09:00, 10:00, 11:00; lun 16: 09:00 y 11:00 (sin 10:00 por la excepción); ningún martes ni nada de hoy. Los miércoles salían 14:00 y 15:00 porque la franja era 14:00–16:00; tras editarla a 12:00–16:00 y pulsar Actualizar: 12:00 a 15:00 el mié 11 y el mié 18. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-73 · HU-18 — Una visita ocupa la hora y al cancelarla la libera
+
+**Resultado esperado:** ¿Tras crear una visita y pulsar Actualizar, esa hora desaparece; y al cancelarla, vuelve?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-07, ~22:50 – 2026-11-08, 00:05 | `admin.demo` no es staff de Django, así que las visitas se crearon con `setup_visits_demo`: lun 9 a las 09:00 (Cumbayá), 10:00 (Local La Mariscal) y 11:00 (Cumbayá), y mié 11 a las 12:00 (Cumbayá), todas del asesor A; las oportunidades siguieron en Contacto Inicial. Actualizar: el lun 9 desapareció (A ocupado de 09 a 12, también por la visita en otra propiedad: la ocupación es por asesor) y el mié 11 quedó con 13:00 a 15:00. Visita #1 cancelada por shell (lun 9, 09:00 Ecuador = 14:00 UTC) → Actualizar: el lun 9 volvió solo con 09:00. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-74 · HU-18 — Propiedad no disponible
+
+**Resultado esperado:** ¿La ficha de una propiedad en captación no muestra la sección de horarios?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-08, ~00:08–00:12 | Propiedades #2 y #4 en captación (shell). Incógnito, `/properties/<id>`: la ficha no carga ("No se pudo cargar esta propiedad. Verifica la conexión con el servidor" y "Volver al catálogo"); no aparece la sección de horarios. Observación: el mensaje sugiere un fallo de conexión (DT-147). capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-75 · HU-24 — Agenda del asesor (I-08)
+
+**Resultado esperado:** ¿"Mi agenda" muestra la semana de lunes a domingo con "Hoy", cada visita con hora, propiedad, ubicación, cliente, teléfono (enlace para llamar), correo y estado, y "Sin visitas." en los días vacíos?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-08, ~00:13–00:16 | Como asesor A: semana del 2 al 8-nov con el domingo 8 como "Hoy", todo "Sin visitas.". Siguiente (9–15-nov): lun 9 con 10:00–11:00 (Local La Mariscal) y 11:00–12:00 (Casa Cumbayá); mié 11 con 12:00–13:00 (Casa Cumbayá); la de las 09:00, cancelada, no aparece. Cada visita con hora, propiedad, ubicación, nombre del cliente, teléfono (enlace `tel:`), correo y la etiqueta "Programada". "Esta semana" vuelve al 2–8-nov. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-76 · HU-24 — Filtro de estado (I-08)
+
+**Resultado esperado:** ¿Por defecto no aparecen las canceladas; con "Cancelada" solo esas; con "Todas", todas?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-08, ~00:17–00:22 | Semana 9–15-nov. Por defecto ("Activas, sin canceladas"): las 3 programadas. "Cancelada": solo lun 9, 09:00–10:00, Casa Cumbayá, con la etiqueta Cancelada. "Todas": las 4. "Programada": las 3 activas. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### V-77 · HU-24 — Agenda aislada por asesor y vista del admin (I-08)
+
+**Resultado esperado:** ¿B no ve las visitas de A; el admin ve "Elija un asesor para ver su agenda." y, al elegir a A, la agenda de A?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-08, ~00:23–00:28 | Asesor B, semana 9–15-nov con "Todas": ninguna visita. Admin sin asesor: "Elija un asesor para ver su agenda."; con A: sus 4 visitas; con B: ninguna. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
 
 ## Estado actual (2026-11-02)
 
