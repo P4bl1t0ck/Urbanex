@@ -71,7 +71,7 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 - No corras `migrate` contra Supabase desde una rama.
 - No edites migraciones ya fusionadas o aplicadas en otro ambiente: crea una nueva y pregunta antes.
 - Las migraciones de `apps/users` se hacen en **una sola rama a la vez** (pull antes de `makemigrations`).
-- Antes del PR, corre la suite contra **PostgreSQL**: mayúsculas y tildes, unicidad, longitud de textos y zona horaria (DT-01).
+- Suite contra **PostgreSQL** (mayúsculas y tildes, unicidad, longitud de textos y zona horaria, DT-01): en un PR de desarrollo diario (Nivel 1) puede quedar **"No ejecutado"** con su DT registrado (DT-68); al cerrar un lote o una entrega (Nivel 2) es obligatoria, contra un PostgreSQL **local o desechable, nunca Supabase** (DS-35; detalle en Estándares §4).
 - Credenciales filtradas: se rotan de inmediato.
 
 ## 8. Evidencia y estados
@@ -82,7 +82,9 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 
 ## 9. Validaciones honestas
 
-El agente **nunca** marca una validación (técnica, funcional, visual o V-xx) como aprobada. Puede redactar la V-xx en `Project_Progress.md` (pasos y resultado esperado) con la tabla **vacía** y "Pendiente". Solo una persona la llena: **quién, fecha, hora, qué vio exactamente y la ruta de una captura**. Una HU no pasa de **Pruebas** sin su V-xx hecha por una persona.
+El agente **nunca** marca una validación (técnica, funcional, visual o V-xx) como aprobada. Puede redactar la V-xx en `Project_Progress.md` (pasos y resultado esperado) con la tabla **vacía** y "Pendiente". Solo una persona la llena: **quién, fecha, hora, qué vio exactamente y la ruta de su evidencia**. Una HU no pasa de **Pruebas** sin su V-xx hecha por una persona.
+
+Evidencia (DS-35): **una sola por criterio de aceptación** del Anexo 2, una captura en `evidence/` si el criterio es visual o la salida de la prueba automática que lo cubre; al cerrar un lote o una entrega se suma un video o GIF corto (1-2 min) del flujo completo, también en `evidence/`. Toda HU sigue necesitando validación humana para contar en el 60 %, y nada entra a `develop` sin PR.
 
 ## 10. Al terminar
 
@@ -96,9 +98,9 @@ Entrega, en el mismo PR:
 
 ## 11. Auditoría antes de cada PR
 
-Obligatoria, en un **chat nuevo y solo de lectura** (el auditor no edita nada). Prompt corto:
+Obligatoria y **una sola por PR** (DS-35), en un **chat nuevo y solo de lectura** (el auditor no edita nada). Prompt corto:
 
-> Eres auditor de solo lectura del repo Urbanex. No modifiques archivos ni ejecutes comandos que escriban. Lee `AGENTS.md`. Compara la rama actual con `origin/develop` (`git diff origin/develop...HEAD --name-only` y el diff completo) y reporta, con archivo:línea o comando + salida: (1) archivos fuera del alcance de la tarea o de otra persona (§4); (2) archivos prohibidos o credenciales; (3) migraciones editadas o en conflicto; (4) IDs DT/FX/DS/V repetidos o fuera de rango; (5) validaciones marcadas como aprobadas sin persona, fecha, hora y captura; (6) documentación que falte según §10; (7) resultado real de la suite. Termina con "Apto para PR" o "No apto" y la lista de lo que hay que corregir.
+> Eres auditor de solo lectura del repo Urbanex. No modifiques archivos ni ejecutes comandos que escriban. Lee `AGENTS.md`. Compara la rama actual con `origin/develop` (`git diff origin/develop...HEAD --name-only` y el diff completo) y reporta, con archivo:línea o comando + salida: (1) archivos fuera del alcance de la tarea o de otra persona (§4); (2) archivos prohibidos o credenciales; (3) migraciones editadas o en conflicto; (4) IDs DT/FX/DS/V repetidos o fuera de rango; (5) validaciones marcadas como aprobadas sin persona, fecha, hora y evidencia (una por criterio, §9); (6) documentación que falte según §10; (7) resultado real de la suite (en un PR de Nivel 1, PostgreSQL "No ejecutado" con su DT no bloquea; §7). Termina con "Apto para PR" o "No apto" y la lista de lo que hay que corregir.
 
 ## 12. Idioma
 
