@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
+from unittest import mock
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import ProtectedError
@@ -16,7 +18,9 @@ from apps.visits.models import Visit
 from .models import (
     Contact, OriginChannel, Opportunity, OpportunityInteraction, OpportunityStatusHistory,
 )
+from .services import WEB_FORM_EMPTY_NOTE, WEB_FORM_NOTE_PREFIX, WEB_FORM_OPENING_REASON
 from .validators import normalize_phone
+from .views import INTEREST_OK_MESSAGE, WebInterestBurstThrottle
 
 OPPORTUNITIES_URL = '/api/opportunities/'
 ELIGIBLE_URL = '/api/opportunities/eligible-properties/'
@@ -530,3 +534,236 @@ class AgentsApiTests(OpportunityApiMixin, TestCase):
     def test_agent_cannot_list_agents(self):
         self.client.force_authenticate(self.agent)
         self.assertEqual(self.client.get(AGENTS_URL).status_code, status.HTTP_403_FORBIDDEN)
+
+
+# ---------------------------------------------------------------------------------------------
+# Lote 4 (DS-50): HU-15 (WhatsApp) y HU-16 (formulario de interes) en la ficha publica P-07
+# ---------------------------------------------------------------------------------------------
+
+def whatsapp_url(property_id):
+    return f'/api/opportunities/public/properties/{property_id}/whatsapp/'
+
+
+def interest_url(property_id):
+    return f'/api/opportunities/public/properties/{property_id}/interest/'
+
+
+class PublicP07Mixin(OpportunityTestMixin):
+    def setUp(self):
+        super().setUp()
+        cache.clear()  # Los throttles publicos guardan sus contadores en la cache
+        self.client = APIClient()
+        self.agent.phone = '099 765 4321'
+        self.agent.save(update_fields=['phone'])
+
+
+class WhatsAppContactApiTests(PublicP07Mixin, TestCase):
+    '''HU-15 (RF-02, DS-50): numero del asesor para wa.me, o null para ocultar el boton.'''
+
+    def test_returns_the_normalized_agent_number_without_plus(self):
+        response = self.client.get(whatsapp_url(self.property.pk))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'property': self.property.pk,
+                                         'whatsapp_phone': '593997654321'})
+
+    def test_e164_agent_phone_is_accepted(self):
+        self.agent.phone = '+593 99 765 4321'
+        self.agent.save(update_fields=['phone'])
+        response = self.client.get(whatsapp_url(self.property.pk))
+        self.assertEqual(response.data['whatsapp_phone'], '593997654321')
+
+    def test_invalid_or_missing_agent_phone_hides_the_button(self):
+        for phone in ('', '022345678', '+573001234567', 'sin telefono'):
+            with self.subTest(phone=phone):
+                self.agent.phone = phone
+                self.agent.save(update_fields=['phone'])
+                response = self.client.get(whatsapp_url(self.property.pk))
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertIsNone(response.data['whatsapp_phone'])
+
+    def test_inactive_agent_hides_the_button(self):
+        self.agent.is_active = False
+        self.agent.save(update_fields=['is_active'])
+        self.assertIsNone(self.client.get(whatsapp_url(self.property.pk)).data['whatsapp_phone'])
+
+    def test_property_that_is_not_available_or_does_not_exist_returns_404(self):
+        self.property.status = 'captacion'
+        self.property.save(update_fields=['status'])
+        for property_id in (self.property.pk, 999999):
+            with self.subTest(property_id=property_id):
+                response = self.client.get(whatsapp_url(property_id))
+                self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_an_invalid_token_does_not_block_the_public_endpoint(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer token-vencido')
+        self.assertEqual(self.client.get(whatsapp_url(self.property.pk)).status_code,
+                         status.HTTP_200_OK)
+
+    def test_requests_are_limited_per_ip(self):
+        codes = [self.client.get(whatsapp_url(self.property.pk)).status_code for _ in range(31)]
+        self.assertEqual(codes[29], status.HTTP_200_OK)
+        self.assertEqual(codes[30], status.HTTP_429_TOO_MANY_REQUESTS)
+
+
+class WebInterestApiTests(PublicP07Mixin, TestCase):
+    '''HU-16 (RF-03, DS-50): interes del visitante sin cuenta desde la ficha publica.'''
+
+    NEW_PHONE = '0981112233'
+
+    def payload(self, **overrides):
+        data = {'full_name': 'Carla Visitante', 'phone': self.NEW_PHONE, 'email': '',
+                'email_opt_in': False, 'message': '¿Aceptan crédito hipotecario?',
+                'privacy_accepted': True}
+        data.update(overrides)
+        return data
+
+    def post(self, data, property_id=None):
+        return self.client.post(interest_url(property_id or self.property.pk), data,
+                                format='json')
+
+    def test_new_visitor_creates_contact_opportunity_history_and_interaction(self):
+        response = self.post(self.payload(email='carla@correo.ec', email_opt_in=True))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data, {'detail': INTEREST_OK_MESSAGE})
+
+        contact = Contact.objects.get(phone='+593981112233')
+        self.assertEqual(contact.origin_channel, OriginChannel.CATALOGO_WEB)
+        self.assertIsNotNone(contact.privacy_accepted_at)
+        self.assertEqual((contact.email, contact.email_opt_in), ('carla@correo.ec', True))
+
+        opportunity = Opportunity.objects.get(contact=contact)
+        self.assertEqual(opportunity.status, Opportunity.Status.CONTACTO_INICIAL)
+        self.assertEqual(opportunity.assigned_agent, self.agent)
+        self.assertEqual(opportunity.origin_channel, OriginChannel.CATALOGO_WEB)
+
+        opening = opportunity.status_history.get()
+        self.assertEqual((opening.previous_status, opening.new_status, opening.changed_by),
+                         ('', Opportunity.Status.CONTACTO_INICIAL, None))
+        self.assertEqual(opening.reason, WEB_FORM_OPENING_REASON)
+
+        interaction = opportunity.interactions.get()
+        self.assertEqual(interaction.interaction_type, OpportunityInteraction.Type.SISTEMA)
+        self.assertIsNone(interaction.author)
+        self.assertEqual(interaction.notes,
+                         f'{WEB_FORM_NOTE_PREFIX}¿Aceptan crédito hipotecario?')
+
+    def test_empty_message_stores_the_default_note(self):
+        for phone, message in (('0981112201', ''), ('0981112202', '   ')):
+            with self.subTest(message=message):
+                self.post(self.payload(phone=phone, message=message))
+                interaction = OpportunityInteraction.objects.get(
+                    opportunity__contact__phone=normalize_phone(phone))
+                self.assertEqual(interaction.notes, WEB_FORM_EMPTY_NOTE)
+
+    def test_message_is_optional_when_missing(self):
+        data = self.payload()
+        del data['message']
+        self.assertEqual(self.post(data).status_code, status.HTTP_201_CREATED)
+        self.assertEqual(OpportunityInteraction.objects.get().notes, WEB_FORM_EMPTY_NOTE)
+
+    def test_existing_contact_is_reused_and_only_its_consent_is_renewed(self):
+        old_consent = timezone.now() - timedelta(days=30)
+        Contact.objects.filter(pk=self.contact.pk).update(
+            email='ana@correo.ec', email_opt_in=False, privacy_accepted_at=old_consent,
+        )
+        response = self.post(self.payload(full_name='Otro Nombre', phone='0991234567',
+                                          email='nuevo@correo.ec', email_opt_in=True))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Contact.objects.count(), 1)
+        self.contact.refresh_from_db()
+        self.assertEqual((self.contact.full_name, self.contact.email, self.contact.email_opt_in),
+                         ('Ana Interesada', 'ana@correo.ec', False))
+        self.assertGreater(self.contact.privacy_accepted_at, old_consent)
+        self.assertEqual(self.contact.origin_channel, OriginChannel.MANUAL)
+
+    def test_active_opportunity_is_reused_without_changing_state_or_agent(self):
+        other_agent = User.objects.create_user(
+            username='asesor.dos', email='asesor.dos@urbanex.ec', password='Password123!',
+            role='asesor',
+        )
+        existing = self.opportunity(status=Opportunity.Status.VISITA_PROGRAMADA)
+        Opportunity.objects.filter(pk=existing.pk).update(
+            assigned_agent=other_agent, last_activity_at=timezone.now() - timedelta(days=5),
+        )
+        before = Opportunity.objects.get(pk=existing.pk).last_activity_at
+
+        response = self.post(self.payload(phone='0991234567'))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Opportunity.objects.count(), 1)
+        existing.refresh_from_db()
+        self.assertEqual(existing.status, Opportunity.Status.VISITA_PROGRAMADA)
+        self.assertEqual(existing.assigned_agent, other_agent)
+        self.assertGreater(existing.last_activity_at, before)
+        self.assertFalse(existing.status_history.exists())
+        self.assertEqual(existing.interactions.count(), 1)
+
+    def test_terminal_opportunity_does_not_block_a_new_one(self):
+        self.opportunity(status=Opportunity.Status.PERDIDA)
+        self.post(self.payload(phone='0991234567'))
+        self.assertEqual(Opportunity.objects.active().filter(contact=self.contact).count(), 1)
+
+    def test_response_is_the_same_for_new_and_known_visitors(self):
+        first = self.post(self.payload())
+        again = self.post(self.payload(full_name='Otra persona'))
+        self.assertEqual(first.data, again.data)
+        self.assertEqual(set(first.data), {'detail'})
+        self.assertEqual(Opportunity.objects.count(), 1)
+        self.assertEqual(OpportunityInteraction.objects.count(), 2)
+
+    def test_invalid_data_returns_400_and_saves_nothing(self):
+        cases = [
+            ({'privacy_accepted': False}, 'privacy_accepted'),
+            ({'phone': '022345678'}, 'phone'),
+            ({'phone': ''}, 'phone'),
+            ({'full_name': '   '}, 'full_name'),
+            ({'email': 'no-es-correo'}, 'email'),
+            ({'email': '', 'email_opt_in': True}, 'email'),
+            ({'message': 'x' * 1001}, 'message'),
+        ]
+        for overrides, field in cases:
+            with self.subTest(field=field, overrides=overrides):
+                cache.clear()
+                response = self.post(self.payload(**overrides))
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn(field, response.data)
+        self.assertEqual(Contact.objects.count(), 1)  # Solo el del mixin
+        self.assertFalse(Opportunity.objects.exists())
+        self.assertFalse(OpportunityInteraction.objects.exists())
+
+    def test_unavailable_property_or_inactive_agent_returns_404_and_saves_nothing(self):
+        self.other_property.status = 'reservado'
+        self.other_property.save(update_fields=['status'])
+        self.assertEqual(self.post(self.payload(), self.other_property.pk).status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.post(self.payload(), 999999).status_code, status.HTTP_404_NOT_FOUND)
+
+        self.agent.is_active = False
+        self.agent.save(update_fields=['is_active'])
+        self.assertEqual(self.post(self.payload()).status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse(Contact.objects.filter(phone='+593981112233').exists())
+        self.assertFalse(Opportunity.objects.exists())
+
+    def test_public_price_is_not_touched(self):
+        self.post(self.payload())
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.price, 150000)
+
+
+class WebInterestThrottleTests(PublicP07Mixin, TestCase):
+    '''HU-16: 3 por minuto y 10 por dia por IP (DS-50).'''
+
+    def post(self, index):
+        return self.client.post(interest_url(self.property.pk), {
+            'full_name': 'Visitante', 'phone': f'09811122{index:02d}', 'privacy_accepted': True,
+        }, format='json')
+
+    def test_fourth_request_in_a_minute_is_rejected(self):
+        codes = [self.post(i).status_code for i in range(4)]
+        self.assertEqual(codes[:3], [status.HTTP_201_CREATED] * 3)
+        self.assertEqual(codes[3], status.HTTP_429_TOO_MANY_REQUESTS)
+
+    def test_eleventh_request_in_a_day_is_rejected(self):
+        with mock.patch.object(WebInterestBurstThrottle, 'rate', '100/minute'):
+            codes = [self.post(i).status_code for i in range(11)]
+        self.assertEqual(codes[:10], [status.HTTP_201_CREATED] * 10)
+        self.assertEqual(codes[10], status.HTTP_429_TOO_MANY_REQUESTS)
