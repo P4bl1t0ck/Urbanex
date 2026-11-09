@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; resultados técnicos en Estándares §4 |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
 | Última actualización de integración HU-46 | 2026-11-09 · Revisión aislada: 238 pruebas backend y 17 frontend; registro humano V-44 conservado; fusión pendiente de commit |
 | Última actualización aditiva HU-46 | 2026-11-06 · Implementación verificada en SQLite y frontend; validación humana V-44 Pendiente |
@@ -49,6 +50,18 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-09 · Codex con Sebas · publicación de corrección PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Sebas autorizó revisión, commit y push a la rama del PR existente. Commits: `ff92374` (autenticación y pruebas), `c4e07b1` (solo el compartido `users/views.py`) y `e84c1f9` (handoff y resultados). `git fetch origin` completado: develop sigue en `966cc50` y la cabeza remota del PR antes del push en `00dd676`. Comentarios del PR: lista vacía mediante GitHub.
+- **Registro humano:** Sebas agregó la fila del 2026-11-09, 16:13:56, sobre rechazo de la sesión anterior y acceso con la contraseña nueva. Indicó la captura `ResetPasswordUsuarioBloqueado` y sustituyó el marcador. Se completa únicamente el subdirectorio de su ruta para apuntar al archivo existente `evidence/HU-46/ResetPasswordUsuarioBloqueado.png`; se conservan su fecha, hora, observación y resultado. Los registros anteriores se conservan como historial. No se emite una aprobación del agente ni se atribuye a Sebas una comprobación de renovación que su fila no menciona.
+- **Comprobaciones:** código sin cambios posteriores a la suite de 243 pruebas OK y 14 focalizadas; frontend 17/17. No se repiten suites por esta etapa documental y de Git. `git diff --check` sin errores y `git ls-files -u` sin entradas; no se preparan archivos prohibidos ni migraciones. DT-92 y PostgreSQL No ejecutado (DT-68, Nivel 1) continúan declarados.
+- **Siguiente paso:** subir estos commits y este registro a `origin/feat/URB-04-HU-46-recuperar-contrasena` y comprobar la cabeza remota. Pablo debe revisar la corrección y publicar la descripción del PR (borrador local `evidence/PR20_descripcion.md`), conforme a DS-31. No se edita ni fusiona el PR ni se publica en develop/master. HU-46 permanece en Pruebas; el dictamen previo No apto no se sustituye por una aprobación nueva del agente.
+
+### 2026-11-09 · Codex con Sebas · corrección de auditoría PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Fase 0 presentada y autorizada. `authentication.py` emite y comprueba `password_version`; `LoginView` usa esa emisión en el archivo compartido `users/views.py`. Se rechazan tokens anteriores dentro del mismo segundo y se permite iniciar sesión inmediatamente con la nueva contraseña. Los JWT heredados sin versión del segundo ambiguo requieren volver a iniciar sesión; los posteriores conservan compatibilidad. Dos regresiones nuevas en `users/tests.py`. Documentación actualizada de forma aditiva, sin cambiar registros humanos ni porcentajes.
+- **Pruebas:** línea base SQLite 241 OK; pruebas focalizadas 14 OK; suite completa final 243 OK, exit 0. `makemigrations --check --dry-run` exit 1 por DT-92; no se crean ni aplican migraciones. Frontend `npm test` 17/17, exit 0; build/TypeScript/ESLint No ejecutados en esta corrección backend/documentación. PostgreSQL No ejecutado (DT-68, Nivel 1). Comandos y salidas reales en Estándares §4.
+- **PR:** descripción y checklist preparados en `evidence/PR20_descripcion.md` (local, ignorado por Git). No se modifica el PR en GitHub ni se hace commit, push o merge. La auditoría previa concluyó No apto; esta implementación no cambia por sí sola aquel dictamen ni constituye una auditoría independiente nueva.
+- **Falta y siguiente paso:** revisión humana de la corrección y del borrador; orden explícita de Pablo para editar el PR #20 hacia develop con ese contenido, conforme a DS-31. Comprobación visual sugerida, Pendiente: recuperar la contraseña con una sesión abierta, confirmar que la anterior deje de autorizar y que el nuevo login y su renovación funcionen. Se conserva la V-44 humana original; no se marca otra aprobación ni HU-46 Listo. DT-92 y DT-68 siguen pendientes.
 
 ### 2026-11-09 · Codex con Sebas · registro humano de ampliación V-44 · rama `feat/URB-04-HU-46-recuperar-contrasena`
 - **Hecho:** Sebas confirmó la fecha y hora y agregó personalmente la fila de la ampliación V-44: 2026-11-09, 15:13:56, recuperación válida con desbloqueo, contador cero e inicio de sesión con contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`, excluida de Git. Se conserva su fila sin modificar el resultado humano.
@@ -954,7 +967,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado y ruta de evidencia |
 |---|---|---|---|
 | Sebas | 2026-11-09, 15:13:56 | Comprobé que la recuperación válida de contraseña desbloquea la cuenta, reinicia los intentos fallidos a cero y permite iniciar sesión con la contraseña nueva. | Aprobado — evidence/ResetPasswordUsuarioBloqueado.png |
-
+| Sebas | 2026-11-09, 16:13:56 | Dejé una sesión abierta y recuperé la contraseña desde otra ventana. Al volver a la sesión anterior e intentar acceder a una pantalla protegida, se me pidió iniciar sesión nuevamente. Después pude entrar con la contraseña nueva. | Aprobado — evidence/HU-46/ResetPasswordUsuarioBloqueado.png |
 **Actualización documental (2026-11-09):** Sebas incorporó la fila anterior y confirmó su fecha y hora en la conversación. Supersede las menciones previas a esta comprobación o su transcripción como Pendiente; el agente conserva el resultado escrito por la persona. HU-46 continúa en Pruebas hasta la revisión correspondiente.
 
 Los pasos y el registro originales de V-44 se conservan a continuación:
