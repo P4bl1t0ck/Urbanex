@@ -2,7 +2,8 @@
 
 // Pantalla I-06 (HU-34): cartera de oportunidades con filtros combinables por asesor, propiedad,
 // estado y fecha de apertura. El asesor ve la suya y el admin todas: lo decide el servidor.
-// Sin detalle (I-06A) ni cambios de estado en este corte (RF-06 llega después).
+// Lote 4 (DS-50): cada fila enlaza al detalle I-06A (/dashboard/opportunities/<id>), donde se
+// avanza el estado (HU-29) y se registran interacciones (HU-30).
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -302,7 +303,8 @@ export default function OpportunitiesPage() {
                       <th className="py-2 pr-3">Estado</th>
                       {isAdmin && <th className="py-2 pr-3">Asesor</th>}
                       <th className="py-2 pr-3">Canal</th>
-                      <th className="py-2">Apertura</th>
+                      <th className="py-2 pr-3">Apertura</th>
+                      <th className="py-2"><span className="sr-only">Detalle</span></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -310,7 +312,12 @@ export default function OpportunitiesPage() {
                       <tr key={row.id} className={String(row.id) === openedId ? "bg-green-50/60" : ""}>
                         <td className="py-2 pr-3 text-slate-500">{row.id}</td>
                         <td className="py-2 pr-3">
-                          <span className="block font-medium text-slate-800">{row.contact.full_name}</span>
+                          <Link
+                            href={`/dashboard/opportunities/${row.id}`}
+                            className="block font-medium text-slate-800 hover:text-blue-700 hover:underline"
+                          >
+                            {row.contact.full_name}
+                          </Link>
                           <span className="text-xs text-slate-500">{row.contact.phone}</span>
                         </td>
                         <td className="py-2 pr-3">
@@ -324,7 +331,15 @@ export default function OpportunitiesPage() {
                         </td>
                         {isAdmin && <td className="py-2 pr-3 text-slate-700">{row.assigned_agent.name}</td>}
                         <td className="py-2 pr-3 text-slate-600">{row.origin_channel_display}</td>
-                        <td className="py-2 text-slate-600">{formatDate(row.created_at)}</td>
+                        <td className="py-2 pr-3 text-slate-600">{formatDate(row.created_at)}</td>
+                        <td className="py-2 text-right">
+                          <Link
+                            href={`/dashboard/opportunities/${row.id}`}
+                            className="whitespace-nowrap rounded-lg border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                          >
+                            Ver detalle
+                          </Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
