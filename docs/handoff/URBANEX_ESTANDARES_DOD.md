@@ -5,7 +5,7 @@
 | Última actualización aditiva HU-46 | 2026-11-06 · Evidencia de suite y validaciones HU-46; V-44 Pendiente |
 | Propósito | Contrato de calidad para cada HU nueva, la escriba una persona o una IA |
 | Fecha | 2026-10-22 |
-| Última actualización | 2026-11-04 (después del merge) · §4: ejecución registrada tras el merge (155 OK; `npm test` 9/9). Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**. Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama HU-12: 2026-11-01 · §4: `npm test` en el frontend (9 pruebas, HU-12, FX-24). Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4: suite contra PostgreSQL y plantilla de PR; §5: `makemigrations --check` y archivos prohibidos. Antes: 2026-10-30 · §4: 90 pruebas (FX-18). Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`. Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21). Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas). Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama de oportunidades: 2026-11-03 (noche) · §4: C-08 con fecha 2026-10-31 (DS-30) y regla del valor heredado `cliente` en las pruebas (DT-106, DT-107). Antes: 2026-11-03 (tarde) · §4: **155 pruebas OK** en la rama de oportunidades (FX-25: +2 en `opportunities` y +2 en `users`). Antes: 2026-11-03 · Pablo (con Claude Code), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`a071b97`, con los PR #9 y #13); se conservan las entradas de ambos lados. Antes (rama de oportunidades, sin develop): 2026-11-01 · §4: regla de roles en las pruebas (solo `admin` y `asesor`; el cliente es anónimo; sin `role='cliente'`; C-08, FX-23). Antes: 2026-10-30 (tarde) · §4: `apps.opportunities.tests` en el comando y 125 pruebas (FX-19). |
+| Última actualización | 2026-11-08 (noche) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): §4, comando con `apps.visits.tests`, ejecución registrada de `develop` `e19a5df` (229 OK) y **Niveles 1 y 2 de la definición de acabado (DS-35, decisión aplicada por Pablo)**. Historial completo en [Historial de actualizaciones](#historial-de-actualizaciones). |
 | Alcance | Backend Django/DRF, frontend Next.js/TypeScript, pruebas y Git |
 | Relación con documentos previos | **Complementa, no reemplaza**, `docs/DefinitionOfDone.es.md` (DoD del equipo: pruebas de caja negra + MVP funcional en la interfaz) y la §13 de `URBANEX_MASTER_CONTEXT.md` |
 | Evidencia HU-45 | 2026-11-03 · Backend 120/120 OK en SQLite en memoria; build y TypeScript exit 0; ESLint exit 0 con 2 avisos preexistentes; `makemigrations --check --dry-run` exit 1 por `documents/0002_alter_document_file.py`; V-43 Pendiente; PostgreSQL no verificado |
@@ -82,12 +82,25 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 - [ ] Listo para revisión por el otro desarrollador
 ```
 
+### Niveles de la definición de acabado (DS-35, 2026-11-08; decisión aplicada por Pablo)
+
+El checklist de arriba se llena según el nivel del PR. Si una regla de este archivo pide más para un PR de Nivel 1, manda DS-35.
+
+| | **Nivel 1: PR de desarrollo diario** | **Nivel 2: cierre de lote o entrega** |
+|---|---|---|
+| Pruebas automáticas | En verde: suite backend (comando de abajo), `npx tsc --noEmit -p .`, `npx eslint .` y `npm run build` (más `npm test`) | Las mismas, en verde |
+| Evidencia de la validación humana | **Una sola por criterio de aceptación** del Anexo 2: captura local en `evidence/` si el criterio es visual; si lo cubre una prueba automática, basta su salida (comando + resultado). Se registra en la V-xx: quién, fecha, hora, qué vio y la ruta `evidence/...` | Además, un **video o GIF corto (1-2 min) del flujo completo**, guardado en `evidence/` |
+| Auditoría de solo lectura (`AGENTS.md` §11) | **Una sola por PR** | Una sola por PR |
+| Suite contra PostgreSQL | Puede quedar **"No ejecutado"**, con su DT registrado (DT-68) | **Obligatoria**, contra un PostgreSQL **local o desechable**; nunca Supabase |
+
+**No cambia:** toda HU requiere validación humana para contar en el 60 % ([USM §2](URBANEX_USM_TRAZABILIDAD.md)), y nada entra a `develop` sin PR. La carpeta `evidence/` está en `.gitignore` y nunca se sube al repo (`AGENTS.md` §6).
+
 **Comandos de prueba vigentes** (desde `backend/`; las etiquetas son obligatorias hasta corregir DT-06). Actualizado el 2026-10-31 con HU-44 (FX-20); resultado esperado: **116 pruebas OK** (53 users + 19 documents + 44 appraisals; 90 en `origin/develop` + 26 nuevas):
 
 (2026-11-03) En la rama de oportunidades, con `apps.opportunities.tests` en el comando: **155 pruebas OK** (55 users + 19 documents + 44 appraisals + 37 opportunities; FX-25). Antes: 151 al fusionar `develop` (116 + 35, FX-19); sin `develop`, 125 (2026-10-30).
 
 ```bash
-pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests apps.visits.tests
 pipenv run python manage.py makemigrations --check --dry-run
 ```
 
@@ -96,6 +109,8 @@ En Windows, fija antes de la suite `PIPENV_DONT_LOAD_ENV=1`, `DB_ENGINE=sqlite` 
 **Ejecución registrada (2026-11-02):** `pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests` → 116 pruebas, **OK** (exit 0; SQLite). `pipenv run python manage.py makemigrations --check --dry-run` → exit 1; detecta `apps/documents/migrations/0002_alter_document_file.py`; no se generó ni aplicó migración. En `frontend/`: `npm run build` → exit 0; `npx tsc --noEmit -p .` → exit 0; `npx eslint .` → exit 0, 0 errores y 2 avisos ya registrados en DT-24. Suite local contra PostgreSQL: **No ejecutado**.
 
 **Ejecución registrada (2026-11-04, rama `feat/URB-30-34-HU-27-HU-34-oportunidades` tras fusionar `develop` `5fb3910`):** con `connection.vendor` = `sqlite`, el comando de arriba (con `apps.opportunities.tests`) → `Ran 155 tests`, **OK** (exit 0); `makemigrations --check --dry-run` → "No changes detected", exit 0 (en la carpeta principal; el `documents/0002` de DT-92 solo aparece en un worktree, DT-77). En `frontend/`: `npm test` → 9/9; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, 0 errores y 2 avisos (DT-24); `npm run build` exit 0. Suite local contra PostgreSQL: **No ejecutado**.
+
+**Ejecución registrada (2026-11-08, `develop` `e19a5df` tras el PR #19; lote 2: HU-22, HU-18 y HU-24):** con `connection.vendor` = `sqlite`, el comando de arriba (con `apps.visits.tests`) → `Ran 229 tests`, **OK** (exit 0); `makemigrations --check --dry-run` → exit 1, detecta `apps/documents/migrations/0002_alter_document_file.py` (DT-92; repetido el 2026-11-08 en el worktree `Urbanex-visitas` al fusionar `develop` en `docs/post-merge-pr15`). En `frontend/`: `npm test` → 17/17; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, 0 errores y 2 avisos (DT-24); `npm run build` exit 0. Suite local contra PostgreSQL: **No ejecutado**.
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 
@@ -169,3 +184,28 @@ La pantalla limpia la contraseña para respuestas `401` y muestra «No se pudo i
 | Build | `npm run build` → exit 0; Next.js compiló y generó 11/11 páginas |
 | Validación humana | Según Sebas, V-43 se ejecutó después del último ajuste y cubrió los dos criterios de HU-45; ver evidencia detallada en `Project_Progress.md` |
 | PostgreSQL | **No verificado**. El intento por defecto abortó antes de ejecutar pruebas porque `test_postgres` ya existía; no se borró ni reutilizó. Suite final ejecutada en SQLite |
+
+## Historial de actualizaciones
+
+Entradas anteriores de la celda "Última actualización" de la cabecera, movidas aquí sin cambios el 2026-11-08 (paso 5 del PR #18, `docs/post-merge-pr15`). La más reciente arriba; el texto es el mismo que estaba en la celda.
+
+- Antes: 2026-11-08 · Pablo · validación visual del lote 2 (V-65 a V-77) registrada sin cambios de código ni incorporación de capturas a Git; no se ejecuta `migrate` contra Supabase y la batería de validación se ejecuta sobre el worktree local con SQLite.
+- Antes: 2026-11-04 (después del merge) · §4: ejecución registrada tras el merge (155 OK; `npm test` 9/9).
+- Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados.
+- Antes (develop): 2026-11-02 · suite backend 116/116 en SQLite; build y TypeScript exit 0; ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); suite local PostgreSQL **No ejecutado**.
+- Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4 registra la suite de 116 pruebas, `makemigrations --check --dry-run`, los requisitos PostgreSQL y la plantilla de PR; §5 documenta archivos prohibidos.
+- Antes: 2026-10-30 · §4: 90 pruebas (FX-18).
+- Antes: 2026-10-29 · aviso de DT-06 sobre la etiqueta `apps.appraisals`.
+- Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21).
+- Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas).
+- Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama HU-12: 2026-11-01 · §4: `npm test` en el frontend (9 pruebas, HU-12, FX-24).
+- Antes: 2026-10-31 · §4 y §5 remiten a `AGENTS.md` (DS-25); §4: suite contra PostgreSQL y plantilla de PR; §5: `makemigrations --check` y archivos prohibidos.
+- Antes: 2026-10-30 · §4: 90 pruebas (FX-18).
+- Antes: 2026-10-29 · §4: aviso de DT-06 sobre la etiqueta `apps.appraisals`.
+- Antes: 2026-10-28 · §4 (88 pruebas, motor DS-21).
+- Antes: 2026-10-27 · §3 (sin `alert`/`confirm`: usar `Dialog`) y §4 (64 pruebas).
+- Antes: 2026-10-25 · §3 (`authFetch`, acciones irreversibles, `useParams` en Next 16) y §5 (reglas 8 y 9) · Rama de oportunidades: 2026-11-03 (noche) · §4: C-08 con fecha 2026-10-31 (DS-30) y regla del valor heredado `cliente` en las pruebas (DT-106, DT-107).
+- Antes: 2026-11-03 (tarde) · §4: **155 pruebas OK** en la rama de oportunidades (FX-25: +2 en `opportunities` y +2 en `users`).
+- Antes: 2026-11-03 · Pablo (con Claude Code), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`a071b97`, con los PR #9 y #13); se conservan las entradas de ambos lados.
+- Antes (rama de oportunidades, sin develop): 2026-11-01 · §4: regla de roles en las pruebas (solo `admin` y `asesor`; el cliente es anónimo; sin `role='cliente'`; C-08, FX-23).
+- Antes: 2026-10-30 (tarde) · §4: `apps.opportunities.tests` en el comando y 125 pruebas (FX-19).

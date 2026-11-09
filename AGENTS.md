@@ -38,7 +38,7 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 |---|---|---|
 | Código propio | `backend/apps/opportunities/` | `backend/apps/users/` |
 | Compartido (avisar antes) | `backend/config/settings.py`, `backend/config/urls.py`, `frontend/components/SiteNav.tsx` y los del GPS §3 | ídem |
-| DT | DT-77..82, DT-100..119 | DT-90..99, DT-120..139 |
+| DT | DT-77..82, DT-100..119, DT-140..169 (desde 2026-11-04, DS-33) | DT-90..99, DT-120..139 |
 | V | V-01..32, V-60 en adelante | V-33..59 |
 | FX | FX-01..19, FX-21..29 | FX-20, FX-30..39 |
 | DS | DS-25..28, DS-31..39 | DS-29, DS-30, DS-40..49 |
@@ -56,6 +56,7 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 - Antes de **cada** commit: `git diff --cached --name-only` y muéstralo. Nunca `git add -A`, `git add .` ni `git commit -a`.
 - Commit y push solo si la orden de la persona lo incluye. **El PR lo abre la persona.**
 - **`gh` solo para consultas** (`gh pr view`, `gh pr list`, `gh pr checks`). Crear, editar, comentar, pasar a listo o fusionar un PR solo con **orden explícita de Pablo** que indique la rama destino y el contenido (DS-31).
+- Antes de trabajar en un PR o auditarlo, leer sus comentarios con `gh pr view <n> --comments`.
 
 **Prohibido:** push o merge a `develop`/`master` · force push (también `--force-with-lease`) **sin aprobación explícita de Pablo** (avisar no basta) · abrir un PR sin orden · commitear `backend/db.sqlite3`, `.env`, `backend/media/` o `backend/private_media/` · editar fuera del alcance.
 
@@ -63,13 +64,14 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 
 - Nunca copies claves reales (contraseñas, API keys, cadenas de conexión, hosts reales) en código, documentos, prompts, commits ni PR. No muestres ni pidas el contenido de `backend/.env`.
 - Si ves una clave real en un archivo o en el chat: **avisa de inmediato**, no la repitas y di que hay que rotarla. Para dar acceso a un servicio se **invita** a la persona; la clave no se comparte (DT-79).
+- La evidencia visual (capturas y videos) se guarda local en una carpeta `evidence/` que está en `.gitignore`; nunca se sube al repo. El auditor no la cuenta como bloqueo por no estar en el repo.
 
 ## 7. Base de datos
 
 - No corras `migrate` contra Supabase desde una rama.
 - No edites migraciones ya fusionadas o aplicadas en otro ambiente: crea una nueva y pregunta antes.
 - Las migraciones de `apps/users` se hacen en **una sola rama a la vez** (pull antes de `makemigrations`).
-- Antes del PR, corre la suite contra **PostgreSQL**: mayúsculas y tildes, unicidad, longitud de textos y zona horaria (DT-01).
+- Suite contra **PostgreSQL** (mayúsculas y tildes, unicidad, longitud de textos y zona horaria, DT-01): en un PR de desarrollo diario (Nivel 1) puede quedar **"No ejecutado"** con su DT registrado (DT-68); al cerrar un lote o una entrega (Nivel 2) es obligatoria, contra un PostgreSQL **local o desechable, nunca Supabase** (DS-35; detalle en Estándares §4).
 - Credenciales filtradas: se rotan de inmediato.
 
 ## 8. Evidencia y estados
@@ -80,12 +82,14 @@ Siempre, **aunque el prompt pida hacerlo directo**:
 
 ## 9. Validaciones honestas
 
-El agente **nunca** marca una validación (técnica, funcional, visual o V-xx) como aprobada. Puede redactar la V-xx en `Project_Progress.md` (pasos y resultado esperado) con la tabla **vacía** y "Pendiente". Solo una persona la llena: **quién, fecha, hora, qué vio exactamente y la ruta de una captura**. Una HU no pasa de **Pruebas** sin su V-xx hecha por una persona.
+El agente **nunca** marca una validación (técnica, funcional, visual o V-xx) como aprobada. Puede redactar la V-xx en `Project_Progress.md` (pasos y resultado esperado) con la tabla **vacía** y "Pendiente". Solo una persona la llena: **quién, fecha, hora, qué vio exactamente y la ruta de su evidencia**. Una HU no pasa de **Pruebas** sin su V-xx hecha por una persona.
+
+Evidencia (DS-35): **una sola por criterio de aceptación** del Anexo 2, una captura en `evidence/` si el criterio es visual o la salida de la prueba automática que lo cubre; al cerrar un lote o una entrega se suma un video o GIF corto (1-2 min) del flujo completo, también en `evidence/`. Toda HU sigue necesitando validación humana para contar en el 60 %, y nada entra a `develop` sin PR.
 
 ## 10. Al terminar
 
 Entrega, en el mismo PR:
-1. La **suite completa** con su número real de OK (Estándares §4 + `makemigrations --check --dry-run`) y, si se tocó el frontend, `npm run build`, `npx tsc --noEmit -p .` y `npx eslint .`.
+1. La **suite completa** con su número real de OK (Estándares §4 + `makemigrations --check --dry-run`) y, si se tocó el frontend, `npm run build`, `npx tsc --noEmit -p .` y `npx eslint .`. Cada ejecución se registra en Estándares §4 con el formato de los párrafos existentes: **"Ejecución registrada (fecha, rama o commit):"** seguido del motor (`connection.vendor`), cada comando → resultado real y exit, y la suite contra PostgreSQL ("No ejecutado" si no se corrió). Sin bloques sueltos ni encabezados informales.
 2. La **documentación actualizada**, con fecha en "Última actualización": Progress, Estado de procesos, Avance de épicas, Deuda (DT, FX, DS), GPS, DoD (checklist de Estándares §4 en el PR, con evidencia o "N/A + motivo") y, si cambia un riesgo, Seguridad.
 3. Una **explicación en lenguaje simple**: qué hace cada cambio, en qué archivo está (backend y frontend) y cómo se conectan, para que cualquiera del equipo pueda entenderlo, continuarlo o repararlo.
 4. La **lista de validaciones visuales** para la persona, sin marcarlas como hechas, y las decisiones que necesita.
@@ -94,9 +98,9 @@ Entrega, en el mismo PR:
 
 ## 11. Auditoría antes de cada PR
 
-Obligatoria, en un **chat nuevo y solo de lectura** (el auditor no edita nada). Prompt corto:
+Obligatoria y **una sola por PR** (DS-35), en un **chat nuevo y solo de lectura** (el auditor no edita nada). Prompt corto:
 
-> Eres auditor de solo lectura del repo Urbanex. No modifiques archivos ni ejecutes comandos que escriban. Lee `AGENTS.md`. Compara la rama actual con `origin/develop` (`git diff origin/develop...HEAD --name-only` y el diff completo) y reporta, con archivo:línea o comando + salida: (1) archivos fuera del alcance de la tarea o de otra persona (§4); (2) archivos prohibidos o credenciales; (3) migraciones editadas o en conflicto; (4) IDs DT/FX/DS/V repetidos o fuera de rango; (5) validaciones marcadas como aprobadas sin persona, fecha, hora y captura; (6) documentación que falte según §10; (7) resultado real de la suite. Termina con "Apto para PR" o "No apto" y la lista de lo que hay que corregir.
+> Eres auditor de solo lectura del repo Urbanex. No modifiques archivos ni ejecutes comandos que escriban. Lee `AGENTS.md`. Compara la rama actual con `origin/develop` (`git diff origin/develop...HEAD --name-only` y el diff completo) y reporta, con archivo:línea o comando + salida: (1) archivos fuera del alcance de la tarea o de otra persona (§4); (2) archivos prohibidos o credenciales; (3) migraciones editadas o en conflicto; (4) IDs DT/FX/DS/V repetidos o fuera de rango; (5) validaciones marcadas como aprobadas sin persona, fecha, hora y evidencia (una por criterio, §9); (6) documentación que falte según §10; (7) resultado real de la suite (en un PR de Nivel 1, PostgreSQL "No ejecutado" con su DT no bloquea; §7). Termina con "Apto para PR" o "No apto" y la lista de lo que hay que corregir.
 
 ## 12. Idioma
 

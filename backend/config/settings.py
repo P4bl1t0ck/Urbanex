@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.documents.apps.DocumentsConfig',  # Expediente digital (RF-10)
     'apps.appraisals.apps.AppraisalsConfig',  # Avalúos (RF-11)
     'apps.opportunities.apps.OpportunitiesConfig',  # Seguimiento de oportunidades (RF-05, RF-06)
+    'apps.visits.apps.VisitsConfig',  # Agendamiento de visitas (RF-09, RF-04)
 ]
 
 MIDDLEWARE = [
@@ -177,6 +178,10 @@ USE_I18N = True
 USE_TZ = True
 
 AUTH_USER_MODEL = "users.User"
+
+# Agendamiento de visitas (HU-18, RF-09): el cliente no ve franjas que empiecen antes de esta
+# antelacion. Valor provisional de Pablo (2026-11-06): 2 horas; pregunta abierta para la empresa.
+VISIT_MIN_LEAD_TIME_MINUTES = 120
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
