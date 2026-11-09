@@ -775,3 +775,285 @@ class WebInterestThrottleTests(PublicP07Mixin, TestCase):
         with override_settings(REST_FRAMEWORK=rest):
             codes = [self.post(i).status_code for i in range(2)]
         self.assertEqual(codes, [status.HTTP_201_CREATED, status.HTTP_429_TOO_MANY_REQUESTS])
+
+
+# ---------------------------------------------------------------------------------------------
+# Lote 4 (DS-50): HU-29 avanzar el estado y HU-30 interacciones, detalle I-06A
+# ---------------------------------------------------------------------------------------------
+
+def detail_url(opportunity_id):
+    return f'{OPPORTUNITIES_URL}{opportunity_id}/'
+
+
+def status_url(opportunity_id):
+    return f'{OPPORTUNITIES_URL}{opportunity_id}/status/'
+
+
+def interactions_url(opportunity_id):
+    return f'{OPPORTUNITIES_URL}{opportunity_id}/interactions/'
+
+
+class I06AMixin(OpportunityApiMixin):
+    def setUp(self):
+        super().setUp()
+        self.opp = self.opportunity()
+        self.client.force_authenticate(self.agent)
+
+    def add_visit(self, opportunity=None, visit_status=Visit.Status.PROGRAMADA, days=1):
+        opportunity = opportunity or self.opp
+        start = timezone.now() + timedelta(days=days)
+        return Visit.objects.create(
+            opportunity=opportunity, property=opportunity.property, agent=self.agent,
+            scheduled_start=start, scheduled_end=start + timedelta(hours=1), status=visit_status,
+        )
+
+    def set_status(self, value, opportunity=None):
+        opportunity = opportunity or self.opp
+        Opportunity.objects.filter(pk=opportunity.pk).update(status=value)
+        opportunity.refresh_from_db()
+
+    def advance(self, target, **extra):
+        return self.client.post(status_url(self.opp.pk), {'status': target, **extra},
+                                format='json')
+
+
+class StatusAdvanceApiTests(I06AMixin, TestCase):
+    '''HU-29 (RF-06, DS-50): un paso a la vez, con sus requisitos.'''
+
+    def test_full_sequence_with_its_requirements(self):
+        visit = self.add_visit()
+        response = self.advance(Opportunity.Status.VISITA_PROGRAMADA)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], Opportunity.Status.VISITA_PROGRAMADA)
+        self.assertEqual(response.data['next_status'], Opportunity.Status.EN_NEGOCIACION)
+
+        # Sin una visita REALIZADA no se negocia (RF-04).
+        response = self.advance(Opportunity.Status.EN_NEGOCIACION)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('status', response.data)
+        Visit.objects.filter(pk=visit.pk).update(status=Visit.Status.REALIZADA)
+        self.assertEqual(self.advance(Opportunity.Status.EN_NEGOCIACION).status_code,
+                         status.HTTP_200_OK)
+
+        response = self.advance(Opportunity.Status.PENDIENTE_CIERRE)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('agreed_final_price', response.data)
+        response = self.advance(Opportunity.Status.PENDIENTE_CIERRE,
+                                agreed_final_price='142500.00')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data['next_status'])
+
+        self.opp.refresh_from_db()
+        self.assertEqual(self.opp.status, Opportunity.Status.PENDIENTE_CIERRE)
+        self.assertEqual(self.opp.agreed_final_price, Decimal('142500.00'))
+        history = list(self.opp.status_history.values_list(
+            'previous_status', 'new_status', 'changed_by', 'reason'))
+        self.assertEqual([row[:2] for row in history], [
+            (Opportunity.Status.CONTACTO_INICIAL, Opportunity.Status.VISITA_PROGRAMADA),
+            (Opportunity.Status.VISITA_PROGRAMADA, Opportunity.Status.EN_NEGOCIACION),
+            (Opportunity.Status.EN_NEGOCIACION, Opportunity.Status.PENDIENTE_CIERRE),
+        ])
+        self.assertTrue(all(row[2] == self.agent.pk and row[3] for row in history))
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.price, 150000)  # El precio publico no cambia
+
+    def test_visita_programada_needs_a_programmed_or_completed_visit(self):
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        for visit_status in (Visit.Status.CANCELADA, Visit.Status.NO_ASISTIDA):
+            self.add_visit(visit_status=visit_status, days=-2)
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.add_visit(visit_status=Visit.Status.REALIZADA, days=-1)
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_200_OK)
+
+    def test_visit_of_another_opportunity_does_not_count(self):
+        other = self.opportunity(property=self.other_property)
+        self.add_visit(opportunity=other)
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_skip_steps_or_go_back(self):
+        self.add_visit(visit_status=Visit.Status.REALIZADA, days=-1)
+        for target in (Opportunity.Status.EN_NEGOCIACION, Opportunity.Status.PENDIENTE_CIERRE,
+                       Opportunity.Status.CONTACTO_INICIAL, Opportunity.Status.PERDIDA,
+                       Opportunity.Status.CIERRE):
+            with self.subTest(target=target):
+                response = self.advance(target, agreed_final_price='1000.00')
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.set_status(Opportunity.Status.EN_NEGOCIACION)
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(self.opp.status_history.exists())
+
+    def test_states_outside_the_cut_do_not_advance(self):
+        for current in (Opportunity.Status.PENDIENTE_CIERRE, Opportunity.Status.LISTA_INTERESADOS,
+                        Opportunity.Status.RESERVADA, Opportunity.Status.CIERRE,
+                        Opportunity.Status.PERDIDA):
+            with self.subTest(current=current):
+                self.set_status(current)
+                for target in Opportunity.Status.values:
+                    self.assertEqual(self.advance(target).status_code,
+                                     status.HTTP_400_BAD_REQUEST)
+
+    def test_price_only_on_the_step_to_pendiente_cierre_and_positive(self):
+        self.add_visit()
+        response = self.advance(Opportunity.Status.VISITA_PROGRAMADA, agreed_final_price='5000')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('agreed_final_price', response.data)
+        self.set_status(Opportunity.Status.EN_NEGOCIACION)
+        for price in ('0', '-10', 'abc'):
+            with self.subTest(price=price):
+                response = self.advance(Opportunity.Status.PENDIENTE_CIERRE,
+                                        agreed_final_price=price)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.opp.refresh_from_db()
+        self.assertIsNone(self.opp.agreed_final_price)
+
+    def test_unknown_status_is_rejected(self):
+        self.assertEqual(self.advance('GANADA').status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_admin_can_advance_any_opportunity(self):
+        self.add_visit()
+        self.client.force_authenticate(self.admin)
+        response = self.advance(Opportunity.Status.VISITA_PROGRAMADA)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.opp.status_history.get().changed_by, self.admin)
+
+    def test_other_agent_gets_404_and_nothing_changes(self):
+        self.add_visit()
+        self.client.force_authenticate(self.other_agent)
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.opp.refresh_from_db()
+        self.assertEqual(self.opp.status, Opportunity.Status.CONTACTO_INICIAL)
+
+    def test_anonymous_and_non_internal_users_are_rejected(self):
+        self.client.force_authenticate(None)
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_401_UNAUTHORIZED)
+        self.client.force_authenticate(self.legacy_client_user())
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_403_FORBIDDEN)
+
+
+class InteractionApiTests(I06AMixin, TestCase):
+    '''HU-30 (RF-06, DS-50): NOTA y CONTRAOFERTA del asesor asignado o del admin.'''
+
+    def post(self, **data):
+        return self.client.post(interactions_url(self.opp.pk), data, format='json')
+
+    def test_agent_registers_a_note(self):
+        before = self.opp.last_activity_at
+        response = self.post(interaction_type='NOTA', notes='  Llamó para pedir planos  ')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['notes'], 'Llamó para pedir planos')
+        self.assertEqual(response.data['author']['id'], self.agent.pk)
+        self.assertIsNone(response.data['offered_price'])
+        self.opp.refresh_from_db()
+        self.assertGreater(self.opp.last_activity_at, before)
+
+    def test_counteroffer_needs_a_positive_price_and_keeps_the_public_price(self):
+        for price in (None, '0', '-1'):
+            with self.subTest(price=price):
+                response = self.post(interaction_type='CONTRAOFERTA', notes='Ofrece menos',
+                                     offered_price=price)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn('offered_price', response.data)
+        response = self.post(interaction_type='CONTRAOFERTA', notes='Ofrece 140 mil',
+                             offered_price='140000.00')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['offered_price'], '140000.00')
+        self.property.refresh_from_db()
+        self.opp.refresh_from_db()
+        self.assertEqual(self.property.price, 150000)
+        self.assertIsNone(self.opp.agreed_final_price)
+
+    def test_note_cannot_carry_a_price(self):
+        response = self.post(interaction_type='NOTA', notes='Nota', offered_price='100')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('offered_price', response.data)
+
+    def test_system_type_and_empty_notes_are_rejected(self):
+        cases = (({'interaction_type': 'SISTEMA', 'notes': 'Falso'}, 'interaction_type'),
+                 ({'interaction_type': 'OTRO', 'notes': 'x'}, 'interaction_type'),
+                 ({'interaction_type': 'NOTA', 'notes': '   '}, 'notes'),
+                 ({'interaction_type': 'NOTA'}, 'notes'))
+        for data, field in cases:
+            with self.subTest(data=data):
+                response = self.post(**data)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn(field, response.data)
+        self.assertFalse(OpportunityInteraction.objects.exists())
+
+    def test_visit_must_belong_to_the_opportunity(self):
+        other = self.opportunity(property=self.other_property)
+        foreign = self.add_visit(opportunity=other)
+        response = self.post(interaction_type='NOTA', notes='Sobre la visita', visit=foreign.pk)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('visit', response.data)
+        own = self.add_visit(days=2)
+        response = self.post(interaction_type='NOTA', notes='Sobre la visita', visit=own.pk)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['visit'], own.pk)
+
+    def test_list_is_chronological_and_includes_system_entries(self):
+        OpportunityInteraction.objects.create(
+            opportunity=self.opp, interaction_type=OpportunityInteraction.Type.SISTEMA,
+            notes=WEB_FORM_EMPTY_NOTE,
+        )
+        self.post(interaction_type='NOTA', notes='Segunda')
+        response = self.client.get(interactions_url(self.opp.pk))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([row['notes'] for row in response.data],
+                         [WEB_FORM_EMPTY_NOTE, 'Segunda'])
+        self.assertIsNone(response.data[0]['author'])
+
+    def test_admin_can_register_and_other_agent_gets_404(self):
+        self.client.force_authenticate(self.admin)
+        self.assertEqual(self.post(interaction_type='NOTA', notes='Del admin').status_code,
+                         status.HTTP_201_CREATED)
+        self.client.force_authenticate(self.other_agent)
+        self.assertEqual(self.post(interaction_type='NOTA', notes='Ajena').status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.client.get(interactions_url(self.opp.pk)).status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(OpportunityInteraction.objects.count(), 1)
+
+
+class OpportunityDetailApiTests(I06AMixin, TestCase):
+    '''I-06A (DS-50): detalle de la oportunidad para el asesor asignado o el admin.'''
+
+    def test_detail_has_next_status_history_interactions_and_visits(self):
+        OpportunityStatusHistory.objects.create(
+            opportunity=self.opp, new_status=self.opp.status, changed_by=None,
+            reason=WEB_FORM_OPENING_REASON,
+        )
+        OpportunityInteraction.objects.create(
+            opportunity=self.opp, interaction_type=OpportunityInteraction.Type.SISTEMA,
+            notes=WEB_FORM_EMPTY_NOTE,
+        )
+        visit = self.add_visit()
+        response = self.client.get(detail_url(self.opp.pk))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
+        self.assertEqual(data['next_status'], Opportunity.Status.VISITA_PROGRAMADA)
+        self.assertEqual(data['next_status_display'], 'Visita programada')
+        self.assertIsNone(data['agreed_final_price'])
+        self.assertIsNone(data['status_history'][0]['changed_by'])
+        self.assertEqual(data['interactions'][0]['notes'], WEB_FORM_EMPTY_NOTE)
+        self.assertEqual([row['id'] for row in data['visits']], [visit.pk])
+        self.assertEqual(data['contact']['phone'], self.contact.phone)
+
+    def test_other_agent_gets_404_and_admin_sees_it(self):
+        self.client.force_authenticate(self.other_agent)
+        self.assertEqual(self.client.get(detail_url(self.opp.pk)).status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.client.force_authenticate(self.admin)
+        self.assertEqual(self.client.get(detail_url(self.opp.pk)).status_code,
+                         status.HTTP_200_OK)
+
+    def test_list_filters_do_not_hide_the_detail(self):
+        response = self.client.get(detail_url(self.opp.pk), {'status': 'PERDIDA'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
