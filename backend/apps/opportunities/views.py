@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.views import APIView
 
@@ -165,9 +166,17 @@ class OpportunityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class IPRateThrottle(SimpleRateThrottle):
     '''
-    Limite por IP para los endpoints publicos. Como en el lote 3 (DS-39), la tasa se define en
-    la clase y no en settings.py, que es un archivo compartido. Cache por defecto de Django.
+    Limite por IP para los endpoints publicos. Cache por defecto de Django.
+
+    Tasa configurable (DS-50): si REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] tiene una entrada
+    para el scope, manda esa; si no, default_rate. Hoy no se toca settings.py (archivo
+    compartido): los valores por defecto viven aqui, como en el lote 3 (DS-39), y se unifican
+    despues con el lote 3 y la rama HU-46 agregando las entradas en settings.
     '''
+    default_rate = None
+
+    def get_rate(self):
+        return api_settings.DEFAULT_THROTTLE_RATES.get(self.scope) or self.default_rate
 
     def get_cache_key(self, request, view):
         return self.cache_format % {'scope': self.scope, 'ident': self.get_ident(request)}
@@ -175,18 +184,18 @@ class IPRateThrottle(SimpleRateThrottle):
 
 class WebInterestBurstThrottle(IPRateThrottle):
     scope = 'opportunities_interest_burst'
-    rate = '3/minute'
+    default_rate = '3/minute'
 
 
 class WebInterestDailyThrottle(IPRateThrottle):
     scope = 'opportunities_interest_daily'
-    rate = '10/day'
+    default_rate = '10/day'
 
 
 class WhatsAppContactThrottle(IPRateThrottle):
     # Frena la recoleccion masiva de telefonos de asesores (DT-117).
     scope = 'opportunities_whatsapp'
-    rate = '30/minute'
+    default_rate = '30/minute'
 
 
 def public_property_or_404(property_id):

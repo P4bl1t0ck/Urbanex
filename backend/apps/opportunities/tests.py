@@ -8,7 +8,8 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import ProtectedError
-from django.test import SimpleTestCase, TestCase
+from django.conf import settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -763,7 +764,14 @@ class WebInterestThrottleTests(PublicP07Mixin, TestCase):
         self.assertEqual(codes[3], status.HTTP_429_TOO_MANY_REQUESTS)
 
     def test_eleventh_request_in_a_day_is_rejected(self):
-        with mock.patch.object(WebInterestBurstThrottle, 'rate', '100/minute'):
+        with mock.patch.object(WebInterestBurstThrottle, 'default_rate', '100/minute'):
             codes = [self.post(i).status_code for i in range(11)]
         self.assertEqual(codes[:10], [status.HTTP_201_CREATED] * 10)
         self.assertEqual(codes[10], status.HTTP_429_TOO_MANY_REQUESTS)
+
+    def test_rate_can_be_configured_in_settings_without_code_changes(self):
+        rest = {**settings.REST_FRAMEWORK,
+                'DEFAULT_THROTTLE_RATES': {'opportunities_interest_burst': '1/minute'}}
+        with override_settings(REST_FRAMEWORK=rest):
+            codes = [self.post(i).status_code for i in range(2)]
+        self.assertEqual(codes, [status.HTTP_201_CREATED, status.HTTP_429_TOO_MANY_REQUESTS])
