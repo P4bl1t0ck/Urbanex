@@ -89,7 +89,7 @@ Evidencia (DS-35): **una sola por criterio de aceptación** del Anexo 2, una cap
 ## 10. Al terminar
 
 Entrega, en el mismo PR:
-1. La **suite completa** con su número real de OK (Estándares §4 + `makemigrations --check --dry-run`) y, si se tocó el frontend, `npm run build`, `npx tsc --noEmit -p .` y `npx eslint .`.
+1. La **suite completa** con su número real de OK (Estándares §4 + `makemigrations --check --dry-run`) y, si se tocó el frontend, `npm run build`, `npx tsc --noEmit -p .` y `npx eslint .`. Cada ejecución se registra en Estándares §4 con el formato de los párrafos existentes: **"Ejecución registrada (fecha, rama o commit):"** seguido del motor (`connection.vendor`), cada comando → resultado real y exit, y la suite contra PostgreSQL ("No ejecutado" si no se corrió). Sin bloques sueltos ni encabezados informales.
 2. La **documentación actualizada**, con fecha en "Última actualización": Progress, Estado de procesos, Avance de épicas, Deuda (DT, FX, DS), GPS, DoD (checklist de Estándares §4 en el PR, con evidencia o "N/A + motivo") y, si cambia un riesgo, Seguridad.
 3. Una **explicación en lenguaje simple**: qué hace cada cambio, en qué archivo está (backend y frontend) y cómo se conectan, para que cualquiera del equipo pueda entenderlo, continuarlo o repararlo.
 4. La **lista de validaciones visuales** para la persona, sin marcarlas como hechas, y las decisiones que necesita.
