@@ -85,7 +85,7 @@ Copiar este checklist en el PR o en el registro de la HU. **No marcar una casill
 (2026-11-03) En la rama de oportunidades, con `apps.opportunities.tests` en el comando: **155 pruebas OK** (55 users + 19 documents + 44 appraisals + 37 opportunities; FX-25). Antes: 151 al fusionar `develop` (116 + 35, FX-19); sin `develop`, 125 (2026-10-30).
 
 ```bash
-pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests apps.visits.testsvisits.tests
+pipenv run python manage.py test apps.users.tests apps.documents.tests apps.appraisals.tests apps.opportunities.tests apps.visits.tests
 pipenv run python manage.py makemigrations --check --dry-run
 ```
 
@@ -95,8 +95,7 @@ En Windows, fija antes de la suite `PIPENV_DONT_LOAD_ENV=1`, `DB_ENGINE=sqlite` 
 
 **Ejecución registrada (2026-11-04, rama `feat/URB-30-34-HU-27-HU-34-oportunidades` tras fusionar `develop` `5fb3910`):** con `connection.vendor` = `sqlite`, el comando de arriba (con `apps.opportunities.tests`) → `Ran 155 tests`, **OK** (exit 0); `makemigrations --check --dry-run` → "No changes detected", exit 0 (en la carpeta principal; el `documents/0002` de DT-92 solo aparece en un worktree, DT-77). En `frontend/`: `npm test` → 9/9; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, 0 errores y 2 avisos (DT-24); `npm run build` exit 0. Suite local contra PostgreSQL: **No ejecutado**.
 
-*Revision*
-Ejecución registrada (2026-11-08, lote 2 HU-22, HU-18, HU-24): con connection.vendor = sqlite, el comando de arriba (incluyendo apps.visits.tests) → Ran 229 tests, OK (exit 0). En frontend/: npm test → 17/17 pass; npx tsc --noEmit -p . exit 0; npx eslint . exit 0, 0 errores y 2 avisos (DT-24); npm run build exit 0.
+**Ejecución registrada (2026-11-08, `develop` `e19a5df` tras el PR #19; lote 2: HU-22, HU-18 y HU-24):** con `connection.vendor` = `sqlite`, el comando de arriba (con `apps.visits.tests`) → `Ran 229 tests`, **OK** (exit 0); `makemigrations --check --dry-run` → exit 1, detecta `apps/documents/migrations/0002_alter_document_file.py` (DT-92; repetido el 2026-11-08 en el worktree `Urbanex-visitas` al fusionar `develop` en `docs/post-merge-pr15`). En `frontend/`: `npm test` → 17/17; `npx tsc --noEmit -p .` exit 0; `npx eslint .` exit 0, 0 errores y 2 avisos (DT-24); `npm run build` exit 0. Suite local contra PostgreSQL: **No ejecutado**.
 
 Cada app nueva agrega su etiqueta a este comando en el mismo cambio que la crea.
 
