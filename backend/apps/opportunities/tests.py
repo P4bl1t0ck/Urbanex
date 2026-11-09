@@ -1010,6 +1010,16 @@ class InteractionApiTests(I06AMixin, TestCase):
                          [WEB_FORM_EMPTY_NOTE, 'Segunda'])
         self.assertIsNone(response.data[0]['author'])
 
+    def test_closed_opportunity_rejects_new_interactions_but_lost_one_accepts(self):
+        self.set_status(Opportunity.Status.CIERRE)
+        response = self.post(interaction_type='NOTA', notes='Después del cierre')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('detail', response.data)
+        self.assertFalse(OpportunityInteraction.objects.exists())
+        self.set_status(Opportunity.Status.PERDIDA)
+        self.assertEqual(self.post(interaction_type='NOTA', notes='Seguimiento').status_code,
+                         status.HTTP_201_CREATED)
+
     def test_admin_can_register_and_other_agent_gets_404(self):
         self.client.force_authenticate(self.admin)
         self.assertEqual(self.post(interaction_type='NOTA', notes='Del admin').status_code,
@@ -1053,6 +1063,26 @@ class OpportunityDetailApiTests(I06AMixin, TestCase):
         self.client.force_authenticate(self.admin)
         self.assertEqual(self.client.get(detail_url(self.opp.pk)).status_code,
                          status.HTTP_200_OK)
+
+    def test_detail_says_why_the_next_step_is_blocked(self):
+        data = self.client.get(detail_url(self.opp.pk)).data
+        self.assertIn('visita programada o realizada', data['advance_blocked_reason'])
+        self.assertTrue(data['accepts_interactions'])
+
+        visit = self.add_visit()
+        self.assertEqual(self.client.get(detail_url(self.opp.pk)).data['advance_blocked_reason'],
+                         '')
+        self.set_status(Opportunity.Status.VISITA_PROGRAMADA)
+        data = self.client.get(detail_url(self.opp.pk)).data
+        self.assertIn('visita realizada', data['advance_blocked_reason'])
+        Visit.objects.filter(pk=visit.pk).update(status=Visit.Status.REALIZADA)
+        self.assertEqual(self.client.get(detail_url(self.opp.pk)).data['advance_blocked_reason'],
+                         '')
+
+        self.set_status(Opportunity.Status.CIERRE)
+        data = self.client.get(detail_url(self.opp.pk)).data
+        self.assertEqual((data['next_status'], data['advance_blocked_reason']), (None, ''))
+        self.assertFalse(data['accepts_interactions'])
 
     def test_list_filters_do_not_hide_the_detail(self):
         response = self.client.get(detail_url(self.opp.pk), {'status': 'PERDIDA'})
