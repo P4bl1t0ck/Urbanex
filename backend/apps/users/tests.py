@@ -26,6 +26,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from apps.appraisals.models import Appraisal
 from apps.documents.models import Document
+from apps.users.authentication import PasswordVersionRefreshToken
 from apps.users.models import (
     PasswordResetToken,
     Property,
@@ -474,6 +475,72 @@ class PasswordResetAndRefreshApiTests(TestCase):
         )
         self.assertEqual(replay_response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_reset_rejects_old_tokens_and_accepts_new_login_in_same_second(self):
+        second = timezone.now().replace(microsecond=0)
+        self.user.password_changed_at = second - timedelta(seconds=2)
+        self.user.save(update_fields=["password_changed_at"])
+
+        def login(password, instant):
+            with mock.patch(
+                "rest_framework_simplejwt.tokens.aware_utcnow", return_value=instant
+            ):
+                response = self.client.post(
+                    "/api/auth/login/",
+                    {"email": self.user.email, "password": password},
+                    format="json",
+                )
+            self.assertEqual(response.status_code, 200, response.data)
+            return (
+                response.data["access"],
+                response.cookies[settings.JWT_REFRESH_COOKIE_NAME].value,
+            )
+
+        old_access, old_refresh = login(
+            "Original-Safe-2026!", second + timedelta(microseconds=100000)
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {old_access}")
+        self.assertEqual(self.client.get("/api/auth/properties/mine/").status_code, 200)
+        self.client.credentials()
+        _, raw_token = self._request_password_reset()
+        changed_at = second + timedelta(microseconds=800000)
+        with mock.patch("django.utils.timezone.now", return_value=changed_at):
+            response = self.client.post(
+                "/api/auth/password-reset/confirm/",
+                {"token": raw_token, "password": "Same-Second-New-Safe-2026!"},
+                format="json",
+            )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.password_changed_at, changed_at)
+        self._assert_old_session_rejected(old_access, old_refresh)
+
+        new_access, new_refresh = login(
+            "Same-Second-New-Safe-2026!", second + timedelta(microseconds=900000)
+        )
+        self.assertEqual(AccessToken(old_access)["iat"], AccessToken(new_access)["iat"])
+        self.assertEqual(RefreshToken(old_refresh)["iat"], RefreshToken(new_refresh)["iat"])
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {new_access}")
+        self.assertEqual(client.get("/api/auth/properties/mine/").status_code, 200)
+        client.credentials()
+        client.cookies[settings.JWT_REFRESH_COOKIE_NAME] = new_refresh
+        client.get("/api/auth/csrf/")
+        response = client.post(
+            "/api/token/refresh/", {}, format="json",
+            HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value,
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.data['access']}")
+        self.assertEqual(client.get("/api/auth/properties/mine/").status_code, 200)
+
+    def test_legacy_tokens_in_ambiguous_second_are_rejected(self):
+        self.user.password_changed_at = timezone.now().replace(microsecond=800000)
+        self.user.save(update_fields=["password_changed_at"])
+        access = AccessToken.for_user(self.user)
+        refresh = RefreshToken.for_user(self.user)
+        access["iat"] = refresh["iat"] = int(self.user.password_changed_at.timestamp())
+        self._assert_old_session_rejected(str(access), str(refresh))
+
     def test_successful_password_reset_unlocks_account_and_allows_login(self):
         self.user.is_locked = True
         self.user.failed_attempts = 5
@@ -639,7 +706,7 @@ class PasswordResetAndRefreshApiTests(TestCase):
 
     def test_refresh_requires_csrf_and_sets_no_refresh_token_in_response(self):
         client = APIClient(enforce_csrf_checks=True)
-        refresh = RefreshToken.for_user(self.user)
+        refresh = PasswordVersionRefreshToken.for_user(self.user)
         client.cookies[settings.JWT_REFRESH_COOKIE_NAME] = str(refresh)
 
         rejected_response = client.post(
