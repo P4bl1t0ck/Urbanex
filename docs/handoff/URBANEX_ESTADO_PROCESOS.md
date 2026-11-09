@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
 | Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
@@ -466,3 +467,7 @@ Decisión de Pablo (2026-11-08, PR #18). **No cambia ningún estado:** cada HU s
 | C-08 | Pueden existir valores heredados `cliente` en bases de datos, aunque `User.Role` ya solo define `admin` y `asesor`; RF-12 solo reconoce esos dos roles internos | Valores históricos en base vs `models.py` / RF-12 | **Confirmada por Pablo el 2026-10-31 (DS-30):** los clientes no tienen cuenta; eliminar `cliente`. Superusuarios cliente pasan a `admin`; las demás cuentas pasan a `asesor` inactivo con motivo `rol cliente eliminado (C-08)` |
 
 > **Nota añadida (Pablo, 2026-11-03), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`:** la fila C-08 queda con el texto de `develop`. En esta rama decía "confirmada por Pablo (2026-11-01)"; la confirmación vale desde el **2026-10-31 (DS-30)**. El 2026-11-01 Pablo la repitió al cerrar DT-105 en código (FX-23, `033b845`): solo hay roles `admin` y `asesor`, el cliente es anónimo (sin cuenta) y las pruebas de oportunidades ya no usan `role='cliente'`.
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+HU-46 permanece en **Pruebas**. La corrección agrega versión precisa de contraseña a access y refresh para rechazar sesiones anteriores dentro del mismo segundo sin impedir el login inmediato con la contraseña nueva. Los JWT heredados del segundo ambiguo requieren volver a iniciar sesión. Se conservan los registros humanos de V-44; esta corrección no añade una aprobación humana. Resultados automáticos de esta sesión en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu).

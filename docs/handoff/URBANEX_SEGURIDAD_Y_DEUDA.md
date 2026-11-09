@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
 | Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
@@ -379,3 +380,7 @@ Frontend Next.js en Vercel · backend Django REST en Render con Docker · Postgr
 7. **SEC-03, SEC-06, SEC-11 y DT-42** según el sprint.
 
 Al cerrar un riesgo: actualizar su fila en §0, su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) y, si cambia el control de acceso, la tabla de §1.1.
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+**SEC-05/DT-33:** la comparación anterior truncaba microsegundos y aceptaba JWT previos al cambio dentro del mismo segundo. Los JWT nuevos llevan `password_version`, comparada con la marca completa de contraseña, y mantienen la comprobación de `iat`. Para JWT heredados sin versión precisa, el segundo ambiguo se rechaza: puede requerirse un nuevo login. La regresión cubre tanto access como refresh y comprueba que los nuevos funcionen inmediatamente. Se mantienen los límites documentados de logout, la necesidad de revisar dominios de producción y los riesgos abiertos; no se declara cierre global de SEC-05. Evidencia técnica en Estándares §4; V-44 humana se conserva.

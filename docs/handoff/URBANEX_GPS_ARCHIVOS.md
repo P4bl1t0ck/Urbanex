@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
 | Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
@@ -260,3 +261,7 @@ flowchart LR
 | `CLAUDE.md` (raíz) y `.github/copilot-instructions.md` (2026-10-31) | Puntos de entrada de Claude Code y de Copilot: solo apuntan a `AGENTS.md` | No agregar reglas aquí; van en `AGENTS.md` |
 | `.github/pull_request_template.md` y `docs/handoff/PLANTILLA_TAREA.md` (2026-10-31) | Plantilla de cada PR y ficha de cada tarea (DS-25) | Mantenerlas alineadas con `AGENTS.md` §2, §10 y §11 |
 | `docs/handoff/URBANEX_USM_TRAZABILIDAD.md` (2026-11-03) | User Story Mapping: etapas, procesos PROC-01..08, HU → RF/RNF/pantalla y la columna **Código** (archivos y endpoints de cada paso, sin números de línea). Lo leen los dos y lo cita `AGENTS.md` §1 | No copia estados: enlaza a Estado de procesos. Al implementar un paso, actualizar su celda Código en el mismo PR; si se fusiona una rama citada como "rama sin fusionar", quitar esa marca. El corte del 60 % (§2) y el §6 son **PROPUESTA**: no cambiarlos sin acuerdo de Pablo y Sebas |
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+`backend/apps/users/authentication.py` define `PasswordVersionRefreshToken`: añade `password_version` al refresh y el access la hereda. La comprobación compartida exige coincidencia con `User.password_changed_at` completo; conserva compatibilidad conservadora para JWT antiguos, rechazando el segundo ambiguo. `backend/apps/users/views.py` (**compartido**, incluido en la Fase 0 autorizada) usa esa clase en `LoginView`; no cambia otras vistas. `backend/apps/users/tests.py` comprueba login anterior, recuperación y nuevo login con el mismo `iat`, rechazo de access/refresh anteriores, acceso con los nuevos y renovación válida; también cubre tokens heredados ambiguos. Sin cambios de frontend, dependencias, modelos ni migraciones. Comandos y resultados en Estándares §4.
