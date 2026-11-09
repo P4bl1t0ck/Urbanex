@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from .models import Contact, Opportunity
-from .services import assignable_agents, eligible_properties
+from .models import Contact, Opportunity, OpportunityInteraction, OpportunityStatusHistory
+from .services import assignable_agents, eligible_properties, next_status
 
 
 def user_display_name(user):
@@ -93,6 +93,97 @@ class WebInterestSerializer(serializers.Serializer):  # pylint: disable=abstract
     email_opt_in = serializers.BooleanField(required=False, default=False)
     message = serializers.CharField(required=False, allow_blank=True, max_length=2000)
     privacy_accepted = serializers.BooleanField(required=False, default=False)
+
+
+def user_summary(user):
+    return {'id': user.pk, 'name': user_display_name(user)} if user else None
+
+
+class StatusHistorySerializer(serializers.ModelSerializer):
+    '''Historial de estados de I-06A. changed_by es null en los cambios del sistema o del portal.'''
+    previous_status_display = serializers.SerializerMethodField()
+    new_status_display = serializers.CharField(source='get_new_status_display', read_only=True)
+    changed_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OpportunityStatusHistory
+        fields = ['id', 'previous_status', 'previous_status_display', 'new_status',
+                  'new_status_display', 'changed_by', 'reason', 'created_at']
+        read_only_fields = fields
+
+    def get_previous_status_display(self, obj):
+        return obj.get_previous_status_display() if obj.previous_status else ''
+
+    def get_changed_by(self, obj):
+        return user_summary(obj.changed_by)
+
+
+class InteractionSerializer(serializers.ModelSerializer):
+    '''Interacciones de I-06A (HU-30). author es null en las de tipo SISTEMA.'''
+    interaction_type_display = serializers.CharField(source='get_interaction_type_display',
+                                                     read_only=True)
+    author = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OpportunityInteraction
+        fields = ['id', 'interaction_type', 'interaction_type_display', 'notes', 'offered_price',
+                  'visit', 'author', 'created_at']
+        read_only_fields = fields
+
+    def get_author(self, obj):
+        return user_summary(obj.author)
+
+
+class OpportunityDetailSerializer(OpportunitySerializer):
+    '''
+    Detalle de la oportunidad (I-06A, HU-29 y HU-30): datos de la cartera mas el precio final
+    acordado, el siguiente estado permitido, el historial, las interacciones y las visitas.
+    '''
+    next_status = serializers.SerializerMethodField()
+    next_status_display = serializers.SerializerMethodField()
+    status_history = StatusHistorySerializer(many=True, read_only=True)
+    interactions = InteractionSerializer(many=True, read_only=True)
+    visits = serializers.SerializerMethodField()
+
+    class Meta(OpportunitySerializer.Meta):
+        fields = OpportunitySerializer.Meta.fields + [
+            'agreed_final_price', 'next_status', 'next_status_display', 'status_history',
+            'interactions', 'visits',
+        ]
+        read_only_fields = fields
+
+    def get_next_status(self, obj):
+        return next_status(obj)
+
+    def get_next_status_display(self, obj):
+        target = next_status(obj)
+        return Opportunity.Status(target).label if target else ''
+
+    def get_visits(self, obj):
+        return [
+            {'id': visit.pk, 'scheduled_start': visit.scheduled_start,
+             'scheduled_end': visit.scheduled_end, 'status': visit.status,
+             'status_display': visit.get_status_display()}
+            for visit in obj.visits.all()
+        ]
+
+
+class StatusChangeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-29. Las reglas de la secuencia las aplica services.advance_status().'''
+    status = serializers.ChoiceField(choices=Opportunity.Status.choices)
+    agreed_final_price = serializers.DecimalField(
+        max_digits=12, decimal_places=2, required=False, allow_null=True, default=None,
+    )
+
+
+class InteractionCreateSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-30. Las reglas las aplican services.add_interaction() y el modelo.'''
+    interaction_type = serializers.ChoiceField(choices=OpportunityInteraction.Type.choices)
+    notes = serializers.CharField(allow_blank=True, max_length=2000, trim_whitespace=True)
+    offered_price = serializers.DecimalField(
+        max_digits=12, decimal_places=2, required=False, allow_null=True, default=None,
+    )
+    visit = serializers.IntegerField(required=False, allow_null=True, default=None)
 
 
 class AgentOptionSerializer(serializers.Serializer):

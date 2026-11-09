@@ -18,13 +18,19 @@ from .models import Opportunity
 from .serializers import (
     AgentOptionSerializer,
     EligiblePropertySerializer,
+    InteractionCreateSerializer,
+    InteractionSerializer,
+    OpportunityDetailSerializer,
     OpportunityOpenSerializer,
     OpportunitySerializer,
+    StatusChangeSerializer,
     WebInterestSerializer,
 )
 from .services import (
     InterestNotAccepted,
     OpportunityConflict,
+    add_interaction,
+    advance_status,
     agent_whatsapp_number,
     assignable_agents,
     eligible_properties,
@@ -93,16 +99,24 @@ def filter_opportunities(queryset, params):
     return queryset
 
 
-class OpportunityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                         viewsets.GenericViewSet):
     '''
-    Oportunidades (RF-05, HU-27 y HU-34). Primer corte: sin detalle ni cambios de estado
-    (I-06A y RF-06 llegan despues).
+    Oportunidades (RF-05, RF-06; HU-27, HU-34, HU-29 y HU-30).
 
     GET  /api/opportunities/?assigned_agent=&property=&status=&created_from=&created_to=
          -> cartera paginada; el asesor ve la suya y el admin todas (HU-34)
     POST /api/opportunities/  -> apertura manual (HU-27, I-07); 409 si ya hay una activa
     GET  /api/opportunities/eligible-properties/  -> propiedades disponibles, datos publicos
     GET  /api/opportunities/agents/  -> asesores activos (solo admin, para elegir responsable)
+
+    Lote 4 (DS-50), I-06A. El asesor asignado o el admin; otro asesor recibe 404, como en la
+    cartera (no ve oportunidades ajenas):
+    GET  /api/opportunities/<id>/  -> detalle con historial, interacciones y visitas
+    POST /api/opportunities/<id>/status/  {"status", "agreed_final_price"?}  -> HU-29
+    GET  /api/opportunities/<id>/interactions/  -> HU-30, orden cronologico
+    POST /api/opportunities/<id>/interactions/
+         {"interaction_type": "NOTA"|"CONTRAOFERTA", "notes", "offered_price"?, "visit"?}
     '''
     permission_classes = [permissions.IsAuthenticated, IsInternalUser]
     http_method_names = ['get', 'post', 'head', 'options']
@@ -115,7 +129,52 @@ class OpportunityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         # Permiso por objeto: el asesor solo ve su cartera (RNF-04, HU-34).
         if user.role != 'admin':
             queryset = queryset.filter(assigned_agent=user)
+        if self.action != 'list':
+            # Los filtros de la cartera no aplican al detalle ni a sus acciones.
+            return queryset.prefetch_related(
+                'status_history__changed_by', 'interactions__author', 'visits',
+            )
         return filter_opportunities(queryset, self.request.query_params)
+
+    def retrieve(self, request, pk=None):
+        return Response(OpportunityDetailSerializer(self.get_object()).data)
+
+    @action(detail=True, methods=['post'], url_path='status')
+    def change_status(self, request, pk=None):
+        opportunity = self.get_object()
+        data = StatusChangeSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        try:
+            advance_status(
+                opportunity_id=opportunity.pk, user=request.user,
+                target_status=data.validated_data['status'],
+                agreed_final_price=data.validated_data['agreed_final_price'],
+            )
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        return Response(OpportunityDetailSerializer(self.get_object()).data)
+
+    @action(detail=True, methods=['get', 'post'])
+    def interactions(self, request, pk=None):
+        opportunity = self.get_object()
+        if request.method == 'GET':
+            return Response(InteractionSerializer(opportunity.interactions.all(), many=True).data)
+        data = InteractionCreateSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        values = data.validated_data
+        try:
+            interaction = add_interaction(
+                opportunity_id=opportunity.pk, user=request.user,
+                interaction_type=values['interaction_type'], notes=values['notes'],
+                offered_price=values['offered_price'], visit_id=values['visit'],
+            )
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        return Response(InteractionSerializer(interaction).data, status=status.HTTP_201_CREATED)
 
     def create(self, request):
         data = OpportunityOpenSerializer(data=request.data)

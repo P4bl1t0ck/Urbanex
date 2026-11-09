@@ -288,3 +288,123 @@ def register_web_interest(*, property_obj, full_name, phone, email='', email_opt
             opportunity.last_activity_at = now
             opportunity.save(update_fields=['last_activity_at'])
     return opportunity, created
+
+
+# ---------------------------------------------------------------------------------------------
+# Lote 4 (DS-50): HU-29 avanzar el estado y HU-30 interacciones (I-06A)
+# ---------------------------------------------------------------------------------------------
+
+# Corte temporal hasta la entrega del 14-nov (DS-50): sin Reservada ni Evaluacion documental,
+# pendientes de HU-35 y RF-10 (C-04). Un solo paso a la vez; sin retroceso manual.
+NEXT_STATUS = {
+    Opportunity.Status.CONTACTO_INICIAL: Opportunity.Status.VISITA_PROGRAMADA,
+    Opportunity.Status.VISITA_PROGRAMADA: Opportunity.Status.EN_NEGOCIACION,
+    Opportunity.Status.EN_NEGOCIACION: Opportunity.Status.PENDIENTE_CIERRE,
+}
+MANUAL_ADVANCE_REASON = 'Avance manual (HU-29).'
+MANUAL_INTERACTION_TYPES = (
+    OpportunityInteraction.Type.NOTA,
+    OpportunityInteraction.Type.CONTRAOFERTA,
+)
+
+
+def next_status(opportunity):
+    return NEXT_STATUS.get(opportunity.status)
+
+
+def can_manage_opportunity(user, opportunity):
+    '''HU-29 y HU-30: el asesor asignado o el admin (RF-06).'''
+    return getattr(user, 'role', None) == 'admin' or opportunity.assigned_agent_id == user.pk
+
+
+def advance_status(*, opportunity_id, user, target_status, agreed_final_price=None):
+    '''
+    HU-29 (RF-06, DS-50). Avanza un solo paso de la secuencia y devuelve la oportunidad.
+    - A VISITA_PROGRAMADA: al menos una visita PROGRAMADA o REALIZADA.
+    - A EN_NEGOCIACION: al menos una visita REALIZADA (RF-04).
+    - A PENDIENTE_CIERRE: agreed_final_price obligatorio y mayor que 0; no cambia el precio
+      publico de la propiedad.
+    El precio solo se acepta en el paso a PENDIENTE_CIERRE. PermissionDenied si no es el
+    asesor asignado ni el admin (la vista ya filtra la cartera y responde 404 antes).
+    '''
+    from apps.visits.models import Visit  # apps.visits importa este modulo: evitar el ciclo
+
+    with transaction.atomic():
+        opportunity = Opportunity.objects.select_for_update().get(pk=opportunity_id)
+        if not can_manage_opportunity(user, opportunity):
+            raise PermissionDenied('Solo el asesor asignado o el administrador cambian el estado.')
+
+        expected = next_status(opportunity)
+        if expected is None:
+            raise ValidationError({'status': (
+                f'Desde "{opportunity.get_status_display()}" no se avanza en este corte.'
+            )})
+        if target_status != expected:
+            raise ValidationError({'status': (
+                f'Desde "{opportunity.get_status_display()}" solo se puede pasar a '
+                f'"{Opportunity.Status(expected).label}".'
+            )})
+
+        visits = Visit.objects.filter(opportunity=opportunity)
+        if (expected == Opportunity.Status.VISITA_PROGRAMADA
+                and not visits.filter(status__in=(Visit.Status.PROGRAMADA,
+                                                  Visit.Status.REALIZADA)).exists()):
+            raise ValidationError({'status': (
+                'Para pasar a "Visita programada" la oportunidad necesita una visita '
+                'programada o realizada.'
+            )})
+        if (expected == Opportunity.Status.EN_NEGOCIACION
+                and not visits.filter(status=Visit.Status.REALIZADA).exists()):
+            raise ValidationError({'status': (
+                'Para pasar a "En negociación" la oportunidad necesita una visita realizada.'
+            )})
+
+        update_fields = []
+        if expected == Opportunity.Status.PENDIENTE_CIERRE:
+            if agreed_final_price is None or agreed_final_price <= 0:
+                raise ValidationError({'agreed_final_price': (
+                    'Registra el precio final acordado (mayor que 0).'
+                )})
+            opportunity.agreed_final_price = agreed_final_price
+            update_fields.append('agreed_final_price')
+        elif agreed_final_price is not None:
+            raise ValidationError({'agreed_final_price': (
+                'El precio final acordado solo se registra al pasar a "Pendiente de cierre".'
+            )})
+
+        if update_fields:
+            opportunity.save(update_fields=update_fields)
+        change_status(opportunity, expected, changed_by=user, reason=MANUAL_ADVANCE_REASON)
+    return opportunity
+
+
+def add_interaction(*, opportunity_id, user, interaction_type, notes, offered_price=None,
+                    visit_id=None):
+    '''
+    HU-30 (RF-06, DS-50). Registra una NOTA o CONTRAOFERTA del asesor asignado o del admin y
+    actualiza la ultima actividad. SISTEMA solo lo escribe el backend. Las reglas del precio y
+    de la visita las aplica OpportunityInteraction.clean(). El precio publico no cambia.
+    '''
+    from apps.visits.models import Visit  # apps.visits importa este modulo: evitar el ciclo
+
+    if interaction_type not in MANUAL_INTERACTION_TYPES:
+        raise ValidationError({'interaction_type': 'Elige "Nota" o "Contraoferta".'})
+    with transaction.atomic():
+        opportunity = Opportunity.objects.select_for_update().get(pk=opportunity_id)
+        if not can_manage_opportunity(user, opportunity):
+            raise PermissionDenied('Solo el asesor asignado o el administrador registran '
+                                   'interacciones.')
+        visit = None
+        if visit_id is not None:
+            visit = Visit.objects.filter(pk=visit_id, opportunity=opportunity).first()
+            if visit is None:
+                raise ValidationError({'visit': 'La visita debe ser de la misma oportunidad.'})
+        interaction = OpportunityInteraction(
+            opportunity=opportunity, author=user, interaction_type=interaction_type,
+            notes=(notes or '').strip(), offered_price=offered_price, visit=visit,
+        )
+        interaction.full_clean()
+        interaction.save()
+        opportunity.last_activity_at = interaction.created_at
+        opportunity.save(update_fields=['last_activity_at'])
+    return interaction
