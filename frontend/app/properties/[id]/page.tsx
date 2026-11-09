@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { cache } from "react";
+import FreeSlotsPicker from "@/components/FreeSlotsPicker";
 import SiteNav from "@/components/SiteNav";
 import { getPropertyById } from "@/lib/api";
 import {
@@ -144,6 +145,11 @@ export default async function PropertyDetailPage({
                   {property.description}
                 </p>
               </section>
+
+              {/* HU-18 (P-07): franjas libres; solo en propiedades publicadas (Disponible). */}
+              {property.status === "disponible" && (
+                <FreeSlotsPicker propertyId={property.id} />
+              )}
             </div>
           </div>
         </div>
