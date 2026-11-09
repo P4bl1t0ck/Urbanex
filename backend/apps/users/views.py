@@ -316,7 +316,9 @@ class PasswordResetConfirmView(APIView):
                 )
 
             user.set_password(serializer.validated_data["password"])
-            user.save(update_fields=["password"])
+            user.is_locked = False
+            user.failed_attempts = 0
+            user.save(update_fields=["password", "is_locked", "failed_attempts"])
             PasswordResetToken.objects.filter(
                 user=user,
                 is_used=False,
