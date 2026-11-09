@@ -3,11 +3,14 @@ from zoneinfo import ZoneInfo
 
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.http import Http404
 from rest_framework import mixins, permissions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.throttling import SimpleRateThrottle
+from rest_framework.views import APIView
 
 from apps.appraisals.serializers import to_drf_error
 from .models import Opportunity
@@ -16,13 +19,17 @@ from .serializers import (
     EligiblePropertySerializer,
     OpportunityOpenSerializer,
     OpportunitySerializer,
+    WebInterestSerializer,
 )
 from .services import (
+    InterestNotAccepted,
     OpportunityConflict,
+    agent_whatsapp_number,
     assignable_agents,
     eligible_properties,
     is_internal_user,
     open_manual_opportunity,
+    register_web_interest,
 )
 
 # DT-01: TIME_ZONE sigue en UTC. El rango de fechas de HU-34 se interpreta en hora de Ecuador
@@ -150,3 +157,101 @@ class OpportunityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             raise PermissionDenied('Solo el administrador elige el asesor responsable.')
         agents = assignable_agents().order_by('first_name', 'last_name', 'username')
         return Response(AgentOptionSerializer(agents, many=True).data)
+
+
+# ---------------------------------------------------------------------------------------------
+# Lote 4 (DS-50): endpoints publicos de la ficha P-07, sin sesion
+# ---------------------------------------------------------------------------------------------
+
+class IPRateThrottle(SimpleRateThrottle):
+    '''
+    Limite por IP para los endpoints publicos. Como en el lote 3 (DS-39), la tasa se define en
+    la clase y no en settings.py, que es un archivo compartido. Cache por defecto de Django.
+    '''
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {'scope': self.scope, 'ident': self.get_ident(request)}
+
+
+class WebInterestBurstThrottle(IPRateThrottle):
+    scope = 'opportunities_interest_burst'
+    rate = '3/minute'
+
+
+class WebInterestDailyThrottle(IPRateThrottle):
+    scope = 'opportunities_interest_daily'
+    rate = '10/day'
+
+
+class WhatsAppContactThrottle(IPRateThrottle):
+    # Frena la recoleccion masiva de telefonos de asesores (DT-117).
+    scope = 'opportunities_whatsapp'
+    rate = '30/minute'
+
+
+def public_property_or_404(property_id):
+    property_obj = (eligible_properties().select_related('agent')
+                    .filter(pk=property_id).first())
+    if property_obj is None:
+        raise Http404
+    return property_obj
+
+
+class PropertyWhatsAppView(APIView):
+    '''
+    HU-15 (P-07, RF-02, DS-50): numero del asesor captador para el enlace wa.me.
+
+    GET /api/opportunities/public/properties/<id>/whatsapp/   (publico; 30/min por IP)
+    -> 200 {"property": id, "whatsapp_phone": "5939XXXXXXXX" | null}
+       null: asesor inactivo o telefono que no es un celular de Ecuador valido (DS-28); el
+       frontend oculta el boton. El mensaje (titulo e id de la propiedad) lo arma el frontend.
+    -> 404 propiedad inexistente o no Disponible.
+    Sin registro en el backend: simplificacion aprobada frente a RF-02 (DS-50).
+    '''
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [WhatsAppContactThrottle]
+
+    def get(self, request, property_id):
+        property_obj = public_property_or_404(property_id)
+        return Response({
+            'property': property_obj.pk,
+            'whatsapp_phone': agent_whatsapp_number(property_obj),
+        })
+
+
+# Mismo texto exista o no el contacto u oportunidad: no revela datos de otros clientes.
+INTEREST_OK_MESSAGE = 'Tu interés quedó registrado. Un asesor se comunicará contigo.'
+
+
+class PropertyInterestView(APIView):
+    '''
+    HU-16 (P-07, RF-03, DS-50): el visitante sin cuenta registra su interes.
+
+    POST /api/opportunities/public/properties/<id>/interest/   (publico; 3/min y 10/dia por IP)
+    {"full_name", "phone", "email", "email_opt_in", "message", "privacy_accepted"}
+    -> 201 {"detail"}: siempre el mismo, sin ids ni datos del asesor o de otros clientes.
+    -> 400 datos invalidos (celular DS-28, LOPDP, correo, largo del mensaje).
+    -> 404 propiedad inexistente, no Disponible o sin asesor captador activo.
+    '''
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [WebInterestBurstThrottle, WebInterestDailyThrottle]
+
+    def post(self, request, property_id):
+        property_obj = public_property_or_404(property_id)
+        serializer = WebInterestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        try:
+            register_web_interest(
+                property_obj=property_obj, full_name=data.get('full_name'),
+                phone=data.get('phone'), email=data.get('email'),
+                email_opt_in=data['email_opt_in'], message=data.get('message'),
+                privacy_accepted=data['privacy_accepted'],
+            )
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except InterestNotAccepted:
+            raise Http404
+        return Response({'detail': INTEREST_OK_MESSAGE}, status=status.HTTP_201_CREATED)

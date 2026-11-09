@@ -82,6 +82,19 @@ class EligiblePropertySerializer(serializers.Serializer):
         return request.build_absolute_uri(image.image.url) if request else image.image.url
 
 
+class WebInterestSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''
+    Entrada de HU-16 (P-07). Solo forma: las reglas (celular DS-28, LOPDP, correo, largo del
+    mensaje) las aplica services.validate_web_interest().
+    '''
+    full_name = serializers.CharField(required=False, allow_blank=True, max_length=300)
+    phone = serializers.CharField(required=False, allow_blank=True, max_length=40)
+    email = serializers.CharField(required=False, allow_blank=True, max_length=254)
+    email_opt_in = serializers.BooleanField(required=False, default=False)
+    message = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+    privacy_accepted = serializers.BooleanField(required=False, default=False)
+
+
 class AgentOptionSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.SerializerMethodField()
