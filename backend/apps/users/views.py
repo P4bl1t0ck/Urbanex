@@ -10,13 +10,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from .authentication import PasswordVersionRefreshToken
 from .serializers import (
     LoginSerializer,
     ManagedUserSerializer,
@@ -181,7 +181,7 @@ class LoginView(APIView):
         user.failed_attempts = 0
         user.save(update_fields=["failed_attempts"])
 
-        refresh = RefreshToken.for_user(user)
+        refresh = PasswordVersionRefreshToken.for_user(user)
         response = Response({
             "access": str(refresh.access_token),
             "role": user.role,
