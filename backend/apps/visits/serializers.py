@@ -129,6 +129,12 @@ class VisitRequestSerializer(serializers.Serializer):  # pylint: disable=abstrac
     privacy_accepted = serializers.BooleanField(required=False, default=False)
 
 
+class OutcomeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-25; las reglas las aplica services.record_outcome().'''
+    status = serializers.CharField()
+    outcome_notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+
 def public_agent(user):
     '''Datos del asesor en P-08: nombre, apellido y telefono (decision de Pablo, 2026-11-09).'''
     return {'first_name': user.first_name, 'last_name': user.last_name, 'phone': user.phone}

@@ -7,6 +7,7 @@ from .views import (
     AvailabilityViewSet,
     PropertyFreeSlotsView,
     PublicVisitView,
+    VisitOutcomeView,
     VisitRequestView,
 )
 
@@ -20,5 +21,6 @@ urlpatterns = [
     path('properties/<int:property_id>/request/', VisitRequestView.as_view(),
          name='property-visit-request'),
     path('public/<uuid:token>/', PublicVisitView.as_view(), name='public-visit'),
+    path('<int:visit_id>/outcome/', VisitOutcomeView.as_view(), name='visit-outcome'),
     path('agenda/', AgendaView.as_view(), name='agenda'),
 ] + router.urls

@@ -916,6 +916,10 @@ def public_url(token):
     return f'/api/visits/public/{token}/'
 
 
+def outcome_url(visit_id):
+    return f'/api/visits/{visit_id}/outcome/'
+
+
 NEW_PHONE = '0987654321'
 NEW_PHONE_E164 = '+593987654321'
 EXISTING_PHONE = '0991234567'  # El de Carla Cliente en HU18TestMixin
@@ -1217,3 +1221,91 @@ class PublicVisitTests(HU18TestMixin, TestCase):
         flags = [v['needs_whatsapp_confirmation']
                  for v in self.client.get(AGENDA_URL, week).data['visits']]
         self.assertEqual(flags, [False, True])
+
+
+class VisitOutcomeTests(HU18TestMixin, TestCase):
+    '''HU-25 (I-08, RF-04): resultado de la visita (DS-39 punto 6).'''
+
+    def setUp(self):
+        super().setUp()
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(
+            status=Opportunity.Status.VISITA_PROGRAMADA)
+        yesterday = ecuador_today() - timedelta(days=1)
+        self.past = self.visit(local(yesterday, 9), local(yesterday, 10))
+
+    def record(self, visit=None, outcome='REALIZADA', notes='El cliente quiere negociar.'):
+        return self.client.post(outcome_url((visit or self.past).pk),
+                                {'status': outcome, 'outcome_notes': notes}, format='json')
+
+    def test_agent_records_realizada_once_without_advancing_opportunity(self):
+        self.login(self.agent)
+        response = self.record()
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['status'], 'REALIZADA')
+        self.assertFalse(response.data['can_record_outcome'])
+        self.past.refresh_from_db()
+        self.assertEqual(self.past.outcome_notes, 'El cliente quiere negociar.')
+        self.assertEqual(self.past.outcome_recorded_by, self.agent)
+        self.assertIsNotNone(self.past.outcome_recorded_at)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.VISITA_PROGRAMADA)
+        # Una sola vez
+        self.assertEqual(self.record(outcome='CANCELADA').status_code, status.HTTP_409_CONFLICT)
+
+    def test_not_before_start(self):
+        future = self.visit(local(self.monday, 9), local(self.monday, 10))
+        self.login(self.agent)
+        response = self.record(visit=future)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        future.refresh_from_db()
+        self.assertEqual(future.status, Visit.Status.PROGRAMADA)
+
+    def test_notes_and_valid_status_are_required(self):
+        self.login(self.agent)
+        self.assertIn('outcome_notes', self.record(notes='   ').data)
+        for outcome in ('PROGRAMADA', 'OTRA'):
+            response = self.record(outcome=outcome)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn('status', response.data)
+
+    def test_permissions(self):
+        self.assertEqual(self.record().status_code, status.HTTP_401_UNAUTHORIZED)
+        self.login(self.other_agent)
+        self.assertEqual(self.record().status_code, status.HTTP_404_NOT_FOUND)
+        self.login(self.admin)
+        response = self.record(outcome='NO_ASISTIDA')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['outcome_recorded_by_name'], 'admin.visitas')
+
+    def test_no_show_of_only_active_visit_returns_to_contacto_inicial(self):
+        for outcome in ('NO_ASISTIDA', 'CANCELADA'):
+            with self.subTest(outcome=outcome):
+                Opportunity.objects.filter(pk=self.opportunity.pk).update(
+                    status=Opportunity.Status.VISITA_PROGRAMADA)
+                yesterday = ecuador_today() - timedelta(days=1)
+                visit = self.visit(local(yesterday, 11), local(yesterday, 12))
+                Visit.objects.filter(pk=self.past.pk).update(status=Visit.Status.REALIZADA)
+                self.login(self.agent)
+                response = self.record(visit=visit, outcome=outcome)
+                self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+                self.opportunity.refresh_from_db()
+                self.assertEqual(self.opportunity.status, Opportunity.Status.CONTACTO_INICIAL)
+                last = self.opportunity.status_history.last()
+                self.assertEqual((last.previous_status, last.new_status, last.changed_by),
+                                 ('VISITA_PROGRAMADA', 'CONTACTO_INICIAL', self.agent))
+
+    def test_other_active_visit_keeps_visita_programada(self):
+        self.visit(local(self.monday, 9), local(self.monday, 10))
+        self.login(self.agent)
+        self.assertEqual(self.record(outcome='CANCELADA').status_code, status.HTTP_200_OK)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.VISITA_PROGRAMADA)
+
+    def test_agenda_offers_outcome_only_after_start(self):
+        future = self.visit(local(self.monday, 9), local(self.monday, 10))
+        self.login(self.agent)
+        yesterday = ecuador_today() - timedelta(days=1)
+        response = self.client.get(AGENDA_URL, {'from': yesterday.isoformat(),
+                                                'to': self.monday.isoformat()})
+        flags = {v['id']: v['can_record_outcome'] for v in response.data['visits']}
+        self.assertEqual(flags, {self.past.pk: True, future.pk: False})

@@ -19,16 +19,19 @@ from .serializers import (
     AgendaVisitSerializer,
     AvailabilityExceptionSerializer,
     AvailabilitySerializer,
+    OutcomeSerializer,
     PublicVisitSerializer,
     VisitRequestSerializer,
 )
 from .services import (
     SCHEDULABLE_PROPERTY_STATUSES,
+    OutcomeAlreadyRecorded,
     SlotUnavailable,
     VisitAlreadyScheduled,
     free_slots,
     local_datetime,
     public_visit_by_token,
+    record_outcome,
     request_visit,
     resolve_target_agent,
 )
@@ -384,3 +387,45 @@ class PublicVisitView(APIView):
         if visit is None:
             raise Http404
         return Response(PublicVisitSerializer(visit).data)
+
+
+class VisitOutcomeView(APIView):
+    '''
+    HU-25 (I-08, RF-04): resultado de la visita.
+
+    POST /api/visits/<id>/outcome/  {"status": "REALIZADA"|"NO_ASISTIDA"|"CANCELADA",
+                                     "outcome_notes": "..."}
+    - el asesor de la visita o el admin; otro asesor: 404 (no ve visitas ajenas);
+    - solo despues de la hora de inicio (400) y una sola vez (409);
+    - NO_ASISTIDA o CANCELADA de la unica visita activa: Visita Programada -> Contacto Inicial.
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def post(self, request, visit_id):
+        visits = Visit.objects.select_related(
+            'property', 'opportunity__contact', 'opportunity__assigned_agent',
+        )
+        if request.user.role != 'admin':
+            visits = visits.filter(agent=request.user)
+        visit = visits.filter(pk=visit_id).first()
+        if visit is None:
+            raise Http404
+        serializer = OutcomeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            visit = record_outcome(
+                visit=visit, user=request.user, outcome=serializer.validated_data['status'],
+                notes=serializer.validated_data.get('outcome_notes'),
+            )
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except OutcomeAlreadyRecorded:
+            return Response({'detail': 'El resultado de esta visita ya fue registrado.'},
+                            status=status.HTTP_409_CONFLICT)
+        visit = (Visit.objects.select_related('property', 'opportunity__contact',
+                                              'opportunity__assigned_agent',
+                                              'outcome_recorded_by')
+                 .get(pk=visit.pk))
+        return Response(AgendaVisitSerializer(visit).data)

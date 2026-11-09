@@ -39,6 +39,7 @@ Lote 3 (DS-39):
 - request_visit(): HU-19, solicitud del cliente sin cuenta desde P-07.
 - send_visit_notifications(): HU-20, correos despues del commit.
 - public_visit_by_token(): HU-20, P-08 de solo lectura hasta la hora de inicio.
+- record_outcome(): HU-25, resultado de la visita en la agenda I-08.
 '''
 
 
@@ -344,3 +345,65 @@ def public_visit_by_token(token, *, now=None):
             .select_related('property', 'agent', 'opportunity__assigned_agent')
             .filter(cancellation_token=token, scheduled_start__gt=now)
             .first())
+
+
+# ---------------------------------------------------------------------------------------------
+# HU-25: resultado de la visita (I-08, DS-39)
+# ---------------------------------------------------------------------------------------------
+
+OUTCOME_STATUSES = (Visit.Status.REALIZADA, Visit.Status.NO_ASISTIDA, Visit.Status.CANCELADA)
+# Si la unica visita activa queda asi, la oportunidad vuelve a Contacto Inicial (DS-39 punto 1).
+REVERTING_OUTCOMES = (Visit.Status.NO_ASISTIDA, Visit.Status.CANCELADA)
+
+
+class OutcomeAlreadyRecorded(Exception):
+    '''El resultado ya se registro: se registra una sola vez (409).'''
+
+
+def can_record_outcome(user, visit):
+    return getattr(user, 'role', None) == 'admin' or visit.agent_id == user.pk
+
+
+def record_outcome(*, visit, user, outcome, notes, now=None):
+    '''
+    HU-25. Solo el asesor de la visita o el admin; solo despues de la hora de inicio; una sola
+    vez; observacion obligatoria. No avanza la oportunidad a En Negociacion (HU-29).
+    '''
+    if not can_record_outcome(user, visit):
+        raise PermissionDenied('Solo el asesor de la visita o el administrador registran el resultado.')
+    errors = {}
+    if outcome not in OUTCOME_STATUSES:
+        errors['status'] = 'Elige Realizada, No asistida o Cancelada.'
+    notes = (notes or '').strip()
+    if not notes:
+        errors['outcome_notes'] = 'Escribe la observación de la visita.'
+    if errors:
+        raise ValidationError(errors)
+
+    now = now or timezone.now()
+    with transaction.atomic():
+        visit = Visit.objects.select_for_update().select_related('opportunity').get(pk=visit.pk)
+        if visit.status != Visit.Status.PROGRAMADA or visit.outcome_recorded_at is not None:
+            raise OutcomeAlreadyRecorded()
+        if now < visit.scheduled_start:
+            raise ValidationError({
+                'status': 'El resultado se registra después de la hora de inicio de la visita.',
+            })
+        visit.status = outcome
+        visit.outcome_notes = notes
+        visit.outcome_recorded_at = now
+        visit.outcome_recorded_by = user
+        visit.save(update_fields=['status', 'outcome_notes', 'outcome_recorded_at',
+                                  'outcome_recorded_by'])
+
+        if outcome in REVERTING_OUTCOMES:
+            opportunity = Opportunity.objects.select_for_update().get(pk=visit.opportunity_id)
+            still_scheduled = opportunity.visits.filter(status=Visit.Status.PROGRAMADA).exists()
+            if (opportunity.status == Opportunity.Status.VISITA_PROGRAMADA
+                    and not still_scheduled):
+                change_status(
+                    opportunity, Opportunity.Status.CONTACTO_INICIAL, changed_by=user,
+                    reason=(f'Visita #{visit.pk} {visit.get_status_display().lower()}: '
+                            'no quedan visitas activas (RF-04).'),
+                )
+    return visit
