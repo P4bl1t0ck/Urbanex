@@ -25,6 +25,8 @@ backend/media/
 # Expediente digital privado (RF-10): nunca versionar documentos de clientes
 backend/private_media/
 
+evidence/
+
 # Archivos temporales del editor
 *.swp
 
