@@ -164,12 +164,12 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 |---|---|---|---|---|---|
 | 1 | El asesor define su disponibilidad y excepciones | HU-22 | I-09 | No implementado | — |
 | 2 | El cliente ve los horarios libres | HU-18 | P-07 | No implementado | — |
-| 3 | Solicita la visita → oportunidad en Visita Programada | HU-19 | P-07 | No implementado | — |
-| 4 | Recibe la confirmación (correo o WhatsApp) | HU-20 | P-08 | No implementado | — |
+| 3 | Solicita la visita → oportunidad en Visita Programada | HU-19 | P-07 | `backend/apps/visits/services.py` (`request_visit`), `POST /api/visits/properties/<id>/request/`; `frontend/components/FreeSlotsPicker.tsx`, `VisitRequestForm.tsx` (rama sin fusionar, PR #21) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-19) |
+| 4 | Recibe la confirmación (correo o WhatsApp) | HU-20 | P-08 | `send_visit_notifications`, `GET /api/visits/public/<token>/`; `frontend/app/visits/[token]/` (rama sin fusionar, PR #21) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-20) |
 | 5 | Puede cancelar antes de la hora | HU-21 | P-08 | No implementado | — |
 | 6 | El asesor registra o reprograma visitas coordinadas | HU-23 | I-08 | No implementado | — |
 | 7 | Consulta su agenda | HU-24 | I-08 | No implementado | — |
-| 8 | Registra el resultado (realizada habilita el avance) | HU-25 | I-08 | No implementado | — |
+| 8 | Registra el resultado (realizada habilita el avance) | HU-25 | I-08 | `record_outcome`, `POST /api/visits/<id>/outcome/`; modal en `frontend/app/dashboard/agenda/page.tsx` (rama sin fusionar, PR #21). El avance a En Negociación es de HU-29 | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-25) |
 
 ### PROC-05 · Seguimiento de la oportunidad
 
