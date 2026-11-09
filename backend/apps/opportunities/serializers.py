@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Contact, Opportunity, OpportunityInteraction, OpportunityStatusHistory
-from .services import assignable_agents, eligible_properties, next_status
+from .services import advance_blocker, assignable_agents, eligible_properties, next_status
 
 
 def user_display_name(user):
@@ -141,19 +141,28 @@ class OpportunityDetailSerializer(OpportunitySerializer):
     '''
     next_status = serializers.SerializerMethodField()
     next_status_display = serializers.SerializerMethodField()
+    advance_blocked_reason = serializers.SerializerMethodField()
+    accepts_interactions = serializers.SerializerMethodField()
     status_history = StatusHistorySerializer(many=True, read_only=True)
     interactions = InteractionSerializer(many=True, read_only=True)
     visits = serializers.SerializerMethodField()
 
     class Meta(OpportunitySerializer.Meta):
         fields = OpportunitySerializer.Meta.fields + [
-            'agreed_final_price', 'next_status', 'next_status_display', 'status_history',
-            'interactions', 'visits',
+            'agreed_final_price', 'next_status', 'next_status_display', 'advance_blocked_reason',
+            'accepts_interactions', 'status_history', 'interactions', 'visits',
         ]
         read_only_fields = fields
 
     def get_next_status(self, obj):
         return next_status(obj)
+
+    def get_advance_blocked_reason(self, obj):
+        # Mismo criterio que la API (advance_status): el boton se deshabilita con este texto.
+        return advance_blocker(obj) if next_status(obj) else ''
+
+    def get_accepts_interactions(self, obj):
+        return obj.status != Opportunity.Status.CIERRE
 
     def get_next_status_display(self, obj):
         target = next_status(obj)

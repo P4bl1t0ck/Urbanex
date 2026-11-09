@@ -312,6 +312,27 @@ def next_status(opportunity):
     return NEXT_STATUS.get(opportunity.status)
 
 
+def advance_blocker(opportunity):
+    '''
+    Motivo por el que no se puede dar el siguiente paso por falta de visitas, o '' si no falta
+    nada (el precio de Pendiente de cierre se pide en el mismo paso). Lo usan advance_status()
+    y el detalle de I-06A, para deshabilitar el boton con el mismo criterio que la API.
+    '''
+    from apps.visits.models import Visit  # apps.visits importa este modulo: evitar el ciclo
+
+    expected = next_status(opportunity)
+    visits = Visit.objects.filter(opportunity=opportunity)
+    if (expected == Opportunity.Status.VISITA_PROGRAMADA
+            and not visits.filter(status__in=(Visit.Status.PROGRAMADA,
+                                              Visit.Status.REALIZADA)).exists()):
+        return ('Para pasar a "Visita programada" la oportunidad necesita una visita '
+                'programada o realizada.')
+    if (expected == Opportunity.Status.EN_NEGOCIACION
+            and not visits.filter(status=Visit.Status.REALIZADA).exists()):
+        return 'Para pasar a "En negociación" la oportunidad necesita una visita realizada.'
+    return ''
+
+
 def can_manage_opportunity(user, opportunity):
     '''HU-29 y HU-30: el asesor asignado o el admin (RF-06).'''
     return getattr(user, 'role', None) == 'admin' or opportunity.assigned_agent_id == user.pk
@@ -327,8 +348,6 @@ def advance_status(*, opportunity_id, user, target_status, agreed_final_price=No
     El precio solo se acepta en el paso a PENDIENTE_CIERRE. PermissionDenied si no es el
     asesor asignado ni el admin (la vista ya filtra la cartera y responde 404 antes).
     '''
-    from apps.visits.models import Visit  # apps.visits importa este modulo: evitar el ciclo
-
     with transaction.atomic():
         opportunity = Opportunity.objects.select_for_update().get(pk=opportunity_id)
         if not can_manage_opportunity(user, opportunity):
@@ -345,19 +364,9 @@ def advance_status(*, opportunity_id, user, target_status, agreed_final_price=No
                 f'"{Opportunity.Status(expected).label}".'
             )})
 
-        visits = Visit.objects.filter(opportunity=opportunity)
-        if (expected == Opportunity.Status.VISITA_PROGRAMADA
-                and not visits.filter(status__in=(Visit.Status.PROGRAMADA,
-                                                  Visit.Status.REALIZADA)).exists()):
-            raise ValidationError({'status': (
-                'Para pasar a "Visita programada" la oportunidad necesita una visita '
-                'programada o realizada.'
-            )})
-        if (expected == Opportunity.Status.EN_NEGOCIACION
-                and not visits.filter(status=Visit.Status.REALIZADA).exists()):
-            raise ValidationError({'status': (
-                'Para pasar a "En negociación" la oportunidad necesita una visita realizada.'
-            )})
+        blocker = advance_blocker(opportunity)
+        if blocker:
+            raise ValidationError({'status': blocker})
 
         update_fields = []
         if expected == Opportunity.Status.PENDIENTE_CIERRE:
@@ -384,6 +393,7 @@ def add_interaction(*, opportunity_id, user, interaction_type, notes, offered_pr
     HU-30 (RF-06, DS-50). Registra una NOTA o CONTRAOFERTA del asesor asignado o del admin y
     actualiza la ultima actividad. SISTEMA solo lo escribe el backend. Las reglas del precio y
     de la visita las aplica OpportunityInteraction.clean(). El precio publico no cambia.
+    Una oportunidad en CIERRE no admite interacciones nuevas (decision de Pablo, 2026-11-09).
     '''
     from apps.visits.models import Visit  # apps.visits importa este modulo: evitar el ciclo
 
@@ -394,6 +404,10 @@ def add_interaction(*, opportunity_id, user, interaction_type, notes, offered_pr
         if not can_manage_opportunity(user, opportunity):
             raise PermissionDenied('Solo el asesor asignado o el administrador registran '
                                    'interacciones.')
+        if opportunity.status == Opportunity.Status.CIERRE:
+            raise ValidationError({'detail': (
+                'La oportunidad está cerrada: no se registran interacciones nuevas.'
+            )})
         visit = None
         if visit_id is not None:
             visit = Visit.objects.filter(pk=visit_id, opportunity=opportunity).first()
