@@ -6,6 +6,8 @@ from .views import (
     AvailabilityExceptionViewSet,
     AvailabilityViewSet,
     PropertyFreeSlotsView,
+    PublicVisitView,
+    VisitRequestView,
 )
 
 router = DefaultRouter()
@@ -15,5 +17,8 @@ router.register(r'exceptions', AvailabilityExceptionViewSet, basename='availabil
 urlpatterns = [
     path('properties/<int:property_id>/free-slots/', PropertyFreeSlotsView.as_view(),
          name='property-free-slots'),
+    path('properties/<int:property_id>/request/', VisitRequestView.as_view(),
+         name='property-visit-request'),
+    path('public/<uuid:token>/', PublicVisitView.as_view(), name='public-visit'),
     path('agenda/', AgendaView.as_view(), name='agenda'),
 ] + router.urls

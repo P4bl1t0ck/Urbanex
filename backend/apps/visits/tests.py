@@ -1,7 +1,10 @@
+import uuid
 from datetime import datetime, time, timedelta, timezone
 from io import StringIO
+from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.management import CommandError, call_command
@@ -10,10 +13,16 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.opportunities.models import Contact, OriginChannel, Opportunity
+from apps.opportunities.models import (
+    SYSTEM_REASON_CLIENT_PORTAL,
+    Contact,
+    OriginChannel,
+    Opportunity,
+)
 from apps.users.models import Property
 from .models import ECUADOR_TZ, AgentAvailability, AvailabilityException, Visit, ecuador_today
 from .services import free_slots
+from .views import VisitRequestBurstThrottle
 
 AVAILABILITY_URL = '/api/visits/availability/'
 EXCEPTIONS_URL = '/api/visits/exceptions/'
@@ -723,8 +732,12 @@ class AgendaTests(HU18TestMixin, TestCase):
         self.assertEqual(response.data['agent'], self.agent.pk)
         self.assertEqual(response.data['timezone'], 'America/Guayaquil')
         [item] = response.data['visits']
+        # Lote 3 (DS-39): aviso de WhatsApp, asesor de la oportunidad y resultado (HU-20, HU-25).
         self.assertEqual(set(item), {'id', 'scheduled_start', 'scheduled_end', 'status',
-                                     'status_display', 'property', 'client', 'opportunity'})
+                                     'status_display', 'property', 'client', 'opportunity',
+                                     'needs_whatsapp_confirmation', 'followup_agent_name',
+                                     'can_record_outcome', 'outcome_notes',
+                                     'outcome_recorded_at', 'outcome_recorded_by_name'})
         self.assertEqual(item['id'], visit.pk)
         self.assertEqual(item['scheduled_start'], local(self.monday, 9).isoformat())
         self.assertTrue(item['scheduled_end'].endswith('-05:00'))
@@ -889,3 +902,318 @@ class CleanWithoutTimesTests(VisitsTestMixin, TestCase):
             with self.subTest(model=type(obj).__name__):
                 with self.assertRaises(ValidationError):
                     obj.full_clean()
+
+
+# =============================================================================================
+# Lote 3 (DS-39): HU-19 solicitar visita, HU-20 confirmacion y P-08, HU-25 resultado
+# =============================================================================================
+
+def request_url(property_id):
+    return f'/api/visits/properties/{property_id}/request/'
+
+
+def public_url(token):
+    return f'/api/visits/public/{token}/'
+
+
+NEW_PHONE = '0987654321'
+NEW_PHONE_E164 = '+593987654321'
+EXISTING_PHONE = '0991234567'  # El de Carla Cliente en HU18TestMixin
+
+
+class HU19TestMixin(HU18TestMixin):
+    def setUp(self):
+        super().setUp()
+        settings_override = override_settings(FRONTEND_BASE_URL='http://portal.test')
+        settings_override.enable()
+        self.addCleanup(settings_override.disable)
+        self.rule(day=0)  # Lunes 09:00-12:00, visitas de 60 min
+        self.start = local(self.monday, 9)
+        self.url = request_url(self.property.pk)
+
+    def payload(self, start=None, **overrides):
+        data = {'start': (start or self.start).isoformat(), 'full_name': 'Nuevo Cliente',
+                'phone': NEW_PHONE, 'email': '', 'email_opt_in': False,
+                'privacy_accepted': True}
+        data.update(overrides)
+        return data
+
+    def post(self, data, execute_on_commit=True):
+        with self.captureOnCommitCallbacks(execute=execute_on_commit):
+            return self.client.post(self.url, data, format='json')
+
+
+class VisitRequestTests(HU19TestMixin, TestCase):
+    '''HU-19 (P-07, RF-04): solicitud del cliente sin cuenta.'''
+
+    # Criterio: se registra la visita, se bloquea la franja y la oportunidad pasa a Visita Programada
+    def test_new_contact_creates_contact_opportunity_and_visit(self):
+        response = self.post(self.payload())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(set(response.data),
+                         {'detail', 'scheduled_start', 'scheduled_end', 'confirmation'})
+        self.assertEqual(response.data['scheduled_start'], self.start.isoformat())
+        self.assertEqual(response.data['confirmation'], 'whatsapp')
+
+        contact = Contact.objects.get(phone=NEW_PHONE_E164)
+        self.assertEqual(contact.origin_channel, OriginChannel.CATALOGO_WEB)
+        self.assertIsNotNone(contact.privacy_accepted_at)
+        self.assertFalse(contact.email_opt_in)
+        opportunity = Opportunity.objects.get(contact=contact)
+        self.assertEqual(opportunity.assigned_agent, self.agent)
+        self.assertEqual(opportunity.origin_channel, OriginChannel.CATALOGO_WEB)
+        self.assertEqual(opportunity.status, Opportunity.Status.VISITA_PROGRAMADA)
+        visit = Visit.objects.get(opportunity=opportunity)
+        self.assertEqual((visit.agent, visit.status, visit.scheduled_start),
+                         (self.agent, Visit.Status.PROGRAMADA, self.start))
+        self.assertNotIn(str(visit.cancellation_token), response.content.decode())
+        self.assertNotIn(self.agent.email, response.content.decode())
+
+        history = list(opportunity.status_history.values_list(
+            'previous_status', 'new_status', 'changed_by', 'reason'))
+        self.assertEqual(history, [
+            ('', 'CONTACTO_INICIAL', None, SYSTEM_REASON_CLIENT_PORTAL),
+            ('CONTACTO_INICIAL', 'VISITA_PROGRAMADA', None, SYSTEM_REASON_CLIENT_PORTAL),
+        ])
+        # La franja queda bloqueada para el siguiente cliente (HU-18)
+        self.assertNotIn(self.start, [s.start for s in free_slots(self.agent, self.monday,
+                                                                    self.monday)])
+
+    def test_existing_contact_reuses_opportunity_and_is_not_modified(self):
+        response = self.post(self.payload(phone=EXISTING_PHONE, full_name='Otro Nombre',
+                                          email='nuevo@correo.ec', email_opt_in=True))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.contact.refresh_from_db()
+        self.assertEqual((self.contact.full_name, self.contact.email, self.contact.email_opt_in),
+                         ('Carla Cliente', 'carla@correo.ec', False))
+        self.assertEqual(Contact.objects.count(), 1)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.VISITA_PROGRAMADA)
+        visit = self.opportunity.visits.get()
+        # DS-39: la confirmacion va al correo de esta solicitud, guardado en la visita
+        self.assertEqual(visit.confirmation_email, 'nuevo@correo.ec')
+
+    def test_response_is_the_same_whether_contact_exists_or_not(self):
+        new = self.post(self.payload())
+        existing = self.post(self.payload(start=local(self.monday, 10), phone=EXISTING_PHONE))
+        self.assertEqual(new.status_code, existing.status_code)
+        self.assertEqual(set(new.data), set(existing.data))
+        self.assertEqual(new.data['detail'], existing.data['detail'])
+
+    def test_new_contact_with_opt_in_saves_email_and_opt_in(self):
+        response = self.post(self.payload(email='cliente@correo.ec', email_opt_in=True))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(response.data['confirmation'], 'email')
+        contact = Contact.objects.get(phone=NEW_PHONE_E164)
+        self.assertEqual((contact.email, contact.email_opt_in), ('cliente@correo.ec', True))
+
+    def test_email_without_opt_in_gets_whatsapp_confirmation(self):
+        response = self.post(self.payload(email='cliente@correo.ec', email_opt_in=False))
+        self.assertEqual(response.data['confirmation'], 'whatsapp')
+        self.assertEqual(Visit.objects.get().confirmation_email, '')
+
+    # Criterio: la franja debe ser exactamente una de las ofrecidas (DS-39 punto 3)
+    def test_slot_not_offered_is_rejected(self):
+        for start in (local(self.monday, 9, 30), local(self.monday, 14),
+                      local(self.monday + timedelta(days=1), 9)):
+            with self.subTest(start=start):
+                response = self.post(self.payload(start=start))
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn('start', response.data)
+        self.assertFalse(Visit.objects.exists())
+        self.assertFalse(Contact.objects.filter(phone=NEW_PHONE_E164).exists())
+
+    def test_taken_slot_is_rejected(self):
+        other_property = Property.objects.create(
+            agent=self.agent, title='Otra', description='x', property_type='casa', price=1,
+            area_m2=1, location='Quito', status='disponible',
+        )
+        other_opportunity = Opportunity.objects.create(
+            contact=self.contact, property=other_property, assigned_agent=self.agent,
+            origin_channel=OriginChannel.MANUAL,
+        )
+        self.visit(local(self.monday, 9), local(self.monday, 10), opportunity=other_opportunity)
+        response = self.post(self.payload())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('start', response.data)
+
+    def test_second_client_cannot_take_the_same_slot(self):
+        first = self.post(self.payload())
+        second = self.post(self.payload(phone='0981112233', full_name='Segundo'))
+        self.assertEqual(first.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(second.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Visit.objects.count(), 1)
+
+    def test_stale_slot_list_is_still_blocked_by_model_validation(self):
+        '''
+        Concurrencia en SQLite: simula que otra solicitud ocupo la franja despues de calcular
+        free_slots(). La validacion de Visit.clean() dentro de la transaccion la rechaza. En
+        PostgreSQL falta la restriccion de exclusion (DT-143).
+        '''
+        from . import services
+        stale = services.free_slots(self.agent, self.monday, self.monday)
+        self.visit(local(self.monday, 9), local(self.monday, 10))
+        with mock.patch.object(services, 'free_slots', return_value=stale):
+            response = self.post(self.payload())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Visit.objects.count(), 1)
+        self.assertFalse(Contact.objects.filter(phone=NEW_PHONE_E164).exists())
+
+    def test_requires_privacy_valid_phone_and_name(self):
+        response = self.post(self.payload(privacy_accepted=False, phone='022345678',
+                                          full_name='  '))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(set(response.data), {'privacy_accepted', 'phone', 'full_name'})
+        self.assertFalse(Visit.objects.exists())
+
+    def test_opt_in_requires_email_and_email_must_be_valid(self):
+        for overrides, field in (({'email_opt_in': True}, 'email'),
+                                 ({'email': 'no-es-correo'}, 'email')):
+            with self.subTest(overrides=overrides):
+                response = self.post(self.payload(**overrides))
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn(field, response.data)
+
+    def test_conflict_when_opportunity_already_has_a_scheduled_visit(self):
+        self.visit(local(self.monday, 11), local(self.monday, 12))
+        response = self.post(self.payload(phone=EXISTING_PHONE))
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(Visit.objects.count(), 1)
+
+    def test_status_does_not_go_back_when_opportunity_is_further(self):
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(
+            status=Opportunity.Status.EN_NEGOCIACION)
+        response = self.post(self.payload(phone=EXISTING_PHONE))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.EN_NEGOCIACION)
+        self.assertFalse(self.opportunity.status_history.exists())
+
+    def test_only_available_properties(self):
+        Property.objects.filter(pk=self.property.pk).update(status='reservado')
+        response = self.post(self.payload())
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.client.post(request_url(999999), self.payload(),
+                                          format='json').status_code,
+                         status.HTTP_404_NOT_FOUND)
+
+    def test_inactive_agent_offers_nothing(self):
+        User.objects.filter(pk=self.agent.pk).update(is_active=False)
+        response = self.post(self.payload())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('start', response.data)
+
+    def test_visit_agent_is_property_agent_even_if_opportunity_has_another(self):
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(assigned_agent=self.other_agent)
+        response = self.post(self.payload(phone=EXISTING_PHONE))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        visit = Visit.objects.get()
+        self.assertEqual(visit.agent, self.agent)
+        self.assertEqual(visit.opportunity.assigned_agent, self.other_agent)
+
+
+class VisitRequestThrottleTests(HU19TestMixin, TestCase):
+    '''DS-39 punto 4: 3 por minuto y 10 por dia por IP.'''
+
+    def test_three_per_minute(self):
+        codes = [self.post(self.payload(privacy_accepted=False)).status_code for _ in range(4)]
+        self.assertEqual(codes[:3], [status.HTTP_400_BAD_REQUEST] * 3)
+        self.assertEqual(codes[3], status.HTTP_429_TOO_MANY_REQUESTS)
+
+    def test_ten_per_day(self):
+        with mock.patch.object(VisitRequestBurstThrottle, 'rate', '100/minute'):
+            codes = [self.post(self.payload(privacy_accepted=False)).status_code
+                     for _ in range(11)]
+        self.assertEqual(codes[:10], [status.HTTP_400_BAD_REQUEST] * 10)
+        self.assertEqual(codes[10], status.HTTP_429_TOO_MANY_REQUESTS)
+
+
+class VisitNotificationTests(HU19TestMixin, TestCase):
+    '''HU-20: correos despues del commit (DS-39 punto 5).'''
+
+    def test_client_with_opt_in_receives_link_and_agent_is_notified(self):
+        response = self.post(self.payload(email='cliente@correo.ec', email_opt_in=True))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        visit = Visit.objects.get()
+        recipients = sorted(message.to[0] for message in mail.outbox)
+        self.assertEqual(recipients, ['asesor.visitas@urbanex.ec', 'cliente@correo.ec'])
+        client_mail = next(m for m in mail.outbox if m.to == ['cliente@correo.ec'])
+        self.assertIn(f'http://portal.test/visits/{visit.cancellation_token}', client_mail.body)
+        agent_mail = next(m for m in mail.outbox if m.to == ['asesor.visitas@urbanex.ec'])
+        self.assertNotIn(str(visit.cancellation_token), agent_mail.body)
+
+    def test_without_opt_in_only_agent_is_notified_with_whatsapp_hint(self):
+        self.post(self.payload(email='cliente@correo.ec'))
+        self.assertEqual([m.to for m in mail.outbox], [['asesor.visitas@urbanex.ec']])
+        self.assertIn('WhatsApp', mail.outbox[0].body)
+
+    def test_mail_is_sent_only_after_commit(self):
+        self.post(self.payload(email='cliente@correo.ec', email_opt_in=True),
+                  execute_on_commit=False)
+        self.assertEqual(mail.outbox, [])
+
+    def test_followup_agent_is_also_notified(self):
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(assigned_agent=self.other_agent)
+        self.post(self.payload(phone=EXISTING_PHONE))
+        self.assertEqual(sorted(m.to[0] for m in mail.outbox),
+                         ['asesor.visitas@urbanex.ec', 'otro.asesor@urbanex.ec'])
+
+    def test_mail_failure_does_not_revert_the_visit(self):
+        with mock.patch('apps.visits.services.send_mail', side_effect=OSError('SMTP caido')):
+            with self.assertLogs('apps.visits.services', level='ERROR'):
+                response = self.post(self.payload(email='cliente@correo.ec', email_opt_in=True))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Visit.objects.exists())
+
+
+class PublicVisitTests(HU18TestMixin, TestCase):
+    '''HU-20 (P-08): solo lectura por token, hasta la hora de inicio.'''
+
+    def setUp(self):
+        super().setUp()
+        User.objects.filter(pk=self.agent.pk).update(phone='0991112222')
+
+    def test_shows_property_date_status_and_agent_until_start(self):
+        visit = self.visit(local(self.monday, 9), local(self.monday, 10))
+        response = self.client.get(public_url(visit.cancellation_token))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(set(response.data), {'scheduled_start', 'scheduled_end', 'status',
+                                              'status_display', 'property', 'visit_agent',
+                                              'followup_agent'})
+        self.assertEqual(response.data['visit_agent'],
+                         {'first_name': 'Ana', 'last_name': 'Asesora', 'phone': '0991112222'})
+        self.assertIsNone(response.data['followup_agent'])
+        body = response.content.decode()
+        for private in ('Carla', '+593991234567', 'carla@correo.ec', 'asesor.visitas@urbanex.ec'):
+            self.assertNotIn(private, body)
+
+    def test_shows_followup_agent_when_different(self):
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(assigned_agent=self.other_agent)
+        visit = self.visit(local(self.monday, 9), local(self.monday, 10))
+        response = self.client.get(public_url(visit.cancellation_token))
+        self.assertEqual(response.data['followup_agent'],
+                         {'first_name': '', 'last_name': '', 'phone': ''})
+
+    def test_expired_or_unknown_token_is_404(self):
+        yesterday = ecuador_today() - timedelta(days=1)
+        past = self.visit(local(yesterday, 9), local(yesterday, 10))
+        self.assertEqual(self.client.get(public_url(past.cancellation_token)).status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.client.get(public_url(uuid.uuid4())).status_code,
+                         status.HTTP_404_NOT_FOUND)
+
+    def test_agenda_marks_whatsapp_confirmation(self):
+        with_email = self.visit(local(self.monday, 9), local(self.monday, 10))
+        Visit.objects.filter(pk=with_email.pk).update(confirmation_email='c@correo.ec')
+        self.visit(local(self.monday, 10), local(self.monday, 11),
+                   opportunity=Opportunity.objects.create(
+                       contact=Contact.objects.create(full_name='Sin correo',
+                                                      phone='+593980000000',
+                                                      origin_channel=OriginChannel.MANUAL),
+                       property=self.property, assigned_agent=self.agent,
+                       origin_channel=OriginChannel.MANUAL))
+        self.login(self.agent)
+        week = {'from': self.monday.isoformat(), 'to': (self.monday + timedelta(days=6)).isoformat()}
+        flags = [v['needs_whatsapp_confirmation']
+                 for v in self.client.get(AGENDA_URL, week).data['visits']]
+        self.assertEqual(flags, [False, True])
