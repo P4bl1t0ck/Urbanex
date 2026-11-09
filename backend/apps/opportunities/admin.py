@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Contact, Opportunity, OpportunityStatusHistory
+from .models import Contact, Opportunity, OpportunityInteraction, OpportunityStatusHistory
 
 
 class ReadOnlyAdmin(admin.ModelAdmin):
@@ -33,3 +33,9 @@ class OpportunityAdmin(ReadOnlyAdmin):
 class OpportunityStatusHistoryAdmin(ReadOnlyAdmin):
     list_display = ('opportunity', 'previous_status', 'new_status', 'changed_by', 'created_at')
     list_filter = ('new_status',)
+
+
+@admin.register(OpportunityInteraction)
+class OpportunityInteractionAdmin(ReadOnlyAdmin):
+    list_display = ('opportunity', 'interaction_type', 'offered_price', 'author', 'created_at')
+    list_filter = ('interaction_type',)
