@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
 | Última actualización aditiva HU-46 | 2026-11-06 · D-05 personalizado implementado; V-44 Pendiente |
 | Propósito | Inventario de riesgos de seguridad e infraestructura del código actual, con su plan de corrección, y opciones documentadas para las decisiones pendientes (D-05 sesión/JWT, DT-42 folio, almacenamiento y base de datos) |
 | Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-11-03:** SEC-16 / DT-117, datos personales de EP-5 (LOPDP), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`. **Actualizado el 2026-11-02:** DT-96 (edición de `users.0007` tras aplicarse en Supabase; restablecimiento de la base de desarrollo y migración desde `develop` propuestos por Sebas, **POR CONFIRMAR** y no ejecutados (corregido por Pablo, 2026-11-03)); PostgreSQL local **No ejecutado**. **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3 (restaurado por Pablo, 2026-11-03). **Actualizado el 2026-10-31:** SEC-15 / DT-79 (incidente de credenciales, sin valores) (restaurado por Pablo, 2026-11-03); SEC-09 y §5.3: `db.sqlite3` ya no se versiona (DS-25, FX-22); DT-90/DT-91 para credenciales de Supabase y Resend; C-08/DS-30 confirma que clientes no tienen cuenta. **Actualizado el 2026-11-02:** §3.1, "XSS almacenado": metaetiquetas de HU-12 (FX-24), comprobación del escape Pendiente. **Actualizado el 2026-11-03:** §3.1, escape de las metaetiquetas de HU-12 comprobado (V-64, aprobada por Pablo). **Actualizado el 2026-11-03 (tarde):** §3.1, el payload RSC se cita como `\u003c/script\u003e` (corrección de la auditoría de HU-12) |
@@ -22,6 +24,18 @@
 **Severidad:** **Alta** = expone datos internos o permite modificar datos ajenos · **Media** = facilita un ataque o filtra información menor · **Baja** = endurecimiento.
 
 ---
+
+### Actualización aditiva HU-46/SEC-05 — 2026-11-09
+
+D-05 está aplicada; las opciones y recomendaciones anteriores se conservan como historial. Se revisaron el cambio de contraseña por recuperación, el cambio manual y la activación, que actualizan `password_changed_at`; se agregan pruebas explícitas de rechazo de access y refresh anteriores en los dos últimos casos. Refresh usa únicamente la cookie HttpOnly, SameSite=Lax, Secure cuando DEBUG=False, y exige CSRF; el frontend no lee el refresh. No se incorporan blacklist ni Redis. Se conserva el registro humano de V-44 de Sebas del 2026-11-07, 16:19 (`Project_Progress.md`), sin una aprobación nueva del agente. **SEC-05 permanece abierto**: la revisión de evidencia por criterio, los riesgos de despliegue y las limitaciones documentadas de logout siguen vigentes. La pregunta sobre recuperación de cuentas bloqueadas continúa pendiente, sin cambio de comportamiento.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+El desbloqueo administrativo de HU-45 conserva su ruta y permisos; esta recuperación exige el enlace válido. No se habilitan cuentas inactivas. SEC-05 permanece abierto por sus riesgos ya documentados.
+
 
 ## ⛔ Regla de despliegue (DS-20)
 

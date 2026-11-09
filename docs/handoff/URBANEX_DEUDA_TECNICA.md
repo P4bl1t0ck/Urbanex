@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
 | Última actualización aditiva HU-46 | 2026-11-06 · D-05 personalizado implementado; DT-33 resuelto en código; V-44 Pendiente |
 | Actualización HU-45 (2026-11-04) | Según Sebas, V-43 cubrió ambos criterios de HU-45. Suite integrada: 159/159 OK en SQLite. `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó migración. DT-120 sigue fuera del alcance |
 | Corrección de identificador HU-45 (2026-11-05) | La notificación persistente de HU-45 usa DT-120 (rango de Sebas). DT-117 se conserva para SEC-16/LOPDP de EP-5. El identificador se comprobó contra `origin/develop` y las ramas remotas actualizadas |
@@ -19,6 +21,18 @@ Prioridad: **P0** bloquea el proceso de negocio o la entrega · **P1** riesgo al
 Referencias: [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) · [GPS](URBANEX_GPS_ARCHIVOS.md) · [Estado de procesos](URBANEX_ESTADO_PROCESOS.md).
 
 ---
+
+### Actualización aditiva HU-46/D-05 — 2026-11-09
+
+D-05 está implementada según la política personalizada confirmada por Pablo, según Sebas: access de 24 horas, refresh de 7 días en cookie HttpOnly, SameSite=Lax, Secure cuando DEBUG=False, refresh protegido por CSRF y rechazo de access/refresh anteriores al cambio de contraseña; sin blacklist ni Redis. Se agregan pruebas de invalidación tras cambio manual y activación, y del flag Secure en ambos valores de DEBUG. El registro de V-44 de Sebas (2026-11-07, 16:19) está en `Project_Progress.md`; existe el archivo local enlazado, sin aprobación nueva del agente. DT-33 no se declara cerrado globalmente. DT-92 sigue pendiente y no se crea migración. PostgreSQL No ejecutado (DT-68; Nivel 1, DS-35). Se conserva sin resolver la pregunta existente sobre limpiar `is_locked` y `failed_attempts` al recuperar contraseña.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+No se crea un ID nuevo ni se cierra SEC-05 globalmente. DT-92 y DT-68 conservan sus pendientes.
+
 
 ## 1. Correcciones confirmadas (sesión de desarrollo 2026-10-21/22, sin commit)
 

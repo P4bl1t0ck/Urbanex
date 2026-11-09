@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · Revisión aislada: 238 pruebas backend y 17 frontend; registro humano V-44 conservado; fusión pendiente de commit |
 | Última actualización aditiva HU-46 | 2026-11-06 · Implementación verificada en SQLite y frontend; validación humana V-44 Pendiente |
 | Actualización HU-45 | 2026-11-04 · Rama avanzada a `origin/develop` (`043cfb5`, PR #15); se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`. Según Sebas, V-43 cubrió bloqueo tras cinco intentos y desbloqueo por admin. Suite integrada: 159/159 OK en SQLite; migraciones detectan `documents/0002_alter_document_file.py` (DT-92), sin generarla ni aplicarla. |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · corrección documental de la auditoría HU-45: DT-120, aclaraciones de Seguridad/USM y pendientes explícitos para el PR |
@@ -47,6 +49,27 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-09 · Codex con Sebas · preparación de actualización del PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** cierre de la fusión pendiente de `origin/develop` `966cc50` en `a39e72e`; cambio del archivo compartido `users/views.py` en `46f4ca3`; pruebas en `e3e2a35`. Se conserva el código comprobado con 241 pruebas OK en SQLite; la comparación SHA-256 confirma que los archivos de código coinciden con el worktree probado. No hay cambios funcionales posteriores que justifiquen repetir la suite.
+- **Evidencia humana comunicada:** según Sebas en esta conversación, la nueva captura y comprobación del desbloqueo ya se completaron y el resultado es correcto. Existe `evidence/ResetPasswordUsuarioBloqueado.png`, excluida de Git; no se incorpora la imagen al repo. La hora de modificación del archivo es 15:13:56 del 2026-11-09; no se toma automáticamente como hora de la comprobación. La fila humana de la ampliación V-44 se deja para transcripción por Sebas conforme a §9.
+- **GitHub:** PR existente #20 hacia `develop`; consulta de comentarios mediante la conexión GitHub devuelve lista vacía (`gh` no está instalado). Sebas autoriza el push a la rama HU-46 para actualizar ese PR; no se edita el PR ni se publica en `develop`/`master`.
+- **Falta:** transcribir el registro humano con su fecha y hora confirmadas; auditoría en un chat nuevo de solo lectura antes de solicitar merge; DT-92 sigue pendiente y PostgreSQL No ejecutado (DT-68, Nivel 1). La HU permanece en Pruebas; el agente no emite aprobación humana ni declara la rama Apta para PR.
+- **Siguiente paso:** publicar los commits y comprobar que origin/HU-46 coincida con HEAD; después, auditoría y revisión por Pablo. La autorización de push no incluye fusionar el PR.
+
+### 2026-11-09 · Codex con Sebas · ampliación de recuperación · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Decisión:** Sebas indicó en esta conversación que completar la recuperación segura debe desbloquear automáticamente y limpiar los intentos. Supersede la pregunta de negocio de las notas anteriores; no se atribuye a Pablo.
+- **Hecho:** `PasswordResetConfirmView` guarda contraseña, `is_locked=False` y `failed_attempts=0` en la transacción existente; no cambia solicitudes de correo, activación ni desbloqueo administrativo. Tres pruebas cubren recuperación e inicio de sesión de una cuenta bloqueada, rechazo de enlaces inválidos/vencidos/usados sin desbloqueo y reinicio de intentos de una cuenta aún no bloqueada. Se actualiza el handoff sin borrar el historial.
+- **Evidencia humana:** según Sebas, 2026-11-09, las evidencias anteriores están bien. Se conserva V-44. La ampliación de desbloqueo tiene pasos adicionales debajo de V-44 y queda Pendiente de comprobación por una persona.
+- **Evidencia técnica:** suite completa 241 pruebas OK, exit 0, SQLite; `makemigrations --check --dry-run` exit 1 solo por DT-92. Sin cambios de frontend en esta ampliación; se conservan sus resultados de esta sesión. Comandos completos en Estándares §4.
+- **Falta y siguiente paso:** registrar esa comprobación visual, revisar el diff, autorizar el commit para cerrar la fusión pendiente y realizar la auditoría de solo lectura en un chat nuevo antes del PR. DT-92 sigue pendiente; PostgreSQL No ejecutado (DT-68, Nivel 1). No se hace commit, push ni PR en esta sesión. Resultados reales en Estándares §4.
+
+### 2026-11-09 · Codex con Sebas · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** revisión del checklist actualizado en `.worktrees/hu46-review` (HEAD separado en `867159e` más copia de los archivos de la fusión pendiente con `origin/develop` `966cc50`). Se conservan los enlaces de visitas y oportunidades y la sesión de HU-46. Se agregan tres pruebas de D-05: cambio manual, activación y cookie Secure según DEBUG. Se sincroniza el handoff con el registro humano existente de V-44, sin emitir una aprobación del agente ni modificar las entradas de Pablo.
+- **Evidencia técnica:** SQLite confirmado por `connection.vendor`; suite completa 238 pruebas OK, exit 0; frontend 17/17, build y TypeScript exit 0; ESLint exit 0 con dos avisos preexistentes. `makemigrations --check --dry-run` exit 1 por DT-92; no se crea ni aplica migración. Registro detallado de comandos e intentos fallidos en Estándares §4. PostgreSQL No ejecutado (DT-68; Nivel 1 según DS-35).
+- **Evidencia humana:** Sebas registró V-44 el 2026-11-07 a las 16:19; existe `evidence/HU-46/Screenshot 2026-11-07 161628.png`. Esta sesión comprueba la existencia del archivo, no vuelve a validar visualmente el flujo ni modifica su fila humana. Revisar por persona la cobertura de evidencia por criterio según DS-35; conservar los archivos solo localmente.
+- **Falta:** confirmar con Pablo la regla sobre recuperación de cuentas bloqueadas (se conserva el bloqueo); revisión humana de la integración y auditoría en un chat nuevo de solo lectura antes del PR. HU-46 permanece en Pruebas. SEC-05 no se cierra globalmente.
+- **Siguiente paso:** revisar el diff y autorizar por separado el commit que concluya la fusión pendiente. No se hizo commit, push ni PR; la carpeta principal conserva MERGE_HEAD. PostgreSQL es obligatorio al cierre de lote/entrega, no bloquea por sí solo un PR de Nivel 1 con DT-68.
 
 ### 2026-11-07 · Copilot con Sebas · rama `feat/URB-04-HU-46-recuperar-contrasena`
 - **Hecho:** Sebas reportó haber completado los cinco pasos de V-44 en la interfaz. Se preparó el texto para que Sebas registre la evidencia en la tabla; la fila permanece pendiente hasta que la persona la copie allí. Se crearon ocho commits locales de HU-46; no se hizo push ni se abrió PR.
@@ -919,6 +942,15 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 ---
 
 ### V-44 · HU-46 — Recuperación de contraseña y sesión
+
+**Ampliación del 2026-11-09 — recuperación con desbloqueo (Pendiente):** Sebas confirmó en la conversación que las evidencias anteriores están bien; se conserva su registro sin atribuirle la comprobación de este comportamiento nuevo. En una cuenta de prueba activa, bloquear con cinco intentos incorrectos; solicitar recuperación y comprobar que solicitar el correo todavía no permite iniciar sesión; completar el enlace válido, iniciar sesión con la contraseña nueva y comprobar `is_locked=False` y `failed_attempts=0`. Guardar evidencia local sin tokens ni datos reales y registrar quién, fecha, hora y lo observado. Los casos de enlace inválido, vencido y usado tienen pruebas automáticas y no requieren esperar una hora en la interfaz.
+
+| Quién | Cuándo | Qué vi | Resultado y ruta de evidencia |
+|---|---|---|---|
+| | | | |
+
+Los pasos y el registro originales de V-44 se conservan a continuación:
+
 1. En un entorno de prueba, solicita recuperar la contraseña de una cuenta activa y luego de un correo sin cuenta; comprueba que la respuesta visible sea la misma.
 2. Abre el enlace recibido, comprueba que la pantalla I-02 permita definir y confirmar una nueva contraseña y que el token no permanezca en la barra de direcciones.
 3. Usa el enlace una segunda vez y comprueba que el servidor lo rechace. La expiración de 60 minutos está cubierta también por prueba automatizada; no es necesario esperar una hora en la validación visual.
@@ -932,7 +964,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Sebas | 2026-11-07, 16:19 | Completé los cinco pasos de V-44: comprobé que la respuesta sea igual para un correo registrado y uno no registrado; restablecí la contraseña con el enlace y confirmé que el token desaparece de la URL; el segundo uso del enlace fue rechazado; comprobé la invalidación de la sesión anterior, el refresh en cookie HttpOnly con CSRF y que el logout elimine la cookie y proteja nuevamente la ruta. | [Captura local](evidence/HU-46/Screenshot%202026-11-07%20161628.png) — Aprobado |
-**Estado: Pendiente.** Capturas previstas bajo `evidence/HU-46/`; no se ha registrado evidencia visual en esta sesión.
+**Aclaración aditiva (2026-11-09):** la fila anterior es el registro humano de Sebas del 2026-11-07, 16:19; supersede la nota previa que decía que faltaba registrar V-44. La captura enlazada existe localmente. Esta revisión del agente no constituye una validación visual nueva ni cambia el resultado escrito por Sebas. La revisión humana de cobertura por criterio e integración permanece Pendiente; HU-46 continúa en Pruebas.
 
 ### Evidencia técnica HU-45 (2026-11-03)
 

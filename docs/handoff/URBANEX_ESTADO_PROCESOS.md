@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
 | Última actualización aditiva HU-46 | 2026-11-06 · I-02 y D-05 implementados; suite SQLite 165/165; V-44 Pendiente |
 | Confirmación V-43 (2026-11-04) | Según Sebas, V-43 se ejecutó después del último ajuste e incluyó bloquear con cinco intentos, desbloquear desde A-01 y volver a iniciar sesión. Suite integrada: 159 pruebas OK en SQLite |
 | Aclaración HU-45 (2026-11-05) | Las filas iniciales de HU-45 describen el estado previo a su implementación; las actualizaciones aditivas del 2026-11-03/04 documentan el endpoint, la acción en A-01 y el login neutral. La notificación persistente continúa pendiente en DT-120 |
@@ -14,6 +16,18 @@
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
 Detalle técnico en [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) · archivos en [GPS](URBANEX_GPS_ARCHIVOS.md) · porcentajes en [Avance de épicas](URBANEX_AVANCE_EPICAS.md).
+
+### Actualización aditiva HU-46 — 2026-11-09
+
+HU-46 permanece en **Pruebas** durante la revisión de integración. D-05 está implementada: access de 24 horas, refresh de 7 días en cookie HttpOnly con CSRF y rechazo de tokens anteriores a `password_changed_at`. El registro humano de Sebas del 2026-11-07, 16:19, consta en `Project_Progress.md`, V-44; la captura enlazada existe localmente. Este registro supersede las menciones anteriores a V-44 sin registro humano, sin convertir esta revisión del agente en una aprobación ni cambiar la HU a Listo. La cobertura de la evidencia por criterio queda para revisión humana. La recuperación conserva el bloqueo de cuenta mientras no se confirme la pregunta de negocio ya registrada.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+HU-46 permanece en **Pruebas** hasta la comprobación visual del comportamiento nuevo y la revisión de integración.
+
 
 ## Cómo leer este documento
 

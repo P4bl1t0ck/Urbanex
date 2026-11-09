@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
 | Última actualización aditiva HU-46 | 2026-11-06 · Código, pruebas y documentación de recuperación/sesión; V-44 Pendiente |
 | Actualización HU-45 (2026-11-04) | Se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`; suite integrada 159/159 OK en SQLite. Según Sebas, V-43 cubrió ambos criterios de HU-45 |
 | Actualización lote 2 (2026-11-08) final | Se agregaron pruebas para visits (CleanWithoutTimesTests). 229/229 pruebas backend OK. Archivos nuevos documentados en §1: backend/apps/visits/*, frontend/components/FreeSlotsPicker.tsx, frontend/lib/visits.ts, frontend/lib/visitsCalendar.ts, frontend/types/visit.ts, páginas en dashboard/agenda y availability |
@@ -15,6 +17,19 @@
 Estados y validaciones: ver [Estado de procesos](URBANEX_ESTADO_PROCESOS.md). Deuda referenciada (DT-xx): ver [Deuda técnica](URBANEX_DEUDA_TECNICA.md).
 
 Riesgo de regresión: **Alto** = lo usan varias HU o pantallas; **Medio** = una HU con integración frontend/backend; **Bajo** = aislado.
+
+### Actualización aditiva HU-46 — 2026-11-09
+
+`backend/apps/users/tests.py` agrega cobertura de invalidación de access/refresh tras cambio manual y activación, y Secure según DEBUG. No se modifican modelos, migraciones, vistas, serializers ni contratos frontend. Se revisó la integración de los compartidos `backend/config/settings.py`, `backend/config/urls.py`, `frontend/components/SiteNav.tsx` y `frontend/lib/api.ts`: se conservan la sesión HU-46 y las rutas/enlaces de oportunidades, disponibilidad y agenda de develop. El registro humano V-44 de Sebas (2026-11-07, 16:19) consta en `Project_Progress.md`; su captura existe localmente y no se incorpora a Git. HU-46 permanece en Pruebas; esta revisión no añade una aprobación humana.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+`backend/apps/users/views.py` (**compartido**) guarda el desbloqueo y el contador cero al confirmar una recuperación válida. `backend/apps/users/tests.py` agrega tres pruebas: cuenta bloqueada puede recuperar e iniciar sesión; enlaces inválidos/vencidos/usados no desbloquean; cuenta aún no bloqueada también reinicia intentos. No cambia el contrato API ni el frontend y no hay migraciones nuevas.
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+
 
 ## 1. Mapa HU → archivos
 
