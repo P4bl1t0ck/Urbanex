@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from decimal import Decimal
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
@@ -6,11 +7,15 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import ProtectedError
 from django.test import SimpleTestCase, TestCase
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.users.models import Property, PropertyImage
-from .models import Contact, OriginChannel, Opportunity, OpportunityStatusHistory
+from apps.visits.models import Visit
+from .models import (
+    Contact, OriginChannel, Opportunity, OpportunityInteraction, OpportunityStatusHistory,
+)
 from .validators import normalize_phone
 
 OPPORTUNITIES_URL = '/api/opportunities/'
@@ -153,6 +158,137 @@ class OpportunityStatusHistoryTests(OpportunityTestMixin, TestCase):
         with self.assertRaises(ValidationError):
             OpportunityStatusHistory.objects.all().delete()
         self.assertTrue(OpportunityStatusHistory.objects.filter(pk=self.entry.pk).exists())
+
+
+class OpportunityInteractionModelTests(OpportunityTestMixin, TestCase):
+    '''HU-30 (DS-50): historial inmutable de interacciones y negociacion.'''
+
+    def setUp(self):
+        super().setUp()
+        self.opp = self.opportunity()
+        self.other_opp = self.opportunity(property=self.other_property)
+
+    def interaction(self, **kwargs):
+        data = {'opportunity': self.opp, 'author': self.agent,
+                'interaction_type': OpportunityInteraction.Type.NOTA, 'notes': 'Llamó el cliente'}
+        data.update(kwargs)
+        return OpportunityInteraction(**data)
+
+    def visit_for(self, opportunity):
+        start = timezone.now() + timedelta(days=1)
+        return Visit.objects.create(
+            opportunity=opportunity, property=opportunity.property, agent=self.agent,
+            scheduled_start=start, scheduled_end=start + timedelta(hours=1),
+        )
+
+    def test_valid_note_counteroffer_and_system_entries(self):
+        cases = [
+            self.interaction(),
+            self.interaction(interaction_type=OpportunityInteraction.Type.CONTRAOFERTA,
+                             offered_price=Decimal('140000.00'), notes='Ofrece menos'),
+            self.interaction(interaction_type=OpportunityInteraction.Type.SISTEMA, author=None,
+                             notes='Interés desde el formulario web: ¿sigue disponible?'),
+        ]
+        for entry in cases:
+            with self.subTest(type=entry.interaction_type):
+                entry.full_clean()
+                entry.save()
+                self.assertIsNotNone(entry.created_at)
+        self.assertEqual(self.opp.interactions.count(), 3)
+
+    def test_counteroffer_requires_a_positive_price(self):
+        for price in (None, Decimal('0'), Decimal('-1')):
+            with self.subTest(price=price), self.assertRaises(ValidationError) as ctx:
+                self.interaction(interaction_type=OpportunityInteraction.Type.CONTRAOFERTA,
+                                 offered_price=price).full_clean()
+            self.assertIn('offered_price', ctx.exception.message_dict)
+
+    def test_only_counteroffers_carry_a_price(self):
+        for kind in (OpportunityInteraction.Type.NOTA, OpportunityInteraction.Type.SISTEMA):
+            with self.subTest(kind=kind), self.assertRaises(ValidationError) as ctx:
+                self.interaction(interaction_type=kind, offered_price=Decimal('1000')).full_clean()
+            self.assertIn('offered_price', ctx.exception.message_dict)
+
+    def test_database_rejects_price_rules_even_without_clean(self):
+        bad = [
+            {'interaction_type': OpportunityInteraction.Type.CONTRAOFERTA, 'offered_price': None},
+            {'interaction_type': OpportunityInteraction.Type.CONTRAOFERTA,
+             'offered_price': Decimal('0')},
+            {'interaction_type': OpportunityInteraction.Type.NOTA, 'offered_price': Decimal('5')},
+        ]
+        for data in bad:
+            with self.subTest(**data), transaction.atomic(), self.assertRaises(IntegrityError):
+                self.interaction(**data).save()
+
+    def test_notes_are_required(self):
+        for notes in ('', '   '):
+            with self.subTest(notes=notes), self.assertRaises(ValidationError) as ctx:
+                self.interaction(notes=notes).full_clean()
+            self.assertIn('notes', ctx.exception.message_dict)
+
+    def test_only_system_entries_may_have_no_author(self):
+        for kind in (OpportunityInteraction.Type.NOTA, OpportunityInteraction.Type.CONTRAOFERTA):
+            price = Decimal('1000') if kind == OpportunityInteraction.Type.CONTRAOFERTA else None
+            with self.subTest(kind=kind):
+                entry = self.interaction(interaction_type=kind, author=None, offered_price=price)
+                with self.assertRaises(ValidationError) as ctx:
+                    entry.full_clean()
+                self.assertIn('author', ctx.exception.message_dict)
+                with transaction.atomic(), self.assertRaises(IntegrityError):
+                    entry.save()
+
+    def test_visit_must_belong_to_the_same_opportunity(self):
+        own_visit = self.visit_for(self.opp)
+        self.interaction(visit=own_visit).full_clean()
+        with self.assertRaises(ValidationError) as ctx:
+            self.interaction(visit=self.visit_for(self.other_opp)).full_clean()
+        self.assertIn('visit', ctx.exception.message_dict)
+
+    def test_entry_cannot_be_modified(self):
+        entry = self.interaction()
+        entry.save()
+        entry.notes = 'Cambio retroactivo'
+        with self.assertRaises(ValidationError):
+            entry.save()
+        with self.assertRaises(ValidationError):
+            OpportunityInteraction.objects.update(notes='Cambio retroactivo')
+        entry.refresh_from_db()
+        self.assertEqual(entry.notes, 'Llamó el cliente')
+
+    def test_entry_cannot_be_deleted(self):
+        entry = self.interaction()
+        entry.save()
+        with self.assertRaises(ValidationError):
+            entry.delete()
+        with self.assertRaises(ValidationError):
+            OpportunityInteraction.objects.all().delete()
+        self.assertTrue(OpportunityInteraction.objects.filter(pk=entry.pk).exists())
+
+    def test_entries_are_listed_in_chronological_order(self):
+        first = self.interaction(notes='Primera')
+        first.save()
+        second = self.interaction(notes='Segunda')
+        second.save()
+        self.assertEqual(list(self.opp.interactions.values_list('notes', flat=True)),
+                         ['Primera', 'Segunda'])
+
+    def test_opportunity_with_interactions_cannot_be_deleted(self):
+        # Sin visitas ni historial: solo la interaccion protege a la oportunidad.
+        self.interaction(opportunity=self.other_opp).save()
+        with self.assertRaises(ProtectedError):
+            self.other_opp.delete()
+
+    def test_visit_linked_to_an_interaction_cannot_be_deleted(self):
+        visit = self.visit_for(self.opp)
+        self.interaction(visit=visit).save()
+        with self.assertRaises(ProtectedError):
+            visit.delete()
+
+    def test_counteroffer_does_not_change_the_public_price(self):
+        self.interaction(interaction_type=OpportunityInteraction.Type.CONTRAOFERTA,
+                         offered_price=Decimal('100000')).save()
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.price, 150000)
 
 
 class OpportunityApiMixin(OpportunityTestMixin):
