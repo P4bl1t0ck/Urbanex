@@ -50,6 +50,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-09 · Codex con Sebas · registro humano de ampliación V-44 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Sebas confirmó la fecha y hora y agregó personalmente la fila de la ampliación V-44: 2026-11-09, 15:13:56, recuperación válida con desbloqueo, contador cero e inicio de sesión con contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`, excluida de Git. Se conserva su fila sin modificar el resultado humano.
+- **Aclaración:** las notas anteriores que dejaban esta comprobación o su transcripción Pendiente quedan supersedidas por esa fila. Esta revisión del agente comprueba el registro y la existencia del archivo; no añade una aprobación ni pasa HU-46 a Listo.
+- **Pruebas:** cambio exclusivamente documental; no se repiten las 241 pruebas SQLite ni las comprobaciones frontend ya registradas en Estándares §4. `git diff --check` sin errores. DT-92 y PostgreSQL No ejecutado (DT-68) siguen declarados.
+- **Siguiente paso:** publicar el registro en la rama del PR #20 y realizar la auditoría de AGENTS §11 en un chat nuevo de solo lectura. HU-46 permanece en Pruebas; la revisión y el merge corresponden a las personas responsables.
+
 ### 2026-11-09 · Codex con Sebas · preparación de actualización del PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
 - **Hecho:** cierre de la fusión pendiente de `origin/develop` `966cc50` en `a39e72e`; cambio del archivo compartido `users/views.py` en `46f4ca3`; pruebas en `e3e2a35`. Se conserva el código comprobado con 241 pruebas OK en SQLite; la comparación SHA-256 confirma que los archivos de código coinciden con el worktree probado. No hay cambios funcionales posteriores que justifiquen repetir la suite.
 - **Evidencia humana comunicada:** según Sebas en esta conversación, la nueva captura y comprobación del desbloqueo ya se completaron y el resultado es correcto. Existe `evidence/ResetPasswordUsuarioBloqueado.png`, excluida de Git; no se incorpora la imagen al repo. La hora de modificación del archivo es 15:13:56 del 2026-11-09; no se toma automáticamente como hora de la comprobación. La fila humana de la ampliación V-44 se deja para transcripción por Sebas conforme a §9.
@@ -947,7 +953,9 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado y ruta de evidencia |
 |---|---|---|---|
-| | | | |
+| Sebas | 2026-11-09, 15:13:56 | Comprobé que la recuperación válida de contraseña desbloquea la cuenta, reinicia los intentos fallidos a cero y permite iniciar sesión con la contraseña nueva. | Aprobado — evidence/ResetPasswordUsuarioBloqueado.png |
+
+**Actualización documental (2026-11-09):** Sebas incorporó la fila anterior y confirmó su fecha y hora en la conversación. Supersede las menciones previas a esta comprobación o su transcripción como Pendiente; el agente conserva el resultado escrito por la persona. HU-46 continúa en Pruebas hasta la revisión correspondiente.
 
 Los pasos y el registro originales de V-44 se conservan a continuación:
 

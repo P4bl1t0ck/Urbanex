@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · 241 pruebas backend OK; comprobación visual del comportamiento nuevo Pendiente |
 | Última actualización de integración HU-46 | 2026-11-09 · Línea base y revisión aislada de D-05; resultados registrados en §4 |
 | Última actualización aditiva HU-46 | 2026-11-06 · Evidencia de suite y validaciones HU-46; V-44 Pendiente |
@@ -17,6 +18,10 @@
 Principio rector (DoD del equipo): *"Ninguna funcionalidad se considera completa si solo funciona en Postman. Debe poder ejecutarse a través de la interfaz gráfica."* A esto se suma que **el software debe reflejar el proceso de la inmobiliaria**, no solo exponer un CRUD.
 
 ---
+
+### Registro humano de ampliación V-44 — 2026-11-09
+
+Sebas incorporó personalmente en `Project_Progress.md`, ampliación V-44, su comprobación del 2026-11-09 a las 15:13:56: recuperación válida con desbloqueo, reinicio de intentos e inicio de sesión con la contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`; la fecha y hora fueron confirmadas por Sebas en la conversación. La fila humana supersede las menciones anteriores que dejaban esa comprobación o su transcripción Pendiente. El agente conserva ese registro sin emitir una aprobación nueva ni recalcular porcentajes. HU-46 permanece en Pruebas; auditoría de solo lectura y revisión para el merge pendientes. DT-92, DT-68 y los riesgos de seguridad no se cierran con esta nota.
 
 ## 1. Clean Code y arquitectura
 
