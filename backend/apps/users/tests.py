@@ -474,6 +474,153 @@ class PasswordResetAndRefreshApiTests(TestCase):
         )
         self.assertEqual(replay_response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_successful_password_reset_unlocks_account_and_allows_login(self):
+        self.user.is_locked = True
+        self.user.failed_attempts = 5
+        self.user.save(update_fields=["is_locked", "failed_attempts"])
+        _, raw_token = self._request_password_reset()
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_locked)
+        self.assertEqual(self.user.failed_attempts, 5)
+
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            {"token": raw_token, "password": "Recovered-Safe-Urbanex-2026!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.is_locked)
+        self.assertEqual(self.user.failed_attempts, 0)
+        login = self.client.post(
+            "/api/auth/login/",
+            {"email": self.user.email, "password": "Recovered-Safe-Urbanex-2026!"},
+            format="json",
+        )
+        self.assertEqual(login.status_code, 200, login.data)
+
+    def test_invalid_reset_does_not_unlock_or_clear_attempts(self):
+        for token_state in ("invalid", "expired", "used"):
+            with self.subTest(token_state=token_state):
+                mail.outbox.clear()
+                self.user.is_locked = True
+                self.user.failed_attempts = 5
+                self.user.save(update_fields=["is_locked", "failed_attempts"])
+                _, raw_token = self._request_password_reset()
+                record = PasswordResetToken.objects.get(
+                    token_hash=hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+                )
+                if token_state == "expired":
+                    record.expires_at = timezone.now() - timedelta(seconds=1)
+                    record.save(update_fields=["expires_at"])
+                elif token_state == "used":
+                    record.is_used = True
+                    record.save(update_fields=["is_used"])
+                else:
+                    raw_token += "-tampered"
+                response = self.client.post(
+                    "/api/auth/password-reset/confirm/",
+                    {"token": raw_token, "password": "Recovered-Safe-Urbanex-2026!"},
+                    format="json",
+                )
+                self.assertEqual(response.status_code, 400, response.data)
+                self.user.refresh_from_db()
+                self.assertTrue(self.user.is_locked)
+                self.assertEqual(self.user.failed_attempts, 5)
+                self.assertTrue(self.user.check_password("Original-Safe-2026!"))
+
+    def test_password_reset_clears_attempts_before_account_is_locked(self):
+        self.user.failed_attempts = 3
+        self.user.save(update_fields=["failed_attempts"])
+        _, raw_token = self._request_password_reset()
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            {"token": raw_token, "password": "Recovered-Safe-Urbanex-2026!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.is_locked)
+        self.assertEqual(self.user.failed_attempts, 0)
+
+    def _old_session_tokens(self):
+        self.user.password_changed_at = timezone.now() - timedelta(minutes=2)
+        self.user.save(update_fields=["password_changed_at"])
+        access = AccessToken.for_user(self.user)
+        refresh = RefreshToken.for_user(self.user)
+        issued_at = int((timezone.now() - timedelta(minutes=1)).timestamp())
+        access["iat"] = issued_at
+        refresh["iat"] = issued_at
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+        self.assertEqual(client.get("/api/auth/properties/mine/").status_code, 200)
+        client.credentials()
+        client.cookies[settings.JWT_REFRESH_COOKIE_NAME] = str(refresh)
+        client.get("/api/auth/csrf/")
+        response = client.post(
+            "/api/token/refresh/", {}, format="json",
+            HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value,
+        )
+        self.assertEqual(response.status_code, 200)
+        return str(access), str(refresh)
+
+    def _assert_old_session_rejected(self, access, refresh):
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+        self.assertEqual(client.get("/api/auth/users/").status_code, 401)
+        client.credentials()
+        client.cookies[settings.JWT_REFRESH_COOKIE_NAME] = refresh
+        client.get("/api/auth/csrf/")
+        response = client.post(
+            "/api/token/refresh/", {}, format="json",
+            HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value,
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertNotIn("access", response.data)
+
+    def test_manual_password_change_invalidates_access_and_refresh(self):
+        tokens = self._old_session_tokens()
+        previous_version = self.user.password_changed_at
+        self.user.set_password("Manual-Safe-Urbanex-2026!")
+        self.user.save(update_fields=["password"])
+        self.user.refresh_from_db()
+        self.assertGreater(self.user.password_changed_at, previous_version)
+        self._assert_old_session_rejected(*tokens)
+
+    def test_activation_invalidates_access_and_refresh(self):
+        tokens = self._old_session_tokens()
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+        raw_token = "synthetic-activation-token-hu46"
+        UserActivationToken.objects.create(
+            user=self.user,
+            token_hash=hashlib.sha256(raw_token.encode("utf-8")).hexdigest(),
+        )
+        response = self.client.post(
+            "/api/auth/users/activate/",
+            {"token": raw_token, "password": "Activated-Safe-Urbanex-2026!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_active)
+        self.assertTrue(self.user.check_password("Activated-Safe-Urbanex-2026!"))
+        self._assert_old_session_rejected(*tokens)
+
+    def test_refresh_cookie_secure_flag_follows_debug(self):
+        for debug in (True, False):
+            with self.subTest(debug=debug), override_settings(DEBUG=debug):
+                response = self.client.post(
+                    "/api/auth/login/",
+                    {"email": self.user.email, "password": "Original-Safe-2026!"},
+                    format="json",
+                )
+                self.assertEqual(response.status_code, 200)
+                cookie = response.cookies[settings.JWT_REFRESH_COOKIE_NAME]
+                self.assertEqual(bool(cookie["secure"]), not debug)
+                self.assertTrue(cookie["httponly"])
+                self.assertEqual(cookie["samesite"], "Lax")
+
     def test_expired_password_reset_token_is_rejected(self):
         _, raw_token = self._request_password_reset()
         record = PasswordResetToken.objects.get(user=self.user)
