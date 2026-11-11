@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización de corrección HU-09 | 2026-11-11 · privacidad del motivo en respuestas públicas; HU-09 permanece en Pruebas; registro humano V-45 conservado |
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; ambos criterios validados; HU en Pruebas hasta auditoría y merge |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -468,6 +469,10 @@ Decisión de Pablo (2026-11-08, PR #18). **No cambia ningún estado:** cada HU s
 | C-08 | Pueden existir valores heredados `cliente` en bases de datos, aunque `User.Role` ya solo define `admin` y `asesor`; RF-12 solo reconoce esos dos roles internos | Valores históricos en base vs `models.py` / RF-12 | **Confirmada por Pablo el 2026-10-31 (DS-30):** los clientes no tienen cuenta; eliminar `cliente`. Superusuarios cliente pasan a `admin`; las demás cuentas pasan a `asesor` inactivo con motivo `rol cliente eliminado (C-08)` |
 
 > **Nota añadida (Pablo, 2026-11-03), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`:** la fila C-08 queda con el texto de `develop`. En esta rama decía "confirmada por Pablo (2026-11-01)"; la confirmación vale desde el **2026-10-31 (DS-30)**. El 2026-11-01 Pablo la repitió al cerrar DT-105 en código (FX-23, `033b845`): solo hay roles `admin` y `asesor`, el cliente es anónimo (sin cuenta) y las pruebas de oportunidades ya no usan `role='cliente'`.
+
+### Corrección aditiva de privacidad HU-09 — 2026-11-11
+
+`PropertySerializer.to_representation()` devuelve `unavailability_reason: null` en respuestas anónimas y cuando falta el contexto de solicitud. Conserva el motivo almacenado y el acceso autenticado existente, incluida la gestión de propietario/admin después de republicar. No cambia las transiciones ni los criterios de aceptación de HU-09. `PropertyWithdrawalApiTests` cubre las respuestas públicas e internas y la conservación del dato. Resultados reales en Estándares §4; validación humana de esta corrección **Pendiente**, sin modificar V-45. HU-09 permanece en **Pruebas**.
 
 ### Actualización aditiva HU-09 — 2026-11-09
 
