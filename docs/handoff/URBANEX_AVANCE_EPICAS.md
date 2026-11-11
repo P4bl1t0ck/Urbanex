@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · §5B: los 3 criterios del lote 3 validados (V-78 a V-85, Pablo); 0/3 HU completas hasta la auditoría y el merge del PR #21 |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
@@ -261,13 +262,13 @@ Composición: HU-19 (5 pts), HU-20 (3 pts) y HU-25 (2 pts) del backlog (contexto
 
 | HU | Criterio (backlog §10) | Impl. | Verif. | Valid. | Evidencia |
 |---|---|:-:|:-:|:-:|---|
-| HU-19 | Bloqueo transaccional sin doble reserva | ✔ | ✔ (SQLite) | Pendiente | `VisitRequestTests`, `VisitRequestThrottleTests` (suite 263 OK, 2026-11-09); PostgreSQL **No ejecutado** (DT-143); V-78 a V-81 Pendiente |
-| HU-20 | Confirmación por canal permitido | ✔ | ✔ | Pendiente | `VisitNotificationTests`, `PublicVisitTests`; V-79, V-82, V-83 Pendiente |
-| HU-25 | Resultado de la visita (solo Realizada habilitará la negociación, HU-29) | ✔ | ✔ | Pendiente | `VisitOutcomeTests`; V-84, V-85 Pendiente |
+| HU-19 | Bloqueo transaccional sin doble reserva | ✔ | ✔ (SQLite) | ✔ | `VisitRequestTests`, `VisitRequestThrottleTests` (suite 263 OK, 2026-11-09); PostgreSQL **No ejecutado** (DT-143); ~~V-78 a V-81 Pendiente~~ **(2026-11-11)** V-78 a V-81 aprobadas (Pablo) |
+| HU-20 | Confirmación por canal permitido | ✔ | ✔ | ✔ | `VisitNotificationTests`, `PublicVisitTests`; ~~V-79, V-82, V-83 Pendiente~~ **(2026-11-11)** V-79, V-82, V-83 aprobadas (Pablo; evidencia: bitácora por correo) |
+| HU-25 | Resultado de la visita (solo Realizada habilitará la negociación, HU-29) | ✔ | ✔ | ✔ | `VisitOutcomeTests`; ~~V-84, V-85 Pendiente~~ **(2026-11-11)** V-84, V-85 aprobadas (Pablo) |
 
 | Métrica | Valor |
 |---|---|
-| Criterios del lote 3 (backlog) | 3/3 implementados y verificados; 0/3 validados |
+| Criterios del lote 3 (backlog) | 3/3 implementados y verificados; ~~0/3 validados~~ **(2026-11-11)** 3/3 validados (Ronda 7, Pablo) |
 | HU completas / puntos | **0/3 HU · 0/10 pts**: en **Pruebas** hasta la validación de Pablo, la auditoría (§11) y el merge del PR #21 |
 
 ## 6. Bloqueos y dependencias que afectan al avance

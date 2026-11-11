@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: validación visual de HU-19, HU-20 y HU-25 aprobada por Pablo (V-78 a V-85) |
 | Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: nota aditiva en PROC-08 con el registro humano de V-44 |
 | Última actualización aditiva HU-46 | 2026-11-06 · PROC-08 registra I-02 y la sesión D-05; V-44 Pendiente |
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
@@ -172,6 +173,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 6 | El asesor registra o reprograma visitas coordinadas | HU-23 | I-08 | No implementado | — |
 | 7 | Consulta su agenda | HU-24 | I-08 | No implementado | — |
 | 8 | Registra el resultado (realizada habilita el avance) | HU-25 | I-08 | `record_outcome`, `POST /api/visits/<id>/outcome/`; modal en `frontend/app/dashboard/agenda/page.tsx` (rama sin fusionar, PR #21). El avance a En Negociación es de HU-29 | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-25) |
+
+**Nota (2026-11-11, Ronda 7):** pasos 3, 4 y 8 (HU-19, HU-20 y HU-25) con validación visual aprobada por Pablo (V-78 a V-85, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #21.
 
 ### PROC-05 · Seguimiento de la oportunidad
 

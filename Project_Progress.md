@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 registrada según Pablo: 5 Aprobado (V-79, V-82–V-85) y 3 Pendiente (parcial) (V-78, V-80, V-81) |
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 cerrada: las 8 Aprobado por Pablo (V-78, V-80 y V-81 tras repetirlas, ~15:46–15:55); HU-19, HU-20 y HU-25 siguen en Pruebas hasta la auditoría y el merge del PR #21 |
 | Última actualización lote 3 · integración de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `97f0e0c` en la rama del lote 3; 277 pruebas OK en SQLite (Estándares §4) |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; resultados técnicos en Estándares §4 |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
@@ -52,6 +52,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · cierre de la Ronda 7
+- **Hecho:** Pablo repitió V-78, V-80 y V-81 (~15:46–15:55, incógnito) y las aprobó: las 8 de la Ronda 7 quedan **Aprobado**. Filas nuevas en Progress; validación registrada en Estado de procesos (HU-19, HU-20, HU-25), Avance de épicas §5B y USM (PROC-04). Las tres HU siguen en **Pruebas** (mismo criterio que el lote 2).
+- **Capturas (ok de Pablo):** (66) V-80; (67) y (68) V-78; (69) V-81.
+- **Falta:** capturas de V-79, V-82 y V-83; frontend tras la fusión (build, tsc, eslint, `npm test`); auditoría de solo lectura (§11); DT-143.
+- **Siguiente paso:** auditoría §11 del PR #21 en un chat nuevo de solo lectura.
 
 ### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · registro de la Ronda 7
 - **Hecho:** transcripción de la validación visual de Pablo (V-78 a V-83 desde sus bitácoras por correo del 2026-11-11, con la corrección de V-80; V-84 y V-85 dictadas en el chat). Según Pablo: V-79, V-82, V-83, V-84 y V-85 **Aprobado**; V-78, V-80 y V-81 **Pendiente (parcial)**. Capturas (57)–(65) asignadas a V-84 y V-85 por orden de Pablo.
@@ -1127,7 +1133,9 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 ### Ronda 7 — Lote 3: HU-19 (P-07), HU-20 (P-08) y HU-25 (I-08) (rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas`, PR #21)
 
-> **Estado (2026-11-11), según Pablo: 5 Aprobado (V-79, V-82, V-83, V-84, V-85) y 3 Pendiente (parcial) (V-78, V-80, V-81, se repiten).** Pruebas del 2026-11-11 en el worktree `Urbanex-lote3` (SQLite, `EMAIL_PROVIDER=console`). V-78 a V-83 se transcriben de sus bitácoras enviadas por correo ese día (para V-80 manda la corrección de las 13:43); V-84 y V-85, de lo que Pablo dictó en el chat. Capturas en `evidencias\Lote3\`: (57)–(61) V-84 y (62)–(65) V-85; V-79, V-82 y V-83 tienen la captura pendiente.
+> **Estado (2026-11-11, cierre): Ronda 7 cerrada, las 8 Aprobado por Pablo.** V-78, V-80 y V-81 se repitieron ese día (~15:46–15:55, incógnito) y quedaron Aprobado (fila nueva en cada tabla; la fila anterior se conserva como antecedente). V-79, V-82 y V-83 tienen como evidencia la bitácora por correo. HU-19, HU-20 y HU-25 siguen en **Pruebas** hasta la auditoría (§11) y el merge del PR #21.
+>
+> *Estado intermedio (2026-11-11), según Pablo: 5 Aprobado (V-79, V-82, V-83, V-84, V-85) y 3 Pendiente (parcial) (V-78, V-80, V-81, se repiten).** Pruebas del 2026-11-11 en el worktree `Urbanex-lote3` (SQLite, `EMAIL_PROVIDER=console`). V-78 a V-83 se transcriben de sus bitácoras enviadas por correo ese día (para V-80 manda la corrección de las 13:43); V-84 y V-85, de lo que Pablo dictó en el chat. Capturas en `evidencias\Lote3\`: (57)–(61) V-84 y (62)–(65) V-85; V-79, V-82 y V-83 tienen la captura pendiente.
 >
 > *Estado anterior (2026-11-09): las 8 pruebas Pendiente.* Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\`, fuera del repo).
 >
@@ -1143,6 +1151,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador sin sesión; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:10) | Ficha "[DEMO] Casa en Cumbayá…", franja miércoles 18-nov 16:00; cliente Julián, celular Ecuador, casillas WhatsApp y LOPDP marcadas y un correo de prueba. Mensaje verde: "Tu solicitud de visita quedó registrada…" (la bitácora transcribe "Miércoles 11 de noviembre a las 4" y "Te enviaremos la confirmación a tu correo…"). En I-06: oportunidad nueva de Julián, Visita Programada, canal Catálogo web. Terminal: correo al cliente (enlace P-08) y al asesor. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el caso sin correo (mensaje "El asesor te confirmará la visita por WhatsApp") y comprobar que la hora desaparece de la lista; se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición) | "Cliente Prueba", 0991111111, LOPDP marcada, sin correo y sin la casilla de confirmación, franja 18-nov 09:00: aviso verde "Tu solicitud de visita quedó registrada." y "El asesor te confirmará la visita por WhatsApp"; la hora desapareció de la lista. En I-06 (asesor.demo): Visita Programada, canal Catálogo web. Capturas: `evidencias\Lote3\Captura de pantalla (67)` y `(68).png`. | **Aprobado** |
 
 ### V-79 · HU-19 / HU-20 — Solicitar con correo y casilla
 
@@ -1159,6 +1168,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora 13:20; corrección 13:43, que manda) | Sin LOPDP: "Debes aceptar la política de privacidad…". Casilla de correo marcada y correo vacío: "Para recibir la confirmación por correo indica tu correo". Sin teléfono: "Ingresa tu número de teléfono". Varios envíos seguidos: "Hiciste varias solicitudes seguidas" (3/min por IP). En ningún error se creó visita ni oportunidad. Según la corrección, esta bitácora es solo de V-80; la mención de V-81 fue un error. Evidencia: bitácoras por correo; captura no localizada. **Falta (según Pablo):** el celular fijo (`022345678`); se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición) | Celular fijo 022345678, LOPDP marcada, sin correo, franja 18-nov 09:00: error junto al campo del celular (tipo de número no válido); no se creó la visita (esa franja se usó después en V-78). Captura: `evidencias\Lote3\Captura de pantalla (66).png`. | **Aprobado** |
 
 ### V-81 · HU-19 — Hora ocupada y visita repetida
 
@@ -1167,6 +1177,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador, dos pestañas; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:43) | Misma ficha y franja (miércoles 11-nov 17:00) en dos pestañas, cliente "otro". Pestaña 1: registro correcto. Pestaña 2: error de horario ya no disponible (la bitácora transcribe "…ya no está disponible, escoge otro horario."). En I-06: una sola oportunidad de "otro" en Visita Programada, sin visita duplicada. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el mismo celular otra vez sobre la misma propiedad ("Ya tienes una visita programada…"); se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición, segundo caso) | Mismo celular 0991111111 (el de V-78), misma propiedad, franja 18-nov 10:00: "Ya tienes una visita programada para esta propiedad…". El primer caso (dos pestañas) queda en la fila anterior. Captura: `evidencias\Lote3\Captura de pantalla (69).png`. | **Aprobado** |
 
 ### V-82 · HU-20 — Confirmación por enlace (P-08)
 

@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25: validación visual aprobada por Pablo (V-78 a V-85); siguen en Pruebas hasta la auditoría y el merge del PR #21 |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
@@ -445,7 +446,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-19
 
-**Solicitar una visita** · EP-4 · RF-04, RF-09 · Pantalla P-07 (en la ficha pública) · URB-23, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-78 a V-81)
+**Solicitar una visita** · EP-4 · RF-04, RF-09 · Pantalla P-07 (en la ficha pública) · URB-23, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-78 a V-81) · **(2026-11-11)** validación visual aprobada (V-78 a V-81, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
 
 **Proceso (PROC-04, T3 pasos 9-10):** el cliente, sin cuenta, elige en la ficha una de las horas libres del asesor, deja su nombre, su celular y la aceptación de la política de privacidad (y, si quiere, un correo para la confirmación). Se registra la visita, se bloquea la hora y la oportunidad pasa a Visita Programada. Decisiones: DS-39.
 
@@ -458,21 +459,21 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-20
 
-**Recibir la confirmación de la visita** · EP-4 · RF-04 · Pantalla P-08 · URB-24, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-79, V-82, V-83)
+**Recibir la confirmación de la visita** · EP-4 · RF-04 · Pantalla P-08 · URB-24, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-79, V-82, V-83) · **(2026-11-11)** validación visual aprobada (V-79, V-82, V-83, Pablo; evidencia: bitácora por correo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
 
 **Proceso (T3 paso 11):** si el cliente dio correo y marcó la casilla, recibe la confirmación con un enlace único a P-08; si no, el asesor confirma por WhatsApp. El asesor de la visita (y el de la oportunidad, si es otro) recibe siempre un aviso.
 
 | Criterio (backlog §10: "Confirmación por canal permitido"; Anexo 2 **POR CONFIRMAR**) | Implementación | Prueba | Resultado |
 |---|---|---|---|
 | Correo al cliente solo con correo + casilla, después del commit; un fallo del correo no revierte la visita | `send_visit_notifications()` con `transaction.on_commit`; correo guardado en `Visit.confirmation_email` | `VisitNotificationTests` (5 pruebas) | Implementado y verificado con `EMAIL_PROVIDER=console`; Resend **No ejecutado** |
-| P-08 de solo lectura por token, válido hasta la hora de inicio, sin botón Cancelar (HU-21) | `GET /api/visits/public/<token>/` (404 igual si no existe o ya empezó); `frontend/app/visits/[token]/` | `PublicVisitTests` | Implementado y verificado; visual Pendiente (V-82) |
-| Sin correo: el asesor confirma por WhatsApp | `needs_whatsapp_confirmation` en la agenda; aviso "Confirmar por WhatsApp" en I-08 | `test_agenda_marks_whatsapp_confirmation` | Implementado y verificado; visual Pendiente (V-83) |
+| P-08 de solo lectura por token, válido hasta la hora de inicio, sin botón Cancelar (HU-21) | `GET /api/visits/public/<token>/` (404 igual si no existe o ya empezó); `frontend/app/visits/[token]/` | `PublicVisitTests` | Implementado y verificado; visual Pendiente (V-82) · **(2026-11-11)** validación visual aprobada (V-82, Pablo) |
+| Sin correo: el asesor confirma por WhatsApp | `needs_whatsapp_confirmation` en la agenda; aviso "Confirmar por WhatsApp" en I-08 | `test_agenda_marks_whatsapp_confirmation` | Implementado y verificado; visual Pendiente (V-83) · **(2026-11-11)** validación visual aprobada (V-83, Pablo) |
 
 - **Decisión (DS-39):** P-08 muestra nombre, apellido y teléfono del asesor de la visita y, si es otro, del asesor de la oportunidad.
 
 ## HU-25
 
-**Registrar el resultado de la visita** · EP-4 · RF-04 · Pantalla I-08 (modal) · URB-28, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-84, V-85)
+**Registrar el resultado de la visita** · EP-4 · RF-04 · Pantalla I-08 (modal) · URB-28, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-84, V-85) · **(2026-11-11)** validación visual aprobada (V-84, V-85, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
 
 **Proceso (T3 paso 12):** pasada la hora de inicio, el asesor de la visita (o el admin) registra una sola vez Realizada, No asistida o Cancelada, con la respuesta del cliente.
 
