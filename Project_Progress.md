@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización de commits HU-09 | 2026-11-11 · correcciones guardadas en commits por archivo; push e integración del develop remoto pendientes |
+| Última actualización de corrección HU-09 | 2026-11-11 · privacidad del motivo de retiro y avance documental corregidos; 253 pruebas OK en SQLite; sin commit ni push de estas correcciones |
 | Última actualización aditiva HU-09 | 2026-11-11 · `origin/develop` `47d09ed` integrado en `048341a`; V-45 aprobada; 251/251 pruebas OK en SQLite; auditoría pendiente |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; resultados técnicos en Estándares §4 |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
@@ -51,6 +53,19 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-11 · Codex con Sebas · commits de correcciones HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** commits autorizados por Sebas en esta conversación, con rutas explícitas, comprobación y presentación del área preparada antes de cada commit y mensaje mediante `git commit -F`. Serializer compartido en `78ccc5b`; regresiones en `819d59d`; Avance en `7419238`; Deuda en `e9d2c40`; Estado en `634c654`; Estándares en `33e1484`; GPS en `c37d030`; Seguridad en `72596c0`. Cada archivo compartido quedó en su propio commit. Este registro y la preparación del PR quedan en el commit de Progress.
+- **Pruebas:** se conserva la ejecución final de 253 pruebas OK, exit 0, SQLite, registrada en Estándares §4; no hubo cambios de código después de esa ejecución. `git diff --cached --check` sin errores antes de cada commit. DT-92 mantiene el check de migraciones en exit 1; PostgreSQL No ejecutado (DT-68).
+- **Verificación remota previa:** la consulta GitHub `compare_commits(base=47d09ed, head=develop)` devolvió `ahead_by=2`, `behind_by=0`, con cambios en Deuda y USM; no se actualizó ni integró la referencia local en esta sesión. La búsqueda de PR por la rama no devolvió resultados. V-45 permanece sin modificaciones locales y las cuatro rutas de evidencia registradas existen.
+- **Falta:** integrar el `develop` remoto actualizado antes de pedir el PR y comprobar cualquier conflicto. La revisión y las correcciones realizadas en este chat quedan como evidencia; el requisito de auditoría en un chat nuevo de solo lectura de `AGENTS.md` §11 sigue Pendiente. No se hizo push ni se abrió PR. No se añadió una aprobación humana.
+- **Siguiente paso:** integrar `develop` y comprobar el contenido final; completar la auditoría formal y hacer push de la rama cuando Sebas lo ordene. El PR hacia `develop` lo abre la persona; propuesta y checklist en la preparación de revisión al final de este documento.
+
+### 2026-11-11 · Codex con Sebas · correcciones de auditoría HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** corregida la representación pública del motivo de retiro en `PropertySerializer`: `null` para consultas anónimas o sin contexto, texto conservado en almacenamiento y en el acceso autenticado existente. Se agregaron dos pruebas y se amplió la de republicación. Restaurado literalmente desde `origin/develop` el bloque histórico de criterios, métricas y gráfico de EP-2; las cifras vigentes de HU-09 quedan en una sección aditiva. Fase 0 autorizada por Sebas en esta conversación. Sin nuevos IDs, dependencias, migraciones ni cambios de frontend.
+- **Pruebas:** línea base sobre `f2312a5`: 251 pruebas OK. Focalizadas antes de corregir: 10 pruebas, 4 fallos; después: 10 OK. Suite final: `Ran 253 tests in 110.251s`, `OK`, exit 0, `connection.vendor=sqlite`. Migraciones exit 1 por DT-92; PostgreSQL No ejecutado (DT-68, Nivel 1). Frontend comprobado en la revisión previa de esta sesión: 17/17, build exit 0, TypeScript sin diagnósticos y ESLint exit 0 con 2 avisos DT-24. Detalle de comandos y salidas en Estándares §4. `git diff --check` sin errores; bloque histórico de EP-2 idéntico a la referencia y filas base conservadas.
+- **Falta:** validación humana de esta corrección Pendiente; se conserva V-45 de Sebas sin añadir aprobaciones. DT-92 y la política de visitas/oportunidades al retirar siguen pendientes. Correcciones locales sin commit; no se hizo push ni se abrió un PR.
+- **Siguiente paso:** revisar el diff y autorizar los commits por capa; antes de pedir el PR, integrar `develop` actualizado conforme a `AGENTS.md` §5 y completar la auditoría de solo lectura en un chat nuevo (§11). Si esa integración cambia código, repetir las comprobaciones afectadas. El PR lo abre la persona; título y descripción propuestos más abajo.
 
 ### 2026-11-11 · Codex con Sebas · cierre documental de V-45 · rama `feat/URB-09-HU-09-actualizar-propiedad`
 - **Hecho:** Sebas completó y aprobó V-45 el 2026-11-10 a las 14:59 (Bogotá), con observación del recorrido de edición, retirada, reactivación y republicación, y cuatro evidencias locales en `C:/Users/mateo/Documents/Urbanex/evidence/HU-09/`. Los dos criterios de HU-09 quedan Implementados, Verificados y Validados; DT-44 queda Resuelto. HU-09 permanece en Pruebas hasta la auditoría y el merge.
@@ -1399,3 +1414,31 @@ Casillas sin aprobación del agente; evidencia técnica en Estándares §4, regi
 | Docs y explicación | Handoff y nota de cierre de esta sesión; GPS explica conexión API/cliente |
 | Auditoría y revisión | Pendientes antes del PR; esta sesión de implementación no es auditoría independiente |
 | Git y archivos compartidos | views.py y dashboard/page.tsx incluidos en Fase 0; deben ir en commits separados cuando se autoricen. Sin commit/push en esta sesión |
+
+### Preparación de revisión — correcciones HU-09 (2026-11-11)
+
+**Título propuesto para el PR:** `feat(URB-09): permite retirar y reactivar propiedades con motivo privado`.
+
+**Ramas propuestas:** `feat/URB-09-HU-09-actualizar-propiedad` → `develop`. Esta propuesta no constituye una orden para abrir el PR.
+
+**Descripción propuesta:** HU-09 permite editar propiedades publicadas, retirarlas con motivo obligatorio y reactivarlas a En captación; volver al catálogo exige comprobar de nuevo los requisitos de publicación HU-53. Los cambios de estado se autorizan para propietario/admin y no permiten asignar Vendido/Arrendado manualmente. El motivo se conserva para la gestión interna y las respuestas públicas devuelven `null`. La actualización de avance conserva los registros históricos y agrega los resultados de HU-09 por separado.
+
+**Cómo se conectan los cambios:** las rutas y vistas de retirada/reactivación usan los serializers de `backend/apps/users/`; el dashboard llama a esas acciones y actualiza la propiedad con la respuesta de la API. La corrección de esta sesión actúa solo en la representación de `PropertySerializer`: mantiene el contrato `string | null` que ya usa `frontend/types/property.ts`, por lo que no requiere editar el frontend. `backend/apps/users/tests.py` comprueba privacidad, conservación del motivo y acceso interno. Los documentos de handoff registran pruebas, alcance y pendientes; V-45 conserva la atribución humana existente.
+
+| DoD / preparación | Evidencia o pendiente |
+|---|---|
+| Criterios y proceso de negocio | HU-09 en Estado de procesos: motivo obligatorio y cambios de estado controlados; estados finales sin asignación manual |
+| Contrato backend/frontend | `PropertySerializer` y `frontend/types/property.ts`: motivo `string | null`; público `null`, acceso autenticado existente conservado |
+| Reglas en servidor | `PropertyWithdrawalApiTests`: permisos, transiciones, errores y republicación; serializer restringe la representación pública |
+| Pruebas unitarias e integración/API | Focalizadas 10 OK; suite completa 253 OK, exit 0, SQLite; comandos y resultados en Estándares §4 |
+| TypeScript, ESLint, build y pruebas frontend | Revisión previa en esta sesión: TypeScript sin diagnósticos, ESLint exit 0 con 2 avisos DT-24, build exit 0, npm test 17/17; no hubo cambios posteriores de frontend |
+| Migraciones | Pendiente: check exit 1 por DT-92; ninguna migración generada, aplicada o editada |
+| PostgreSQL | No ejecutado (DT-68, permitido para Nivel 1; obligatorio para cierre de lote/entrega) |
+| Casos límite y regresiones | 253 pruebas OK; privacidad comprobada en Disponible/Reservado, después de republicar y sin contexto de solicitud; motivo almacenado y acceso interno conservados |
+| Documentación y evidencia | Progress, Estado, Avance, Deuda, GPS, Estándares y Seguridad actualizados; bloque histórico de EP-2 idéntico a `origin/develop` |
+| Validación humana | V-45 existente de Sebas, 2026-11-10 14:59, conservada. Comprobación humana de la corrección: Pendiente |
+| Archivos prohibidos, credenciales y migraciones históricas | Sin archivos prohibidos ni migraciones en el diff local de esta corrección; auditoría integral de rama/commits Pendiente |
+| Integración, commits y push | Pendientes: integrar `develop` actualizado antes de pedir PR; commits por capa y archivos compartidos separados; mostrar staged antes de cada commit; requieren orden |
+| Auditoría y revisión del otro integrante | Pendiente: auditoría de solo lectura en chat nuevo sobre el contenido final; esta implementación no la sustituye |
+
+**Comprobación humana propuesta (Pendiente, sin aprobación del agente):** al gestionar una propiedad retirada, comprobar que propietario/admin siguen viendo el motivo en el panel; al reactivar y publicar, comprobar que el catálogo y la ficha públicos cargan y que sus respuestas no contienen el texto del motivo. Registrar quién, fecha, hora, observación y evidencia local si se realiza. No se modifica la tabla humana de V-45.
