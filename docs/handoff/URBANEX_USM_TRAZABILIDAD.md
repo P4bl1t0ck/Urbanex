@@ -2,6 +2,9 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: validación visual de HU-19, HU-20 y HU-25 aprobada por Pablo (V-78 a V-85) |
+| Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: nota aditiva en PROC-08 con el registro humano de V-44 |
+| Última actualización aditiva HU-46 | 2026-11-06 · PROC-08 registra I-02 y la sesión D-05; V-44 Pendiente |
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
 | Última actualización | 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4): §4, columna **Código** de PROC-03 (HU-15, HU-16) y PROC-05 (HU-29, HU-30), con el texto anterior tachado; rama sin fusionar. Antes: 2026-11-08 (noche) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): §2, **plan de reparto** (PLAN, sin avance). Antes: 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` conservando filas del mapa y la traza de HU-45. Se mantiene la nota del PR #15 (HU-27 y HU-34 ya no son "Rama sin fusionar"), se actualiza HU-12 en §4 (PR #14 ya está en `develop`) y se aclara la nota de PROC-08/HU-45 de la rama `origin/develop`. Antes: 2026-11-05 · Sebas (con Copilot) · PROC-08/HU-45: se aclara que la fila inicial sobre el desbloqueo es histórica y que la actualización del 2026-11-04 describe el flujo implementado; notificación pendiente referida a DT-120. Antes: 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: §4, HU-27 (PROC-03 paso 5) y HU-34 (PROC-05 paso 1) ya no son "Rama sin fusionar" (fusionadas en `develop`, `043cfb5`, DS-32) y su columna Estado enlaza a Estado de procesos. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
@@ -171,6 +174,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 7 | Consulta su agenda | HU-24 | I-08 | No implementado | — |
 | 8 | Registra el resultado (realizada habilita el avance) | HU-25 | I-08 | `record_outcome`, `POST /api/visits/<id>/outcome/`; modal en `frontend/app/dashboard/agenda/page.tsx` (rama sin fusionar, PR #21). El avance a En Negociación es de HU-29 | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-25) |
 
+**Nota (2026-11-11, Ronda 7):** pasos 3, 4 y 8 (HU-19, HU-20 y HU-25) con validación visual aprobada por Pablo (V-78 a V-85, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #21.
+
 ### PROC-05 · Seguimiento de la oportunidad
 
 | # | Paso | HU | Pantalla | Código | Estado |
@@ -207,6 +212,7 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | # | Paso | HU | Pantalla | Código | Estado |
 |---|---|---|---|---|---|
 | 1 | Inicia sesión y recupera contraseña | HU-46 | I-01, I-02 | **Parcial:** `users/views.py` (`LoginView`) · `POST auth/login/` · `app/(auth)/login/page.tsx`, `lib/auth-session.ts`, `lib/api.ts` (`authFetch`), `components/SiteNav.tsx` (cierre de sesión). La recuperación de contraseña (I-02) no está implementada | [HU-46](URBANEX_ESTADO_PROCESOS.md#hu-46) |
+| 1 (actualización 2026-11-06) | Inicia sesión y recupera contraseña | HU-46 | I-01, I-02 | `User.password_changed_at`, `PasswordResetToken`, autenticación JWT con invalidación por cambio de contraseña, endpoints de solicitud/confirmación, refresh HttpOnly con CSRF, `forgot-password/page.tsx`, `reset-password/page.tsx`, `lib/api.ts` y `SiteNav.tsx` | Implementación y suite automática verificadas en SQLite; validación funcional/visual V-44 Pendiente | [HU-46](URBANEX_ESTADO_PROCESOS.md#hu-46) |
 | 2 | Gestiona usuarios internos | HU-44 | A-01 | `users/models.py` (`User`, `UserActivationToken`), `users/serializers.py` (`ManagedUserSerializer`), `users/views.py` (`UserListCreateView`, `UserDetailView`, `UserDeactivateView`, `UserResendActivationView`, `UserActivationView`) · `GET/POST auth/users/`, `GET/PATCH auth/users/<id>/`, `POST auth/users/<id>/deactivate/`, `POST auth/users/<id>/resend-activation/`, `POST auth/users/activate/` · `app/dashboard/users/page.tsx`, `app/activate/page.tsx`, `types/user.ts` | [HU-44](URBANEX_ESTADO_PROCESOS.md#hu-44) |
 | 3 | Desbloquea cuentas | HU-45 | A-01 | **Parcial:** `users/views.py` (`LoginView` bloquea tras 5 intentos con `failed_attempts` e `is_locked`). El desbloqueo por el admin no está implementado | [HU-45](URBANEX_ESTADO_PROCESOS.md#hu-45) |
 | 3 (actualización 2026-11-03) | Desbloquea cuentas | HU-45 | A-01 | `users/views.py` (`LoginView`, `UserUnlockView`) · `POST auth/users/<id>/unlock/` · `users/urls.py` · `app/dashboard/users/page.tsx` | [HU-45](URBANEX_ESTADO_PROCESOS.md#hu-45) |
@@ -219,6 +225,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 9 | Analiza cierres y conversión digital | HU-52 | A-06 | No implementado | — |
 
 **Aclaración aditiva HU-45 (2026-11-05):** la fila inicial de PROC-08 registra el estado previo a implementar el desbloqueo por admin y queda supersedida por las actualizaciones del 2026-11-03 y 2026-11-04, que documentan `UserUnlockView`, `POST auth/users/<id>/unlock/` y la acción en A-01. La actualización del 2026-11-04 también registra el comportamiento neutral del login.
+
+**Actualización aditiva HU-46 (2026-11-11):** la fila "1 (actualización 2026-11-06)" dice "V-44 Pendiente"; ya no es así. Sebas registró V-44 en `Project_Progress.md` como Aprobado en tres filas: 2026-11-07, 16:19, los cinco pasos originales (`evidence/HU-46/Screenshot 2026-11-07 161628.png`); 2026-11-09, 15:13:56, recuperación con desbloqueo y contador en cero (`evidence/ResetPasswordUsuarioBloqueado.png`); y 2026-11-09, 16:13:56, invalidación de la sesión anterior tras recuperar la contraseña (`evidence/HU-46/ResetPasswordUsuarioBloqueado.png`). Es la transcripción de su registro, no una validación nueva del agente.
 
 ---
 

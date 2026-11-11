@@ -1,20 +1,26 @@
 from django.contrib.auth import get_user_model, password_validation
+from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, AuthenticationFailed
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.settings import api_settings as jwt_api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta
 import hashlib
 import logging
 import re
 import secrets
+import smtplib
 import resend
 from resend.exceptions import ResendError
 
-from .models import Property, PropertyImage, UserActivationToken
+from .authentication import token_matches_password_version
+from .models import PasswordResetToken, Property, PropertyImage, UserActivationToken
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -27,6 +33,10 @@ class ActivationEmailError(APIException):
         "del remitente y del proveedor de correo."
     )
     default_code = "activation_email_failed"
+
+
+class PasswordResetEmailError(Exception):
+    pass
 
 
 def build_username(email):
@@ -86,6 +96,56 @@ def send_activation_email(user):
         recipient_list=[user.email],
         fail_silently=False,
     )
+
+
+def send_password_reset_email(user, token):
+    reset_url = (
+        f"{settings.FRONTEND_BASE_URL.rstrip('/')}/reset-password#token={token}"
+    )
+    subject = "Restablece tu contraseña de Urbanex"
+    message = (
+        f"Hola {user.first_name or user.email},\n\n"
+        "Recibimos una solicitud para restablecer tu contraseña. "
+        "El enlace es de un solo uso y vence en 60 minutos:\n"
+        f"{reset_url}\n\n"
+        "Si no solicitaste este cambio, puedes ignorar este mensaje."
+    )
+
+    if settings.EMAIL_PROVIDER == "resend":
+        resend.api_key = settings.RESEND_API_KEY
+        try:
+            resend.Emails.send(
+                {
+                    "from": settings.DEFAULT_FROM_EMAIL,
+                    "to": [user.email],
+                    "subject": subject,
+                    "text": message,
+                }
+            )
+        except ResendError as exc:
+            logger.error(
+                "Resend rejected password reset email for user_id=%s: %s (%s)",
+                user.pk,
+                exc.message,
+                exc.error_type,
+            )
+            raise PasswordResetEmailError from exc
+        return
+
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except (smtplib.SMTPException, OSError) as exc:
+        logger.exception(
+            "Could not send password reset email for user_id=%s",
+            user.pk,
+        )
+        raise PasswordResetEmailError from exc
 
 
 class ManagedUserSerializer(serializers.ModelSerializer):
@@ -215,6 +275,83 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     #Maybe this is the reason why the login is not working, because the serializer is not returning the token. 
     #YEAH that what i think ! 
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.strip().lower()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField(write_only=True, trim_whitespace=False)
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def validate(self, attrs):
+        raw_token = attrs["token"]
+        generator_token, separator, _nonce = raw_token.rpartition(".")
+        if not separator or not generator_token:
+            raise serializers.ValidationError(
+                {"token": "El enlace no es válido, ya se usó o venció."}
+            )
+
+        token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+        reset_token = (
+            PasswordResetToken.objects.select_related("user")
+            .filter(
+                token_hash=token_hash,
+                is_used=False,
+                expires_at__gt=timezone.now(),
+                user__is_active=True,
+            )
+            .first()
+        )
+        if reset_token is None or not default_token_generator.check_token(
+            reset_token.user,
+            generator_token,
+        ):
+            raise serializers.ValidationError(
+                {"token": "El enlace no es válido, ya se usó o venció."}
+            )
+
+        try:
+            password_validation.validate_password(
+                attrs["password"],
+                reset_token.user,
+            )
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(
+                {"password": exc.messages}
+            ) from exc
+
+        attrs["reset_token_id"] = reset_token.pk
+        attrs["generator_token"] = generator_token
+        return attrs
+
+
+class PasswordAwareRefreshSerializer(serializers.Serializer):
+    refresh = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        try:
+            refresh = RefreshToken(attrs["refresh"])
+        except TokenError as exc:
+            raise InvalidToken("El refresh token no es válido o venció.") from exc
+
+        user_id = refresh.payload.get(jwt_api_settings.USER_ID_CLAIM)
+        user = User.objects.filter(
+            **{jwt_api_settings.USER_ID_FIELD: user_id}
+        ).first()
+        if user is None or not user.is_active:
+            raise AuthenticationFailed("El refresh token no es válido.")
+        if not token_matches_password_version(user, refresh.payload):
+            raise AuthenticationFailed(
+                "La sesión fue invalidada porque cambió la contraseña.",
+                code="password_changed",
+            )
+
+        return {"access": str(refresh.access_token)}
     
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:

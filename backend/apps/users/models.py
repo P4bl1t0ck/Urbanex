@@ -34,8 +34,20 @@ class User(AbstractUser):
     is_locked = models.BooleanField(default=False)
     phone = models.CharField(max_length=32, blank=True, default="")
     deactivation_reason = models.TextField(blank=True, default="")
+    password_changed_at = models.DateTimeField(default=timezone.now)
 
     objects = UserManager()
+
+    def set_password(self, raw_password):
+        super().set_password(raw_password)
+        self.password_changed_at = timezone.now()
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None and "password" in update_fields:
+            self.password_changed_at = timezone.now()
+            kwargs["update_fields"] = set(update_fields) | {"password_changed_at"}
+        super().save(*args, **kwargs)
 
 
 class UserActivationToken(models.Model):
@@ -51,6 +63,23 @@ class UserActivationToken(models.Model):
 
     def __str__(self):
         return f"Activation token for user {self.user_id}"
+
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="password_reset_tokens",
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Password reset token for user {self.user_id}"
+
+
 class Property(models.Model):
     #The class about every property.
     # We create 

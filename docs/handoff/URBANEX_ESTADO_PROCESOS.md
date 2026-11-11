@@ -2,8 +2,15 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25: validación visual aprobada por Pablo (V-78 a V-85); siguen en Pruebas hasta la auditoría y el merge del PR #21 |
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
+| Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
+| Última actualización aditiva HU-46 | 2026-11-06 · I-02 y D-05 implementados; suite SQLite 165/165; V-44 Pendiente |
 | Confirmación V-43 (2026-11-04) | Según Sebas, V-43 se ejecutó después del último ajuste e incluyó bloquear con cinco intentos, desbloquear desde A-01 y volver a iniciar sesión. Suite integrada: 159 pruebas OK en SQLite |
 | Aclaración HU-45 (2026-11-05) | Las filas iniciales de HU-45 describen el estado previo a su implementación; las actualizaciones aditivas del 2026-11-03/04 documentan el endpoint, la acción en A-01 y el login neutral. La notificación persistente continúa pendiente en DT-120 |
+| Actualización HU-46 (2026-11-06) | Implementación de I-02, refresh en cookie y rechazo de JWT anteriores al cambio de contraseña; suite automatizada 165/165 OK en SQLite. Validación humana V-44 **Pendiente** |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · aclaración de HU-45 y referencia DT-120 |
 | Propósito | Conectar lo construido con los procesos reales de la inmobiliaria, HU por HU |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
@@ -12,6 +19,22 @@
 | Fuentes de requisitos | `ProyectoCapstoneV4 (3).md` (Anexo 2: criterios de aceptación; Anexo 4: backlog) y `URBANEX_MASTER_CONTEXT.md` (§4 RF, §10 backlog definitivo, §11 reglas) |
 
 Detalle técnico en [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) · archivos en [GPS](URBANEX_GPS_ARCHIVOS.md) · porcentajes en [Avance de épicas](URBANEX_AVANCE_EPICAS.md).
+
+### Actualización aditiva HU-46 — 2026-11-09
+
+HU-46 permanece en **Pruebas** durante la revisión de integración. D-05 está implementada: access de 24 horas, refresh de 7 días en cookie HttpOnly con CSRF y rechazo de tokens anteriores a `password_changed_at`. El registro humano de Sebas del 2026-11-07, 16:19, consta en `Project_Progress.md`, V-44; la captura enlazada existe localmente. Este registro supersede las menciones anteriores a V-44 sin registro humano, sin convertir esta revisión del agente en una aprobación ni cambiar la HU a Listo. La cobertura de la evidencia por criterio queda para revisión humana. La recuperación conserva el bloqueo de cuenta mientras no se confirme la pregunta de negocio ya registrada.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+HU-46 permanece en **Pruebas** hasta la comprobación visual del comportamiento nuevo y la revisión de integración.
+
+
+### Registro humano de ampliación V-44 — 2026-11-09
+
+Sebas incorporó personalmente en `Project_Progress.md`, ampliación V-44, su comprobación del 2026-11-09 a las 15:13:56: recuperación válida con desbloqueo, reinicio de intentos e inicio de sesión con la contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`; la fecha y hora fueron confirmadas por Sebas en la conversación. La fila humana supersede las menciones anteriores que dejaban esa comprobación o su transcripción Pendiente. El agente conserva ese registro sin emitir una aprobación nueva ni recalcular porcentajes. HU-46 permanece en Pruebas; auditoría de solo lectura y revisión para el merge pendientes. DT-92, DT-68 y los riesgos de seguridad no se cierran con esta nota.
 
 ## Cómo leer este documento
 
@@ -346,6 +369,15 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 - Sesión: `access` en `sessionStorage` (aislado por pestaña), vigencia de 1 día; el `refresh` no se guarda; no hay cierre por inactividad. Depende de la decisión D-05.
 - El pedido original agrupaba HU-44, HU-45 y HU-46 con el "modal de propiedades". En la tesis son historias de acceso (ver C-01). El modal se audita en HU-01, HU-03 y HU-05.
 
+### Actualización aditiva HU-46 (2026-11-06)
+
+| Criterio | Implementación | Evidencia técnica |
+|---|---|---|
+| Recuperar contraseña con enlace de 60 minutos y de un solo uso | I-02, endpoints de solicitud/confirmación, token almacenado como hash y política de contraseña de Django | Pruebas API de solicitud neutral, vencimiento, uso único y cambio de contraseña; suite integrada 165/165 OK en SQLite |
+| Mantener la sesión y rechazar tokens anteriores al cambio de contraseña | Access de 24 h en `sessionStorage`; refresh de 7 días HttpOnly; protección CSRF y cierre de cookie | Pruebas de refresh/CSRF, invalidación de access y refresh antiguos, y logout |
+
+**Estado:** implementación y pruebas automatizadas verificadas en SQLite; validación funcional y visual **Pendiente** hasta que Sebas complete V-44. PostgreSQL **No ejecutado**; el intento inicial encontró que `test_postgres` ya existía y se detuvo sin borrarlo ni reutilizarlo. `makemigrations --check --dry-run` sigue detectando la diferencia preexistente `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó esa migración.
+
 ---
 
 ## HU-27
@@ -414,7 +446,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-19
 
-**Solicitar una visita** · EP-4 · RF-04, RF-09 · Pantalla P-07 (en la ficha pública) · URB-23, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-78 a V-81)
+**Solicitar una visita** · EP-4 · RF-04, RF-09 · Pantalla P-07 (en la ficha pública) · URB-23, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-78 a V-81) · **(2026-11-11)** validación visual aprobada (V-78 a V-81, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
 
 **Proceso (PROC-04, T3 pasos 9-10):** el cliente, sin cuenta, elige en la ficha una de las horas libres del asesor, deja su nombre, su celular y la aceptación de la política de privacidad (y, si quiere, un correo para la confirmación). Se registra la visita, se bloquea la hora y la oportunidad pasa a Visita Programada. Decisiones: DS-39.
 
@@ -427,21 +459,21 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-20
 
-**Recibir la confirmación de la visita** · EP-4 · RF-04 · Pantalla P-08 · URB-24, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-79, V-82, V-83)
+**Recibir la confirmación de la visita** · EP-4 · RF-04 · Pantalla P-08 · URB-24, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-79, V-82, V-83) · **(2026-11-11)** validación visual aprobada (V-79, V-82, V-83, Pablo; evidencia: bitácora por correo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
 
 **Proceso (T3 paso 11):** si el cliente dio correo y marcó la casilla, recibe la confirmación con un enlace único a P-08; si no, el asesor confirma por WhatsApp. El asesor de la visita (y el de la oportunidad, si es otro) recibe siempre un aviso.
 
 | Criterio (backlog §10: "Confirmación por canal permitido"; Anexo 2 **POR CONFIRMAR**) | Implementación | Prueba | Resultado |
 |---|---|---|---|
 | Correo al cliente solo con correo + casilla, después del commit; un fallo del correo no revierte la visita | `send_visit_notifications()` con `transaction.on_commit`; correo guardado en `Visit.confirmation_email` | `VisitNotificationTests` (5 pruebas) | Implementado y verificado con `EMAIL_PROVIDER=console`; Resend **No ejecutado** |
-| P-08 de solo lectura por token, válido hasta la hora de inicio, sin botón Cancelar (HU-21) | `GET /api/visits/public/<token>/` (404 igual si no existe o ya empezó); `frontend/app/visits/[token]/` | `PublicVisitTests` | Implementado y verificado; visual Pendiente (V-82) |
-| Sin correo: el asesor confirma por WhatsApp | `needs_whatsapp_confirmation` en la agenda; aviso "Confirmar por WhatsApp" en I-08 | `test_agenda_marks_whatsapp_confirmation` | Implementado y verificado; visual Pendiente (V-83) |
+| P-08 de solo lectura por token, válido hasta la hora de inicio, sin botón Cancelar (HU-21) | `GET /api/visits/public/<token>/` (404 igual si no existe o ya empezó); `frontend/app/visits/[token]/` | `PublicVisitTests` | Implementado y verificado; visual Pendiente (V-82) · **(2026-11-11)** validación visual aprobada (V-82, Pablo) |
+| Sin correo: el asesor confirma por WhatsApp | `needs_whatsapp_confirmation` en la agenda; aviso "Confirmar por WhatsApp" en I-08 | `test_agenda_marks_whatsapp_confirmation` | Implementado y verificado; visual Pendiente (V-83) · **(2026-11-11)** validación visual aprobada (V-83, Pablo) |
 
 - **Decisión (DS-39):** P-08 muestra nombre, apellido y teléfono del asesor de la visita y, si es otro, del asesor de la oportunidad.
 
 ## HU-25
 
-**Registrar el resultado de la visita** · EP-4 · RF-04 · Pantalla I-08 (modal) · URB-28, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-84, V-85)
+**Registrar el resultado de la visita** · EP-4 · RF-04 · Pantalla I-08 (modal) · URB-28, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-84, V-85) · **(2026-11-11)** validación visual aprobada (V-84, V-85, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
 
 **Proceso (T3 paso 12):** pasada la hora de inicio, el asesor de la visita (o el admin) registra una sola vez Realizada, No asistida o Cancelada, con la respuesta del cliente.
 
@@ -533,3 +565,7 @@ Decisión de Pablo (2026-11-08, PR #18). **No cambia ningún estado:** cada HU s
 | C-08 | Pueden existir valores heredados `cliente` en bases de datos, aunque `User.Role` ya solo define `admin` y `asesor`; RF-12 solo reconoce esos dos roles internos | Valores históricos en base vs `models.py` / RF-12 | **Confirmada por Pablo el 2026-10-31 (DS-30):** los clientes no tienen cuenta; eliminar `cliente`. Superusuarios cliente pasan a `admin`; las demás cuentas pasan a `asesor` inactivo con motivo `rol cliente eliminado (C-08)` |
 
 > **Nota añadida (Pablo, 2026-11-03), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`:** la fila C-08 queda con el texto de `develop`. En esta rama decía "confirmada por Pablo (2026-11-01)"; la confirmación vale desde el **2026-10-31 (DS-30)**. El 2026-11-01 Pablo la repitió al cerrar DT-105 en código (FX-23, `033b845`): solo hay roles `admin` y `asesor`, el cliente es anónimo (sin cuenta) y las pruebas de oportunidades ya no usan `role='cliente'`.
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+HU-46 permanece en **Pruebas**. La corrección agrega versión precisa de contraseña a access y refresh para rechazar sesiones anteriores dentro del mismo segundo sin impedir el login inmediato con la contraseña nueva. Los JWT heredados del segundo ambiguo requieren volver a iniciar sesión. Se conservan los registros humanos de V-44; esta corrección no añade una aprobación humana. Resultados automáticos de esta sesión en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu).

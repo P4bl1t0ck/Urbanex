@@ -2,8 +2,16 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 4 · fusión de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `5ed0e3b` (PR #21) en la rama del lote 4; 332 pruebas OK en SQLite (Estándares §4); HU-19, HU-20 y HU-25 en Listo |
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 cerrada: las 8 Aprobado por Pablo (V-78, V-80 y V-81 tras repetirlas, ~15:46–15:55); HU-19, HU-20 y HU-25 siguen en Pruebas hasta la auditoría y el merge del PR #21 |
+| Última actualización lote 3 · integración de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `97f0e0c` en la rama del lote 3; 277 pruebas OK en SQLite (Estándares §4) |
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; resultados técnicos en Estándares §4 |
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · Revisión aislada: 238 pruebas backend y 17 frontend; registro humano V-44 conservado; fusión pendiente de commit |
+| Última actualización aditiva HU-46 | 2026-11-06 · Implementación verificada en SQLite y frontend; validación humana V-44 Pendiente |
 | Actualización HU-45 | 2026-11-04 · Rama avanzada a `origin/develop` (`043cfb5`, PR #15); se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`. Según Sebas, V-43 cubrió bloqueo tras cinco intentos y desbloqueo por admin. Suite integrada: 159/159 OK en SQLite; migraciones detectan `documents/0002_alter_document_file.py` (DT-92), sin generarla ni aplicarla. |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · corrección documental de la auditoría HU-45: DT-120, aclaraciones de Seguridad/USM y pendientes explícitos para el PR |
+| Actualización HU-46 (2026-11-06) | Implementación en `feat/URB-04-HU-46-recuperar-contrasena`: recuperación I-02, refresh HttpOnly con CSRF e invalidación de JWT al cambiar contraseña; D-05 personalizado registrado según confirmación de Pablo transmitida por Sebas. V-44 Pendiente |
 | Confirmación para PR #17 (2026-11-05) | Según Sebas, el cambio en `backend/apps/users/views.py` fue coordinado antes. Nota preparada para Pablo: DT-111 (`slug` de HU-12, pendiente y fuera de HU-45), DT-49 (usar `git commit -F` en PowerShell 5.1), DT-120 (notificación persistente fuera de HU-45), DT-92 (diferencia conocida; no se generó ni aplicó migración) y PostgreSQL **No ejecutado**. No se publicó la nota: el PR #17 apunta a `master`, en conflicto con `AGENTS.md` §5; requiere aclaración/corrección por Pablo. |
 | Estado PR #17 (2026-11-06) | El PR ahora apunta a `develop`. DT-120 está registrado localmente en `b30e5c9`, pendiente de push. Sigue pendiente adjuntar al PR la captura solicitada de que una cuenta no administradora no puede desbloquear; la ruta referenciada por V-43 (`evidence/HU-45/V-43.png`) no existe en este checkout. |
 | Última actualización | 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4, sobre el lote 3): HU-15, HU-16, HU-29 y HU-30 implementadas; **Ronda 8** (V-86 a V-95) redactada en Pendiente; DS-50, DT-154, DT-155, C-09, C-10 y nota de cierre. Antes: 2026-11-09 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21, borrador): lote 3 (HU-19, HU-20, HU-25) implementado; **Ronda 7** (V-78 a V-85) redactada en Pendiente; DS-39, DT-149 a DT-152 y nota de cierre. Antes: 2026-11-08 (noche, tarde) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): nota de cierre del merge de `develop`, DS-35, DS-38, DT-148 y plan de reparto. Antes: 2026-11-08 · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, borrador): validación visual del lote 2, **Ronda 6** (V-65 a V-77, todas Aprobadas), DS-37, DT-143 a DT-147 y nota de cierre. Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama de oportunidades: 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. · Rama `docs/post-merge-pr15`: 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` en la worktree correcta, conservando filas de ambos lados en `Project_Progress.md` y `URBANEX_USM_TRAZABILIDAD.md` y dejando sin tocar los cambios de código. Antes: 2026-11-05 · Copilot con Sebas · corrección documental de la auditoría HU-45: DT-120, aclaraciones de Seguridad/USM y pendientes explícitos para el PR. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: nota de cierre de sesión (HU-27 y HU-34 a Listo, DS-32; rango DT-140..169, DS-33; decisiones del diseño del lote 2). Antes: 2026-11-04 · Rama avanzada a `origin/develop` (`043cfb5`, PR #15); se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`. Según Sebas, V-43 cubrió bloqueo tras cinco intentos y desbloqueo por admin. Suite integrada: 159/159 OK en SQLite; migraciones detectan `documents/0002_alter_document_file.py` (DT-92), sin generarla ni aplicarla. Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día, V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. |
@@ -46,6 +54,30 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4) · fusión de develop tras el PR #21
+- **Hecho:** `git fetch` y fusión de `origin/develop` `5ed0e3b` (PR #21, lote 3) por orden de Pablo. Dos conflictos solo documentales, resueltos según Pablo conservando las dos partes (Progress: develop arriba y lote 4 debajo; Estándares: orden cronológico); el código se fusionó sin conflictos. Nota añadida en DS-50 (excepción a `AGENTS.md` §5, cerrada). Lote 3 después del merge: HU-19, HU-20 y HU-25 pasan a **Listo** (PR #21 auditado en un chat aparte, "apto para fusionar", según Pablo, 2026-11-11, y fusionado) en Estado de procesos (filas nuevas en la tabla resumen), Avance §5B y USM.
+- **Entorno:** el worktree no tenía virtualenv propio; `pipenv sync --dev` instaló el `Pipfile.lock` sin cambios. `migrate` (SQLite) aplicó solo `users.0009`.
+- **Evidencia:** suite SQLite → `Ran 332 tests`, **OK** (318 + 14 de HU-46); `makemigrations --check` → solo `documents/0002` (DT-92). Frontend y PostgreSQL: **No ejecutado** (Estándares §4).
+- **Falta:** frontend tras la fusión (build, tsc, eslint, `npm test`); validación visual de la Ronda 8 (V-86 a V-95); auditoría de solo lectura (§11) del PR del lote 4, que abre Pablo.
+- **Siguiente paso:** Ronda 8; luego HU-31 (DT-154).
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · cierre de la Ronda 7
+- **Hecho:** Pablo repitió V-78, V-80 y V-81 (~15:46–15:55, incógnito) y las aprobó: las 8 de la Ronda 7 quedan **Aprobado**. Filas nuevas en Progress; validación registrada en Estado de procesos (HU-19, HU-20, HU-25), Avance de épicas §5B y USM (PROC-04). Las tres HU siguen en **Pruebas** (mismo criterio que el lote 2).
+- **Capturas (ok de Pablo):** (66) V-80; (67) y (68) V-78; (69) V-81.
+- **Falta:** capturas de V-79, V-82 y V-83; frontend tras la fusión (build, tsc, eslint, `npm test`); auditoría de solo lectura (§11); DT-143.
+- **Siguiente paso:** auditoría §11 del PR #21 en un chat nuevo de solo lectura.
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · registro de la Ronda 7
+- **Hecho:** transcripción de la validación visual de Pablo (V-78 a V-83 desde sus bitácoras por correo del 2026-11-11, con la corrección de V-80; V-84 y V-85 dictadas en el chat). Según Pablo: V-79, V-82, V-83, V-84 y V-85 **Aprobado**; V-78, V-80 y V-81 **Pendiente (parcial)**. Capturas (57)–(65) asignadas a V-84 y V-85 por orden de Pablo.
+- **Falta:** repetir V-78 (sin correo y la hora que desaparece de la lista), V-80 (celular fijo) y V-81 (mismo celular sobre la misma propiedad); capturas de V-79, V-82 y V-83; con las 8 aprobadas, actualizar Estado de procesos, Avance de épicas y USM (Pablo lo pospone hasta entonces); frontend tras la fusión, auditoría (§11) y DT-143.
+- **Siguiente paso:** Pablo repite V-78, V-80 y V-81.
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · integración de develop
+- **Hecho:** `git fetch` y fusión de `origin/develop` `97f0e0c` (PR #20 HU-46 y PR #23 docs) por orden de Pablo. Tres conflictos solo documentales (Progress, Deuda, Estándares), resueltos según Pablo conservando las dos partes: en Progress la nota del lote 3 arriba; en Deuda y Estándares lo de develop primero. El código (`users/*`, `settings.py`, `config/urls.py`, `SiteNav.tsx`, `lib/api.ts`, `users.0009`) se fusionó sin conflictos.
+- **Evidencia:** suite SQLite → `Ran 277 tests`, **OK** (263 + 14 de HU-46); `makemigrations --check` → solo DT-92. Las rutas públicas de visitas (solicitud y P-08 por token) no usan autenticación y responden igual con un JWT invalidado; la agenda lo rechaza con 401 `password_changed`. Detalle en Estándares §4. Frontend y PostgreSQL: **No ejecutado**.
+- **Falta:** frontend tras la fusión (build, tsc, eslint, `npm test`); validación visual V-78 a V-85; auditoría de solo lectura (§11); DT-143.
+- **Siguiente paso:** correr el frontend integrado y la auditoría antes de pasar el PR #21 a listo.
+
 ### 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4, sobre el lote 3)
 - **Entorno:** worktree `C:\Users\Pablo\Desktop\Urbanex-lote4`. La rama se creó desde `origin/develop` y, por decisión de Pablo, se rebasó sin commits propios a la cabeza del lote 3 (`0c0f0a7`, PR #21) para heredar `opportunities.0002`; renombrada con las claves Jira correctas (HU-16 = URB-20, HU-15 = URB-21, HU-29 = URB-35, HU-30 = URB-36). `backend/.env` copiado de la carpeta principal (`DB_ENGINE=sqlite`; `EMAIL_PROVIDER` toma `console` por defecto), base nueva con `migrate` y `setup_demo_data`, `npm install`. Script de demo **fuera del repo** en `evidencias\Lote4\` (Ronda 8).
 - **Commits (por capa, orden de Pablo):** `8d0b3b3` modelo `OpportunityInteraction` y `opportunities.0003` · `a073aa1` pruebas del modelo · `be8841f` API pública HU-15/HU-16 · `dbb49d7` sus pruebas · `9c11c73` tasas configurables · `b9ee341` API HU-29/HU-30 e I-06A · `7767f87` sus pruebas · `a1887d4` CIERRE sin interacciones y motivo de bloqueo · `1943bf4` sus pruebas · `f67c117` tipos, cliente y lógica pura · `9c59167` P-07 · `351a08a` I-06A · `9b83b4b` enlace desde I-06 · un commit por documento (Deuda, AGENTS §4, Seguridad, Estado, Avance, GPS, USM, DoD y este). Push: solo los dos primeros hasta ahora; el resto con la orden de Pablo de este cierre.
@@ -64,6 +96,56 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Falta:** validación visual de Pablo (V-78 a V-85); push (con orden de Pablo); auditoría de solo lectura (§11); DT-143 (restricción de exclusión y suite en PostgreSQL) en un commit o rama posterior; avisar a Sebas de DT-152 y DT-153 (`settings.py` es compartido).
 - **Siguiente paso:** Ronda 7; desde el 2026-11-10, DT-149 y DT-151.
 
+### 2026-11-09 · Codex con Sebas · publicación de corrección PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Sebas autorizó revisión, commit y push a la rama del PR existente. Commits: `ff92374` (autenticación y pruebas), `c4e07b1` (solo el compartido `users/views.py`) y `e84c1f9` (handoff y resultados). `git fetch origin` completado: develop sigue en `966cc50` y la cabeza remota del PR antes del push en `00dd676`. Comentarios del PR: lista vacía mediante GitHub.
+- **Registro humano:** Sebas agregó la fila del 2026-11-09, 16:13:56, sobre rechazo de la sesión anterior y acceso con la contraseña nueva. Indicó la captura `ResetPasswordUsuarioBloqueado` y sustituyó el marcador. Se completa únicamente el subdirectorio de su ruta para apuntar al archivo existente `evidence/HU-46/ResetPasswordUsuarioBloqueado.png`; se conservan su fecha, hora, observación y resultado. Los registros anteriores se conservan como historial. No se emite una aprobación del agente ni se atribuye a Sebas una comprobación de renovación que su fila no menciona.
+- **Comprobaciones:** código sin cambios posteriores a la suite de 243 pruebas OK y 14 focalizadas; frontend 17/17. No se repiten suites por esta etapa documental y de Git. `git diff --check` sin errores y `git ls-files -u` sin entradas; no se preparan archivos prohibidos ni migraciones. DT-92 y PostgreSQL No ejecutado (DT-68, Nivel 1) continúan declarados.
+- **Siguiente paso:** subir estos commits y este registro a `origin/feat/URB-04-HU-46-recuperar-contrasena` y comprobar la cabeza remota. Pablo debe revisar la corrección y publicar la descripción del PR (borrador local `evidence/PR20_descripcion.md`), conforme a DS-31. No se edita ni fusiona el PR ni se publica en develop/master. HU-46 permanece en Pruebas; el dictamen previo No apto no se sustituye por una aprobación nueva del agente.
+
+### 2026-11-09 · Codex con Sebas · corrección de auditoría PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Fase 0 presentada y autorizada. `authentication.py` emite y comprueba `password_version`; `LoginView` usa esa emisión en el archivo compartido `users/views.py`. Se rechazan tokens anteriores dentro del mismo segundo y se permite iniciar sesión inmediatamente con la nueva contraseña. Los JWT heredados sin versión del segundo ambiguo requieren volver a iniciar sesión; los posteriores conservan compatibilidad. Dos regresiones nuevas en `users/tests.py`. Documentación actualizada de forma aditiva, sin cambiar registros humanos ni porcentajes.
+- **Pruebas:** línea base SQLite 241 OK; pruebas focalizadas 14 OK; suite completa final 243 OK, exit 0. `makemigrations --check --dry-run` exit 1 por DT-92; no se crean ni aplican migraciones. Frontend `npm test` 17/17, exit 0; build/TypeScript/ESLint No ejecutados en esta corrección backend/documentación. PostgreSQL No ejecutado (DT-68, Nivel 1). Comandos y salidas reales en Estándares §4.
+- **PR:** descripción y checklist preparados en `evidence/PR20_descripcion.md` (local, ignorado por Git). No se modifica el PR en GitHub ni se hace commit, push o merge. La auditoría previa concluyó No apto; esta implementación no cambia por sí sola aquel dictamen ni constituye una auditoría independiente nueva.
+- **Falta y siguiente paso:** revisión humana de la corrección y del borrador; orden explícita de Pablo para editar el PR #20 hacia develop con ese contenido, conforme a DS-31. Comprobación visual sugerida, Pendiente: recuperar la contraseña con una sesión abierta, confirmar que la anterior deje de autorizar y que el nuevo login y su renovación funcionen. Se conserva la V-44 humana original; no se marca otra aprobación ni HU-46 Listo. DT-92 y DT-68 siguen pendientes.
+
+### 2026-11-09 · Codex con Sebas · registro humano de ampliación V-44 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Sebas confirmó la fecha y hora y agregó personalmente la fila de la ampliación V-44: 2026-11-09, 15:13:56, recuperación válida con desbloqueo, contador cero e inicio de sesión con contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`, excluida de Git. Se conserva su fila sin modificar el resultado humano.
+- **Aclaración:** las notas anteriores que dejaban esta comprobación o su transcripción Pendiente quedan supersedidas por esa fila. Esta revisión del agente comprueba el registro y la existencia del archivo; no añade una aprobación ni pasa HU-46 a Listo.
+- **Pruebas:** cambio exclusivamente documental; no se repiten las 241 pruebas SQLite ni las comprobaciones frontend ya registradas en Estándares §4. `git diff --check` sin errores. DT-92 y PostgreSQL No ejecutado (DT-68) siguen declarados.
+- **Siguiente paso:** publicar el registro en la rama del PR #20 y realizar la auditoría de AGENTS §11 en un chat nuevo de solo lectura. HU-46 permanece en Pruebas; la revisión y el merge corresponden a las personas responsables.
+
+### 2026-11-09 · Codex con Sebas · preparación de actualización del PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** cierre de la fusión pendiente de `origin/develop` `966cc50` en `a39e72e`; cambio del archivo compartido `users/views.py` en `46f4ca3`; pruebas en `e3e2a35`. Se conserva el código comprobado con 241 pruebas OK en SQLite; la comparación SHA-256 confirma que los archivos de código coinciden con el worktree probado. No hay cambios funcionales posteriores que justifiquen repetir la suite.
+- **Evidencia humana comunicada:** según Sebas en esta conversación, la nueva captura y comprobación del desbloqueo ya se completaron y el resultado es correcto. Existe `evidence/ResetPasswordUsuarioBloqueado.png`, excluida de Git; no se incorpora la imagen al repo. La hora de modificación del archivo es 15:13:56 del 2026-11-09; no se toma automáticamente como hora de la comprobación. La fila humana de la ampliación V-44 se deja para transcripción por Sebas conforme a §9.
+- **GitHub:** PR existente #20 hacia `develop`; consulta de comentarios mediante la conexión GitHub devuelve lista vacía (`gh` no está instalado). Sebas autoriza el push a la rama HU-46 para actualizar ese PR; no se edita el PR ni se publica en `develop`/`master`.
+- **Falta:** transcribir el registro humano con su fecha y hora confirmadas; auditoría en un chat nuevo de solo lectura antes de solicitar merge; DT-92 sigue pendiente y PostgreSQL No ejecutado (DT-68, Nivel 1). La HU permanece en Pruebas; el agente no emite aprobación humana ni declara la rama Apta para PR.
+- **Siguiente paso:** publicar los commits y comprobar que origin/HU-46 coincida con HEAD; después, auditoría y revisión por Pablo. La autorización de push no incluye fusionar el PR.
+
+### 2026-11-09 · Codex con Sebas · ampliación de recuperación · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Decisión:** Sebas indicó en esta conversación que completar la recuperación segura debe desbloquear automáticamente y limpiar los intentos. Supersede la pregunta de negocio de las notas anteriores; no se atribuye a Pablo.
+- **Hecho:** `PasswordResetConfirmView` guarda contraseña, `is_locked=False` y `failed_attempts=0` en la transacción existente; no cambia solicitudes de correo, activación ni desbloqueo administrativo. Tres pruebas cubren recuperación e inicio de sesión de una cuenta bloqueada, rechazo de enlaces inválidos/vencidos/usados sin desbloqueo y reinicio de intentos de una cuenta aún no bloqueada. Se actualiza el handoff sin borrar el historial.
+- **Evidencia humana:** según Sebas, 2026-11-09, las evidencias anteriores están bien. Se conserva V-44. La ampliación de desbloqueo tiene pasos adicionales debajo de V-44 y queda Pendiente de comprobación por una persona.
+- **Evidencia técnica:** suite completa 241 pruebas OK, exit 0, SQLite; `makemigrations --check --dry-run` exit 1 solo por DT-92. Sin cambios de frontend en esta ampliación; se conservan sus resultados de esta sesión. Comandos completos en Estándares §4.
+- **Falta y siguiente paso:** registrar esa comprobación visual, revisar el diff, autorizar el commit para cerrar la fusión pendiente y realizar la auditoría de solo lectura en un chat nuevo antes del PR. DT-92 sigue pendiente; PostgreSQL No ejecutado (DT-68, Nivel 1). No se hace commit, push ni PR en esta sesión. Resultados reales en Estándares §4.
+
+### 2026-11-09 · Codex con Sebas · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** revisión del checklist actualizado en `.worktrees/hu46-review` (HEAD separado en `867159e` más copia de los archivos de la fusión pendiente con `origin/develop` `966cc50`). Se conservan los enlaces de visitas y oportunidades y la sesión de HU-46. Se agregan tres pruebas de D-05: cambio manual, activación y cookie Secure según DEBUG. Se sincroniza el handoff con el registro humano existente de V-44, sin emitir una aprobación del agente ni modificar las entradas de Pablo.
+- **Evidencia técnica:** SQLite confirmado por `connection.vendor`; suite completa 238 pruebas OK, exit 0; frontend 17/17, build y TypeScript exit 0; ESLint exit 0 con dos avisos preexistentes. `makemigrations --check --dry-run` exit 1 por DT-92; no se crea ni aplica migración. Registro detallado de comandos e intentos fallidos en Estándares §4. PostgreSQL No ejecutado (DT-68; Nivel 1 según DS-35).
+- **Evidencia humana:** Sebas registró V-44 el 2026-11-07 a las 16:19; existe `evidence/HU-46/Screenshot 2026-11-07 161628.png`. Esta sesión comprueba la existencia del archivo, no vuelve a validar visualmente el flujo ni modifica su fila humana. Revisar por persona la cobertura de evidencia por criterio según DS-35; conservar los archivos solo localmente.
+- **Falta:** confirmar con Pablo la regla sobre recuperación de cuentas bloqueadas (se conserva el bloqueo); revisión humana de la integración y auditoría en un chat nuevo de solo lectura antes del PR. HU-46 permanece en Pruebas. SEC-05 no se cierra globalmente.
+- **Siguiente paso:** revisar el diff y autorizar por separado el commit que concluya la fusión pendiente. No se hizo commit, push ni PR; la carpeta principal conserva MERGE_HEAD. PostgreSQL es obligatorio al cierre de lote/entrega, no bloquea por sí solo un PR de Nivel 1 con DT-68.
+
+### 2026-11-07 · Copilot con Sebas · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** Sebas reportó haber completado los cinco pasos de V-44 en la interfaz. Se preparó el texto para que Sebas registre la evidencia en la tabla; la fila permanece pendiente hasta que la persona la copie allí. Se crearon ocho commits locales de HU-46; no se hizo push ni se abrió PR.
+- **Evidencia:** suite backend 165/165 OK; `npm test` 9/9; TypeScript y build exit 0; ESLint exit 0 con 2 avisos preexistentes. `git diff --check origin/develop...HEAD` exit 0. La captura con token usado queda solo local, fuera de los commits.
+- **Falta:** Sebas debe pegar y guardar la fila V-44, revisar la evidencia y realizar la suite contra PostgreSQL aislado antes del PR. No hacer push a `develop` ni `master`.
+- **Siguiente paso:** completar el registro humano de V-44, crear un commit documental si corresponde y luego subir esta rama para que Sebas abra el PR hacia `develop`.
+
+### 2026-11-06 · Copilot con Sebas · rama `feat/URB-04-HU-46-recuperar-contrasena`
+- **Hecho:** implementación de HU-46 en backend y frontend: recuperación de contraseña con enlace de 60 minutos y uso único; refresh JWT en cookie HttpOnly, CSRF, logout e invalidación de tokens al cambiar contraseña. D-05 personalizado registrado como confirmado por Pablo, según Sebas.
+- **Evidencia técnica:** suite backend integrada 165/165 OK en SQLite; `npm test` 9/9; TypeScript y build exit 0; ESLint exit 0 con 2 avisos preexistentes. `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó esa migración. PostgreSQL **No ejecutado**: el intento inicial encontró que `test_postgres` ya existía y se detuvo; no se borró ni reutilizó esa base.
+- **Pendiente:** V-44 y validación visual por Sebas; revisar los dominios reales de producción para CORS/CSRF. No se hizo commit, push ni PR.
+- **Siguiente paso:** Sebas ejecuta V-44 en la interfaz con una cuenta de prueba, registra quién/fecha/hora/resultado y guarda las capturas sin tokens ni datos personales.
 ### 2026-11-08 (noche, tarde) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18, solo documentación)
 - **Hecho:** merge de `origin/develop` (`e19a5df`, PR #19) en `2d1ac9a`, conservando las filas de ambos lados. El merge lo había empezado otro asistente, que dejó texto reescrito (celda "Última actualización" de este archivo resumida y duplicada; "DS-35 sigue reservado" borrado en DS-36): restaurado en `3976508`. Comando de la DoD con `apps.visits.tests` y registro de ejecución en formato de párrafo (`f03d45a`); HU-22, HU-18 y HU-24 a **Listo** (`b8f2b16`); **DS-35** (definición de acabado en dos niveles, decisión aplicada por Pablo), **DS-38** (PR #19 sin revisión formal aprobada en GitHub) y **DT-148** (límite de 30/min por proceso) en `d6c0ed3`; DoD con historial al final (`0b2c9a8`); `AGENTS.md` §10, formato de los registros (`6bea04c`); plan de reparto como PLAN (`70ccf00`). DT-140..169 en `AGENTS.md` §4 (DS-33).
 - **Evidencia:** con `connection.vendor` = `sqlite`, la suite de Estándares §4 → 229 pruebas, **OK** (exit 0); `makemigrations --check --dry-run` → exit 1 solo por `documents/0002` (DT-92). `git diff --name-only origin/develop...HEAD` → solo `.md`, más `.gitattributes` y `.gitignore` (de `b312737`, DS-36; se quedan por decisión de Pablo). Suite contra PostgreSQL: **No ejecutado** (DT-68). Sin cambios de código.
@@ -920,6 +1002,36 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Sebas | 2026-11-04, 18:59 | Probé el inicio de sesión con contraseña incorrecta y con la cuenta bloqueada: apareció el mismo mensaje, se borró la contraseña y el correo permaneció. Desbloqueé la cuenta en `/dashboard/users` y pude iniciar sesión con la contraseña correcta. | [Captura V-43](evidence/HU-45/V-43.png) — Aprobado |
 
 | Sebas | 2026-11-06, 14:03 | Inicié sesión como Asesor, abrí `/dashboard/users` y comprobé que no pude acceder a la gestión de usuarios ni al desbloqueo. | `evidence/HU-45/V-43-no-admin.png` — Aprobado |
+
+---
+
+### V-44 · HU-46 — Recuperación de contraseña y sesión
+
+**Ampliación del 2026-11-09 — recuperación con desbloqueo (Pendiente):** Sebas confirmó en la conversación que las evidencias anteriores están bien; se conserva su registro sin atribuirle la comprobación de este comportamiento nuevo. En una cuenta de prueba activa, bloquear con cinco intentos incorrectos; solicitar recuperación y comprobar que solicitar el correo todavía no permite iniciar sesión; completar el enlace válido, iniciar sesión con la contraseña nueva y comprobar `is_locked=False` y `failed_attempts=0`. Guardar evidencia local sin tokens ni datos reales y registrar quién, fecha, hora y lo observado. Los casos de enlace inválido, vencido y usado tienen pruebas automáticas y no requieren esperar una hora en la interfaz.
+
+| Quién | Cuándo | Qué vi | Resultado y ruta de evidencia |
+|---|---|---|---|
+| Sebas | 2026-11-09, 15:13:56 | Comprobé que la recuperación válida de contraseña desbloquea la cuenta, reinicia los intentos fallidos a cero y permite iniciar sesión con la contraseña nueva. | Aprobado — evidence/ResetPasswordUsuarioBloqueado.png |
+| Sebas | 2026-11-09, 16:13:56 | Dejé una sesión abierta y recuperé la contraseña desde otra ventana. Al volver a la sesión anterior e intentar acceder a una pantalla protegida, se me pidió iniciar sesión nuevamente. Después pude entrar con la contraseña nueva. | Aprobado — evidence/HU-46/ResetPasswordUsuarioBloqueado.png |
+**Actualización documental (2026-11-09):** Sebas incorporó la fila anterior y confirmó su fecha y hora en la conversación. Supersede las menciones previas a esta comprobación o su transcripción como Pendiente; el agente conserva el resultado escrito por la persona. HU-46 continúa en Pruebas hasta la revisión correspondiente.
+
+Los pasos y el registro originales de V-44 se conservan a continuación:
+
+1. En un entorno de prueba, solicita recuperar la contraseña de una cuenta activa y luego de un correo sin cuenta; comprueba que la respuesta visible sea la misma.
+2. Abre el enlace recibido, comprueba que la pantalla I-02 permita definir y confirmar una nueva contraseña y que el token no permanezca en la barra de direcciones.
+3. Usa el enlace una segunda vez y comprueba que el servidor lo rechace. La expiración de 60 minutos está cubierta también por prueba automatizada; no es necesario esperar una hora en la validación visual.
+4. Inicia sesión con la nueva contraseña y confirma que una sesión anterior ya no autoriza peticiones. Comprueba en Network/Application que el refresh se transmite solo como cookie HttpOnly, el refresh no aparece en el JSON y el refresh requiere `csrftoken` más `X-CSRFToken`.
+5. Cierra sesión desde la navegación y comprueba que la cookie refresh se elimine y una ruta protegida vuelva a requerir inicio de sesión.
+
+**Correo local de consola:** Django imprime el mensaje en formato quoted-printable. Al reconstruir el enlace, `=3D` representa `=` y un `=` al final de una línea indica que la línea continúa; quita ese salto de línea y une el texto siguiente. No copies el marcador `=3D` literalmente en el enlace. El token es secreto temporal: no lo pegues en capturas, commits ni mensajes.
+
+**Resultado esperado:** solo la cuenta activa recibe instrucciones; el enlace expira, se usa una sola vez, restablece la contraseña y las sesiones emitidas antes del cambio dejan de funcionar. El refresh queda protegido por cookie HttpOnly y CSRF.
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Sebas | 2026-11-07, 16:19 | Completé los cinco pasos de V-44: comprobé que la respuesta sea igual para un correo registrado y uno no registrado; restablecí la contraseña con el enlace y confirmé que el token desaparece de la URL; el segundo uso del enlace fue rechazado; comprobé la invalidación de la sesión anterior, el refresh en cookie HttpOnly con CSRF y que el logout elimine la cookie y proteja nuevamente la ruta. | [Captura local](evidence/HU-46/Screenshot%202026-11-07%20161628.png) — Aprobado |
+**Aclaración aditiva (2026-11-09):** la fila anterior es el registro humano de Sebas del 2026-11-07, 16:19; supersede la nota previa que decía que faltaba registrar V-44. La captura enlazada existe localmente. Esta revisión del agente no constituye una validación visual nueva ni cambia el resultado escrito por Sebas. La revisión humana de cobertura por criterio e integración permanece Pendiente; HU-46 continúa en Pruebas.
+
 ### Evidencia técnica HU-45 (2026-11-03)
 
 - **Suite backend (desde `backend/`):** `pipenv run python -c "import os, sys; os.environ['DB_ENGINE']='sqlite'; os.environ['EMAIL_PROVIDER']='console'; import config.settings as settings; print('Engine aislado:', settings.DATABASES['default']['ENGINE']); print('Correo:', os.environ['EMAIL_PROVIDER']); settings.DATABASES['default']['NAME']=':memory:'; sys.modules['urbanex_test_settings']=settings; from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','test','--settings=urbanex_test_settings','apps.users.tests','apps.documents.tests','apps.appraisals.tests'])"` → `Engine aislado: django.db.backends.sqlite3`; `Correo: console`; `Found 120 test(s)`; `Ran 120 tests in 58.160s`; `OK`; exit 0. El registro de rechazo de Resend corresponde a `test_resend_failure_returns_gateway_error_and_rolls_back_user_creation`, que simula el error con `mock.patch`; no hubo envío externo confirmado.
@@ -1038,7 +1150,11 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 ### Ronda 7 — Lote 3: HU-19 (P-07), HU-20 (P-08) y HU-25 (I-08) (rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas`, PR #21)
 
-> **Estado (2026-11-09): las 8 pruebas Pendiente.** Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\`, fuera del repo).
+> **Estado (2026-11-11, cierre): Ronda 7 cerrada, las 8 Aprobado por Pablo.** V-78, V-80 y V-81 se repitieron ese día (~15:46–15:55, incógnito) y quedaron Aprobado (fila nueva en cada tabla; la fila anterior se conserva como antecedente). V-79, V-82 y V-83 tienen como evidencia la bitácora por correo. HU-19, HU-20 y HU-25 siguen en **Pruebas** hasta la auditoría (§11) y el merge del PR #21.
+>
+> *Estado intermedio (2026-11-11), según Pablo: 5 Aprobado (V-79, V-82, V-83, V-84, V-85) y 3 Pendiente (parcial) (V-78, V-80, V-81, se repiten).** Pruebas del 2026-11-11 en el worktree `Urbanex-lote3` (SQLite, `EMAIL_PROVIDER=console`). V-78 a V-83 se transcriben de sus bitácoras enviadas por correo ese día (para V-80 manda la corrección de las 13:43); V-84 y V-85, de lo que Pablo dictó en el chat. Capturas en `evidencias\Lote3\`: (57)–(61) V-84 y (62)–(65) V-85; V-79, V-82 y V-83 tienen la captura pendiente.
+>
+> *Estado anterior (2026-11-09): las 8 pruebas Pendiente.* Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\`, fuera del repo).
 >
 > **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote3`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; nunca Supabase ni Resend). La base del worktree ya tiene `migrate` (con `opportunities.0002` y `visits.0003`) y `setup_demo_data` (2026-11-09); `setup_visits_demo` creó 0 visitas porque las 4 propiedades están en captación:
 > 1. Como `asesor.demo`, publicar "[DEMO] Casa en Cumbayá - lista para publicar" (I-10B) y crear en I-09 una franja para los próximos días (por ejemplo, lunes a viernes 09:00–13:00).
@@ -1051,7 +1167,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador sin sesión; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:10) | Ficha "[DEMO] Casa en Cumbayá…", franja miércoles 18-nov 16:00; cliente Julián, celular Ecuador, casillas WhatsApp y LOPDP marcadas y un correo de prueba. Mensaje verde: "Tu solicitud de visita quedó registrada…" (la bitácora transcribe "Miércoles 11 de noviembre a las 4" y "Te enviaremos la confirmación a tu correo…"). En I-06: oportunidad nueva de Julián, Visita Programada, canal Catálogo web. Terminal: correo al cliente (enlace P-08) y al asesor. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el caso sin correo (mensaje "El asesor te confirmará la visita por WhatsApp") y comprobar que la hora desaparece de la lista; se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición) | "Cliente Prueba", 0991111111, LOPDP marcada, sin correo y sin la casilla de confirmación, franja 18-nov 09:00: aviso verde "Tu solicitud de visita quedó registrada." y "El asesor te confirmará la visita por WhatsApp"; la hora desapareció de la lista. En I-06 (asesor.demo): Visita Programada, canal Catálogo web. Capturas: `evidencias\Lote3\Captura de pantalla (67)` y `(68).png`. | **Aprobado** |
 
 ### V-79 · HU-19 / HU-20 — Solicitar con correo y casilla
 
@@ -1059,7 +1176,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:15) | Pantalla: "Te enviamos la confirmación a tu correo con el enlace para ver los datos de tu visita." Terminal: correo al cliente (Julián) desde `Urbanex <noreply@localhost>`, "tu visita está programada…", con `http://localhost:3000/visits/<token>` y "Para cancelar o cambiar la visita comunícate con tu asesor Urbanex." Pestaña Red: la respuesta del POST público no trae el token ni datos del asesor ni de otros clientes. Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
 
 ### V-80 · HU-19 — Errores del formulario
 
@@ -1067,7 +1184,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora 13:20; corrección 13:43, que manda) | Sin LOPDP: "Debes aceptar la política de privacidad…". Casilla de correo marcada y correo vacío: "Para recibir la confirmación por correo indica tu correo". Sin teléfono: "Ingresa tu número de teléfono". Varios envíos seguidos: "Hiciste varias solicitudes seguidas" (3/min por IP). En ningún error se creó visita ni oportunidad. Según la corrección, esta bitácora es solo de V-80; la mención de V-81 fue un error. Evidencia: bitácoras por correo; captura no localizada. **Falta (según Pablo):** el celular fijo (`022345678`); se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición) | Celular fijo 022345678, LOPDP marcada, sin correo, franja 18-nov 09:00: error junto al campo del celular (tipo de número no válido); no se creó la visita (esa franja se usó después en V-78). Captura: `evidencias\Lote3\Captura de pantalla (66).png`. | **Aprobado** |
 
 ### V-81 · HU-19 — Hora ocupada y visita repetida
 
@@ -1075,7 +1193,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador, dos pestañas; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:43) | Misma ficha y franja (miércoles 11-nov 17:00) en dos pestañas, cliente "otro". Pestaña 1: registro correcto. Pestaña 2: error de horario ya no disponible (la bitácora transcribe "…ya no está disponible, escoge otro horario."). En I-06: una sola oportunidad de "otro" en Visita Programada, sin visita duplicada. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el mismo celular otra vez sobre la misma propiedad ("Ya tienes una visita programada…"); se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición, segundo caso) | Mismo celular 0991111111 (el de V-78), misma propiedad, franja 18-nov 10:00: "Ya tienes una visita programada para esta propiedad…". El primer caso (dos pestañas) queda en la fila anterior. Captura: `evidencias\Lote3\Captura de pantalla (69).png`. | **Aprobado** |
 
 ### V-82 · HU-20 — Confirmación por enlace (P-08)
 
@@ -1083,7 +1202,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:47) | Enlace del correo: "[DEMO] Casa en Cumbayá…" con enlace a la ficha, miércoles 11-nov 17:00–18:00 hora de Ecuador, "Programada", asesor con nombre y apellido y teléfono "No registrado" (el demo no tiene celular en A-01), "Para cancelar o cambiar tu visita comunícate con tu asesor."; sin botón Cancelar. Token alterado (último carácter): "Este enlace no es válido o la visita ya comenzó…" y botón "Ver catálogo". Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
 
 ### V-83 · HU-20 — "Confirmar por WhatsApp" en la agenda (I-08)
 
@@ -1091,7 +1210,7 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:55) | Solicitud nueva de "another" a las 19:00 con correo, LOPDP marcada y WhatsApp desmarcado: terminal con correo al cliente (P-08) y aviso al asesor; en I-06, Visita Programada. En "Mi agenda": la visita con WhatsApp/sin correo (la de V-78) tiene "Confirmar por WhatsApp" con el celular del cliente; la de "another" (con correo) no lo tiene. Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
 
 ### V-84 · HU-25 — Registrar el resultado (modal en I-08)
 
@@ -1101,7 +1220,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:20–15:30 | Preparación en el shell: visitas 1 y 2 movidas una semana atrás con `update()`; visita 4 creada en el pasado (28-oct) para la oportunidad 3. La visita futura (hoy 19:00, "Another") solo muestra "Programada", sin "Registrar resultado". La del 4-nov 16:00 (Julián) sí lo tiene. Sin resultado ni observación, el modal dice "Elige resultado" y "Escribe la observación" y no guarda. Con "Realizada" y "Cliente interesado": queda Realizada, desaparece el botón y muestra "Resultado: Cliente interesado · asesor.demo". En I-06 la oportunidad de Julián sigue en Visita Programada. Capturas: `evidencias\Lote3\Captura de pantalla (57)` a `(61).png`. | **Aprobado** |
 
 ### V-85 · HU-25 — No asistida devuelve la oportunidad a Contacto Inicial
 
@@ -1109,7 +1228,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:30–15:36 | Caso A: visita del 4-nov 17:00, única activa de su oportunidad, "No asistida" con "Cliente no llegó": muestra No asistida y el resultado con asesor.demo; en I-06 la oportunidad volvió a Contacto Inicial (Catálogo web). Caso B: visita 4 (28-oct 19:00, cliente "Another", con otra visita Programada hoy 19:00) → No asistida; en I-06 "Another" sigue en Visita Programada. Capturas: caso A `evidencias\Lote3\Captura de pantalla (62)` y `(63).png`; caso B `(64)` y `(65).png`. | **Aprobado** |
 
 ### Ronda 8 — Lote 4: HU-15, HU-16 (P-07), HU-29 y HU-30 (I-06A) (rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm`)
 
