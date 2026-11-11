@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; ambos criterios validados; HU en Pruebas hasta auditoría y merge |
 | Confirmación V-43 (2026-11-04) | Según Sebas, V-43 se ejecutó después del último ajuste e incluyó bloquear con cinco intentos, desbloquear desde A-01 y volver a iniciar sesión. Suite integrada: 159 pruebas OK en SQLite |
 | Aclaración HU-45 (2026-11-05) | Las filas iniciales de HU-45 describen el estado previo a su implementación; las actualizaciones aditivas del 2026-11-03/04 documentan el endpoint, la acción en A-01 y el login neutral. La notificación persistente continúa pendiente en DT-120 |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · aclaración de HU-45 y referencia DT-120 |
@@ -436,3 +437,14 @@ Decisión de Pablo (2026-11-08, PR #18). **No cambia ningún estado:** cada HU s
 | C-08 | Pueden existir valores heredados `cliente` en bases de datos, aunque `User.Role` ya solo define `admin` y `asesor`; RF-12 solo reconoce esos dos roles internos | Valores históricos en base vs `models.py` / RF-12 | **Confirmada por Pablo el 2026-10-31 (DS-30):** los clientes no tienen cuenta; eliminar `cliente`. Superusuarios cliente pasan a `admin`; las demás cuentas pasan a `asesor` inactivo con motivo `rol cliente eliminado (C-08)` |
 
 > **Nota añadida (Pablo, 2026-11-03), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`:** la fila C-08 queda con el texto de `develop`. En esta rama decía "confirmada por Pablo (2026-11-01)"; la confirmación vale desde el **2026-10-31 (DS-30)**. El 2026-11-01 Pablo la repitió al cerrar DT-105 en código (FX-23, `033b845`): solo hay roles `admin` y `asesor`, el cliente es anónimo (sin cuenta) y las pruebas de oportunidades ya no usan `role='cliente'`.
+
+### Actualización aditiva HU-09 — 2026-11-09
+
+**Estado de trabajo: Pruebas. Validación funcional/visual: Aprobada por Sebas (V-45, 2026-11-10, 14:59 Bogotá).** Disponible/Reservado pueden pasar a No disponible con motivo obligatorio; No disponible vuelve únicamente a En captación y debe publicarse de nuevo por HU-53. Se conserva el valor almacenado `reservador` (DT-16), sin migración. Esta actualización supersede la descripción histórica de HU-09 sin acciones de estado; HU-09 permanece en Pruebas hasta la auditoría y el merge.
+
+| Criterio | Implementación y evidencia | Validación humana |
+|---|---|---|
+| Cambiar entre En captación, Disponible y No disponible; No disponible exige motivo | Acciones explícitas `POST /api/auth/properties/<id>/withdraw/` y `reactivate/`; publicación por la acción HU-53. Pruebas `PropertyWithdrawalApiTests` cubren motivo, permisos, estados y visibilidad | Validado, V-45 aprobada por Sebas el 2026-11-10 |
+| No permite asignar Vendido o Arrendado manualmente | `status` sigue siendo de solo lectura en POST/PATCH. Las acciones solo asignan No disponible o En captación; prueba de PATCH conserva el estado al editar precio/título | Validado, V-45 aprobada por Sebas el 2026-11-10 |
+
+La edición de datos no se confunde con una transición: se retira la validación genérica que rechazaba toda edición de propiedades vendidas/arrendadas sin que se estuviera cambiando su estado (DT-44). Los permisos de propietario/admin se conservan. Resultados técnicos en Estándares §4. No se implementa cancelación de visitas/oportunidades al retirar; esa política no está definida por la decisión recibida.

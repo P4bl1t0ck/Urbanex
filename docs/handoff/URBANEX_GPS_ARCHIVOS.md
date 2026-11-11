@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; responsabilidades y precauciones sin cambios |
 | Actualización HU-45 (2026-11-04) | Se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`; suite integrada 159/159 OK en SQLite. Según Sebas, V-43 cubrió ambos criterios de HU-45 |
 | Actualización lote 2 (2026-11-08) final | Se agregaron pruebas para visits (CleanWithoutTimesTests). 229/229 pruebas backend OK. Archivos nuevos documentados en §1: backend/apps/visits/*, frontend/components/FreeSlotsPicker.tsx, frontend/lib/visits.ts, frontend/lib/visitsCalendar.ts, frontend/types/visit.ts, páginas en dashboard/agenda y availability |
 | Propósito | Saber qué archivo implementa qué HU, qué riesgo tiene tocarlo y de qué depende Avalúos |
@@ -226,3 +227,15 @@ flowchart LR
 | `CLAUDE.md` (raíz) y `.github/copilot-instructions.md` (2026-10-31) | Puntos de entrada de Claude Code y de Copilot: solo apuntan a `AGENTS.md` | No agregar reglas aquí; van en `AGENTS.md` |
 | `.github/pull_request_template.md` y `docs/handoff/PLANTILLA_TAREA.md` (2026-10-31) | Plantilla de cada PR y ficha de cada tarea (DS-25) | Mantenerlas alineadas con `AGENTS.md` §2, §10 y §11 |
 | `docs/handoff/URBANEX_USM_TRAZABILIDAD.md` (2026-11-03) | User Story Mapping: etapas, procesos PROC-01..08, HU → RF/RNF/pantalla y la columna **Código** (archivos y endpoints de cada paso, sin números de línea). Lo leen los dos y lo cita `AGENTS.md` §1 | No copia estados: enlaza a Estado de procesos. Al implementar un paso, actualizar su celda Código en el mismo PR; si se fusiona una rama citada como "rama sin fusionar", quitar esa marca. El corte del 60 % (§2) y el §6 son **PROPUESTA**: no cambiarlos sin acuerdo de Pablo y Sebas |
+
+### Actualización aditiva HU-09 — 2026-11-09
+
+| Archivo | Responsabilidad | Riesgo / precaución |
+|---|---|---|
+| `backend/apps/users/serializers.py` | `PropertyWithdrawalSerializer` exige motivo no vacío; `PropertySerializer` permite editar sin confundir el estado guardado con una transición | Mantener `status` de solo lectura; afecta a creación/edición de propiedades |
+| `backend/apps/users/views.py` (**compartido**) | `PropertyWithdrawalView` y `PropertyReactivationView`: permiso dueño/admin, transacción y bloqueo de propiedad, transición controlada, respuesta Property | No tocar login HU-46; integrar develop después del merge de PR #20 y repetir comprobaciones si cambia el código |
+| `backend/apps/users/urls.py` | Rutas `properties/<id>/withdraw/` y `properties/<id>/reactivate/` | Conservar rutas existentes; ninguna transición genérica por PATCH |
+| `backend/apps/users/tests.py` | `PropertyWithdrawalApiTests`, permisos/errores, edición, visibilidad y republicación | SQLite; PostgreSQL No ejecutado (DT-68) |
+| `frontend/app/dashboard/page.tsx` (**compartido**) | Botones Retirar/Reactivar, motivo y confirmación mediante Dialog; actualiza la fila con el DTO del servidor | V-45 aprobada por Sebas el 2026-11-10; no modificar modal de expediente ni flujo de avalúos |
+
+Sin cambios de modelos, migraciones, contratos de tipos ni dependencias. API y cliente usan el DTO `Property` existente. Se conserva el último motivo al reactivar; no se crea un historial adicional. Resultados en Estándares §4.

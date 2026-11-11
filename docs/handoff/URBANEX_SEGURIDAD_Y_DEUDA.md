@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; sin cambios en riesgos globales |
 | Propósito | Inventario de riesgos de seguridad e infraestructura del código actual, con su plan de corrección, y opciones documentadas para las decisiones pendientes (D-05 sesión/JWT, DT-42 folio, almacenamiento y base de datos) |
 | Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-11-03:** SEC-16 / DT-117, datos personales de EP-5 (LOPDP), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`. **Actualizado el 2026-11-02:** DT-96 (edición de `users.0007` tras aplicarse en Supabase; restablecimiento de la base de desarrollo y migración desde `develop` propuestos por Sebas, **POR CONFIRMAR** y no ejecutados (corregido por Pablo, 2026-11-03)); PostgreSQL local **No ejecutado**. **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3 (restaurado por Pablo, 2026-11-03). **Actualizado el 2026-10-31:** SEC-15 / DT-79 (incidente de credenciales, sin valores) (restaurado por Pablo, 2026-11-03); SEC-09 y §5.3: `db.sqlite3` ya no se versiona (DS-25, FX-22); DT-90/DT-91 para credenciales de Supabase y Resend; C-08/DS-30 confirma que clientes no tienen cuenta. **Actualizado el 2026-11-02:** §3.1, "XSS almacenado": metaetiquetas de HU-12 (FX-24), comprobación del escape Pendiente. **Actualizado el 2026-11-03:** §3.1, escape de las metaetiquetas de HU-12 comprobado (V-64, aprobada por Pablo). **Actualizado el 2026-11-03 (tarde):** §3.1, el payload RSC se cita como `\u003c/script\u003e` (corrección de la auditoría de HU-12) |
 | Método | Lectura del código del backend y del frontend. **No se hicieron pruebas de intrusión.** Lo que no se comprobó en ejecución está marcado **Por verificar** |
@@ -344,3 +345,7 @@ Frontend Next.js en Vercel · backend Django REST en Render con Docker · Postgr
 7. **SEC-03, SEC-06, SEC-11 y DT-42** según el sprint.
 
 Al cerrar un riesgo: actualizar su fila en §0, su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) y, si cambia el control de acceso, la tabla de §1.1.
+
+### Actualización aditiva HU-09 — 2026-11-09
+
+Las nuevas acciones de retirada/reactivación requieren autenticación y permiso por objeto (propietario o rol admin), además de `transaction.atomic` y `select_for_update` sobre la propiedad. Una retirada exige motivo no vacío y solo admite Disponible/Reservado; una reactivación solo admite No disponible y termina en captación. Los estados finales siguen fuera de las actualizaciones manuales y volver al catálogo requiere la acción HU-53, con comprobación de sus requisitos. Pruebas de permisos, ocultación al público y estados inválidos en `PropertyWithdrawalApiTests`; resultados en Estándares §4. Sebas aprobó la validación humana V-45 el 2026-11-10. No se cierran riesgos globales ni se prueba concurrencia PostgreSQL en esta sesión (DT-68). No se implementan cambios sobre oportunidades/visitas asociadas.

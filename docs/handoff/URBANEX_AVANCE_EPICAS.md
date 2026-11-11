@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; EP-2: 17/24 implementados, 15/24 verificados y 12/24 validados |
 | Actualización HU-45 (2026-11-04) | Según Sebas, V-43 cubrió ambos criterios de HU-45 después del último ajuste. Suite integrada: 159/159 OK en SQLite. Ver actualización de EP-1 |
 | Propósito | Medir el avance real de EP-1, EP-2 y EP-5 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
@@ -121,25 +122,25 @@ Esta actualización supersede la lectura anterior de hoy: el flujo detallado de 
 | HU-07 | Justificación manual si el servicio falla | ✗ | ✗ | ✗ | No iniciado |
 | HU-08 | Conserva valor del motor, calibrado y diferencia | ✔ | ✔ | ✔ | (2026-10-25) Backend verificado (`apps.appraisals.tests`) + pantalla I-12 (`af9b416`: `tsc`, `eslint`, `build`). (2026-10-27) **V-05 a V-08** (Pablo). **Matiz:** se validó con el registro manual (DS-02): valor del motor "No disponible (D-04)" y diferencia "No aplica" |
 | HU-08 | El avalúo aprobado no se sobrescribe | ✔ | ✔ | ✔ | (2026-10-25) Backend verificado. (2026-10-27) **V-08** (solo lectura tras aprobar) y **V-09** (la reevaluación crea otro folio y conserva el aprobado) |
-| HU-09 | Cambiar entre estados; No disponible con motivo | ✗ | ✗ | ✗ | La regla del motivo está en el serializer, pero la UI no permite cambiar el estado y el PATCH acepta estados no previstos (DT-09) |
-| HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✗ | ✗ | En el serializer; sin prueba |
+| HU-09 | Cambiar entre estados; No disponible con motivo | ✔ | ✔ | ✔ | Acciones explícitas de retirada/reactivación, `PropertyWithdrawalApiTests` y recorrido humano aprobado por Sebas en V-45 (2026-11-10) |
+| HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✔ | ✔ | `status` de solo lectura, pruebas de edición/transiciones y V-45 aprobada por Sebas (2026-11-10) |
 | HU-53 | Requiere avalúo y contrato de corretaje | ✔ | ✔ | ✔ | (2026-10-24) 8 pruebas de publicación + 2 de `status` de solo lectura (FX-11). (2026-10-27) **V-02** (lista de requisitos faltantes en `#35`), **V-11** y **V-12** (`#33` publicada y visible sin sesión): **DT-40 cerrado** |
 | HU-53 | Pasa a Disponible y genera URL con metaetiquetas | ✗ | ✗ | ✗ | Sin `slug` ni OpenGraph. **(2026-11-01)** Las metaetiquetas de la ficha ya existen en la rama de HU-12 (FX-24, sin fusionar; V-60 a V-62 aprobadas por Pablo el 2026-11-02, V-63 Pendiente por DT-110). Las marcas no cambian: falta el `slug` (DT-111) y la rama no está en `develop` |
 
 | Métrica | Valor |
 |---|---|
 | Total de criterios | 24 |
-| Implementado | 16/24 = **66,7 %** (2026-10-28: +5 del motor DS-21; antes 11/24) |
-| Verificado | 13/24 = **54,2 %** (2026-10-28: +5 del motor DS-21; antes 8/24) |
-| Validado | 10/24 = **41,7 %** (2026-10-30: +4 de la ronda 3, HU-04 ×2 y HU-06 ×2; antes 6/24: HU-03 ×2, HU-04 ×1, HU-08 ×2, HU-53 ×1) |
-| HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** (HU-04, HU-06 y HU-08 tienen todos sus criterios validados; si cuentan como completas está **POR CONFIRMAR**: ver la actualización del 2026-10-30) |
+| Implementado | 17/24 = **70,8 %** (2026-11-11: +1 de HU-09; antes 16/24) |
+| Verificado | 15/24 = **62,5 %** (2026-11-11: +2 de HU-09; antes 13/24) |
+| Validado | 12/24 = **50,0 %** (2026-11-11: +2 de HU-09, V-45 aprobada por Sebas; antes 10/24) |
+| HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** en `develop`. HU-09 tiene 2/2 criterios validados en esta rama, pero sus 2 puntos se suman después de la auditoría y el merge. HU-04, HU-06 y HU-08 tienen todos sus criterios validados; si cuentan como completas está **POR CONFIRMAR**: ver la actualización del 2026-10-30 |
 
 ```mermaid
 pie showData title EP-2 — criterios de aceptación (24)
-  "Validados (persona + test)" : 10
+  "Validados (persona + test)" : 12
   "Verificados sin validar" : 3
-  "Implementados sin test" : 3
-  "No implementados" : 8
+  "Implementados sin test" : 2
+  "No implementados" : 7
 ```
 
 **Lectura:** el trabajo hecho se concentra en el registro de propiedades y el expediente. Las HU de avalúo (HU-04, 06, 07, 08), que suman 16 de 33 puntos, están sin iniciar. HU-53 (publicar) y la parte "sin exhibirse al público" de HU-01 fallan respecto del proceso de negocio.
@@ -249,3 +250,7 @@ Decisión de Pablo (2026-11-08, PR #18). **Es un plan, no avance:** ninguna de e
 | Sebas | 2 | HU-10 Filtrar el catálogo | 5 | EP-3 |
 | Pablo | Lote 3 | HU-19 Solicitar la visita · HU-20 Confirmación · HU-25 Registrar el resultado de la visita | 5 + 3 + 2 = 10 | EP-4 |
 | Pablo | Lote 4 | HU-15 Contacto por WhatsApp · HU-16 Interés por formulario · HU-29 Avanzar el estado de la oportunidad · HU-30 Registrar interacciones y negociación | 3 + 2 + 5 + 5 = 15 | EP-4, EP-5 |
+
+### Actualización aditiva EP-2/HU-09 — 2026-11-09
+
+HU-09 incorpora retirada con motivo, reactivación a captación y edición sin asignación manual de estados finales. `PropertyWithdrawalApiTests` cubre sus reglas en SQLite; resultados en Estándares §4. Sebas aprobó V-45 el 2026-11-10 a las 14:59 (Bogotá): los dos criterios quedan Implementados, Verificados y Validados. HU-09 permanece en **Pruebas** hasta la auditoría y el merge; por eso sus 2 puntos todavía no se suman al avance de `develop`. La definición de las transiciones procede de Sebas en la conversación del 2026-11-09; no se atribuye a Pablo.

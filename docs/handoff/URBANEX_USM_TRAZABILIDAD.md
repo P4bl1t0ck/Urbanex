@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; HU-09 con 2/2 criterios validados en la rama |
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
 | Última actualización | 2026-11-08 (noche) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): §2, **plan de reparto** (PLAN, sin avance). Antes: 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` conservando filas del mapa y la traza de HU-45. Se mantiene la nota del PR #15 (HU-27 y HU-34 ya no son "Rama sin fusionar"), se actualiza HU-12 en §4 (PR #14 ya está en `develop`) y se aclara la nota de PROC-08/HU-45 de la rama `origin/develop`. Antes: 2026-11-05 · Sebas (con Copilot) · PROC-08/HU-45: se aclara que la fila inicial sobre el desbloqueo es histórica y que la actualización del 2026-11-04 describe el flujo implementado; notificación pendiente referida a DT-120. Antes: 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: §4, HU-27 (PROC-03 paso 5) y HU-34 (PROC-05 paso 1) ya no son "Rama sin fusionar" (fusionadas en `develop`, `043cfb5`, DS-32) y su columna Estado enlaza a Estado de procesos. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
@@ -306,3 +307,7 @@ RF sin HU propia: **RF-14** (auditoría) se alimenta de RF-01, 05, 06, 07, 08, 1
 - **Al cerrar una HU:** no se toca este archivo (el estado está en los enlaces). Solo se actualiza si cambia el mapa, el corte del 60 % o un proceso.
 - **Al implementar un paso:** completar la columna **Código** de §4 con los archivos y el endpoint (sin números de línea).
 - **Si se decide algo del §6:** registrar la decisión en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) (DS-xx) y enlazarla aquí.
+
+### Actualización aditiva PROC-01 / HU-09 — 2026-11-09
+
+La fila histórica de PROC-01 paso 10 es anterior a esta implementación. HU-09 añade edición y acciones de retirada/reactivación en `users/serializers.py`, `users/views.py`, `users/urls.py`, `users/tests.py` y `frontend/app/dashboard/page.tsx`. Rutas: `POST auth/properties/<id>/withdraw/` (motivo obligatorio), `POST auth/properties/<id>/reactivate/` (solo a captación); para volver a Disponible se usa la publicación HU-53 existente. No cambia el corte del 60 % ni su reparto. Estado y validación se consultan en [HU-09](URBANEX_ESTADO_PROCESOS.md#hu-09); V-45 fue aprobada por Sebas el 2026-11-10 y está registrada en `Project_Progress.md`.
