@@ -239,6 +239,10 @@ export default function DashboardPage() {
   const [publishCandidate, setPublishCandidate] = useState<Property | null>(null);
   const [publishProblem, setPublishProblem] = useState<PublishProblem | null>(null);
   const [publishingId, setPublishingId] = useState<number | null>(null);
+  const [statusCandidate, setStatusCandidate] = useState<{ property: Property; action: "withdraw" | "reactivate" } | null>(null);
+  const [withdrawalReason, setWithdrawalReason] = useState("");
+  const [statusError, setStatusError] = useState("");
+  const [changingStatus, setChangingStatus] = useState(false);
 
   useEffect(() => {
     const token = sessionStorage.getItem("access");
@@ -606,6 +610,44 @@ export default function DashboardPage() {
     }
   }
 
+  function openStatusDialog(property: Property, action: "withdraw" | "reactivate") {
+    setWithdrawalReason("");
+    setStatusError("");
+    setStatusCandidate({ property, action });
+  }
+
+  async function changePropertyStatus() {
+    if (!statusCandidate || changingStatus) return;
+    const { property, action } = statusCandidate;
+    if (action === "withdraw" && !withdrawalReason.trim()) {
+      setStatusError("Escribe el motivo del retiro.");
+      return;
+    }
+    setChangingStatus(true);
+    setStatusError("");
+    setNotice(null);
+    try {
+      const updated = await authFetch<Property>(`/api/auth/properties/${property.id}/${action}/`, {
+        method: "POST",
+        body: JSON.stringify(action === "withdraw" ? { unavailability_reason: withdrawalReason.trim() } : {}),
+      });
+      setProperties((previous) => previous.map((item) => item.id === updated.id ? updated : item));
+      setStatusCandidate(null);
+      setNotice({
+        kind: "success",
+        title: action === "withdraw" ? "Propiedad retirada del catálogo." : "Propiedad reactivada en captación.",
+        lines: action === "reactivate" ? ["Revisa su expediente y pulsa Publicar para comprobar los requisitos antes de mostrarla en el catálogo."] : [],
+      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError && error.status === 401) {
+        router.replace("/login");
+      }
+      setStatusError(error instanceof Error ? error.message : "No se pudo cambiar el estado. Intenta de nuevo.");
+    } finally {
+      setChangingStatus(false);
+    }
+  }
+
   // Desde el modal de requisitos, abre la ficha en la pestaña donde se corrige lo que falta.
   function fixRequirement(property: Property, tab: TabId) {
     setPublishProblem(null);
@@ -724,6 +766,11 @@ export default function DashboardPage() {
                            <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
                              {STATUS_LABELS[property.status] ?? property.status.replace("_", " ")}
                            </span>
+                           {property.status === "no_disponible" && property.unavailability_reason && (
+                             <p className="mt-2 max-w-xs whitespace-normal text-xs text-slate-600">
+                               Motivo: {property.unavailability_reason}
+                             </p>
+                           )}
                          </td>
                          <td className="hidden whitespace-nowrap px-4 py-3 text-sm text-slate-600 xl:table-cell">
                               {property.agent_name || userInfo.email}
@@ -741,6 +788,20 @@ export default function DashboardPage() {
                              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
                              Avalúo
                            </Link>
+                           {(property.status === "disponible" || property.status === "reservador") && (
+                             <button type="button" onClick={() => openStatusDialog(property, "withdraw")}
+                               disabled={changingStatus}
+                               className="rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60">
+                               Retirar
+                             </button>
+                           )}
+                           {property.status === "no_disponible" && (
+                             <button type="button" onClick={() => openStatusDialog(property, "reactivate")}
+                               disabled={changingStatus}
+                               className="rounded-lg border border-blue-300 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60">
+                               Reactivar
+                             </button>
+                           )}
                            {/* El servidor solo publica desde captación (DS-07, DT-46) */}
                            {property.status === "captacion" && (
                              <button
@@ -1139,6 +1200,29 @@ export default function DashboardPage() {
            </form>
          </div>
        )}
+
+       <Dialog
+         open={statusCandidate !== null}
+         title={statusCandidate?.action === "withdraw" ? "¿Retirar esta propiedad?" : "¿Reactivar esta propiedad?"}
+         tone={statusCandidate?.action === "withdraw" ? "danger" : "primary"}
+         confirmLabel={changingStatus ? "Guardando..." : statusCandidate?.action === "withdraw" ? "Retirar" : "Volver a captación"}
+         busy={changingStatus}
+         onConfirm={changePropertyStatus}
+         onCancel={() => !changingStatus && setStatusCandidate(null)}
+       >
+         <p className="break-words">{statusCandidate?.property.title}</p>
+         {statusCandidate?.action === "withdraw" ? (
+           <label className="mt-3 block font-medium">
+             Motivo del retiro (obligatorio)
+             <textarea value={withdrawalReason} onChange={(event) => setWithdrawalReason(event.target.value)}
+               disabled={changingStatus} required rows={3}
+               className="mt-1 w-full rounded-lg border border-slate-300 p-2 font-normal text-slate-900" />
+           </label>
+         ) : (
+           <p className="mt-3">Volverá a En captación y seguirá oculta al público hasta que la publiques nuevamente con todos los requisitos.</p>
+         )}
+         {statusError && <p role="alert" className="mt-3 text-red-700">{statusError}</p>}
+       </Dialog>
 
        <Dialog
          open={publishCandidate !== null}
