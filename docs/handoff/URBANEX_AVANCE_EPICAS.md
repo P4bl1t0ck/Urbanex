@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización de corrección HU-09 | 2026-11-11 · bloque histórico de EP-2 restaurado; actualización vigente en sección aditiva; privacidad del motivo cubierta por pruebas |
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; EP-2: 17/24 implementados, 15/24 verificados y 12/24 validados |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -156,25 +157,25 @@ Esta actualización supersede la lectura anterior de hoy: el flujo detallado de 
 | HU-07 | Justificación manual si el servicio falla | ✗ | ✗ | ✗ | No iniciado |
 | HU-08 | Conserva valor del motor, calibrado y diferencia | ✔ | ✔ | ✔ | (2026-10-25) Backend verificado (`apps.appraisals.tests`) + pantalla I-12 (`af9b416`: `tsc`, `eslint`, `build`). (2026-10-27) **V-05 a V-08** (Pablo). **Matiz:** se validó con el registro manual (DS-02): valor del motor "No disponible (D-04)" y diferencia "No aplica" |
 | HU-08 | El avalúo aprobado no se sobrescribe | ✔ | ✔ | ✔ | (2026-10-25) Backend verificado. (2026-10-27) **V-08** (solo lectura tras aprobar) y **V-09** (la reevaluación crea otro folio y conserva el aprobado) |
-| HU-09 | Cambiar entre estados; No disponible con motivo | ✔ | ✔ | ✔ | Acciones explícitas de retirada/reactivación, `PropertyWithdrawalApiTests` y recorrido humano aprobado por Sebas en V-45 (2026-11-10) |
-| HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✔ | ✔ | `status` de solo lectura, pruebas de edición/transiciones y V-45 aprobada por Sebas (2026-11-10) |
+| HU-09 | Cambiar entre estados; No disponible con motivo | ✗ | ✗ | ✗ | La regla del motivo está en el serializer, pero la UI no permite cambiar el estado y el PATCH acepta estados no previstos (DT-09) |
+| HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✗ | ✗ | En el serializer; sin prueba |
 | HU-53 | Requiere avalúo y contrato de corretaje | ✔ | ✔ | ✔ | (2026-10-24) 8 pruebas de publicación + 2 de `status` de solo lectura (FX-11). (2026-10-27) **V-02** (lista de requisitos faltantes en `#35`), **V-11** y **V-12** (`#33` publicada y visible sin sesión): **DT-40 cerrado** |
 | HU-53 | Pasa a Disponible y genera URL con metaetiquetas | ✗ | ✗ | ✗ | Sin `slug` ni OpenGraph. **(2026-11-01)** Las metaetiquetas de la ficha ya existen en la rama de HU-12 (FX-24, sin fusionar; V-60 a V-62 aprobadas por Pablo el 2026-11-02, V-63 Pendiente por DT-110). Las marcas no cambian: falta el `slug` (DT-111) y la rama no está en `develop` |
 
 | Métrica | Valor |
 |---|---|
 | Total de criterios | 24 |
-| Implementado | 17/24 = **70,8 %** (2026-11-11: +1 de HU-09; antes 16/24) |
-| Verificado | 15/24 = **62,5 %** (2026-11-11: +2 de HU-09; antes 13/24) |
-| Validado | 12/24 = **50,0 %** (2026-11-11: +2 de HU-09, V-45 aprobada por Sebas; antes 10/24) |
-| HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** en `develop`. HU-09 tiene 2/2 criterios validados en esta rama, pero sus 2 puntos se suman después de la auditoría y el merge. HU-04, HU-06 y HU-08 tienen todos sus criterios validados; si cuentan como completas está **POR CONFIRMAR**: ver la actualización del 2026-10-30 |
+| Implementado | 16/24 = **66,7 %** (2026-10-28: +5 del motor DS-21; antes 11/24) |
+| Verificado | 13/24 = **54,2 %** (2026-10-28: +5 del motor DS-21; antes 8/24) |
+| Validado | 10/24 = **41,7 %** (2026-10-30: +4 de la ronda 3, HU-04 ×2 y HU-06 ×2; antes 6/24: HU-03 ×2, HU-04 ×1, HU-08 ×2, HU-53 ×1) |
+| HU completas / puntos | 0/10 HU · 0/33 pts = **0 %** (HU-04, HU-06 y HU-08 tienen todos sus criterios validados; si cuentan como completas está **POR CONFIRMAR**: ver la actualización del 2026-10-30) |
 
 ```mermaid
 pie showData title EP-2 — criterios de aceptación (24)
-  "Validados (persona + test)" : 12
+  "Validados (persona + test)" : 10
   "Verificados sin validar" : 3
-  "Implementados sin test" : 2
-  "No implementados" : 7
+  "Implementados sin test" : 3
+  "No implementados" : 8
 ```
 
 **Lectura:** el trabajo hecho se concentra en el registro de propiedades y el expediente. Las HU de avalúo (HU-04, 06, 07, 08), que suman 16 de 33 puntos, están sin iniciar. HU-53 (publicar) y la parte "sin exhibirse al público" de HU-01 fallan respecto del proceso de negocio.
@@ -292,3 +293,31 @@ HU-09 incorpora retirada con motivo, reactivación a captación y edición sin a
 ### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
 
 La corrección de HU-46 agrega dos pruebas de regresión para JWT emitidos en el mismo segundo y para tokens heredados sin versión precisa. La sesión nueva debe funcionar y las anteriores deben rechazarse. Los resultados técnicos se registran en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu). No se recalculan porcentajes ni se modifican registros humanos; HU-46 permanece en Pruebas.
+
+
+### Corrección aditiva de auditoría HU-09 — 2026-11-11
+
+El bloque original de criterios, métricas y gráfico de EP-2 se conserva literalmente respecto de `origin/develop`. Es histórico: para HU-09 prevalecen las filas siguientes y la actualización aditiva del 2026-11-09. Se corrige así la sustitución de filas anteriores detectada en la revisión, conforme a `AGENTS.md` §4.
+
+| HU | Criterio | Implementado | Verificado | Validado | Evidencia |
+|---|---|---|---|---|---|
+| HU-09 | Cambiar entre estados; No disponible con motivo | ✔ | ✔ | ✔ | Acciones explícitas de retirada/reactivación, `PropertyWithdrawalApiTests` y V-45 registrada por Sebas el 2026-11-10 a las 14:59 (Bogotá) |
+| HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✔ | ✔ | `status` de solo lectura, pruebas de edición/transiciones y la misma V-45; no se añade una aprobación humana |
+
+| Métrica EP-2 actualizada en esta rama | Valor |
+|---|---|
+| Total de criterios | 24 |
+| Implementado | 17/24 = **70,8 %** (+1 de HU-09 respecto del bloque histórico) |
+| Verificado | 15/24 = **62,5 %** (+2 de HU-09) |
+| Validado | 12/24 = **50,0 %** (+2 de HU-09, según V-45 de Sebas) |
+| HU completas / puntos en `develop` | 0/10 HU · 0/33 pts; los 2 puntos de HU-09 no se suman antes de la auditoría y el merge |
+
+```mermaid
+pie showData title EP-2 — actualización HU-09 en rama (2026-11-11)
+  "Validados (persona + test)" : 12
+  "Verificados sin validar" : 3
+  "Implementados sin test" : 2
+  "No implementados" : 7
+```
+
+La corrección de privacidad del motivo de retiro se verifica por pruebas automáticas; no cambia las marcas de aceptación ni el registro humano V-45. HU-09 permanece en **Pruebas**. Resultados de ejecución en Estándares §4.
