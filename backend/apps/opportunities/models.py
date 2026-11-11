@@ -24,6 +24,9 @@ PENDIENTE_COMISION. La garantiza una restriccion condicional de la BD (§12.4).
 # Estados que liberan la regla de una oportunidad activa por contacto e inmueble.
 TERMINAL_STATUSES = ('CIERRE', 'PERDIDA')
 
+# Motivo del historial cuando el cambio lo provoca el cliente sin cuenta (DS-39).
+SYSTEM_REASON_CLIENT_PORTAL = 'Solicitud del cliente desde el portal'
+
 
 class OriginChannel(models.TextChoices):
     CATALOGO_WEB = 'CATALOGO_WEB', 'Catálogo web'
@@ -137,6 +140,9 @@ class OpportunityStatusHistory(models.Model):
     '''
     Historial inmutable de estados (RF-06, HU-29): usuario, fecha y hora de cada cambio, sin
     edicion retroactiva. La apertura queda como la primera fila, con previous_status vacio.
+
+    changed_by es opcional (DS-39, HU-19): los cambios que provoca el cliente anonimo desde el
+    portal no tienen usuario y llevan el motivo SYSTEM_REASON_CLIENT_PORTAL.
     '''
     opportunity = models.ForeignKey(
         Opportunity,
@@ -151,6 +157,8 @@ class OpportunityStatusHistory(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='opportunity_status_changes',
+        null=True,
+        blank=True,
     )
     reason = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)

@@ -29,4 +29,7 @@ class VisitAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     search_fields = ('property__title', 'agent__username', 'opportunity__contact__full_name')
     raw_id_fields = ('opportunity', 'property', 'agent')
-    readonly_fields = ('cancellation_token', 'created_at')
+    # Lote 3 (DS-39): el resultado se registra solo desde la agenda (HU-25, una vez) y el correo
+    # de confirmacion lo fija la solicitud (HU-19/HU-20): aqui son de solo lectura.
+    readonly_fields = ('cancellation_token', 'created_at', 'confirmation_email',
+                       'outcome_recorded_at', 'outcome_recorded_by')

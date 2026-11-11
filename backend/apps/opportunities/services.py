@@ -9,7 +9,9 @@ from .validators import normalize_phone
 
 '''
 Apertura de oportunidades (RF-05). open_manual_opportunity() es la unica via de HU-27 (I-07).
-get_or_create_contact() la podran reutilizar HU-15 y HU-16 (RF-02, RF-03) con su propio canal.
+get_or_create_contact() la reutilizan HU-19 (apps.visits, canal CATALOGO_WEB) y la podran
+reutilizar HU-15 y HU-16 (RF-02, RF-03) con su propio canal. change_status() escribe el
+historial de cada cambio de estado (RF-06).
 
 Reglas del corte (DS-28):
 - Solo usuarios internos (admin o asesor). El asesor queda como responsable (RF-08: la
@@ -56,12 +58,17 @@ def resolve_assigned_agent(registered_by, assigned_agent):
     return registered_by
 
 
-def get_or_create_contact(*, phone, full_name, email, origin_channel, privacy_accepted_at):
-    '''Devuelve (contacto, reutilizado). Llamar dentro de una transaccion.'''
+def get_or_create_contact(*, phone, full_name, email, origin_channel, privacy_accepted_at,
+                          email_opt_in=False):
+    '''
+    Devuelve (contacto, reutilizado). Llamar dentro de una transaccion.
+    email_opt_in solo se guarda en un contacto nuevo: el existente no cambia (DS-28, DS-39).
+    '''
     contact = Contact.objects.select_for_update().filter(phone=phone).first()
     if contact is None:
         contact = Contact(full_name=full_name, phone=phone, email=email,
-                          origin_channel=origin_channel, privacy_accepted_at=privacy_accepted_at)
+                          origin_channel=origin_channel, privacy_accepted_at=privacy_accepted_at,
+                          email_opt_in=bool(email and email_opt_in))
         contact.full_clean()
         try:
             with transaction.atomic():
@@ -75,6 +82,23 @@ def get_or_create_contact(*, phone, full_name, email, origin_channel, privacy_ac
         contact.privacy_accepted_at = privacy_accepted_at
         contact.save(update_fields=['privacy_accepted_at'])
     return contact, True
+
+
+def change_status(opportunity, new_status, *, changed_by, reason):
+    '''
+    Cambia el estado y deja la fila del historial (RF-06). Llamar dentro de una transaccion con
+    la oportunidad bloqueada. changed_by=None: cambio del cliente desde el portal (DS-39).
+    '''
+    previous = opportunity.status
+    now = timezone.now()
+    opportunity.status = new_status
+    opportunity.last_activity_at = now
+    opportunity.save(update_fields=['status', 'last_activity_at'])
+    OpportunityStatusHistory.objects.create(
+        opportunity=opportunity, previous_status=previous, new_status=new_status,
+        changed_by=changed_by, reason=reason,
+    )
+    return opportunity
 
 
 def open_manual_opportunity(*, registered_by, property_obj, full_name, phone, email='',
