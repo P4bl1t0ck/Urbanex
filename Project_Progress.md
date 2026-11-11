@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 registrada según Pablo: 5 Aprobado (V-79, V-82–V-85) y 3 Pendiente (parcial) (V-78, V-80, V-81) |
 | Última actualización lote 3 · integración de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `97f0e0c` en la rama del lote 3; 277 pruebas OK en SQLite (Estándares §4) |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; resultados técnicos en Estándares §4 |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
@@ -51,6 +52,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · registro de la Ronda 7
+- **Hecho:** transcripción de la validación visual de Pablo (V-78 a V-83 desde sus bitácoras por correo del 2026-11-11, con la corrección de V-80; V-84 y V-85 dictadas en el chat). Según Pablo: V-79, V-82, V-83, V-84 y V-85 **Aprobado**; V-78, V-80 y V-81 **Pendiente (parcial)**. Capturas (57)–(65) asignadas a V-84 y V-85 por orden de Pablo.
+- **Falta:** repetir V-78 (sin correo y la hora que desaparece de la lista), V-80 (celular fijo) y V-81 (mismo celular sobre la misma propiedad); capturas de V-79, V-82 y V-83; con las 8 aprobadas, actualizar Estado de procesos, Avance de épicas y USM (Pablo lo pospone hasta entonces); frontend tras la fusión, auditoría (§11) y DT-143.
+- **Siguiente paso:** Pablo repite V-78, V-80 y V-81.
 
 ### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · integración de develop
 - **Hecho:** `git fetch` y fusión de `origin/develop` `97f0e0c` (PR #20 HU-46 y PR #23 docs) por orden de Pablo. Tres conflictos solo documentales (Progress, Deuda, Estándares), resueltos según Pablo conservando las dos partes: en Progress la nota del lote 3 arriba; en Deuda y Estándares lo de develop primero. El código (`users/*`, `settings.py`, `config/urls.py`, `SiteNav.tsx`, `lib/api.ts`, `users.0009`) se fusionó sin conflictos.
@@ -1121,7 +1127,9 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 ### Ronda 7 — Lote 3: HU-19 (P-07), HU-20 (P-08) y HU-25 (I-08) (rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas`, PR #21)
 
-> **Estado (2026-11-09): las 8 pruebas Pendiente.** Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\`, fuera del repo).
+> **Estado (2026-11-11), según Pablo: 5 Aprobado (V-79, V-82, V-83, V-84, V-85) y 3 Pendiente (parcial) (V-78, V-80, V-81, se repiten).** Pruebas del 2026-11-11 en el worktree `Urbanex-lote3` (SQLite, `EMAIL_PROVIDER=console`). V-78 a V-83 se transcriben de sus bitácoras enviadas por correo ese día (para V-80 manda la corrección de las 13:43); V-84 y V-85, de lo que Pablo dictó en el chat. Capturas en `evidencias\Lote3\`: (57)–(61) V-84 y (62)–(65) V-85; V-79, V-82 y V-83 tienen la captura pendiente.
+>
+> *Estado anterior (2026-11-09): las 8 pruebas Pendiente.* Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\`, fuera del repo).
 >
 > **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote3`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; nunca Supabase ni Resend). La base del worktree ya tiene `migrate` (con `opportunities.0002` y `visits.0003`) y `setup_demo_data` (2026-11-09); `setup_visits_demo` creó 0 visitas porque las 4 propiedades están en captación:
 > 1. Como `asesor.demo`, publicar "[DEMO] Casa en Cumbayá - lista para publicar" (I-10B) y crear en I-09 una franja para los próximos días (por ejemplo, lunes a viernes 09:00–13:00).
@@ -1134,7 +1142,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador sin sesión; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:10) | Ficha "[DEMO] Casa en Cumbayá…", franja miércoles 18-nov 16:00; cliente Julián, celular Ecuador, casillas WhatsApp y LOPDP marcadas y un correo de prueba. Mensaje verde: "Tu solicitud de visita quedó registrada…" (la bitácora transcribe "Miércoles 11 de noviembre a las 4" y "Te enviaremos la confirmación a tu correo…"). En I-06: oportunidad nueva de Julián, Visita Programada, canal Catálogo web. Terminal: correo al cliente (enlace P-08) y al asesor. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el caso sin correo (mensaje "El asesor te confirmará la visita por WhatsApp") y comprobar que la hora desaparece de la lista; se repite. | Pendiente (parcial) |
 
 ### V-79 · HU-19 / HU-20 — Solicitar con correo y casilla
 
@@ -1142,7 +1150,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:15) | Pantalla: "Te enviamos la confirmación a tu correo con el enlace para ver los datos de tu visita." Terminal: correo al cliente (Julián) desde `Urbanex <noreply@localhost>`, "tu visita está programada…", con `http://localhost:3000/visits/<token>` y "Para cancelar o cambiar la visita comunícate con tu asesor Urbanex." Pestaña Red: la respuesta del POST público no trae el token ni datos del asesor ni de otros clientes. Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
 
 ### V-80 · HU-19 — Errores del formulario
 
@@ -1150,7 +1158,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora 13:20; corrección 13:43, que manda) | Sin LOPDP: "Debes aceptar la política de privacidad…". Casilla de correo marcada y correo vacío: "Para recibir la confirmación por correo indica tu correo". Sin teléfono: "Ingresa tu número de teléfono". Varios envíos seguidos: "Hiciste varias solicitudes seguidas" (3/min por IP). En ningún error se creó visita ni oportunidad. Según la corrección, esta bitácora es solo de V-80; la mención de V-81 fue un error. Evidencia: bitácoras por correo; captura no localizada. **Falta (según Pablo):** el celular fijo (`022345678`); se repite. | Pendiente (parcial) |
 
 ### V-81 · HU-19 — Hora ocupada y visita repetida
 
@@ -1158,7 +1166,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador, dos pestañas; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:43) | Misma ficha y franja (miércoles 11-nov 17:00) en dos pestañas, cliente "otro". Pestaña 1: registro correcto. Pestaña 2: error de horario ya no disponible (la bitácora transcribe "…ya no está disponible, escoge otro horario."). En I-06: una sola oportunidad de "otro" en Visita Programada, sin visita duplicada. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el mismo celular otra vez sobre la misma propiedad ("Ya tienes una visita programada…"); se repite. | Pendiente (parcial) |
 
 ### V-82 · HU-20 — Confirmación por enlace (P-08)
 
@@ -1166,7 +1174,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:47) | Enlace del correo: "[DEMO] Casa en Cumbayá…" con enlace a la ficha, miércoles 11-nov 17:00–18:00 hora de Ecuador, "Programada", asesor con nombre y apellido y teléfono "No registrado" (el demo no tiene celular en A-01), "Para cancelar o cambiar tu visita comunícate con tu asesor."; sin botón Cancelar. Token alterado (último carácter): "Este enlace no es válido o la visita ya comenzó…" y botón "Ver catálogo". Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
 
 ### V-83 · HU-20 — "Confirmar por WhatsApp" en la agenda (I-08)
 
@@ -1174,7 +1182,7 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:55) | Solicitud nueva de "another" a las 19:00 con correo, LOPDP marcada y WhatsApp desmarcado: terminal con correo al cliente (P-08) y aviso al asesor; en I-06, Visita Programada. En "Mi agenda": la visita con WhatsApp/sin correo (la de V-78) tiene "Confirmar por WhatsApp" con el celular del cliente; la de "another" (con correo) no lo tiene. Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
 
 ### V-84 · HU-25 — Registrar el resultado (modal en I-08)
 
@@ -1184,7 +1192,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:20–15:30 | Preparación en el shell: visitas 1 y 2 movidas una semana atrás con `update()`; visita 4 creada en el pasado (28-oct) para la oportunidad 3. La visita futura (hoy 19:00, "Another") solo muestra "Programada", sin "Registrar resultado". La del 4-nov 16:00 (Julián) sí lo tiene. Sin resultado ni observación, el modal dice "Elige resultado" y "Escribe la observación" y no guarda. Con "Realizada" y "Cliente interesado": queda Realizada, desaparece el botón y muestra "Resultado: Cliente interesado · asesor.demo". En I-06 la oportunidad de Julián sigue en Visita Programada. Capturas: `evidencias\Lote3\Captura de pantalla (57)` a `(61).png`. | **Aprobado** |
 
 ### V-85 · HU-25 — No asistida devuelve la oportunidad a Contacto Inicial
 
@@ -1192,7 +1200,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:30–15:36 | Caso A: visita del 4-nov 17:00, única activa de su oportunidad, "No asistida" con "Cliente no llegó": muestra No asistida y el resultado con asesor.demo; en I-06 la oportunidad volvió a Contacto Inicial (Catálogo web). Caso B: visita 4 (28-oct 19:00, cliente "Another", con otra visita Programada hoy 19:00) → No asistida; en I-06 "Another" sigue en Visita Programada. Capturas: caso A `evidencias\Lote3\Captura de pantalla (62)` y `(63).png`; caso B `(64)` y `(65).png`. | **Aprobado** |
 
 ## Estado actual (2026-11-02)
 
