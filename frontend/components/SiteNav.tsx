@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { logoutRefreshSession } from "@/lib/api";
 import {
   clearAuthSession,
   getAuthSessionSnapshot,
@@ -38,13 +39,23 @@ export default function SiteNav() {
   const session = sessionSnapshot
     ? (JSON.parse(sessionSnapshot) as { access: string | null; email: string | null; role: string | null })
     : null;
-  const isInternal = Boolean(session?.access) && INTERNAL_ROLES.includes(session?.role ?? "");
+  const hasSession = Boolean(session?.access);
+  const isInternal = hasSession && INTERNAL_ROLES.includes(session?.role ?? "");
   const links = isInternal ? [...PUBLIC_LINKS, ...INTERNAL_LINKS] : PUBLIC_LINKS;
 
   function handleLogout() {
+    void logoutRefreshSession().catch((error: unknown) => {
+      console.error("No se pudo borrar la cookie de renovación:", error);
+    });
     clearAuthSession();
     router.replace("/login");
   }
+
+  useEffect(() => {
+    if (pathname.startsWith("/dashboard") && !hasSession) {
+      router.replace("/login");
+    }
+  }, [hasSession, pathname, router]);
 
   return (
     <nav className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">

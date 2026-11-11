@@ -1,7 +1,11 @@
 from django.urls import path
 from .views import (
+    CsrfCookieView,
     LoginView,
+    LogoutView,
     MyPropertiesView,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
     PropertyDetailView,
     PropertyImageViewSet,
     PropertyListCreateView,
@@ -22,6 +26,18 @@ from rest_framework.routers import DefaultRouter
 #Tuvimos que modificar todo el patron de rutas para que se reparer un problema de el inicio de sesion y eel login.
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
+    path("csrf/", CsrfCookieView.as_view(), name="csrf-cookie"),
+    path("logout/", LogoutView.as_view(), name="logout"),
+    path(
+        "password-reset/request/",
+        PasswordResetRequestView.as_view(),
+        name="password-reset-request",
+    ),
+    path(
+        "password-reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
     path("users/", UserListCreateView.as_view(), name="user-list-create"),
     path("users/activate/", UserActivationView.as_view(), name="user-activate"),
     path("users/<int:pk>/", UserDetailView.as_view(), name="user-detail"),

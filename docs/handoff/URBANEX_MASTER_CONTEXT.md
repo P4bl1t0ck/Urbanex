@@ -1,5 +1,8 @@
 # Contexto Maestro de Ingeniería — Urbanex (desarrollo guiado por backlog)
 
+**Última actualización aditiva HU-46:** 2026-11-09 · precisión JWT; detalle aditivo al final.
+
+
 > **Propósito:** Contexto autónomo de programación basado en ProyectoCapstoneV4, el Contexto Maestro original y el backlog definitivo acordado. Conserva los RF/RNF, pantallas y modelos originales y agrega planificación, trazabilidad y controles de implementación. **No sustituye las decisiones aún no resueltas en la tesis.**
 
 ---
@@ -516,5 +519,10 @@ Las siguientes decisiones se resolverán antes de implementar las funcionalidade
 | D-05 | Definir almacenamiento, expiración, renovación y revocación de JWT, incluyendo mecanismos de protección de sesión. | Sprint 1, antes de URB-04 |
 | D-06 | Elegir mecanismo de ejecución de procesos programados, webhooks y reintentos, considerando los servicios disponibles en la arquitectura. | Antes del Sprint 4 |
 
+**Actualización aditiva D-05 (2026-11-06):** según Sebas, Pablo confirmó para HU-46 una política personalizada, distinta de la Opción A literal de `URBANEX_SEGURIDAD_Y_DEUDA.md`: access JWT de 24 horas; refresh JWT de 7 días en cookie `HttpOnly; SameSite=Lax`, `Secure` cuando `DEBUG=False`; sin blacklist ni Redis; ambos tipos se rechazan si `iat` precede `User.password_changed_at`, que se actualiza al cambiar la contraseña. El refresh usa `POST /api/token/refresh/` y exige la cookie CSRF estándar `csrftoken` más `X-CSRFToken`. La solicitud de recuperación responde igual exista o no una cuenta activa; el enlace usa `PasswordResetTokenGenerator`, vence en 60 minutos y es de un solo uso. En desarrollo, frontend y backend usan `localhost`; en producción, `CORS_ALLOWED_ORIGINS` y `FRONTEND_BASE_URL` se configuran mediante el entorno. La implementación y sus límites se documentan en Seguridad y Deuda técnica; la validación visual sigue Pendiente.
+
 Una decisión aprobada debe trasladarse a la sección funcional o técnica correspondiente y registrarse en PROJECT_PROGRESS.md.
 
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+**D-05, precisión de la versión:** los JWT nuevos incorporan `password_version`, la representación ISO completa de `User.password_changed_at`. Access y refresh exigen coincidencia exacta de esa versión y un `iat` coherente. Esto permite iniciar sesión inmediatamente después del cambio y rechaza tokens anteriores aunque compartan el mismo segundo de emisión. Para JWT heredados sin esa versión se compara `iat` con la marca de cambio sin truncarla: el segundo ambiguo se rechaza y requiere iniciar sesión nuevamente. Los emitidos en segundos posteriores al último cambio siguen siendo compatibles. Se conservan las duraciones, cookies y CSRF acordados; no se cambian modelos ni migraciones.

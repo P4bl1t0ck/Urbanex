@@ -3,6 +3,11 @@
 | Campo | Valor |
 |---|---|
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; DT-44 Resuelto con evidencia humana y automática |
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
+| Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
+| Última actualización aditiva HU-46 | 2026-11-06 · D-05 personalizado implementado; DT-33 resuelto en código; V-44 Pendiente |
 | Actualización HU-45 (2026-11-04) | Según Sebas, V-43 cubrió ambos criterios de HU-45. Suite integrada: 159/159 OK en SQLite. `makemigrations --check --dry-run` detecta `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó migración. DT-120 sigue fuera del alcance |
 | Corrección de identificador HU-45 (2026-11-05) | La notificación persistente de HU-45 usa DT-120 (rango de Sebas). DT-117 se conserva para SEC-16/LOPDP de EP-5. El identificador se comprobó contra `origin/develop` y las ramas remotas actualizadas |
 | DT-140 (2026-11-06) | `backend/media/properties/images` está rastreado por Git; agregarlo a `.gitignore` y sacarlo del índice. Se registra en esta rama pero no se corrige aquí. |
@@ -19,6 +24,22 @@ Prioridad: **P0** bloquea el proceso de negocio o la entrega · **P1** riesgo al
 Referencias: [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) · [GPS](URBANEX_GPS_ARCHIVOS.md) · [Estado de procesos](URBANEX_ESTADO_PROCESOS.md).
 
 ---
+
+### Actualización aditiva HU-46/D-05 — 2026-11-09
+
+D-05 está implementada según la política personalizada confirmada por Pablo, según Sebas: access de 24 horas, refresh de 7 días en cookie HttpOnly, SameSite=Lax, Secure cuando DEBUG=False, refresh protegido por CSRF y rechazo de access/refresh anteriores al cambio de contraseña; sin blacklist ni Redis. Se agregan pruebas de invalidación tras cambio manual y activación, y del flag Secure en ambos valores de DEBUG. El registro de V-44 de Sebas (2026-11-07, 16:19) está en `Project_Progress.md`; existe el archivo local enlazado, sin aprobación nueva del agente. DT-33 no se declara cerrado globalmente. DT-92 sigue pendiente y no se crea migración. PostgreSQL No ejecutado (DT-68; Nivel 1, DS-35). Se conserva sin resolver la pregunta existente sobre limpiar `is_locked` y `failed_attempts` al recuperar contraseña.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+No se crea un ID nuevo ni se cierra SEC-05 globalmente. DT-92 y DT-68 conservan sus pendientes.
+
+
+### Registro humano de ampliación V-44 — 2026-11-09
+
+Sebas incorporó personalmente en `Project_Progress.md`, ampliación V-44, su comprobación del 2026-11-09 a las 15:13:56: recuperación válida con desbloqueo, reinicio de intentos e inicio de sesión con la contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`; la fecha y hora fueron confirmadas por Sebas en la conversación. La fila humana supersede las menciones anteriores que dejaban esa comprobación o su transcripción Pendiente. El agente conserva ese registro sin emitir una aprobación nueva ni recalcular porcentajes. HU-46 permanece en Pruebas; auditoría de solo lectura y revisión para el merge pendientes. DT-92, DT-68 y los riesgos de seguridad no se cierran con esta nota.
 
 ## 1. Correcciones confirmadas (sesión de desarrollo 2026-10-21/22, sin commit)
 
@@ -313,6 +334,12 @@ Detalle, severidad y plan en [Seguridad e infraestructura](URBANEX_SEGURIDAD_Y_D
 | N-04 | **Resuelto en parte (DS-25, FX-22):** `db.sqlite3` ya no se versiona; `media/`, `.pyc` y el historial siguen. ¿Se dejan de rastrear `db.sqlite3` y `media/`? ¿Con qué seed se reemplazan? (2026-10-27: ya existe `setup_demo_data`, que puede servir de reemplazo) | Equipo | DT-02 |
 | N-05 | **Pregunta para el tutor (2026-10-27):** hoy se puede publicar con un precio muy distinto al del avalúo aprobado (en la validación: precio $123.555 y avalúo $34.000,60). El avalúo no toca el precio (DS-12: el precio es solo una referencia). ¿Aprobar el avalúo debe **actualizar** el precio, **avisar** de la diferencia o mantenerlos **independientes**? **No implementar nada hasta la respuesta**. **(2026-10-28)** Otro caso: `#32 Cumbayá` se publicó (desvío de V-15) con precio $285.000; su avalúo aprobado más reciente es de $123,99 (DT-73). Con DS-06, para publicar basta con **cualquier** avalúo aprobado, no el último. **(2026-10-30, ronda 3, observación O3)** La pregunta se eleva **también a la empresa** (no es técnica): ¿el valor del avalúo aprobado debe actualizar el precio de la propiedad, quedar ligado a él o ser un dato separado? | HU-08, HU-53, RF-11 | Pregunta de negocio de Pablo (tutor y empresa) |
 
+**Actualización aditiva D-05 (2026-11-06):** según Sebas, Pablo confirmó para HU-46 la política personalizada descrita en `URBANEX_MASTER_CONTEXT.md` y `URBANEX_SEGURIDAD_Y_DEUDA.md`. No se usó un ID DT/DS nuevo. La política está implementada en la rama HU-46; V-44 y la revisión humana siguen **Pendiente**.
+
+**Actualización aditiva DT-33 (2026-11-06):** la política de sesión quedó implementada según D-05 personalizado: refresh HttpOnly de 7 días con CSRF e invalidación de access/refresh emitidos antes de `password_changed_at`. Pruebas automatizadas ejecutadas en SQLite; **Resuelto en código; validación visual Pendiente (V-44)**. El logout elimina la cookie local, pero no revoca copias del token.
+
+**Pregunta pendiente HU-46 (sin ID):** al restablecer la contraseña de una cuenta activa bloqueada, ¿también se deben limpiar `is_locked` y `failed_attempts`? Actualmente se conserva el bloqueo; no cambiar hasta confirmar la regla.
+
 ## 4. Decisiones tomadas (sesión 2026-10-24, aprobadas por Pablo)
 
 No volver a discutirlas sin una razón nueva; si cambian, registrar aquí la revisión.
@@ -427,3 +454,7 @@ No volver a discutirlas sin una razón nueva; si cambian, registrar aquí la rev
 **Regla indicada por Sebas, 2026-11-09:** Disponible o Reservado → No disponible exige motivo guardado; No disponible → En captación; no existe retorno directo a Disponible. La publicación vuelve a comprobar foto, avalúo aprobado y corretaje vigente. No se atribuye esta decisión a Pablo.
 
 **Pregunta pendiente HU-09, sin ID nuevo:** ¿qué debe ocurrir con oportunidades y visitas existentes al retirar una propiedad Reservada? La implementación autorizada cambia el estado del inmueble y conserva el resto; no inventa cancelaciones, liberaciones ni notificaciones. DT-103 permanece fuera de esta corrección de HU-09: el filtro de propiedades de I-06 pertenece a oportunidades y requiere coordinación con Pablo. No se registra como resuelto.
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+**DT-33/D-05:** se corrige la aceptación de JWT anteriores al cambio dentro del mismo segundo: tokens nuevos llevan `password_version` y requieren coincidencia exacta con la marca completa. Para tokens heredados, el segundo ambiguo se rechaza de forma conservadora. Pruebas y resultados en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu). No se crea un ID nuevo ni se declara cierre global de DT-33/SEC-05. DT-92 sigue pendiente; PostgreSQL No ejecutado (DT-68, Nivel 1).

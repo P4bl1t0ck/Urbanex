@@ -1,29 +1,71 @@
 import hashlib
+import secrets
+from datetime import timedelta
+
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, permissions, status, viewsets
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from .authentication import PasswordVersionRefreshToken
 from .serializers import (
     LoginSerializer,
     ManagedUserSerializer,
+    PasswordAwareRefreshSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetEmailError,
+    PasswordResetRequestSerializer,
     PropertySerializer,
     PropertyWithdrawalSerializer,
     PropertyImageSerializer,
     UserActivationSerializer,
     UserDeactivationSerializer,
+    send_password_reset_email,
     send_activation_email,
 )
-from .models import Property, PropertyImage, UserActivationToken
+from .models import PasswordResetToken, Property, PropertyImage, UserActivationToken
 from apps.appraisals.models import Appraisal
 from apps.documents.models import Document
 
 User = get_user_model()
 LOGIN_ERROR_MESSAGE = "Credenciales inválidas."
+PASSWORD_RESET_RESPONSE = (
+    "Si existe una cuenta activa con ese correo, recibirás instrucciones para "
+    "restablecer tu contraseña."
+)
+PASSWORD_RESET_TOKEN_ERROR = "El enlace no es válido, ya se usó o venció."
+
+
+def set_refresh_cookie(response, refresh_token):
+    lifetime = settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"]
+    response.set_cookie(
+        settings.JWT_REFRESH_COOKIE_NAME,
+        refresh_token,
+        max_age=int(lifetime.total_seconds()),
+        httponly=True,
+        secure=not settings.DEBUG,
+        samesite="Lax",
+        path=settings.JWT_REFRESH_COOKIE_PATH,
+    )
+    return response
+
+
+def delete_refresh_cookie(response):
+    response.delete_cookie(
+        settings.JWT_REFRESH_COOKIE_NAME,
+        path=settings.JWT_REFRESH_COOKIE_PATH,
+        samesite="Lax",
+    )
+    return response
 
 
 class IsAdminRole(permissions.BasePermission):
@@ -111,6 +153,7 @@ class PropertyImageViewSet(viewsets.ModelViewSet):
     '''
     As you can see, this method its the great example of the fecth, get, or query the database. 
     '''
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class LoginView(APIView):
     def post(self, request): #Post Function WEB
         serializer = LoginSerializer(data=request.data)
@@ -139,12 +182,153 @@ class LoginView(APIView):
         user.failed_attempts = 0
         user.save(update_fields=["failed_attempts"])
 
-        refresh = RefreshToken.for_user(user)
-        return Response({
+        refresh = PasswordVersionRefreshToken.for_user(user)
+        response = Response({
             "access": str(refresh.access_token),
-            "refresh": str(refresh),
             "role": user.role,
         })
+        return set_refresh_cookie(response, str(refresh))
+
+
+@method_decorator(ensure_csrf_cookie, name="dispatch")
+class CsrfCookieView(APIView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        return Response({"detail": "Cookie CSRF preparada."})
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PasswordAwareRefreshSerializer
+
+    @method_decorator(csrf_protect)
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get(settings.JWT_REFRESH_COOKIE_NAME)
+        if not refresh_token:
+            return delete_refresh_cookie(
+                Response(
+                    {"detail": "El refresh token no es válido."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            )
+
+        serializer = self.get_serializer(data={"refresh": refresh_token})
+        try:
+            serializer.is_valid(raise_exception=True)
+        except AuthenticationFailed:
+            return delete_refresh_cookie(
+                Response(
+                    {"detail": "El refresh token no es válido."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            )
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    @method_decorator(csrf_protect)
+    def post(self, request):
+        return delete_refresh_cookie(
+            Response(status=status.HTTP_204_NO_CONTENT)
+        )
+
+
+class PasswordResetRequestView(APIView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.filter(
+            email__iexact=serializer.validated_data["email"],
+            is_active=True,
+        ).first()
+
+        if user is not None:
+            generator_token = default_token_generator.make_token(user)
+            raw_token = f"{generator_token}.{secrets.token_urlsafe(16)}"
+            reset_token = PasswordResetToken.objects.create(
+                user=user,
+                token_hash=hashlib.sha256(raw_token.encode("utf-8")).hexdigest(),
+                expires_at=timezone.now()
+                + timedelta(seconds=settings.PASSWORD_RESET_TIMEOUT),
+            )
+            try:
+                send_password_reset_email(user, raw_token)
+            except PasswordResetEmailError:
+                reset_token.is_used = True
+                reset_token.save(update_fields=["is_used"])
+
+        return Response(
+            {"detail": PASSWORD_RESET_RESPONSE},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        raw_token = serializer.validated_data["token"]
+        token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+
+        with transaction.atomic():
+            reset_token = (
+                PasswordResetToken.objects.select_for_update()
+                .filter(
+                    pk=serializer.validated_data["reset_token_id"],
+                    token_hash=token_hash,
+                    is_used=False,
+                    expires_at__gt=timezone.now(),
+                )
+                .first()
+            )
+            if reset_token is None:
+                return Response(
+                    {"token": PASSWORD_RESET_TOKEN_ERROR},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            user = User.objects.select_for_update().filter(
+                pk=reset_token.user_id
+            ).first()
+            if (
+                user is None
+                or not user.is_active
+                or not default_token_generator.check_token(
+                    user,
+                    serializer.validated_data["generator_token"],
+                )
+            ):
+                return Response(
+                    {"token": PASSWORD_RESET_TOKEN_ERROR},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            user.set_password(serializer.validated_data["password"])
+            user.is_locked = False
+            user.failed_attempts = 0
+            user.save(update_fields=["password", "is_locked", "failed_attempts"])
+            PasswordResetToken.objects.filter(
+                user=user,
+                is_used=False,
+            ).update(is_used=True)
+
+        return Response(
+            {"detail": "La contraseña se restableció. Ya puedes iniciar sesión."},
+            status=status.HTTP_200_OK,
+        )
 
 
 class UserListCreateView(generics.ListCreateAPIView):
