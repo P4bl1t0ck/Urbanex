@@ -67,15 +67,19 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000", #IN case that doesnt sense the original url
-    #It doesnt work. 
-    ]
-CORS_ALLOWED_CREDENTIALS = True
+    origin.strip().rstrip("/")
+    for origin in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if origin.strip()
+]
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES':(
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'apps.users.authentication.PasswordChangedJWTAuthentication',
         ),
     }
 
@@ -217,6 +221,9 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':timedelta(days=1), # El token durara con una vida de un dia. 
     'REFRESH_TOKEN_LIFETIME':timedelta(days=7), #El token se actualizara cada siete dias. 
 }
+PASSWORD_RESET_TIMEOUT = 60 * 60
+JWT_REFRESH_COOKIE_NAME = "urbanex_refresh"
+JWT_REFRESH_COOKIE_PATH = "/api/token/refresh/"
 
 import os 
 

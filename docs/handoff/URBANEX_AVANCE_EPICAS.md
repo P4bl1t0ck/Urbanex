@@ -2,12 +2,33 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
+| Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
+| Última actualización aditiva HU-46 | 2026-11-06 · EP-1: recuperación implementada y verificada en SQLite; V-44 Pendiente |
 | Actualización HU-45 (2026-11-04) | Según Sebas, V-43 cubrió ambos criterios de HU-45 después del último ajuste. Suite integrada: 159/159 OK en SQLite. Ver actualización de EP-1 |
 | Propósito | Medir el avance real de EP-1, EP-2 y EP-5 con un método reproducible, separando lo escrito de lo probado y de lo validado |
 | Fecha de auditoría | 2026-10-22 · rama `develop` con cambios sin commit |
 | Última actualización | 2026-11-08 (noche) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): nueva §8, **plan de reparto** (Sebas: HU-09 y HU-10; Pablo: lote 3 y lote 4) registrado como PLAN; **métricas sin cambio**. Antes: 2026-11-08 · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19): nueva sección **§5A, EP-4 (lote 2)**: HU-22, HU-18 y HU-24 con su validación visual aprobada (V-65 a V-77); **siguen en Pruebas** hasta la auditoría y el merge; métricas de EP-1, EP-2 y EP-5 sin cambio. Antes: 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: EP-5 **2/9 HU · 6/32 pts (18,8 %)** completas, HU-27 y HU-34 (PR #15 fusionado en `develop`, `043cfb5`, DS-32); criterios sin cambio (4/20 implementados, verificados y validados). Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría del PR #15: EP-5 cita también la repetición con hora y captura de V-26 a V-32 (2026-11-03); **métricas sin cambio**. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-02 · HU-44 sigue con **0/6 criterios validados**; V-33..V-42 Pendiente. Las observaciones previas de V-33..V-39 se atribuyen a Sebas; no hay evidencia visual adjunta. Suite automatizada reportada en SQLite (116/116); prueba local contra PostgreSQL **No ejecutado**. EP-2 sin cambios (**10/24 validados, 41,7 %**). Antes: 2026-10-31 · HU-44, Validado **0/6**; EP-2 sin cambios. Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 · Rama HU-12: 2026-11-02 · HU-12 validada en local (V-60 a V-62): **sin cambio de métricas** (rama sin fusionar; EP-3 no se mide aquí). Antes: 2026-11-01 · HU-12 (EP-3, rama `feat/URB-17-HU-12-compartir-ficha`, FX-24): **sin cambio de métricas**. EP-3 no se mide aquí; la fila de HU-53 "URL con metaetiquetas" anota el avance (metaetiquetas implementadas en una rama sin fusionar ni validar; sin `slug`, DT-111). Antes: 2026-10-30 · ronda 3 validada (V-20 a V-25): EP-2 **10/24 validados (41,7 %)**; HU-04, HU-06 y HU-08 completas POR CONFIRMAR. Antes: 2026-10-28 (noche) · motor DS-21 (FX-17): EP-2 **16/24 implementados (66,7 %)** y **13/24 verificados (54,2 %)**; validados sin cambio (6/24). Antes: 2026-10-28 · validación V-13 a V-18 (tarea 3): **sin cambio de métricas** (ver la actualización del 2026-10-28). Antes: 2026-10-27 · validación de Pablo (V-01 a V-12): EP-2 **6/24 validados (25 %)**; HU-08 completa POR CONFIRMAR. Antes: 2026-10-25 · HU-08: sus 2 criterios pasan a implementados y verificados con la pantalla I-12 (EP-2: 11/24 implementados, 8/24 verificados, 0/24 validados). Antes: 2026-10-24, filas de HU-01, HU-04, HU-08 y HU-53 · Rama de oportunidades: 2026-11-03 (noche) · correcciones de la auditoría: EP-5 verificado con 37 pruebas y sin la razón vieja de DT-105; métricas sin cambio. Antes: 2026-11-03 (tarde) · rama de oportunidades: pruebas de DT-106 y DT-107 (FX-25, suite 155 OK); **sin cambio de métricas** (EP-5 sigue en 4/20 validados; HU-27 y HU-34 en Pruebas hasta el merge). Antes: 2026-11-03 · Pablo (con Claude Code), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`a071b97`, con los PR #9 y #13); se conservan las entradas de ambos lados. Antes (rama de oportunidades, sin develop): 2026-11-01 · EP-5: validación visual aprobada 2026-11-01 (V-26 a V-32, Pablo): **4/20 validados (20 %)**; HU-27 y HU-34 siguen en Pruebas (0/9 HU completas). Antes: 2026-10-30 (tarde) · nueva sección **EP-5** (§5), primer corte (FX-19): **4/20 implementados y verificados (20 %)**, 0/20 validados (V-26 a V-32 pendientes). |
 | Fuentes | Composición de épicas: tesis, Anexo 4 (columna "Épica"), y contexto maestro §9.1 y §10. Criterios: tesis, Anexo 2. Evidencia: [Estado de procesos](URBANEX_ESTADO_PROCESOS.md) y [Auditoría de código](URBANEX_AUDITORIA_CODIGO.md) |
 | No disponible | Tablero de Jira y planillas Excel (no están en el repositorio). El estado en Jira es **POR CONFIRMAR** |
+
+### Actualización aditiva EP-1/HU-46 — 2026-11-09
+
+Las referencias anteriores a V-44 pendiente de registro son históricas: Sebas registró el 2026-11-07 a las 16:19 su comprobación de los cinco pasos y una captura local en `Project_Progress.md`, V-44. Se conserva esa declaración humana; el agente no aprueba validaciones ni recalcula porcentajes. HU-46 permanece en Pruebas para la revisión de integración y de cobertura de evidencia por criterio. D-05 está aplicada en código; no es una decisión técnica todavía por elegir.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+No se recalculan porcentajes ni se declara HU-46 Listo con esta revisión. La evidencia previa se mantiene atribuida a Sebas; la ampliación de desbloqueo queda en Pruebas.
+
+
+### Registro humano de ampliación V-44 — 2026-11-09
+
+Sebas incorporó personalmente en `Project_Progress.md`, ampliación V-44, su comprobación del 2026-11-09 a las 15:13:56: recuperación válida con desbloqueo, reinicio de intentos e inicio de sesión con la contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`; la fecha y hora fueron confirmadas por Sebas en la conversación. La fila humana supersede las menciones anteriores que dejaban esa comprobación o su transcripción Pendiente. El agente conserva ese registro sin emitir una aprobación nueva ni recalcular porcentajes. HU-46 permanece en Pruebas; auditoría de solo lectura y revisión para el merge pendientes. DT-92, DT-68 y los riesgos de seguridad no se cierran con esta nota.
 
 ## 1. Alcance de las épicas (comprobado)
 
@@ -59,7 +80,20 @@ Un criterio parcialmente implementado cuenta como **no** implementado. El avance
 | Validado | 0/6 = **0 %** |
 | HU completas / puntos | 0/3 HU · 0/8 pts = **0 %** |
 
-**Lectura:** HU-44 cuenta con API, migraciones y pantalla A-01; la suite automatizada de esta rama se ejecuta en SQLite. V-33..V-42 siguen Pendiente y Valid. = ✗; las observaciones reportadas por Sebas no sustituyen la evidencia humana. La validación manual del 2026-10-30 fue informada como realizada en Supabase PostgreSQL; no se ejecutó una suite local contra PostgreSQL. HU-45 aún no permite que el administrador desbloquee cuentas y HU-46 todavía no implementa recuperación de contraseña.
+### Actualización aditiva de EP-1 para HU-46 (2026-11-06)
+
+| HU | Criterio | Impl. | Verif. | Valid. | Evidencia |
+|---|---|:-:|:-:|:-:|---|
+| HU-46 | Enlace de recuperación de 60 min y de un solo uso | ✔ | ✔ | ✗ | Modelo y endpoints con pruebas automáticas; V-44 Pendiente |
+
+El criterio agregado eleva a 6/6 los criterios de EP-1 implementados y verificados según el corte anterior y esta evidencia. La política D-05 está implementada y probada, pero no agrega un criterio al denominador. La validación humana/visual de HU-46 sigue Pendiente; no se declara completa la HU.
+
+| Métrica EP-1 (corte aditivo HU-46) | Valor |
+|---|---|
+| Implementado | 6/6 = **100 %** |
+| Verificado | 6/6 = **100 %** |
+
+**Aclaración aditiva (2026-11-06):** el párrafo «Lectura» y las métricas iniciales son un corte histórico; las actualizaciones aditivas de HU-45 y HU-46 describen el código vigente. V-44 sigue **Pendiente**. Esta sesión actualiza implementación/verificación técnica, no la validación humana ni el avance por puntos.
 
 ### Actualización aditiva de EP-1 para HU-45 (2026-11-03)
 
@@ -249,3 +283,7 @@ Decisión de Pablo (2026-11-08, PR #18). **Es un plan, no avance:** ninguna de e
 | Sebas | 2 | HU-10 Filtrar el catálogo | 5 | EP-3 |
 | Pablo | Lote 3 | HU-19 Solicitar la visita · HU-20 Confirmación · HU-25 Registrar el resultado de la visita | 5 + 3 + 2 = 10 | EP-4 |
 | Pablo | Lote 4 | HU-15 Contacto por WhatsApp · HU-16 Interés por formulario · HU-29 Avanzar el estado de la oportunidad · HU-30 Registrar interacciones y negociación | 3 + 2 + 5 + 5 = 15 | EP-4, EP-5 |
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+La corrección de HU-46 agrega dos pruebas de regresión para JWT emitidos en el mismo segundo y para tokens heredados sin versión precisa. La sesión nueva debe funcionar y las anteriores deben rechazarse. Los resultados técnicos se registran en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu). No se recalculan porcentajes ni se modifican registros humanos; HU-46 permanece en Pruebas.

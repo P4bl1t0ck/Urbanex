@@ -2,6 +2,11 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
+| Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
+| Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
+| Última actualización de integración HU-46 | 2026-11-09 · D-05 revisada; registro humano V-44 conservado; HU-46 en Pruebas |
+| Última actualización aditiva HU-46 | 2026-11-06 · D-05 personalizado implementado; V-44 Pendiente |
 | Propósito | Inventario de riesgos de seguridad e infraestructura del código actual, con su plan de corrección, y opciones documentadas para las decisiones pendientes (D-05 sesión/JWT, DT-42 folio, almacenamiento y base de datos) |
 | Fecha | 2026-10-27 · rama `docs/DT-42-seguridad-y-deuda`, desde `develop` (`47b59ce`). **Actualizado el 2026-11-03:** SEC-16 / DT-117, datos personales de EP-5 (LOPDP), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`. **Actualizado el 2026-11-02:** DT-96 (edición de `users.0007` tras aplicarse en Supabase; restablecimiento de la base de desarrollo y migración desde `develop` propuestos por Sebas, **POR CONFIRMAR** y no ejecutados (corregido por Pablo, 2026-11-03)); PostgreSQL local **No ejecutado**. **Actualizado el 2026-10-28:** SEC-09 (cuentas inutilizadas en la copia de Pablo, DS-24) y propuesta concreta en §5.3 (restaurado por Pablo, 2026-11-03). **Actualizado el 2026-10-31:** SEC-15 / DT-79 (incidente de credenciales, sin valores) (restaurado por Pablo, 2026-11-03); SEC-09 y §5.3: `db.sqlite3` ya no se versiona (DS-25, FX-22); DT-90/DT-91 para credenciales de Supabase y Resend; C-08/DS-30 confirma que clientes no tienen cuenta. **Actualizado el 2026-11-02:** §3.1, "XSS almacenado": metaetiquetas de HU-12 (FX-24), comprobación del escape Pendiente. **Actualizado el 2026-11-03:** §3.1, escape de las metaetiquetas de HU-12 comprobado (V-64, aprobada por Pablo). **Actualizado el 2026-11-03 (tarde):** §3.1, el payload RSC se cita como `\u003c/script\u003e` (corrección de la auditoría de HU-12) |
 | Método | Lectura del código del backend y del frontend. **No se hicieron pruebas de intrusión.** Lo que no se comprobó en ejecución está marcado **Por verificar** |
@@ -21,6 +26,22 @@
 **Severidad:** **Alta** = expone datos internos o permite modificar datos ajenos · **Media** = facilita un ataque o filtra información menor · **Baja** = endurecimiento.
 
 ---
+
+### Actualización aditiva HU-46/SEC-05 — 2026-11-09
+
+D-05 está aplicada; las opciones y recomendaciones anteriores se conservan como historial. Se revisaron el cambio de contraseña por recuperación, el cambio manual y la activación, que actualizan `password_changed_at`; se agregan pruebas explícitas de rechazo de access y refresh anteriores en los dos últimos casos. Refresh usa únicamente la cookie HttpOnly, SameSite=Lax, Secure cuando DEBUG=False, y exige CSRF; el frontend no lee el refresh. No se incorporan blacklist ni Redis. Se conserva el registro humano de V-44 de Sebas del 2026-11-07, 16:19 (`Project_Progress.md`), sin una aprobación nueva del agente. **SEC-05 permanece abierto**: la revisión de evidencia por criterio, los riesgos de despliegue y las limitaciones documentadas de logout siguen vigentes. La pregunta sobre recuperación de cuentas bloqueadas continúa pendiente, sin cambio de comportamiento.
+
+### Decisión de recuperación y desbloqueo — 2026-11-09
+
+**Decisión indicada por Sebas el 2026-11-09:** una cuenta activa que completa correctamente la recuperación segura de contraseña queda con `is_locked=False` y `failed_attempts=0`. El cambio se guarda junto con la contraseña dentro de la transacción existente de `PasswordResetConfirmView`; conserva la invalidación de JWT por `password_changed_at` y el consumo de los enlaces. Solicitar el correo no desbloquea. Los enlaces inválidos, vencidos o usados no cambian la contraseña, el bloqueo ni los contadores. Esta nota supersede la pregunta anterior sobre conservar el bloqueo; no se atribuye esta decisión a Pablo.
+
+**Evidencia humana:** según Sebas en esta conversación (2026-11-09), las evidencias existentes están bien. Se conserva la fila humana de V-44 del 2026-11-07 sin añadir una aprobación del agente. El nuevo comportamiento de desbloqueo requiere una comprobación visual adicional por una persona; queda Pendiente y no se considera cubierto por la evidencia anterior.
+El desbloqueo administrativo de HU-45 conserva su ruta y permisos; esta recuperación exige el enlace válido. No se habilitan cuentas inactivas. SEC-05 permanece abierto por sus riesgos ya documentados.
+
+
+### Registro humano de ampliación V-44 — 2026-11-09
+
+Sebas incorporó personalmente en `Project_Progress.md`, ampliación V-44, su comprobación del 2026-11-09 a las 15:13:56: recuperación válida con desbloqueo, reinicio de intentos e inicio de sesión con la contraseña nueva. Evidencia local: `evidence/ResetPasswordUsuarioBloqueado.png`; la fecha y hora fueron confirmadas por Sebas en la conversación. La fila humana supersede las menciones anteriores que dejaban esa comprobación o su transcripción Pendiente. El agente conserva ese registro sin emitir una aprobación nueva ni recalcular porcentajes. HU-46 permanece en Pruebas; auditoría de solo lectura y revisión para el merge pendientes. DT-92, DT-68 y los riesgos de seguridad no se cierran con esta nota.
 
 ## ⛔ Regla de despliegue (DS-20)
 
@@ -133,6 +154,21 @@
 - agregar una política **Content-Security-Policy** en el frontend (*Por verificar*: no se encontró ninguna).
 
 Hasta entonces, **no** se acorta la vida del token sin un flujo de renovación.
+
+### Actualización aditiva D-05 para HU-46 (2026-11-06)
+
+Según Sebas, Pablo aprobó una variante personalizada; no debe etiquetarse como la Opción A literal ni como la recomendación B:
+
+- `access`: 24 horas en `sessionStorage`; `refresh`: 7 días en cookie `HttpOnly; SameSite=Lax`, `Secure` solo cuando `DEBUG=False`.
+- No se usa blacklist ni Redis. La autenticación JWT y el refresh rechazan tokens cuyo `iat` precede `User.password_changed_at`; el campo se actualiza al cambiar la contraseña. El logout elimina la cookie del navegador, pero no revoca una copia robada del refresh.
+- La ruta `POST /api/token/refresh/` exige el cookie CSRF estándar `csrftoken` y `X-CSRFToken`; CORS permite credenciales. En desarrollo ambos servicios deben usar `localhost`.
+- La recuperación responde de forma neutral exista o no una cuenta activa. `PasswordResetTokenGenerator` y `PasswordResetToken` aplican vigencia de 60 minutos y uso único.
+- El código y las pruebas automatizadas están implementados; V-44 y la validación visual siguen **Pendiente**. La variante no elimina la necesidad futura de límites de solicitudes ni de revisar los dominios reales de producción.
+- En producción, configurar `CORS_ALLOWED_ORIGINS` y `FRONTEND_BASE_URL` en el entorno; no se fijan dominios de despliegue no confirmados en el código.
+
+**Estado aditivo SEC-05:** D-05 ya está definido e implementado en la rama HU-46. La vigencia y la renovación de tokens tienen pruebas automatizadas; la validación humana/visual queda Pendiente y el cierre global de SEC-05 no se declara.
+
+**Pregunta pendiente HU-46 (sin ID):** si una cuenta activa bloqueada recupera su contraseña, ¿el restablecimiento debe también limpiar `is_locked` y `failed_attempts`? El código conserva el bloqueo; no se cambia hasta confirmar la regla con el equipo.
 
 ### 2.5 Otros riesgos de autenticación (SEC-04, DT-62)
 
@@ -344,3 +380,7 @@ Frontend Next.js en Vercel · backend Django REST en Render con Docker · Postgr
 7. **SEC-03, SEC-06, SEC-11 y DT-42** según el sprint.
 
 Al cerrar un riesgo: actualizar su fila en §0, su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) y, si cambia el control de acceso, la tabla de §1.1.
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+**SEC-05/DT-33:** la comparación anterior truncaba microsegundos y aceptaba JWT previos al cambio dentro del mismo segundo. Los JWT nuevos llevan `password_version`, comparada con la marca completa de contraseña, y mantienen la comprobación de `iat`. Para JWT heredados sin versión precisa, el segundo ambiguo se rechaza: puede requerirse un nuevo login. La regresión cubre tanto access como refresh y comprueba que los nuevos funcionen inmediatamente. Se mantienen los límites documentados de logout, la necesidad de revisar dominios de producción y los riesgos abiertos; no se declara cierre global de SEC-05. Evidencia técnica en Estándares §4; V-44 humana se conserva.
