@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización de corrección HU-09 | 2026-11-11 · motivo de retiro sin contenido en respuestas públicas; avance documental aditivo; DT-92 y DT-68 siguen pendientes |
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; DT-44 Resuelto con evidencia humana y automática |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -446,6 +447,12 @@ No volver a discutirlas sin una razón nueva; si cambian, registrar aquí la rev
 |---|---|---|---|
 | DS-35 | **Definición de acabado en dos niveles.** **Nivel 1 (PR de desarrollo diario):** pruebas automáticas en verde (suite backend de Estándares §4, `npx tsc --noEmit -p .`, `npx eslint .` y `npm run build`); **una sola evidencia por criterio de aceptación** del Anexo 2 (captura local en `evidence/` si el criterio es visual; si lo prueba una prueba automática, basta su salida); **una sola auditoría de solo lectura por PR** (`AGENTS.md` §11); suite contra PostgreSQL en **"No ejecutado"** con su DT registrado (DT-68). **Nivel 2 (cierre de lote o entrega):** video o GIF corto (1-2 min) del flujo completo, guardado en `evidence/`, y suite ejecutada contra un **PostgreSQL local o desechable, nunca Supabase**. **Sin cambios:** toda HU requiere validación humana para contar en el 60 % (USM §2), y nada entra a `develop` sin PR | Aligerar la definición de acabado sin perder trazabilidad: una captura por cada paso V-xx, varias auditorías por PR y la suite PostgreSQL en cada PR (sin PostgreSQL local, DT-68) frenan la entrega del 60 % (14 de noviembre de 2026). La evidencia se concentra en lo que pide el Anexo 2 y en un cierre de lote más fuerte. Se apoya en la carpeta local `evidence/` (`.gitignore`, DS-36, `AGENTS.md` §6) | `AGENTS.md` §7, §9 y §11; [Estándares §4](URBANEX_ESTANDARES_DOD.md) (Niveles 1 y 2) · **decisión aplicada por Pablo (2026-11-08)** · rama `docs/post-merge-pr15` |
 | DS-38 | **PR #19 fusionado por el administrador sin revisión formal aprobada en GitHub; respaldo: auditorías de solo lectura previas al merge y suite en verde (229 tests OK).** Merge `e19a5df` en `develop` (2026-11-08, 15:44 hora de Ecuador). HU-22, HU-18 y HU-24 pasan a **Listo** | Se documenta la fusión sin ocultar la condición, como en DS-32 y DS-36. El punto del DoD "Listo para revisión por el otro desarrollador" (Estándares §4) queda pendiente de Sebas, no omitido | Decisión de Pablo (2026-11-08) · rama `docs/post-merge-pr15` · Estado de procesos (HU-22, HU-18, HU-24) |
+
+### Corrección aditiva de auditoría HU-09 — 2026-11-11
+
+Hallazgo de privacidad del motivo de retiro: **Confirmado** en la revisión previa. Se corrige la representación pública de `PropertySerializer`, manteniendo el motivo almacenado y el contrato `string | null`; las respuestas anónimas y sin contexto reciben `null`. La cobertura automatizada se incorpora a `PropertyWithdrawalApiTests`; detalle de ejecuciones en Estándares §4. Corrección implementada en código; validación humana **Pendiente**. No se modifica el registro humano V-45 ni se cierran riesgos globales.
+
+Hallazgo documental: **Confirmado**. El bloque histórico de criterios, métricas y gráfico de EP-2 se restaura desde `origin/develop`; los datos actualizados de HU-09 quedan en una sección aditiva de Avance de épicas. No se usan IDs nuevos ni se modifican migraciones. DT-92, DT-68, DT-103 y la pregunta sobre visitas/oportunidades al retirar mantienen su alcance pendiente.
 
 ### Actualización aditiva HU-09 / DT-44 — 2026-11-09
 
