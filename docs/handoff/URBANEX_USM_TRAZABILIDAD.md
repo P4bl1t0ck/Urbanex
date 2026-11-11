@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: nota aditiva en PROC-08 con el registro humano de V-44 |
 | Última actualización aditiva HU-46 | 2026-11-06 · PROC-08 registra I-02 y la sesión D-05; V-44 Pendiente |
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
@@ -221,6 +222,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 9 | Analiza cierres y conversión digital | HU-52 | A-06 | No implementado | — |
 
 **Aclaración aditiva HU-45 (2026-11-05):** la fila inicial de PROC-08 registra el estado previo a implementar el desbloqueo por admin y queda supersedida por las actualizaciones del 2026-11-03 y 2026-11-04, que documentan `UserUnlockView`, `POST auth/users/<id>/unlock/` y la acción en A-01. La actualización del 2026-11-04 también registra el comportamiento neutral del login.
+
+**Actualización aditiva HU-46 (2026-11-11):** la fila "1 (actualización 2026-11-06)" dice "V-44 Pendiente"; ya no es así. Sebas registró V-44 en `Project_Progress.md` como Aprobado en tres filas: 2026-11-07, 16:19, los cinco pasos originales (`evidence/HU-46/Screenshot 2026-11-07 161628.png`); 2026-11-09, 15:13:56, recuperación con desbloqueo y contador en cero (`evidence/ResetPasswordUsuarioBloqueado.png`); y 2026-11-09, 16:13:56, invalidación de la sesión anterior tras recuperar la contraseña (`evidence/HU-46/ResetPasswordUsuarioBloqueado.png`). Es la transcripción de su registro, no una validación nueva del agente.
 
 ---
 

@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: cerrada la pregunta pendiente HU-46 (sin ID) sobre el desbloqueo al recuperar la contraseña |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
@@ -338,6 +339,8 @@ Detalle, severidad y plan en [Seguridad e infraestructura](URBANEX_SEGURIDAD_Y_D
 **Actualización aditiva DT-33 (2026-11-06):** la política de sesión quedó implementada según D-05 personalizado: refresh HttpOnly de 7 días con CSRF e invalidación de access/refresh emitidos antes de `password_changed_at`. Pruebas automatizadas ejecutadas en SQLite; **Resuelto en código; validación visual Pendiente (V-44)**. El logout elimina la cookie local, pero no revoca copias del token.
 
 **Pregunta pendiente HU-46 (sin ID):** al restablecer la contraseña de una cuenta activa bloqueada, ¿también se deben limpiar `is_locked` y `failed_attempts`? Actualmente se conserva el bloqueo; no cambiar hasta confirmar la regla.
+
+**Cierre de la pregunta pendiente HU-46 (2026-11-11):** **Cerrada.** Respuesta confirmada por Pablo el 2026-11-10: **sí**. La recuperación de contraseña solo levanta el bloqueo por intentos fallidos (`is_locked = False`, `failed_attempts = 0`); no reactiva una cuenta desactivada por un admin (`is_active = False`). Implementado en `46f4ca3` (`PasswordResetConfirmView`, `backend/apps/users/views.py`), que llegó a `develop` con el PR #20 (merge `47d09ed`).
 
 ## 4. Decisiones tomadas (sesión 2026-10-24, aprobadas por Pablo)
 
