@@ -12,6 +12,7 @@ from .serializers import (
     LoginSerializer,
     ManagedUserSerializer,
     PropertySerializer,
+    PropertyWithdrawalSerializer,
     PropertyImageSerializer,
     UserActivationSerializer,
     UserDeactivationSerializer,
@@ -352,6 +353,46 @@ class PropertyPublishView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class PropertyWithdrawalView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        with transaction.atomic():
+            property_obj = get_object_or_404(Property.objects.select_for_update(), pk=pk)
+            if property_obj.agent_id != request.user.id and request.user.role != "admin":
+                return Response({"detail": "No tienes permiso sobre esta propiedad."}, status=403)
+            # "reservador" is the existing stored value for Reservado (DT-16).
+            if property_obj.status not in ("disponible", "reservador"):
+                return Response(
+                    {"detail": "Solo se puede retirar una propiedad Disponible o Reservada."},
+                    status=409,
+                )
+            serializer = PropertyWithdrawalSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            property_obj.status = "no_disponible"
+            property_obj.unavailability_reason = serializer.validated_data["unavailability_reason"]
+            property_obj.save(update_fields=["status", "unavailability_reason", "updated_at"])
+            return Response(PropertySerializer(property_obj, context={"request": request}).data)
+
+
+class PropertyReactivationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        with transaction.atomic():
+            property_obj = get_object_or_404(Property.objects.select_for_update(), pk=pk)
+            if property_obj.agent_id != request.user.id and request.user.role != "admin":
+                return Response({"detail": "No tienes permiso sobre esta propiedad."}, status=403)
+            if property_obj.status != "no_disponible":
+                return Response(
+                    {"detail": "Solo se puede reactivar una propiedad No disponible."}, status=409,
+                )
+            # Retain the last withdrawal reason; publishing checks HU-53 again.
+            property_obj.status = "captacion"
+            property_obj.save(update_fields=["status", "updated_at"])
+            return Response(PropertySerializer(property_obj, context={"request": request}).data)
 
 
 class PropertyPublicationRequirementsView(APIView):
