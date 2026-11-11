@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25 pasan a **Listo**: PR #21 auditado (§11, chat aparte, "apto para fusionar", según Pablo) y fusionado en `develop` (`5ed0e3b`, por Pablo); filas nuevas en la tabla resumen |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25: validación visual aprobada por Pablo (V-78 a V-85); siguen en Pruebas hasta la auditoría y el merge del PR #21 |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -74,6 +75,9 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-22](#hu-22) | Configurar la disponibilidad horaria | EP-4 | 3 | ~~**Pruebas** (lote 2, 2026-11-06: app `visits`, API + pantalla I-09)~~ **Listo** (2026-11-08: PR #19 auditado y fusionado en `develop`, `e19a5df`; decisión de Pablo. Antes: Pruebas, lote 2, 2026-11-06: app `visits`, API + pantalla I-09) | Aprobado (suite 228/228 en SQLite, 69 de `visits`; `npm test` 17/17, `build`, `tsc` y `eslint` sin errores, 2026-11-06) | Aprobado (V-68 a V-71, Pablo, 2026-11-07) | Aprobado (V-68 a V-71). Sigue en **Pruebas**: faltan la auditoría y el merge del PR #19. **(2026-11-08, nota añadida)** La auditoría de solo lectura y el merge ya se hicieron (PR #19, `e19a5df`, fusionado por Pablo; en GitHub sin revisión aprobada del compañero, `reviewDecision: REVIEW_REQUIRED`): pasa a **Listo** |
 | [HU-18](#hu-18) | Consultar la disponibilidad del asesor | EP-4 | 3 | ~~**Pruebas** (lote 2, 2026-11-06: `free_slots()`, endpoint público + P-07 en la ficha)~~ **Listo** (2026-11-08: PR #19 auditado y fusionado en `develop`, `e19a5df`; decisión de Pablo. Antes: Pruebas, lote 2, 2026-11-06: `free_slots()`, endpoint público + P-07 en la ficha) | Aprobado (ídem) | Aprobado (V-72 a V-74, Pablo, 2026-11-07/08) | Aprobado (V-72 a V-74; ver DT-147). Sigue en **Pruebas**: faltan la auditoría y el merge del PR #19. **(2026-11-08, nota añadida)** La auditoría y el merge ya se hicieron (PR #19, `e19a5df`): pasa a **Listo** |
 | [HU-24](#hu-24) | Consultar la agenda de visitas | EP-4 | 2 | ~~**Pruebas** (lote 2, 2026-11-06: `/api/visits/agenda/` + pantalla I-08)~~ **Listo** (2026-11-08: PR #19 auditado y fusionado en `develop`, `e19a5df`; decisión de Pablo. Antes: Pruebas, lote 2, 2026-11-06: `/api/visits/agenda/` + pantalla I-08) | Aprobado (ídem) | Aprobado (V-75 a V-77, Pablo, 2026-11-08) | Aprobado (V-75 a V-77; LOPDP en DT-117). Sigue en **Pruebas**: faltan la auditoría y el merge del PR #19. **(2026-11-08, nota añadida)** La auditoría y el merge ya se hicieron (PR #19, `e19a5df`): pasa a **Listo** |
+| [HU-19](#hu-19) | Solicitar una visita | EP-4 | 4 | ~~**Pruebas** (lote 3, 2026-11-09: `request_visit()`, endpoint público + P-07)~~ **Listo** (2026-11-11: PR #21 auditado y fusionado en `develop`, `5ed0e3b`; decisión de Pablo) | Aprobado (suite 277 OK en SQLite, auditoría PR #21; PostgreSQL No ejecutado, DT-143) | Aprobado (V-78 a V-81, Pablo, 2026-11-11) | Aprobado (V-78 a V-81) |
+| [HU-20](#hu-20) | Recibir la confirmación de la visita | EP-4 | 4 | ~~**Pruebas** (lote 3, 2026-11-09: notificaciones + P-08 por token)~~ **Listo** (2026-11-11: PR #21 auditado y fusionado en `develop`, `5ed0e3b`; decisión de Pablo) | Aprobado (ídem; Resend No ejecutado) | Aprobado (V-79, V-82, V-83, Pablo, 2026-11-11) | Aprobado (V-79, V-82, V-83) |
+| [HU-25](#hu-25) | Registrar el resultado de la visita | EP-4 | 5 | ~~**Pruebas** (lote 3, 2026-11-09: `record_outcome()` + modal en I-08)~~ **Listo** (2026-11-11: PR #21 auditado y fusionado en `develop`, `5ed0e3b`; decisión de Pablo) | Aprobado (ídem) | Aprobado (V-84, V-85, Pablo, 2026-11-11) | Aprobado (V-84, V-85) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | **Pruebas** | Pendiente de cierre técnico (suite 116/116 ejecutada en SQLite; suite PostgreSQL local no ejecutada) | V-33..V-39 Pendiente | V-33..V-42 Pendiente; no marcar como validada |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | Pruebas | Aprobado (120 pruebas backend en SQLite en memoria) | Aprobado (V-43; Sebas confirmó el flujo de desbloqueo y login el 2026-11-04) | Aprobado (V-43; Sebas, 2026-11-04, después del último ajuste) |
@@ -446,7 +450,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-19
 
-**Solicitar una visita** · EP-4 · RF-04, RF-09 · Pantalla P-07 (en la ficha pública) · URB-23, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-78 a V-81) · **(2026-11-11)** validación visual aprobada (V-78 a V-81, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
+**Solicitar una visita** · EP-4 · RF-04, RF-09 · Pantalla P-07 (en la ficha pública) · URB-23, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-78 a V-81) · **(2026-11-11)** validación visual aprobada (V-78 a V-81, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21 · **(2026-11-11)** ~~Pruebas~~ **Listo**: PR #21 auditado y fusionado en `develop` (`5ed0e3b`, por Pablo)
 
 **Proceso (PROC-04, T3 pasos 9-10):** el cliente, sin cuenta, elige en la ficha una de las horas libres del asesor, deja su nombre, su celular y la aceptación de la política de privacidad (y, si quiere, un correo para la confirmación). Se registra la visita, se bloquea la hora y la oportunidad pasa a Visita Programada. Decisiones: DS-39.
 
@@ -459,7 +463,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-20
 
-**Recibir la confirmación de la visita** · EP-4 · RF-04 · Pantalla P-08 · URB-24, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-79, V-82, V-83) · **(2026-11-11)** validación visual aprobada (V-79, V-82, V-83, Pablo; evidencia: bitácora por correo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
+**Recibir la confirmación de la visita** · EP-4 · RF-04 · Pantalla P-08 · URB-24, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-79, V-82, V-83) · **(2026-11-11)** validación visual aprobada (V-79, V-82, V-83, Pablo; evidencia: bitácora por correo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21 · **(2026-11-11)** ~~Pruebas~~ **Listo**: PR #21 auditado y fusionado en `develop` (`5ed0e3b`, por Pablo)
 
 **Proceso (T3 paso 11):** si el cliente dio correo y marcó la casilla, recibe la confirmación con un enlace único a P-08; si no, el asesor confirma por WhatsApp. El asesor de la visita (y el de la oportunidad, si es otro) recibe siempre un aviso.
 
@@ -473,7 +477,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-25
 
-**Registrar el resultado de la visita** · EP-4 · RF-04 · Pantalla I-08 (modal) · URB-28, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-84, V-85) · **(2026-11-11)** validación visual aprobada (V-84, V-85, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21
+**Registrar el resultado de la visita** · EP-4 · RF-04 · Pantalla I-08 (modal) · URB-28, lote 3 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-84, V-85) · **(2026-11-11)** validación visual aprobada (V-84, V-85, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #21 · **(2026-11-11)** ~~Pruebas~~ **Listo**: PR #21 auditado y fusionado en `develop` (`5ed0e3b`, por Pablo)
 
 **Proceso (T3 paso 12):** pasada la hora de inicio, el asesor de la visita (o el admin) registra una sola vez Realizada, No asistida o Cancelada, con la respuesta del cliente.
 

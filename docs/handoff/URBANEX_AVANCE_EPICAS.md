@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · §5B: 3/3 HU · 10/10 pts del lote 3 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · §5B: los 3 criterios del lote 3 validados (V-78 a V-85, Pablo); 0/3 HU completas hasta la auditoría y el merge del PR #21 |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -269,7 +270,7 @@ Composición: HU-19 (5 pts), HU-20 (3 pts) y HU-25 (2 pts) del backlog (contexto
 | Métrica | Valor |
 |---|---|
 | Criterios del lote 3 (backlog) | 3/3 implementados y verificados; ~~0/3 validados~~ **(2026-11-11)** 3/3 validados (Ronda 7, Pablo) |
-| HU completas / puntos | **0/3 HU · 0/10 pts**: en **Pruebas** hasta la validación de Pablo, la auditoría (§11) y el merge del PR #21 |
+| HU completas / puntos | ~~**0/3 HU · 0/10 pts**: en **Pruebas** hasta la validación de Pablo, la auditoría (§11) y el merge del PR #21~~ **(2026-11-11)** **3/3 HU · 10/10 pts** del lote: **Listo** (PR #21 auditado y fusionado en `develop`, `5ed0e3b`) |
 
 ## 5C. EP-4 y EP-5 — Contactos y seguimiento: lote 4 (2026-11-09)
 
