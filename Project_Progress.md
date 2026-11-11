@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización de preparación de push HU-09 | 2026-11-11 · comprobación de rama para publicación; push autorizado por Sebas; sin integración ni merge de ramas en este paso |
 | Última actualización de commits HU-09 | 2026-11-11 · correcciones guardadas en commits por archivo; push e integración del develop remoto pendientes |
 | Última actualización de corrección HU-09 | 2026-11-11 · privacidad del motivo de retiro y avance documental corregidos; 253 pruebas OK en SQLite; sin commit ni push de estas correcciones |
 | Última actualización aditiva HU-09 | 2026-11-11 · `origin/develop` `47d09ed` integrado en `048341a`; V-45 aprobada; 251/251 pruebas OK en SQLite; auditoría pendiente |
@@ -53,6 +54,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-11 · Codex con Sebas · verificación para publicar HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** Sebas autorizó continuar los pasos hasta el push y aclaró que este paso consiste en subir la rama, sin integrar ni fusionar ramas. `git status --short --branch` sobre `da8f12b` confirmó el árbol limpio; `git diff origin/develop...HEAD --check` y `git ls-files -u` no encontraron errores ni conflictos. El diff contiene 13 archivos, sin archivos prohibidos ni migraciones modificadas. La revisión de patrones de secretos en los 15 commits propios no encontró coincidencias; esta comprobación no constituye una auditoría exhaustiva de credenciales. `git ls-remote --heads origin refs/heads/feat/URB-09-HU-09-actualizar-propiedad` terminó exit 0 sin referencias: la rama aún no estaba publicada.
+- **Pruebas:** resultado conservado de 253 pruebas backend OK, exit 0, SQLite; no se modificó código desde esa ejecución. DT-92 sigue pendiente con check de migraciones exit 1; PostgreSQL No ejecutado (DT-68). La revisión técnica y las correcciones anteriores quedan documentadas sin añadir aprobaciones humanas.
+- **Falta y siguiente paso:** publicar únicamente la rama HU-09, sin force push; confirmar que su hash remoto coincide con HEAD. El resultado del push se informa en la respuesta de cierre. No se abre PR ni se modifica `develop` en este paso. Antes de pedir el PR siguen aplicando los requisitos de integración y auditoría de `AGENTS.md` §5 y §11.
 
 ### 2026-11-11 · Codex con Sebas · commits de correcciones HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
 - **Hecho:** commits autorizados por Sebas en esta conversación, con rutas explícitas, comprobación y presentación del área preparada antes de cada commit y mensaje mediante `git commit -F`. Serializer compartido en `78ccc5b`; regresiones en `819d59d`; Avance en `7419238`; Deuda en `e9d2c40`; Estado en `634c654`; Estándares en `33e1484`; GPS en `c37d030`; Seguridad en `72596c0`. Cada archivo compartido quedó en su propio commit. Este registro y la preparación del PR quedan en el commit de Progress.
