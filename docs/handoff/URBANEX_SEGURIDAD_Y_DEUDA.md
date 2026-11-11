@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización de corrección HU-09 | 2026-11-11 · minimización de datos del motivo de retiro en respuestas públicas; pruebas de regresión incorporadas |
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; sin cambios en riesgos globales |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -17,6 +18,10 @@
 | Aclaración aditiva HU-45 (2026-11-05) | Las afirmaciones antiguas de §2.5 sobre mensajes no uniformes y falta de desbloqueo describen el estado previo a HU-45; la tabla de actualización y la nota bajo ella documentan lo vigente. DT-117 queda asociado solo a SEC-16/LOPDP; la notificación de HU-45 se sigue en DT-120 |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · afirmaciones históricas aclaradas y SEC-04 mantenido abierto |
 | Registro oficial | Cada riesgo tiene su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md); el estado se actualiza allí y en la tabla de §0 |
+
+### Corrección aditiva de privacidad HU-09 — 2026-11-11
+
+Se limita la representación del motivo de retiro en el catálogo público: el serializer devuelve `null` para solicitudes anónimas o sin contexto, conservando el valor almacenado y el acceso autenticado existente. Las pruebas de regresión cubren la privacidad y la conservación del dato; resultados en Estándares §4. Corrección implementada en código; validación humana **Pendiente**. No cambia el registro de V-45, la política de roles ni el estado de riesgos globales. Seguimiento en la actualización aditiva HU-09 de Deuda técnica, sin ID nuevo.
 
 > **🔒 Documento publicable.** El repositorio es **público**. Por eso este documento describe **qué** está en riesgo y **cómo se corregirá**, pero **no** incluye pasos de explotación, peticiones, payloads ni comandos de ataque.
 >
