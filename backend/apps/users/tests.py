@@ -33,6 +33,7 @@ from apps.users.models import (
     PropertyImage,
     UserActivationToken,
 )
+from apps.users.serializers import PropertySerializer
 from apps.users.views import get_missing_publication_requirements
 # Create your tests here.
 User = get_user_model()
@@ -473,7 +474,48 @@ class PropertyWithdrawalApiTests(TestCase):
         self.assertEqual(response.status_code, 200, response.data)
         self.property.refresh_from_db()
         self.assertEqual(self.property.status, "disponible")
-        self.assertEqual(APIClient().get(self.url).status_code, 200)
+        self.assertEqual(self.property.unavailability_reason, "Owner request")
+        anonymous = APIClient()
+        public_detail = anonymous.get(self.url)
+        self.assertEqual(public_detail.status_code, 200)
+        self.assertIsNone(public_detail.data["unavailability_reason"])
+        public_list = anonymous.get("/api/auth/properties/")
+        self.assertEqual(public_list.status_code, 200)
+        public_property = next(item for item in public_list.data if item["id"] == self.property.pk)
+        self.assertIsNone(public_property["unavailability_reason"])
+        for actor in (self.agent, self.admin_user):
+            with self.subTest(actor=actor):
+                self.client.force_authenticate(actor)
+                detail = self.client.get(self.url)
+                self.assertEqual(detail.status_code, 200)
+                self.assertEqual(detail.data["unavailability_reason"], "Owner request")
+
+    def test_public_statuses_hide_reason_but_owner_keeps_it_in_lists(self):
+        self.property.unavailability_reason = "Synthetic internal reason"
+        anonymous = APIClient()
+        for initial in ("disponible", "reservador"):
+            with self.subTest(initial=initial):
+                self.property.status = initial
+                self.property.save(update_fields=["status", "unavailability_reason"])
+                detail = anonymous.get(self.url)
+                self.assertEqual(detail.status_code, 200)
+                self.assertIsNone(detail.data["unavailability_reason"])
+                public_list = anonymous.get("/api/auth/properties/")
+                self.assertEqual(public_list.status_code, 200)
+                public_property = next(item for item in public_list.data if item["id"] == self.property.pk)
+                self.assertIsNone(public_property["unavailability_reason"])
+                for path in ("/api/auth/properties/", "/api/auth/properties/mine/"):
+                    internal_list = self.client.get(path)
+                    self.assertEqual(internal_list.status_code, 200)
+                    internal_property = next(item for item in internal_list.data if item["id"] == self.property.pk)
+                    self.assertEqual(internal_property["unavailability_reason"], "Synthetic internal reason")
+
+    def test_serializer_without_request_hides_reason_without_changing_storage(self):
+        self.property.unavailability_reason = "Synthetic internal reason"
+        self.property.save(update_fields=["unavailability_reason"])
+        self.assertIsNone(PropertySerializer(self.property).data["unavailability_reason"])
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.unavailability_reason, "Synthetic internal reason")
 
     def test_patch_edits_published_property_without_changing_status(self):
         for initial in ("disponible", "reservador", "vendido", "arrendado", "no_disponible"):
