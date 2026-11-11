@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización de corrección HU-09 | 2026-11-11 · representación pública del motivo en serializer y cobertura de privacidad; sin cambios de frontend |
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; responsabilidades y precauciones sin cambios |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -262,6 +263,16 @@ flowchart LR
 | `CLAUDE.md` (raíz) y `.github/copilot-instructions.md` (2026-10-31) | Puntos de entrada de Claude Code y de Copilot: solo apuntan a `AGENTS.md` | No agregar reglas aquí; van en `AGENTS.md` |
 | `.github/pull_request_template.md` y `docs/handoff/PLANTILLA_TAREA.md` (2026-10-31) | Plantilla de cada PR y ficha de cada tarea (DS-25) | Mantenerlas alineadas con `AGENTS.md` §2, §10 y §11 |
 | `docs/handoff/URBANEX_USM_TRAZABILIDAD.md` (2026-11-03) | User Story Mapping: etapas, procesos PROC-01..08, HU → RF/RNF/pantalla y la columna **Código** (archivos y endpoints de cada paso, sin números de línea). Lo leen los dos y lo cita `AGENTS.md` §1 | No copia estados: enlaza a Estado de procesos. Al implementar un paso, actualizar su celda Código en el mismo PR; si se fusiona una rama citada como "rama sin fusionar", quitar esa marca. El corte del 60 % (§2) y el §6 son **PROPUESTA**: no cambiarlos sin acuerdo de Pablo y Sebas |
+
+### Corrección aditiva de privacidad HU-09 — 2026-11-11
+
+| Archivo | Responsabilidad añadida | Precaución |
+|---|---|---|
+| `backend/apps/users/serializers.py` | `PropertySerializer.to_representation()` devuelve motivo `null` para solicitudes anónimas o sin contexto | Conservar la forma del DTO y el motivo almacenado; el acceso autenticado existente se mantiene |
+| `backend/apps/users/tests.py` | Dos pruebas nuevas y ampliación de la republicación: privacidad pública, consulta interna y serializer sin contexto | Datos sintéticos; resultados completos en Estándares §4 |
+| `docs/handoff/URBANEX_AVANCE_EPICAS.md` (**compartido**) | Restaura el bloque histórico de EP-2 y agrega la actualización de HU-09 por separado | Mantener filas ajenas y la atribución de V-45 a Sebas |
+
+El frontend sigue usando el DTO `Property` existente (`unavailability_reason: string | null`): el catálogo recibe `null` y el panel autenticado conserva el texto del motivo. No se editan vistas, rutas, modelos, migraciones, tipos ni componentes frontend en esta corrección.
 
 ### Actualización aditiva HU-09 — 2026-11-09
 
