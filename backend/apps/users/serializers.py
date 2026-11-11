@@ -223,6 +223,10 @@ class PropertyImageSerializer(serializers.ModelSerializer):
         read_only_fields = ['uploaded_at']
 
 #Now we create the class thats going to handle the property Serializer
+class PropertyWithdrawalSerializer(serializers.Serializer):
+    unavailability_reason = serializers.CharField(trim_whitespace=True)
+
+
 class PropertySerializer(serializers.ModelSerializer):
     agent_name = serializers.SerializerMethodField()
     #Agregamos las imagenes vinculadas.
@@ -255,11 +259,6 @@ class PropertySerializer(serializers.ModelSerializer):
         if status == 'no_disponible' and not unavailability_reason:
             raise serializers.ValidationError({
                 "unavailability_reason": "Debe especificar un motivo para marcar la propiedad como No disponible."
-            })
-
-        if status in ['vendido', 'arrendado']:
-            raise serializers.ValidationError({
-                "status": "Las propiedades solo pueden pasar a Vendido o Arrendado mediante la confirmación de Cierre definitivo."
             })
 
         return attrs
