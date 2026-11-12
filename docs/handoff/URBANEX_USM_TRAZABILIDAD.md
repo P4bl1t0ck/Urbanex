@@ -2,12 +2,14 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · notas aditivas en PROC-03 y PROC-05: validación visual de HU-15, HU-16, HU-29 y HU-30 aprobada por Pablo (V-86 a V-95) |
+| Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: HU-19, HU-20 y HU-25 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: validación visual de HU-19, HU-20 y HU-25 aprobada por Pablo (V-78 a V-85) |
 | Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: nota aditiva en PROC-08 con el registro humano de V-44 |
 | Última actualización aditiva HU-46 | 2026-11-06 · PROC-08 registra I-02 y la sesión D-05; V-44 Pendiente |
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
-| Última actualización | 2026-11-08 (noche) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): §2, **plan de reparto** (PLAN, sin avance). Antes: 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` conservando filas del mapa y la traza de HU-45. Se mantiene la nota del PR #15 (HU-27 y HU-34 ya no son "Rama sin fusionar"), se actualiza HU-12 en §4 (PR #14 ya está en `develop`) y se aclara la nota de PROC-08/HU-45 de la rama `origin/develop`. Antes: 2026-11-05 · Sebas (con Copilot) · PROC-08/HU-45: se aclara que la fila inicial sobre el desbloqueo es histórica y que la actualización del 2026-11-04 describe el flujo implementado; notificación pendiente referida a DT-120. Antes: 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: §4, HU-27 (PROC-03 paso 5) y HU-34 (PROC-05 paso 1) ya no son "Rama sin fusionar" (fusionadas en `develop`, `043cfb5`, DS-32) y su columna Estado enlaza a Estado de procesos. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
+| Última actualización | 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4): §4, columna **Código** de PROC-03 (HU-15, HU-16) y PROC-05 (HU-29, HU-30), con el texto anterior tachado; rama sin fusionar. Antes: 2026-11-08 (noche) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): §2, **plan de reparto** (PLAN, sin avance). Antes: 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` conservando filas del mapa y la traza de HU-45. Se mantiene la nota del PR #15 (HU-27 y HU-34 ya no son "Rama sin fusionar"), se actualiza HU-12 en §4 (PR #14 ya está en `develop`) y se aclara la nota de PROC-08/HU-45 de la rama `origin/develop`. Antes: 2026-11-05 · Sebas (con Copilot) · PROC-08/HU-45: se aclara que la fila inicial sobre el desbloqueo es histórica y que la actualización del 2026-11-04 describe el flujo implementado; notificación pendiente referida a DT-120. Antes: 2026-11-04 (tras el merge del PR #15) · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: §4, HU-27 (PROC-03 paso 5) y HU-34 (PROC-05 paso 1) ya no son "Rama sin fusionar" (fusionadas en `develop`, `043cfb5`, DS-32) y su columna Estado enlaza a Estado de procesos. Antes: 2026-11-03 · Pablo (con Claude Code) · §4: columna **Código** completada contra `develop` (`d71c7f2`, con el PR #9 de HU-44 fusionado) y contra las ramas sin fusionar de HU-12, HU-27 y HU-34; anclas `#hu-xx` verificadas contra los encabezados de Estado de procesos (las de HU-27 y HU-34 no existían); §6 fila 7: C-08 confirmada (DS-30). El corte del 60 % (§2) y el resto del §6 siguen como **PROPUESTA** |
 | Actualización aditiva HU-45 | 2026-11-03 · Se agrega la fila de implementación del desbloqueo en PROC-08; no se modifican las filas ya existentes |
 | Actualización HU-45 y V-43 | 2026-11-04 · Se agrega una fila vigente para los dos criterios validados por Sebas en V-43; no se modifican las filas anteriores |
 | Fuentes | User Story Mapping de Miro (exportado el 2026-10-31); tesis `ProyectoCapstoneV4 (3).md` (RF-01 a RF-16, Anexo 2); [Contexto maestro](URBANEX_MASTER_CONTEXT.md) (§4 RF/RNF, pantallas, §10 backlog) |
@@ -155,11 +157,13 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 
 | # | Paso | HU | Pantalla | Código | Estado |
 |---|---|---|---|---|---|
-| 1 | Contacto por WhatsApp (nombre y teléfono antes de redirigir) | HU-15 | P-03, P-05 | No implementado | — |
-| 2 | Interés por formulario (con LOPDP) | HU-16 | P-05 | No implementado | — |
+| 1 | Contacto por WhatsApp (nombre y teléfono antes de redirigir) | HU-15 | P-03, P-05 | ~~No implementado~~ (2026-11-09) `opportunities/services.py` (`agent_whatsapp_number`), `GET /api/opportunities/public/properties/<id>/whatsapp/`; `frontend/components/WhatsAppContactButton.tsx` en P-07 (rama sin fusionar, lote 4). Sin registro previo a la redirección (simplificación, DS-50) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-15) |
+| 2 | Interés por formulario (con LOPDP) | HU-16 | P-05 | ~~No implementado~~ (2026-11-09) `register_web_interest`, `POST /api/opportunities/public/properties/<id>/interest/`; `frontend/components/InterestForm.tsx` en P-07 (rama sin fusionar, lote 4) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-16) |
 | 3 | Messenger: respuesta automática que pide el número | HU-17 | (webhook), I-04 | No implementado | — |
 | 4 | El asesor atiende conversaciones sin número | HU-26 | I-04, I-04A | No implementado | — |
 | 5 | El asesor abre contacto y oportunidad a mano | HU-27 | I-07 | ~~**Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`):~~ (2026-11-04: fusionada en `develop` por el PR #15, `043cfb5`, DS-32) `opportunities/models.py`, `opportunities/services.py`, `opportunities/validators.py`, `opportunities/serializers.py`, `opportunities/views.py` (`OpportunityViewSet.create`, `eligible_properties`, `agents`) · `POST opportunities/`, `GET opportunities/eligible-properties/`, `GET opportunities/agents/` · `app/dashboard/opportunities/new/page.tsx`, `lib/opportunities.ts`, `types/opportunity.ts` | [HU-27](URBANEX_ESTADO_PROCESOS.md#hu-27) |
+
+**Nota (2026-11-12, Ronda 8):** pasos 1 y 2 (HU-15 y HU-16) con validación visual aprobada por Pablo (V-86 a V-90, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
 
 ### PROC-04 · Agendamiento y visitas
 
@@ -176,17 +180,21 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 
 **Nota (2026-11-11, Ronda 7):** pasos 3, 4 y 8 (HU-19, HU-20 y HU-25) con validación visual aprobada por Pablo (V-78 a V-85, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #21.
 
+**Nota (2026-11-11, merge del PR #21):** los pasos 3, 4 y 8 (HU-19, HU-20 y HU-25) pasan a **Listo**: PR #21 auditado y fusionado en `develop` (`5ed0e3b`, por Pablo). Donde las celdas dicen "rama sin fusionar, PR #21", ese código ya está en `develop`.
+
 ### PROC-05 · Seguimiento de la oportunidad
 
 | # | Paso | HU | Pantalla | Código | Estado |
 |---|---|---|---|---|---|
 | 1 | El asesor ve su cartera (admin: todas) con filtros | HU-34 | I-06 | ~~**Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`):~~ (2026-11-04: fusionada en `develop` por el PR #15, `043cfb5`, DS-32) `opportunities/views.py` (`OpportunityViewSet.get_queryset`, `filter_opportunities`, `OpportunityPagination`), `opportunities/serializers.py` · `GET opportunities/` · `app/dashboard/opportunities/page.tsx`, `lib/opportunities.ts` | [HU-34](URBANEX_ESTADO_PROCESOS.md#hu-34) |
 | 2 | Consulta una oportunidad y su historial | HU-33 | I-06A | No implementado | — |
-| 3 | Avanza el estado hasta Pendiente de Cierre (precio final) | HU-29 | I-06A | No implementado | — |
-| 4 | Registra interacciones y negociación (no cambia el precio público) | HU-30 | I-06A | No implementado | — |
+| 3 | Avanza el estado hasta Pendiente de Cierre (precio final) | HU-29 | I-06A | ~~No implementado~~ (2026-11-09) `advance_status`, `POST /api/opportunities/<id>/status/`; `frontend/app/dashboard/opportunities/[id]/page.tsx` (rama sin fusionar, lote 4). Corte sin Reservada ni Evaluación documental (C-09) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-29) |
+| 4 | Registra interacciones y negociación (no cambia el precio público) | HU-30 | I-06A | ~~No implementado~~ (2026-11-09) `OpportunityInteraction` (`opportunities.0003`), `add_interaction`, `GET`/`POST /api/opportunities/<id>/interactions/`; I-06A (rama sin fusionar, lote 4) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-30) |
 | 5 | Marca Perdida con motivo | HU-31 | I-06A | No implementado | — |
 | 6 | Recibe recordatorios (inactividad, visita, documento, asignación) | HU-32 | I-03 | No implementado | — |
 | 7 | El admin asigna o reasigna con motivo | HU-28 | A-02 | No implementado | — |
+
+**Nota (2026-11-12, Ronda 8):** pasos 3 y 4 (HU-29 y HU-30) con validación visual aprobada por Pablo (V-91 a V-95, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
 
 ### PROC-06 · Reserva y documentación
 
