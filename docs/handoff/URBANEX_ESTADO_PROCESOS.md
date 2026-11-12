@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 pasa a **Listo** por decisión de Pablo (auditoría del PR #20, V-44 y PR #23); nota aditiva en la sección HU-46. La fila resumen de HU-46 ("En Curso") queda como histórica, sin reescribirla |
 | Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-15, HU-16, HU-29 y HU-30 pasan a **Listo** (PR #22 auditado y fusionado en `develop`, `c64b41a`); filas nuevas en la tabla resumen (DT-157) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · HU-15, HU-16, HU-29 y HU-30: validación visual aprobada por Pablo (V-86 a V-95); siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25 pasan a **Listo**: PR #21 auditado (§11, chat aparte, "apto para fusionar", según Pablo) y fusionado en `develop` (`5ed0e3b`, por Pablo); filas nuevas en la tabla resumen |
@@ -387,6 +388,10 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | Mantener la sesión y rechazar tokens anteriores al cambio de contraseña | Access de 24 h en `sessionStorage`; refresh de 7 días HttpOnly; protección CSRF y cierre de cookie | Pruebas de refresh/CSRF, invalidación de access y refresh antiguos, y logout |
 
 **Estado:** implementación y pruebas automatizadas verificadas en SQLite; validación funcional y visual **Pendiente** hasta que Sebas complete V-44. PostgreSQL **No ejecutado**; el intento inicial encontró que `test_postgres` ya existía y se detuvo sin borrarlo ni reutilizarlo. `makemigrations --check --dry-run` sigue detectando la diferencia preexistente `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó esa migración.
+
+### Actualización aditiva HU-46 (2026-11-12, decisión de Pablo)
+
+**Estado: Listo.** Decisión de Pablo (2026-11-12, DT-157), con este respaldo: auditoría §11 del PR #20 (corrección posterior de precisión de JWT registrada el 2026-11-09, ver "Corrección posterior a auditoría PR #20"); V-44 aprobada por Sebas en `Project_Progress.md` (2026-11-07, 16:19, los cinco pasos; 2026-11-09, 15:13:56, recuperación con desbloqueo; 2026-11-09, 16:13:56, invalidación de la sesión anterior); PR #20 fusionado en `develop` (`47d09ed`, 2026-11-11) y PR #23 con el cierre documental (`97f0e0c`). La fila de HU-46 en la tabla resumen ("En Curso") y las notas anteriores que la dejaban en Pruebas son históricas; no se reescriben porque son de Sebas. Siguen abiertos DT-92 y DT-68 (PostgreSQL No ejecutado, Nivel 1).
 
 ---
 

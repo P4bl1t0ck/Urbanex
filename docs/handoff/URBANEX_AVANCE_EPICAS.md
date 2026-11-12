@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-46 en **Listo** por decisión de Pablo; EP-1 validado 3/6; por el método de §2 sigue 1/3 HU · 2/8 pts (el criterio "solo usuarios activos" no tiene validación humana propia, POR CONFIRMAR) |
 | Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §5C, 4/4 HU · 15/15 pts del lote 4 en **Listo**; §5 (EP-5), **4/9 HU · 16/32 pts (50 %)** (PR #22 auditado y fusionado, `c64b41a`) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · §5 (EP-5): validado 10/20 con HU-29 y HU-30 (V-91 a V-95); §5C: HU-15 y HU-16 validadas (V-86 a V-90); 0/4 HU del lote completas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · §5B: 3/3 HU · 10/10 pts del lote 3 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
@@ -134,6 +135,17 @@ Esta actualización supersede la lectura anterior de hoy: el flujo detallado de 
 | EP-1 verificado | 5/6 = **83,3 %**; suite backend integrada 159/159 OK en SQLite |
 | EP-1 validado | 2/6 = **33,3 %** |
 | HU completas / puntos | 1/3 HU · 2/8 pts = **25 %**; HU-45 aporta 2 puntos según `URBANEX_MASTER_CONTEXT.md` §10 |
+
+### Actualización aditiva de EP-1 para HU-46 (2026-11-12, decisión de Pablo)
+
+HU-46 pasa a **Listo** (decisión de Pablo, 2026-11-12, DT-157): auditoría §11 del PR #20, V-44 aprobada por Sebas (2026-11-07 y 2026-11-09) y PR #20 y #23 fusionados (`47d09ed`, `97f0e0c`). No se reescriben las notas anteriores de Sebas.
+
+| Métrica / criterio | Resultado vigente |
+|---|---|
+| HU-46: enlace de recuperación de 60 min y de un solo uso | Validado por Sebas mediante V-44 (pasos 1 a 3, 2026-11-07, 16:19) |
+| HU-46: solo los usuarios activos inician sesión | **Sin validación humana propia**: V-44 no lo prueba (sus pasos cubren recuperación, sesión y logout). Lo cubre la prueba automática de `LoginView`; la observación de Sebas en V-37 (HU-44, asesor inactivo rechazado) sigue Pendiente |
+| EP-1 validado | 3/6 = **50 %** (2 de HU-45 y 1 de HU-46) |
+| HU completas / puntos (método §2) | Sin cambio: 1/3 HU · 2/8 pts = **25 %**. Con el método de §2, HU-46 no cuenta como completa mientras su primer criterio no tenga validación humana, aunque su estado sea **Listo** por decisión de Pablo. **POR CONFIRMAR (Pablo):** aceptar la prueba automática para ese criterio o validarlo con V-37 |
 
 ## 4. EP-2 — Gestión de propiedades y avalúos
 
