@@ -58,7 +58,9 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ### 2026-11-12 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (PR #22) · cierre de la Ronda 8
 - **Hecho:** transcripción de la validación visual de Pablo: V-86 y V-88 a V-94 desde su bitácora por correo del 2026-11-12; V-87 y V-95 dictadas en el chat. Las 10 **Aprobado** (V-87 y V-95 con observaciones). Decisión de Pablo en DT-117/SEC-20: el celular del asesor puede ser público si es el de trabajo. Estado de procesos, Avance (§5 y §5C), USM y Seguridad (SEC-20) actualizados; HU-15, HU-16, HU-29 y HU-30 siguen en **Pruebas** hasta la auditoría y el merge del PR #22.
 - **Hallazgos:** DT-156 nuevo (I-06A redirige a `/dashboard` después de "no encontrada"); DT-147 visto otra vez en V-87; pregunta para Sebas sobre DT-94 (desactivar deja las propiedades sin asesor y A-01 no reactiva; HU-44/HU-47), sin ID nuevo.
-- **Falta:** asignar las capturas de `evidencias\Lote4\` (propuesta en el chat, pendiente del ok de Pablo; no hay capturas después de las 17:29 del 11-nov); frontend tras la fusión (build, tsc, eslint, `npm test`); auditoría de solo lectura (§11) del PR #22; avisar a Sebas de DT-94.
+- **Capturas:** asignadas por hora con el ok de Pablo, `evidencias\Lote4\Captura de pantalla (70)` a `(119)`; cada una de V-86 a V-95 tiene al menos una.
+- **Correcciones de la auditoría del PR #22 (2026-11-12):** frontend registrado en Estándares §4 (build y tsc exit 0 según la auditoría; `npx eslint .` y `npm test` ejecutados en esta sesión). Sebas avisado (2026-11-12) del rango DS-50..69 en AGENTS.md y de DT-94.
+- **Falta:** merge del PR #22.
 - **Siguiente paso:** auditoría §11 del PR #22 y merge; luego el lote 5 según la respuesta del tutor.
 
 ### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4) · fusión de develop tras el PR #21
