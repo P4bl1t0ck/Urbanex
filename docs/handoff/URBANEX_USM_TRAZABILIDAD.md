@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-02, HU-12 en **Listo**; V-63 No aplicable hasta el despliegue (DT-110) |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-45 en **Listo** (según Pablo, confirmado por Sebas) |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-46 en **Listo** (decisión de Pablo) |
 | Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: notas aditivas en PROC-03 y PROC-05: HU-15, HU-16, HU-29 y HU-30 en **Listo** (PR #22 auditado y fusionado, `c64b41a`) |
@@ -155,6 +156,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 3 | Comparte la URL con metaetiquetas | HU-12 | P-03 | ~~**Rama sin fusionar** (`feat/URB-17-HU-12-compartir-ficha`):~~ (2026-11-06: fusionada en `develop` por el PR #14) `lib/propertyMetadata.ts` (`buildPropertyMetadata`), `app/properties/[id]/page.tsx` (`generateMetadata`) | — |
 | 4 | Si está Reservada, deja su interés (Lista de Interesados) | HU-13 | P-04, P-06 | No implementado | — |
 | 5 | Recibe aviso si la reserva se libera | HU-14 | (notificación) | No implementado | — |
+
+**Nota (2026-11-12, decisión de Pablo, DT-157):** el paso 3 (HU-12) pasa a **Listo**: PR #14 fusionado (`18c150d`), V-60 a V-62 y V-64 aprobadas; V-63 **No aplicable hasta el despliegue (DT-110)**.
 
 ### PROC-03 · Captación multicanal de contactos
 

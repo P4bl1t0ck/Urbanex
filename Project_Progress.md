@@ -852,6 +852,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 |---|---|---|---|
 | — | — | No se puede hacer en local (DT-110); confirmado por Pablo el 2026-11-02 | Pendiente |
 
+> **Nota (2026-11-12, decisión de Pablo, DT-157):** V-63 queda **No aplicable hasta el despliegue (DT-110)**. No es una validación aprobada: la tabla de arriba sigue sin fila humana. Cuando exista una URL pública, una persona ejecuta V-63 y agrega su fila. Con esta decisión, HU-12 pasa a **Listo**.
+
 ### V-64 · HU-12 / Seguridad §3.1 — Un título malicioso sale escapado en las metaetiquetas
 > **Preparación (2026-11-03, Claude Code, solo SQLite local):** worktree `../Urbanex-hu12` en `40dd147` (merge de `develop`), BD recién creada con `migrate` + `setup_demo_data`, `next build` + `next start` en `localhost:3000` y `runserver` en `127.0.0.1:8000`. El título de la #1 ("[DEMO] Casa en Cumbayá - lista para publicar") se cambió con `manage.py shell` y se restauró al terminar.
 
