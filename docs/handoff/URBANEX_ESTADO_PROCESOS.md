@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · HU-15, HU-16, HU-29 y HU-30: validación visual aprobada por Pablo (V-86 a V-95); siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25 pasan a **Listo**: PR #21 auditado (§11, chat aparte, "apto para fusionar", según Pablo) y fusionado en `develop` (`5ed0e3b`, por Pablo); filas nuevas en la tabla resumen |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25: validación visual aprobada por Pablo (V-78 a V-85); siguen en Pruebas hasta la auditoría y el merge del PR #21 |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
@@ -489,13 +490,13 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-15
 
-**Iniciar contacto por WhatsApp** · EP-4 · RF-02 · Pantalla P-07 (botón en la ficha pública) · URB-21, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-86 y V-87)
+**Iniciar contacto por WhatsApp** · EP-4 · RF-02 · Pantalla P-07 (botón en la ficha pública) · URB-21, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-86 y V-87) · **(2026-11-12)** validación visual aprobada (V-86 y V-87, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22
 
 **Proceso (PROC-03, T3):** el visitante pulsa "Escribir al asesor por WhatsApp" y se abre `wa.me` con el celular del asesor captador y un mensaje con el título y el código de la propiedad. Decisiones: DS-50.
 
 | Criterio (backlog §10: "Registrar lead antes de redirección wa.me"; Anexo 2 **POR CONFIRMAR**) | Implementación | Prueba | Resultado |
 |---|---|---|---|
-| El botón solo aparece si la propiedad está Disponible y el asesor está activo con un celular válido (RF-02) | `agent_whatsapp_number()` (`backend/apps/opportunities/services.py`) normaliza con la regla de DS-28; `GET /api/opportunities/public/properties/<id>/whatsapp/` → número o `null`, 404 fuera de Disponible; `frontend/components/WhatsAppContactButton.tsx` se oculta con `null`, 404 o error | `WhatsAppContactApiTests` (7 pruebas: número normalizado, E.164, celular inválido o vacío, asesor inactivo, 404, token inválido, 30/min) | Implementado y verificado; visual Pendiente (V-86, V-87) |
+| El botón solo aparece si la propiedad está Disponible y el asesor está activo con un celular válido (RF-02) | `agent_whatsapp_number()` (`backend/apps/opportunities/services.py`) normaliza con la regla de DS-28; `GET /api/opportunities/public/properties/<id>/whatsapp/` → número o `null`, 404 fuera de Disponible; `frontend/components/WhatsAppContactButton.tsx` se oculta con `null`, 404 o error | `WhatsAppContactApiTests` (7 pruebas: número normalizado, E.164, celular inválido o vacío, asesor inactivo, 404, token inválido, 30/min) | Implementado y verificado; visual Pendiente (V-86, V-87) · **(2026-11-12)** validación visual aprobada (V-86, V-87, Pablo) |
 | Mensaje prellenado con título y código de la propiedad | `buildWhatsAppLink()` (`frontend/lib/opportunityPipeline.ts`) | `opportunityPipeline.test.mjs` | Implementado y verificado |
 | **Registrar el lead antes de redirigir** (RF-02) | **No se implementa:** simplificación aprobada por Pablo (DS-50); el contacto por WhatsApp no deja registro en el sistema | — | Desviación registrada en DS-50 |
 
@@ -503,15 +504,15 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-16
 
-**Registrar interés desde el formulario** · EP-4 · RF-03, RF-05 · Pantalla P-07 (formulario en la ficha pública; el contexto maestro lo ubica en P-05) · URB-20, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-88 a V-90)
+**Registrar interés desde el formulario** · EP-4 · RF-03, RF-05 · Pantalla P-07 (formulario en la ficha pública; el contexto maestro lo ubica en P-05) · URB-20, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-88 a V-90) · **(2026-11-12)** validación visual aprobada (V-88 a V-90, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22
 
 **Proceso (PROC-03, T3):** el visitante deja su nombre, su celular, un correo opcional (con casilla de novedades), un mensaje opcional y la aceptación de la política de privacidad. El sistema reutiliza o crea el contacto y la oportunidad sin duplicarla, y el asesor ve el mensaje en I-06A.
 
 | Criterio (backlog §10: "Consentimiento y no duplicación"; Anexo 2 **POR CONFIRMAR**) | Implementación | Prueba | Resultado |
 |---|---|---|---|
-| Casilla LOPDP obligatoria con fecha y hora; celular de Ecuador (DS-28); opt-in solo con correo; mensaje de 1000 caracteres como máximo | `validate_web_interest()` y `register_web_interest()` (`backend/apps/opportunities/services.py`); `POST /api/opportunities/public/properties/<id>/interest/`; `frontend/components/InterestForm.tsx` y `AutoGrowTextarea.tsx` | `test_invalid_data_returns_400_and_saves_nothing` (7 casos), `test_message_is_optional_when_missing` | Implementado y verificado; visual Pendiente (V-89) |
+| Casilla LOPDP obligatoria con fecha y hora; celular de Ecuador (DS-28); opt-in solo con correo; mensaje de 1000 caracteres como máximo | `validate_web_interest()` y `register_web_interest()` (`backend/apps/opportunities/services.py`); `POST /api/opportunities/public/properties/<id>/interest/`; `frontend/components/InterestForm.tsx` y `AutoGrowTextarea.tsx` | `test_invalid_data_returns_400_and_saves_nothing` (7 casos), `test_message_is_optional_when_missing` | Implementado y verificado; visual Pendiente (V-89) · **(2026-11-12)** validación visual aprobada (V-89, Pablo) |
 | No duplica: reutiliza el contacto por teléfono (sin cambiar sus datos, pero renovando la fecha del consentimiento) y la oportunidad activa (sin cambiar su estado ni su asesor); si no hay, crea una en Contacto inicial con el asesor captador | `get_or_create_contact(refresh_privacy=True)`; oportunidad con `select_for_update` y fila de apertura sin usuario | `test_new_visitor_creates_contact_opportunity_history_and_interaction`, `test_existing_contact_is_reused_and_only_its_consent_is_renewed`, `test_active_opportunity_is_reused_without_changing_state_or_agent`, `test_terminal_opportunity_does_not_block_a_new_one` | Implementado y verificado |
-| El mensaje queda en el historial de la oportunidad | Interacción SISTEMA sin autor: "Interés desde el formulario web: …" o "Interés registrado desde el formulario web (sin mensaje)" | `test_empty_message_stores_the_default_note` | Implementado y verificado; visual Pendiente (V-90) |
+| El mensaje queda en el historial de la oportunidad | Interacción SISTEMA sin autor: "Interés desde el formulario web: …" o "Interés registrado desde el formulario web (sin mensaje)" | `test_empty_message_stores_the_default_note` | Implementado y verificado; visual Pendiente (V-90) · **(2026-11-12)** validación visual aprobada (V-90, Pablo) |
 | Respuesta pública neutra y límites por IP (3/min, 10/día) | `PropertyInterestView` con `WebInterestBurstThrottle` y `WebInterestDailyThrottle` (tasas configurables, DT-155) | `test_response_is_the_same_for_new_and_known_visitors`, `WebInterestThrottleTests` (3 pruebas) | Implementado y verificado (los límites cuentan por proceso) |
 
 - **Pregunta pendiente (C-10):** sin asesor captador activo responde 404 y el interés se pierde.
@@ -519,31 +520,31 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-29
 
-**Avanzar el estado de la oportunidad** · EP-5 · RF-06 · Pantalla I-06A (`/dashboard/opportunities/[id]`) · URB-35, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-91 a V-93)
+**Avanzar el estado de la oportunidad** · EP-5 · RF-06 · Pantalla I-06A (`/dashboard/opportunities/[id]`) · URB-35, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-91 a V-93) · **(2026-11-12)** validación visual aprobada (V-91 a V-93, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22
 
 **Proceso (PROC-05):** el asesor asignado (o el admin) avanza la oportunidad **un paso a la vez** desde la barra de progreso; cada cambio queda en el historial con usuario, fecha y hora.
 
 | Criterio (Avance de épicas §5; RF-06) | Implementación | Prueba | Resultado |
 |---|---|---|---|
-| Avanza en la secuencia de RF-06 (corte: Contacto inicial → Visita programada → En negociación → Pendiente de cierre; sin Reservada ni Evaluación documental, C-09) | `advance_status()` con `NEXT_STATUS` (`backend/apps/opportunities/services.py`); `POST /api/opportunities/<id>/status/`; barra y botón en I-06A | `test_full_sequence_with_its_requirements`, `test_cannot_skip_steps_or_go_back`, `test_states_outside_the_cut_do_not_advance`, `test_unknown_status_is_rejected` | Implementado y verificado; visual Pendiente (V-91) |
-| Requisitos de visita: Visita programada con una visita Programada o Realizada; En negociación con una Realizada (RF-04) | `advance_blocker()`; el detalle expone `advance_blocked_reason` y el botón se deshabilita con ese texto | `test_visita_programada_needs_a_programmed_or_completed_visit`, `test_visit_of_another_opportunity_does_not_count`, `test_detail_says_why_the_next_step_is_blocked` | Implementado y verificado; visual Pendiente (V-92) |
+| Avanza en la secuencia de RF-06 (corte: Contacto inicial → Visita programada → En negociación → Pendiente de cierre; sin Reservada ni Evaluación documental, C-09) | `advance_status()` con `NEXT_STATUS` (`backend/apps/opportunities/services.py`); `POST /api/opportunities/<id>/status/`; barra y botón en I-06A | `test_full_sequence_with_its_requirements`, `test_cannot_skip_steps_or_go_back`, `test_states_outside_the_cut_do_not_advance`, `test_unknown_status_is_rejected` | Implementado y verificado; visual Pendiente (V-91) · **(2026-11-12)** validación visual aprobada (V-91, Pablo) |
+| Requisitos de visita: Visita programada con una visita Programada o Realizada; En negociación con una Realizada (RF-04) | `advance_blocker()`; el detalle expone `advance_blocked_reason` y el botón se deshabilita con ese texto | `test_visita_programada_needs_a_programmed_or_completed_visit`, `test_visit_of_another_opportunity_does_not_count`, `test_detail_says_why_the_next_step_is_blocked` | Implementado y verificado; visual Pendiente (V-92) · **(2026-11-12)** validación visual aprobada (V-92, Pablo) |
 | Cada cambio registra fecha, hora y usuario | `change_status()` (lote 3) con `changed_by` y el motivo "Avance manual (HU-29)." | `test_full_sequence_with_its_requirements`, `test_admin_can_advance_any_opportunity` | Implementado y verificado |
-| Pendiente de cierre es el tope del asesor y registra el precio final acordado | `agreed_final_price` obligatorio y > 0 solo en ese paso; no cambia el precio público | `test_price_only_on_the_step_to_pendiente_cierre_and_positive` | Implementado y verificado; visual Pendiente (V-93) |
+| Pendiente de cierre es el tope del asesor y registra el precio final acordado | `agreed_final_price` obligatorio y > 0 solo en ese paso; no cambia el precio público | `test_price_only_on_the_step_to_pendiente_cierre_and_positive` | Implementado y verificado; visual Pendiente (V-93) · **(2026-11-12)** validación visual aprobada (V-93, Pablo) |
 | Solo el asesor asignado o el admin (`role == 'admin'`) | `get_queryset()` de la cartera (otro asesor: 404) y `can_manage_opportunity()` | `test_other_agent_gets_404_and_nothing_changes`, `test_anonymous_and_non_internal_users_are_rejected` | Implementado y verificado |
 
 - **Fuera del lote:** PERDIDA con motivo obligatorio (HU-31, siguiente bloque: DT-154); Reservada y Evaluación documental (HU-35, RF-10: C-09); el cierre que confirma el admin (RF-07).
 
 ## HU-30
 
-**Registrar interacciones y negociación de precio** · EP-5 · RF-06 · Pantalla I-06A · URB-36, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-94 y V-95)
+**Registrar interacciones y negociación de precio** · EP-5 · RF-06 · Pantalla I-06A · URB-36, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-94 y V-95) · **(2026-11-12)** validación visual aprobada (V-94 y V-95, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22
 
 **Proceso (PROC-05):** el asesor anota llamadas, acuerdos y contraofertas; el historial no se edita ni se borra y las contraofertas no cambian el precio público.
 
 | Criterio (Avance de épicas §5; RF-06) | Implementación | Prueba | Resultado |
 |---|---|---|---|
-| La negociación no modifica el precio público | `OpportunityInteraction` (`opportunities.0003`): CONTRAOFERTA con `offered_price` > 0, sin tocar `Property.price` ni `agreed_final_price` | `test_counteroffer_does_not_change_the_public_price`, `test_counteroffer_needs_a_positive_price_and_keeps_the_public_price` | Implementado y verificado; visual Pendiente (V-94) |
+| La negociación no modifica el precio público | `OpportunityInteraction` (`opportunities.0003`): CONTRAOFERTA con `offered_price` > 0, sin tocar `Property.price` ni `agreed_final_price` | `test_counteroffer_does_not_change_the_public_price`, `test_counteroffer_needs_a_positive_price_and_keeps_the_public_price` | Implementado y verificado; visual Pendiente (V-94) · **(2026-11-12)** validación visual aprobada (V-94, Pablo) |
 | El historial no es editable retroactivamente | `save()`, `delete()` y el QuerySet bloquean cambios y borrados; admin de solo lectura; `CheckConstraint` de precio y autor | `OpportunityInteractionModelTests` (13 pruebas) | Implementado y verificado |
-| Registrar NOTA o CONTRAOFERTA (SISTEMA solo el backend), con visita opcional de la misma oportunidad; en Cierre no se registran nuevas | `add_interaction()`; `GET`/`POST /api/opportunities/<id>/interactions/`; formulario y línea de tiempo en I-06A | `InteractionApiTests` (8 pruebas) | Implementado y verificado; visual Pendiente (V-95) |
+| Registrar NOTA o CONTRAOFERTA (SISTEMA solo el backend), con visita opcional de la misma oportunidad; en Cierre no se registran nuevas | `add_interaction()`; `GET`/`POST /api/opportunities/<id>/interactions/`; formulario y línea de tiempo en I-06A | `InteractionApiTests` (8 pruebas) | Implementado y verificado; visual Pendiente (V-95) · **(2026-11-12)** validación visual aprobada (V-95, Pablo) |
 
 ## Plan de reparto (2026-11-08) **[PLAN]**
 

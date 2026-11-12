@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (transcrito por Claude Code) · Ronda 8 cerrada: V-86 a V-95 **Aprobado** por Pablo; HU-15, HU-16, HU-29 y HU-30 siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 4 · fusión de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `5ed0e3b` (PR #21) en la rama del lote 4; 332 pruebas OK en SQLite (Estándares §4); HU-19, HU-20 y HU-25 en Listo |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 cerrada: las 8 Aprobado por Pablo (V-78, V-80 y V-81 tras repetirlas, ~15:46–15:55); HU-19, HU-20 y HU-25 siguen en Pruebas hasta la auditoría y el merge del PR #21 |
 | Última actualización lote 3 · integración de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `97f0e0c` en la rama del lote 3; 277 pruebas OK en SQLite (Estándares §4) |
@@ -53,6 +54,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-12 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (PR #22) · cierre de la Ronda 8
+- **Hecho:** transcripción de la validación visual de Pablo: V-86 y V-88 a V-94 desde su bitácora por correo del 2026-11-12; V-87 y V-95 dictadas en el chat. Las 10 **Aprobado** (V-87 y V-95 con observaciones). Decisión de Pablo en DT-117/SEC-20: el celular del asesor puede ser público si es el de trabajo. Estado de procesos, Avance (§5 y §5C), USM y Seguridad (SEC-20) actualizados; HU-15, HU-16, HU-29 y HU-30 siguen en **Pruebas** hasta la auditoría y el merge del PR #22.
+- **Hallazgos:** DT-156 nuevo (I-06A redirige a `/dashboard` después de "no encontrada"); DT-147 visto otra vez en V-87; pregunta para Sebas sobre DT-94 (desactivar deja las propiedades sin asesor y A-01 no reactiva; HU-44/HU-47), sin ID nuevo.
+- **Falta:** asignar las capturas de `evidencias\Lote4\` (propuesta en el chat, pendiente del ok de Pablo; no hay capturas después de las 17:29 del 11-nov); frontend tras la fusión (build, tsc, eslint, `npm test`); auditoría de solo lectura (§11) del PR #22; avisar a Sebas de DT-94.
+- **Siguiente paso:** auditoría §11 del PR #22 y merge; luego el lote 5 según la respuesta del tutor.
 
 ### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4) · fusión de develop tras el PR #21
 - **Hecho:** `git fetch` y fusión de `origin/develop` `5ed0e3b` (PR #21, lote 3) por orden de Pablo. Dos conflictos solo documentales, resueltos según Pablo conservando las dos partes (Progress: develop arriba y lote 4 debajo; Estándares: orden cronológico); el código se fusionó sin conflictos. Nota añadida en DS-50 (excepción a `AGENTS.md` §5, cerrada). Lote 3 después del merge: HU-19, HU-20 y HU-25 pasan a **Listo** (PR #21 auditado en un chat aparte, "apto para fusionar", según Pablo, 2026-11-11, y fusionado) en Estado de procesos (filas nuevas en la tabla resumen), Avance §5B y USM.
@@ -1232,6 +1239,8 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 ### Ronda 8 — Lote 4: HU-15, HU-16 (P-07), HU-29 y HU-30 (I-06A) (rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm`)
 
+> **(2026-11-12) Ronda 8 cerrada: las 10 Aprobado por Pablo** (V-86 y V-88 a V-94 desde su bitácora por correo del 2026-11-12; V-87 y V-95 dictadas en el chat). Capturas asignadas por hora (ok de Pablo): las 10.
+>
 > **Estado (2026-11-09): las 10 pruebas Pendiente.** Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\Lote4\`, fuera del repo).
 >
 > **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote4`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console` por defecto; nunca Supabase ni Resend). La base del worktree ya tiene `migrate` (hasta `opportunities.0003`), `setup_demo_data` y el script **fuera del repo** `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\Lote4\preparar_demo_lote4.py` (ejecutado el 2026-11-09; las instrucciones están en su cabecera). El script deja:
@@ -1245,7 +1254,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:05 | Sin sesión, en la ficha #1 aparece el botón verde "Escribir al asesor por WhatsApp" bajo el precio; abre `wa.me` (redirige a `api.whatsapp.com`) con el número del asesor y el texto prellenado "Hola, me interesa la propiedad "[DEMO] Casa en Cumbayá - lista para publicar" (código #1) que vi en Urbanex.". **Decisión DT-117/SEC-20:** Pablo acepta que el celular del asesor sea público, siempre que sea el celular de trabajo. Capturas: `evidencias\Lote4\Captura de pantalla (70)`, `(71)` y `(72).png`. | **Aprobado** |
 
 ### V-87 · HU-15 — El botón se oculta sin celular válido o con el asesor inactivo
 
@@ -1253,7 +1262,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:45–01:04 | Sin celular → sin botón. A-01 no permite guardar un fijo (valida el celular), así que el fijo `022345678` se puso por el shell → sin botón; con `0990000001` vuelve el botón. Asesor desactivado → sin botón. Propiedad en captación → la ficha no se muestra. Hallazgos: (i) al desactivar el asesor, `UserDeactivateView` pone `agent=None` en todas sus propiedades (`backend/apps/users/views.py:367`) y A-01 no permite reactivar: se reactivó y se reasignaron las 4 propiedades por el shell (pregunta para Sebas, DT-94); (ii) la ficha no pública dice "No se pudo cargar… verifica la conexión con el servidor" en vez de "no encontrada" (DT-147, ya registrado). Capturas: `evidencias\Lote4\Captura de pantalla (105)` a `(119).png`. | **Aprobado** (con observaciones) |
 
 ### V-88 · HU-16 — Enviar el interés desde la ficha (P-07)
 
@@ -1261,7 +1270,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:11 | "Interesado Prueba", `0992222222`, "Quiero más información" y LOPDP → "¡Gracias!" y "Tu interés quedó registrado…"; en I-06 la oportunidad en Contacto inicial, canal Catálogo web; I-06A muestra la barra de 4 etapas, el avance deshabilitado sin visita y el historial inmutable. Capturas: `evidencias\Lote4\Captura de pantalla (73)`, `(74)` y `(75).png`. | **Aprobado** |
 
 ### V-89 · HU-16 — Errores del formulario y campo de mensaje responsivo
 
@@ -1269,7 +1278,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:18–17:24 | Sin LOPDP, con el fijo `022345678` y con la casilla de correo marcada y el correo vacío, cada error aparece junto a su campo y no se crea nada. "Mensaje" crece, hace scroll, muestra n/1000 y no deja pasar de 1000. En vista de teléfono (Opera GX) no hay desplazamiento lateral. Capturas: `evidencias\Lote4\Captura de pantalla (76)` a `(81)`, `(83)` y `(84).png`. | **Aprobado** |
 
 ### V-90 · HU-16 — Un visitante repetido no duplica y su mensaje llega a I-06A
 
@@ -1277,7 +1286,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:23 | Mismo celular, "Otro Nombre", "Segundo mensaje" → misma respuesta; en I-06 una sola oportunidad con el nombre original; en I-06A dos entradas "Sistema" (17:11 y 17:23). Capturas: `evidencias\Lote4\Captura de pantalla (82).png`. | **Aprobado** |
 
 ### V-91 · HU-29 — Barra de progreso y avance de un paso (I-06A)
 
@@ -1285,7 +1294,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:26 | Demo B: la barra muestra Contacto inicial; "Avanzar a Visita programada" abre un modal de confirmación; al aceptar pasa a Visita programada y el historial registra el cambio con usuario y hora; no hay botón para volver atrás. Capturas: `evidencias\Lote4\Captura de pantalla (85)` a `(88).png`. | **Aprobado** |
 
 ### V-92 · HU-29 — Avance bloqueado si falta la visita
 
@@ -1293,7 +1302,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:29 | Demo A: avance deshabilitado con el mensaje de que necesita una visita y el enlace a la agenda. Demo B, en Visita programada: "Avanzar a En negociación" deshabilitado por falta de una visita Realizada. Capturas: `evidencias\Lote4\Captura de pantalla (89)` y `(90).png`. | **Aprobado** |
 
 ### V-93 · HU-29 — Pendiente de cierre con precio final acordado
 
@@ -1301,7 +1310,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:15 | Precio de la ficha #1 = $285.000. Demo C → En negociación (confirmado); "Precio final acordado" con 0 y con "abc" deja el botón deshabilitado; con 142500 el modal muestra el precio; queda en Pendiente de cierre con "Precio final acordado: $142.500,00", sin botón de avance y con el aviso de que el cierre lo confirma el administrador; la ficha sigue en $285.000. Capturas: `evidencias\Lote4\Captura de pantalla (91)` a `(95).png`. | **Aprobado** |
 
 ### V-94 · HU-30 — Contraoferta sin cambiar el precio público
 
@@ -1309,7 +1318,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:23 | Demo B: Contraoferta sin precio o con 0 → no guarda (debe ser mayor a 0); con observación y 140000 → aparece en el historial con la etiqueta Contraoferta, "Precio ofrecido: $140.000,00" y `asesor.demo`; la ficha sigue en $285.000. Capturas: `evidencias\Lote4\Captura de pantalla (96)` a `(99).png`. | **Aprobado** |
 
 ### V-95 · HU-30 — Nota con visita, Cierre sin interacciones e historial inmutable
 
@@ -1317,7 +1326,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:30–00:42 | (a) Demo B: Nota con visita relacionada → en el historial "Visita del …"; el historial no tiene botones de editar ni borrar. (b) Demo D: "La oportunidad está cerrada: no se registran interacciones nuevas." y la barra avisa que el estado está fuera de la secuencia. (c) Con un asesor B creado en A-01, `/dashboard/opportunities/<id de Demo A>` → pantalla de carga y "no encontrada" (404) sin mostrar ningún dato de Demo A; a los segundos redirige a `/dashboard`. Observación: I-06A debería quedarse en el mensaje de no encontrada (DT-156). Capturas: `evidencias\Lote4\Captura de pantalla (100)` a `(104).png`. | **Aprobado** (con observación) |
 
 ## Estado actual (2026-11-02)
 

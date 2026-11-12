@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · notas aditivas en PROC-03 y PROC-05: validación visual de HU-15, HU-16, HU-29 y HU-30 aprobada por Pablo (V-86 a V-95) |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: HU-19, HU-20 y HU-25 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: validación visual de HU-19, HU-20 y HU-25 aprobada por Pablo (V-78 a V-85) |
 | Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: nota aditiva en PROC-08 con el registro humano de V-44 |
@@ -162,6 +163,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 4 | El asesor atiende conversaciones sin número | HU-26 | I-04, I-04A | No implementado | — |
 | 5 | El asesor abre contacto y oportunidad a mano | HU-27 | I-07 | ~~**Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`):~~ (2026-11-04: fusionada en `develop` por el PR #15, `043cfb5`, DS-32) `opportunities/models.py`, `opportunities/services.py`, `opportunities/validators.py`, `opportunities/serializers.py`, `opportunities/views.py` (`OpportunityViewSet.create`, `eligible_properties`, `agents`) · `POST opportunities/`, `GET opportunities/eligible-properties/`, `GET opportunities/agents/` · `app/dashboard/opportunities/new/page.tsx`, `lib/opportunities.ts`, `types/opportunity.ts` | [HU-27](URBANEX_ESTADO_PROCESOS.md#hu-27) |
 
+**Nota (2026-11-12, Ronda 8):** pasos 1 y 2 (HU-15 y HU-16) con validación visual aprobada por Pablo (V-86 a V-90, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
+
 ### PROC-04 · Agendamiento y visitas
 
 | # | Paso | HU | Pantalla | Código | Estado |
@@ -190,6 +193,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 5 | Marca Perdida con motivo | HU-31 | I-06A | No implementado | — |
 | 6 | Recibe recordatorios (inactividad, visita, documento, asignación) | HU-32 | I-03 | No implementado | — |
 | 7 | El admin asigna o reasigna con motivo | HU-28 | A-02 | No implementado | — |
+
+**Nota (2026-11-12, Ronda 8):** pasos 3 y 4 (HU-29 y HU-30) con validación visual aprobada por Pablo (V-91 a V-95, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
 
 ### PROC-06 · Reserva y documentación
 

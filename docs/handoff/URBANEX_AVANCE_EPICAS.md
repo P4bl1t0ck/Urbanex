@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · §5 (EP-5): validado 10/20 con HU-29 y HU-30 (V-91 a V-95); §5C: HU-15 y HU-16 validadas (V-86 a V-90); 0/4 HU del lote completas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · §5B: 3/3 HU · 10/10 pts del lote 3 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · §5B: los 3 criterios del lote 3 validados (V-78 a V-85, Pablo); 0/3 HU completas hasta la auditoría y el merge del PR #21 |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
@@ -217,12 +218,12 @@ Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Crite
 | HU-27 | Reutiliza el contacto si ya existe | ✔ | ✔ | ✔ | (2026-10-30) Por teléfono, sin cambiar sus datos y con aviso (DS-28). `test_existing_contact_is_reused_without_changing_its_data`. Validación visual aprobada 2026-11-01 (V-28, Pablo); **(2026-11-04)** repetida con hora y captura el 2026-11-03 |
 | HU-28 | La reasignación exige un motivo | ✗ | ✗ | ✗ | No iniciado (`AssignmentHistory`) |
 | HU-28 | Notifica al asesor entrante y al saliente | ✗ | ✗ | ✗ | No iniciado |
-| HU-29 | Avanza en la secuencia de RF-06 | ✔ | ✔ | ✗ | Corte posterior (DS-26); los estados existen en el modelo, sin transiciones. **(2026-11-09, lote 4, nota añadida)** `advance_status()`: un paso a la vez hasta Pendiente de cierre, sin Reservada ni Evaluación documental (corte temporal, C-09); `test_full_sequence_with_its_requirements`, `test_cannot_skip_steps_or_go_back`. V-91 y V-92 Pendiente |
-| HU-29 | Cada cambio registra fecha, hora y usuario | ✔ | ✔ | ✗ | Parcial: `OpportunityStatusHistory` registra la apertura (inmutable, probado), pero aún no hay cambios de estado. Parcial = no cuenta. **(2026-11-09, lote 4, nota añadida)** cada avance usa `change_status()` con el usuario; `test_full_sequence_with_its_requirements`, `test_admin_can_advance_any_opportunity`. V-91 Pendiente |
-| HU-29 | Pendiente de Cierre es el tope del asesor | ✔ | ✔ | ✗ | No iniciado. **(2026-11-09, lote 4, nota añadida)** desde Pendiente de cierre no hay siguiente paso (`next_status` null); `test_states_outside_the_cut_do_not_advance`. V-93 Pendiente |
-| HU-29 | Registra el precio final acordado al pasar a Pendiente de Cierre | ✔ | ✔ | ✗ | El campo `agreed_final_price` existe (DS-28), sin uso. **(2026-11-09, lote 4, nota añadida)** obligatorio y > 0 solo en ese paso; `test_price_only_on_the_step_to_pendiente_cierre_and_positive`. V-93 Pendiente |
-| HU-30 | La negociación no modifica el precio público | ✔ | ✔ | ✗ | No iniciado (`OpportunityInteraction`). **(2026-11-09, lote 4, nota añadida)** `OpportunityInteraction` (`opportunities.0003`), CONTRAOFERTA con `offered_price`; `test_counteroffer_does_not_change_the_public_price`. V-94 Pendiente |
-| HU-30 | El historial no es editable retroactivamente | ✔ | ✔ | ✗ | No iniciado. **(2026-11-09, lote 4, nota añadida)** sin edición ni borrado (modelo, QuerySet y admin); `OpportunityInteractionModelTests`. V-95 Pendiente |
+| HU-29 | Avanza en la secuencia de RF-06 | ✔ | ✔ | ~~✗~~ ✔ | Corte posterior (DS-26); los estados existen en el modelo, sin transiciones. **(2026-11-09, lote 4, nota añadida)** `advance_status()`: un paso a la vez hasta Pendiente de cierre, sin Reservada ni Evaluación documental (corte temporal, C-09); `test_full_sequence_with_its_requirements`, `test_cannot_skip_steps_or_go_back`. V-91 y V-92 Pendiente · **(2026-11-12)** V-91 y V-92 aprobada (Pablo) |
+| HU-29 | Cada cambio registra fecha, hora y usuario | ✔ | ✔ | ~~✗~~ ✔ | Parcial: `OpportunityStatusHistory` registra la apertura (inmutable, probado), pero aún no hay cambios de estado. Parcial = no cuenta. **(2026-11-09, lote 4, nota añadida)** cada avance usa `change_status()` con el usuario; `test_full_sequence_with_its_requirements`, `test_admin_can_advance_any_opportunity`. V-91 Pendiente · **(2026-11-12)** V-91 aprobada (Pablo) |
+| HU-29 | Pendiente de Cierre es el tope del asesor | ✔ | ✔ | ~~✗~~ ✔ | No iniciado. **(2026-11-09, lote 4, nota añadida)** desde Pendiente de cierre no hay siguiente paso (`next_status` null); `test_states_outside_the_cut_do_not_advance`. V-93 Pendiente · **(2026-11-12)** V-93 aprobada (Pablo) |
+| HU-29 | Registra el precio final acordado al pasar a Pendiente de Cierre | ✔ | ✔ | ~~✗~~ ✔ | El campo `agreed_final_price` existe (DS-28), sin uso. **(2026-11-09, lote 4, nota añadida)** obligatorio y > 0 solo en ese paso; `test_price_only_on_the_step_to_pendiente_cierre_and_positive`. V-93 Pendiente · **(2026-11-12)** V-93 aprobada (Pablo) |
+| HU-30 | La negociación no modifica el precio público | ✔ | ✔ | ~~✗~~ ✔ | No iniciado (`OpportunityInteraction`). **(2026-11-09, lote 4, nota añadida)** `OpportunityInteraction` (`opportunities.0003`), CONTRAOFERTA con `offered_price`; `test_counteroffer_does_not_change_the_public_price`. V-94 Pendiente · **(2026-11-12)** V-94 aprobada (Pablo) |
+| HU-30 | El historial no es editable retroactivamente | ✔ | ✔ | ~~✗~~ ✔ | No iniciado. **(2026-11-09, lote 4, nota añadida)** sin edición ni borrado (modelo, QuerySet y admin); `OpportunityInteractionModelTests`. V-95 Pendiente · **(2026-11-12)** V-95 aprobada (Pablo) |
 | HU-31 | Exige un motivo | ✗ | ✗ | ✗ | El campo `loss_or_reversion_reason` existe, sin uso |
 | HU-31 | Puede hacerse desde cualquier estado | ✗ | ✗ | ✗ | No iniciado |
 | HU-32 | Recordatorios por inactividad, visita, documento o asignación | ✗ | ✗ | ✗ | No iniciado (`Reminder`, D-06) |
@@ -237,8 +238,8 @@ Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Crite
 | Total de criterios | 20 |
 | Implementado | 4/20 = **20 %** (2026-10-30). **(2026-11-09, lote 4, nota añadida) 10/20 = 50 %** (+4 de HU-29 y +2 de HU-30) |
 | Verificado | **(2026-11-09, lote 4, nota añadida) 10/20 = 50 %** (HU-29 y HU-30 con pruebas en `apps.opportunities.tests`, suite 318 OK). Antes: 4/20 = **20 %** (backend: ~~35~~ 37 pruebas de `apps.opportunities.tests`, FX-25 (corregido por Pablo, 2026-11-03); las pantallas I-06 e I-07 compilan con `tsc`, `eslint` y `next build`, sin pruebas automáticas, DT-37) |
-| Validado | 4/20 = **20 %**, sin cambio el 2026-11-09 (V-91 a V-95 Pendiente) (validación visual aprobada 2026-11-01, V-26 a V-32, Pablo; **(2026-11-04)** repetida con hora y captura el 2026-11-03, 22:50 a 23:49) |
-| HU completas / puntos | **(2026-11-09, lote 4, nota añadida)** sin cambio: HU-29 y HU-30 quedan en **Pruebas** (0 pts más) hasta la validación de Pablo (V-91 a V-95), la auditoría y el merge. 0/9 HU · 0/32 pts = **0 %** (2026-11-01: los 4 criterios de HU-27 y HU-34 están validados, pero las dos siguen en **Pruebas** por decisión de Pablo: ~~falta comprobar DT-105 con HU-44 fusionada,~~ faltan la auditoría y el merge; DT-105 se comprobó el 2026-11-03, FX-25) (corregido por Pablo, 2026-11-03). **(2026-11-04, nota añadida) 2/9 HU · 6/32 pts = 18,8 %**: HU-27 (3 pts) y HU-34 (3 pts) completas tras el merge del PR #15 en `develop` (`043cfb5`, DS-32) |
+| Validado | ~~4/20 = **20 %**, sin cambio el 2026-11-09 (V-91 a V-95 Pendiente)~~ **(2026-11-12) 10/20 = 50 %** (+4 de HU-29 y +2 de HU-30, V-91 a V-95, Pablo). Antes: 4/20 = 20 % (validación visual aprobada 2026-11-01, V-26 a V-32, Pablo; **(2026-11-04)** repetida con hora y captura el 2026-11-03, 22:50 a 23:49) |
+| HU completas / puntos | **(2026-11-09, lote 4, nota añadida)** sin cambio: HU-29 y HU-30 quedan en **Pruebas** (0 pts más) hasta la validación de Pablo (V-91 a V-95), la auditoría y el merge. 0/9 HU · 0/32 pts = **0 %** (2026-11-01: los 4 criterios de HU-27 y HU-34 están validados, pero las dos siguen en **Pruebas** por decisión de Pablo: ~~falta comprobar DT-105 con HU-44 fusionada,~~ faltan la auditoría y el merge; DT-105 se comprobó el 2026-11-03, FX-25) (corregido por Pablo, 2026-11-03). **(2026-11-04, nota añadida) 2/9 HU · 6/32 pts = 18,8 %**: HU-27 (3 pts) y HU-34 (3 pts) completas tras el merge del PR #15 en `develop` (`043cfb5`, DS-32). **(2026-11-12, nota añadida)** HU-29 y HU-30 validadas (V-91 a V-95), pero siguen en **Pruebas** hasta la auditoría y el merge del PR #22: sin cambio, 2/9 HU · 6/32 pts |
 
 **Lectura:** el primer corte cubre los dos criterios de HU-27 y los dos de HU-34 en el backend y en la interfaz, y su validación visual se aprobó el 2026-11-01 (V-26 a V-32) y se repitió con hora y captura el 2026-11-03 (Pablo, 22:50 a 23:49; filas nuevas en `Project_Progress.md`, Ronda 4) (corregido por Pablo, 2026-11-04). HU-27 (3 pts) y HU-34 (3 pts) pasarán a completas (**2/9 HU · 6/32 pts, 18,8 %**) cuando se fusionen en `develop` después de la auditoría (criterio conservador, decisión de Pablo del 2026-11-01). **(2026-11-04, nota añadida)** Se cumplió: el PR #15 se fusionó en `develop` (`043cfb5`) y las dos pasan a completas (**2/9 HU · 6/32 pts, 18,8 %**). Lo fusionó el administrador sin la revisión del compañero; Sebas revisa después (DS-32).
 
@@ -278,13 +279,13 @@ Composición: HU-15 (3 pts) y HU-16 (2 pts) de EP-4, más HU-29 (5 pts) y HU-30 
 
 | HU | Criterio (backlog §10) | Impl. | Verif. | Valid. | Evidencia |
 |---|---|:-:|:-:|:-:|---|
-| HU-15 | Botón de WhatsApp solo con propiedad Disponible y asesor activo con celular (RF-02) | ✔ | ✔ | Pendiente | `WhatsAppContactApiTests` (7), `opportunityPipeline.test.mjs`; V-86, V-87 Pendiente. "Registrar lead antes de redirección" **no se implementa** (simplificación, DS-50) |
-| HU-16 | Consentimiento y no duplicación | ✔ | ✔ | Pendiente | `WebInterestApiTests` (11), `WebInterestThrottleTests` (3); V-88 a V-90 Pendiente |
+| HU-15 | Botón de WhatsApp solo con propiedad Disponible y asesor activo con celular (RF-02) | ✔ | ✔ | ~~Pendiente~~ ✔ | `WhatsAppContactApiTests` (7), `opportunityPipeline.test.mjs`; ~~V-86, V-87 Pendiente~~ **(2026-11-12)** V-86 y V-87 aprobadas (Pablo). "Registrar lead antes de redirección" **no se implementa** (simplificación, DS-50) |
+| HU-16 | Consentimiento y no duplicación | ✔ | ✔ | ~~Pendiente~~ ✔ | `WebInterestApiTests` (11), `WebInterestThrottleTests` (3); ~~V-88 a V-90 Pendiente~~ **(2026-11-12)** V-88 a V-90 aprobadas (Pablo) |
 
 | Métrica | Valor |
 |---|---|
-| Criterios del lote 4 (EP-4) | 2/2 implementados y verificados (HU-15 con la desviación de DS-50); 0/2 validados |
-| HU completas / puntos del lote | **0/4 HU · 0/15 pts**: en **Pruebas** hasta la validación de Pablo (V-86 a V-95), la auditoría (§11) y el merge (después del PR #21 del lote 3) |
+| Criterios del lote 4 (EP-4) | 2/2 implementados y verificados (HU-15 con la desviación de DS-50); ~~0/2 validados~~ **(2026-11-12)** 2/2 validados (Ronda 8, Pablo) |
+| HU completas / puntos del lote | **0/4 HU · 0/15 pts**: en **Pruebas** hasta la validación de Pablo (V-86 a V-95), la auditoría (§11) y el merge (después del PR #21 del lote 3). **(2026-11-12)** Validación hecha (V-86 a V-95, Pablo); faltan la auditoría y el merge del PR #22 |
 
 ## 6. Bloqueos y dependencias que afectan al avance
 
