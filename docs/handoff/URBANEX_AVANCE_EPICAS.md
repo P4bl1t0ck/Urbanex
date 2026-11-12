@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-45 en **Listo** (según Pablo, confirmado por Sebas); métricas sin cambio |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-46 en **Listo** por decisión de Pablo; EP-1 validado 3/6; por el método de §2 sigue 1/3 HU · 2/8 pts (el criterio "solo usuarios activos" no tiene validación humana propia, POR CONFIRMAR) |
 | Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §5C, 4/4 HU · 15/15 pts del lote 4 en **Listo**; §5 (EP-5), **4/9 HU · 16/32 pts (50 %)** (PR #22 auditado y fusionado, `c64b41a`) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · §5 (EP-5): validado 10/20 con HU-29 y HU-30 (V-91 a V-95); §5C: HU-15 y HU-16 validadas (V-86 a V-90); 0/4 HU del lote completas hasta la auditoría y el merge del PR #22 |
@@ -135,6 +136,10 @@ Esta actualización supersede la lectura anterior de hoy: el flujo detallado de 
 | EP-1 verificado | 5/6 = **83,3 %**; suite backend integrada 159/159 OK en SQLite |
 | EP-1 validado | 2/6 = **33,3 %** |
 | HU completas / puntos | 1/3 HU · 2/8 pts = **25 %**; HU-45 aporta 2 puntos según `URBANEX_MASTER_CONTEXT.md` §10 |
+
+### Actualización aditiva de EP-1 para HU-45 (2026-11-12)
+
+HU-45 pasa a **Listo**: según Pablo (2026-11-12), Sebas confirmó que está terminada (V-43, PR #17 fusionado, `94843c7`). **Métricas sin cambio:** la actualización del 2026-11-04 ya la contaba como completa (1/3 HU · 2/8 pts). DT-120 queda abierto aparte (DT-157).
 
 ### Actualización aditiva de EP-1 para HU-46 (2026-11-12, decisión de Pablo)
 

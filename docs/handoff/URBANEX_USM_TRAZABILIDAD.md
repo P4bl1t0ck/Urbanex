@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-45 en **Listo** (según Pablo, confirmado por Sebas) |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-46 en **Listo** (decisión de Pablo) |
 | Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: notas aditivas en PROC-03 y PROC-05: HU-15, HU-16, HU-29 y HU-30 en **Listo** (PR #22 auditado y fusionado, `c64b41a`) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · notas aditivas en PROC-03 y PROC-05: validación visual de HU-15, HU-16, HU-29 y HU-30 aprobada por Pablo (V-86 a V-95) |
@@ -243,6 +244,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 **Actualización aditiva HU-46 (2026-11-11):** la fila "1 (actualización 2026-11-06)" dice "V-44 Pendiente"; ya no es así. Sebas registró V-44 en `Project_Progress.md` como Aprobado en tres filas: 2026-11-07, 16:19, los cinco pasos originales (`evidence/HU-46/Screenshot 2026-11-07 161628.png`); 2026-11-09, 15:13:56, recuperación con desbloqueo y contador en cero (`evidence/ResetPasswordUsuarioBloqueado.png`); y 2026-11-09, 16:13:56, invalidación de la sesión anterior tras recuperar la contraseña (`evidence/HU-46/ResetPasswordUsuarioBloqueado.png`). Es la transcripción de su registro, no una validación nueva del agente.
 
 **Actualización aditiva HU-46 (2026-11-12, decisión de Pablo, DT-157):** HU-46 pasa a **Listo**. Respaldo: auditoría §11 del PR #20 (con la corrección posterior de precisión de JWT registrada el 2026-11-09), V-44 aprobada por Sebas (filas del 2026-11-07 y del 2026-11-09 en `Project_Progress.md`), PR #20 fusionado en `develop` (`47d09ed`) y PR #23 con su cierre documental (`97f0e0c`). No se modifican las filas anteriores de Sebas.
+
+**Actualización aditiva HU-45 (2026-11-12, DT-157):** HU-45 pasa a **Listo**. Según Pablo (2026-11-12), Sebas confirmó que está terminada: V-43 aprobada por Sebas (2026-11-04 y 2026-11-06) y PR #17 fusionado en `develop` (`94843c7`). DT-120 (notificación persistente al administrador) queda abierto aparte.
 
 ---
 

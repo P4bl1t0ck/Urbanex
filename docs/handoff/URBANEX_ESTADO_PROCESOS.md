@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-45 pasa a **Listo** (según Pablo, Sebas confirmó que está terminada; V-43 y PR #17); DT-120 sigue abierto aparte |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 pasa a **Listo** por decisión de Pablo (auditoría del PR #20, V-44 y PR #23); nota aditiva en la sección HU-46. La fila resumen de HU-46 ("En Curso") queda como histórica, sin reescribirla |
 | Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-15, HU-16, HU-29 y HU-30 pasan a **Listo** (PR #22 auditado y fusionado en `develop`, `c64b41a`); filas nuevas en la tabla resumen (DT-157) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · HU-15, HU-16, HU-29 y HU-30: validación visual aprobada por Pablo (V-86 a V-95); siguen en Pruebas hasta la auditoría y el merge del PR #22 |
@@ -367,6 +368,8 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | Bloqueo tras cinco intentos fallidos | `LoginView` bloquea la cuenta y A-01 muestra el estado y el contador | Según Sebas, comprobado en V-43 el 2026-11-04 junto con el desbloqueo posterior |
 
 **Actualización aditiva (2026-11-04):** la respuesta del login continúa siendo uniforme para reducir la enumeración de cuentas. Tras `401`, la interfaz borra la contraseña y muestra «No se pudo iniciar sesión. Revisa tus credenciales.»; no explica la regla de bloqueo ni revela el estado de la cuenta. `npm run build`, `npx tsc --noEmit -p .` y la suite backend de 120 pruebas terminaron con exit 0; `npx eslint .` terminó con exit 0 y 2 avisos preexistentes. `makemigrations --check --dry-run` detecta la diferencia previa `documents/0002_alter_document_file.py`. Según confirmación de Sebas, V-43 se completó después del último ajuste; los estados anteriores «Pendiente» son históricos y quedan supersedidos por esta confirmación. PostgreSQL no verificado.
+
+**Actualización aditiva HU-45 (2026-11-12): Listo.** Según Pablo (2026-11-12), Sebas confirmó que HU-45 está terminada. Respaldo: V-43 aprobada por Sebas (2026-11-04, 18:59, y 2026-11-06, 14:03, caso no admin; `Project_Progress.md`) y PR #17 fusionado en `develop` (`94843c7`, 2026-11-06; DS-36). DT-120 (notificación persistente al administrador, RF-13) queda abierto aparte y fuera de HU-45. La fila de HU-45 en la tabla resumen ("Pruebas") queda como histórica, sin reescribirla (DT-157).
 
 ## HU-46
 
