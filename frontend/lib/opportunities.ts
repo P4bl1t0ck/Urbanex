@@ -7,6 +7,7 @@ import type {
   EligibleProperty,
   Interaction,
   InteractionCreatePayload,
+  MarkLostPayload,
   OpportunityDetail,
   OpportunityFilters,
   OpportunityOpenPayload,
@@ -73,6 +74,14 @@ export function advanceOpportunity(id: number, payload: StatusChangePayload) {
 }
 
 // HU-30: NOTA o CONTRAOFERTA.
+// HU-31 (DS-52): marca la oportunidad como Perdida; devuelve el detalle actualizado.
+export function markOpportunityLost(id: number, payload: MarkLostPayload) {
+  return authFetch<OpportunityDetail>(`${BASE}${id}/lose/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function createInteraction(id: number, payload: InteractionCreatePayload) {
   return authFetch<Interaction>(`${BASE}${id}/interactions/`, {
     method: "POST",

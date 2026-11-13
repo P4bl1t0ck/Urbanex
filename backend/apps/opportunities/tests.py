@@ -1011,15 +1011,16 @@ class InteractionApiTests(I06AMixin, TestCase):
                          [WEB_FORM_EMPTY_NOTE, 'Segunda'])
         self.assertIsNone(response.data[0]['author'])
 
-    def test_closed_opportunity_rejects_new_interactions_but_lost_one_accepts(self):
-        self.set_status(Opportunity.Status.CIERRE)
-        response = self.post(interaction_type='NOTA', notes='Después del cierre')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('detail', response.data)
+    def test_closed_or_lost_opportunity_rejects_new_interactions(self):
+        # Lote 4: solo CIERRE. Desde HU-31 (DS-52, Fase 0 aprobada por Pablo el 2026-11-13),
+        # PERDIDA tambien es definitiva y no admite interacciones nuevas.
+        for current in (Opportunity.Status.CIERRE, Opportunity.Status.PERDIDA):
+            with self.subTest(current=current):
+                self.set_status(current)
+                response = self.post(interaction_type='NOTA', notes='Después del final')
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn('detail', response.data)
         self.assertFalse(OpportunityInteraction.objects.exists())
-        self.set_status(Opportunity.Status.PERDIDA)
-        self.assertEqual(self.post(interaction_type='NOTA', notes='Seguimiento').status_code,
-                         status.HTTP_201_CREATED)
 
     def test_admin_can_register_and_other_agent_gets_404(self):
         self.client.force_authenticate(self.admin)
@@ -1088,6 +1089,119 @@ class OpportunityDetailApiTests(I06AMixin, TestCase):
     def test_list_filters_do_not_hide_the_detail(self):
         response = self.client.get(detail_url(self.opp.pk), {'status': 'PERDIDA'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+def lose_url(opportunity_id):
+    return f'{OPPORTUNITIES_URL}{opportunity_id}/lose/'
+
+
+class MarkLostApiTests(I06AMixin, TestCase):
+    '''HU-31 (RF-06, DS-52): motivo de la lista cerrada y desde cualquier estado activo.'''
+
+    def lose(self, **data):
+        return self.client.post(lose_url(self.opp.pk), data, format='json')
+
+    def test_reason_is_required_and_must_be_in_the_list(self):
+        for data in ({}, {'loss_reason': ''}, {'loss_reason': 'CARO'}, {'notes': 'Sin motivo'}):
+            with self.subTest(data=data):
+                response = self.lose(**data)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn('loss_reason', response.data)
+        self.opp.refresh_from_db()
+        self.assertEqual(self.opp.status, Opportunity.Status.CONTACTO_INICIAL)
+        self.assertFalse(self.opp.status_history.exists())
+
+    def test_reason_and_optional_notes_are_kept_in_the_immutable_history(self):
+        response = self.lose(loss_reason='PRECIO', notes='  Le pareció caro  ')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], Opportunity.Status.PERDIDA)
+        self.opp.refresh_from_db()
+        self.assertEqual(self.opp.loss_or_reversion_reason, 'Precio. Observación: Le pareció caro')
+        entry = self.opp.status_history.get()
+        self.assertEqual((entry.previous_status, entry.new_status, entry.changed_by),
+                         (Opportunity.Status.CONTACTO_INICIAL, Opportunity.Status.PERDIDA,
+                          self.agent))
+        self.assertIn('Motivo: Precio. Observación: Le pareció caro', entry.reason)
+        with self.assertRaises(ValidationError):
+            entry.save()
+
+    def test_without_notes_only_the_reason_is_saved(self):
+        self.lose(loss_reason='NO_RESPONDE')
+        self.opp.refresh_from_db()
+        self.assertEqual(self.opp.loss_or_reversion_reason, 'No responde')
+
+    def test_notes_longer_than_1000_are_rejected(self):
+        response = self.lose(loss_reason='OTRO', notes='x' * 1001)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_can_be_marked_from_every_active_status(self):
+        active = [value for value in Opportunity.Status.values
+                  if value not in (Opportunity.Status.CIERRE, Opportunity.Status.PERDIDA)]
+        for current in active:
+            with self.subTest(current=current):
+                opp = Opportunity.objects.create(
+                    contact=Contact.objects.create(
+                        full_name=f'Contacto {current}', origin_channel=OriginChannel.MANUAL,
+                        phone=f'+59399{active.index(current):07d}'),
+                    property=self.property, assigned_agent=self.agent,
+                    origin_channel=OriginChannel.MANUAL, status=current,
+                )
+                response = self.client.post(lose_url(opp.pk), {'loss_reason': 'DESISTIO'},
+                                            format='json')
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(response.data['status'], Opportunity.Status.PERDIDA)
+
+    def test_it_is_final_closed_or_lost_cannot_be_marked_again(self):
+        for current in (Opportunity.Status.CIERRE, Opportunity.Status.PERDIDA):
+            with self.subTest(current=current):
+                self.set_status(current)
+                response = self.lose(loss_reason='PRECIO')
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(self.opp.status_history.exists())
+
+    def test_lost_opportunity_accepts_no_interactions_nor_advance(self):
+        self.lose(loss_reason='OTRA_PROPIEDAD')
+        data = self.client.get(detail_url(self.opp.pk)).data
+        self.assertEqual((data['accepts_interactions'], data['can_mark_lost'], data['next_status']),
+                         (False, False, None))
+        response = self.client.post(interactions_url(self.opp.pk),
+                                    {'interaction_type': 'NOTA', 'notes': 'Hola'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.advance(Opportunity.Status.VISITA_PROGRAMADA).status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
+    def test_contact_can_open_a_new_opportunity_after_the_loss(self):
+        self.lose(loss_reason='SIN_FINANCIAMIENTO')
+        response = self.open(self.agent, phone=self.contact.phone)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_programmed_visits_are_cancelled_and_free_their_slot(self):
+        future = self.add_visit()
+        done = self.add_visit(visit_status=Visit.Status.REALIZADA, days=-1)
+        self.set_status(Opportunity.Status.VISITA_PROGRAMADA)
+        self.assertEqual(self.lose(loss_reason='DESISTIO').status_code, status.HTTP_200_OK)
+        future.refresh_from_db()
+        done.refresh_from_db()
+        self.assertEqual(future.status, Visit.Status.CANCELADA)
+        self.assertEqual((future.outcome_recorded_by, bool(future.outcome_recorded_at)),
+                         (self.agent, True))
+        self.assertIn('perdida', future.outcome_notes)
+        self.assertEqual(done.status, Visit.Status.REALIZADA)
+        # La franja vuelve a estar libre: free_slots() solo resta visitas PROGRAMADAS.
+        self.assertFalse(Visit.objects.filter(agent=self.agent,
+                                              status=Visit.Status.PROGRAMADA).exists())
+
+    def test_admin_can_mark_and_other_agent_gets_404(self):
+        self.client.force_authenticate(self.other_agent)
+        self.assertEqual(self.lose(loss_reason='PRECIO').status_code, status.HTTP_404_NOT_FOUND)
+        self.client.force_authenticate(self.admin)
+        self.assertEqual(self.lose(loss_reason='PRECIO').status_code, status.HTTP_200_OK)
+        self.assertEqual(self.opp.status_history.get().changed_by, self.admin)
+
+    def test_anonymous_is_rejected(self):
+        self.client.force_authenticate(None)
+        self.assertEqual(self.lose(loss_reason='PRECIO').status_code,
+                         status.HTTP_401_UNAUTHORIZED)
 
 
 class OpportunityFollowUpApiTests(I06AMixin, TestCase):

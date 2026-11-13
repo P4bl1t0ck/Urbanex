@@ -190,6 +190,26 @@ export type OpportunityDetail = Opportunity & {
   interactions: Interaction[];
   visits: OpportunityVisit[];
   documents: OpportunityDocument[]; // HU-33, en orden de carga
+  can_mark_lost: boolean; // HU-31: true en cualquier estado activo
+  loss_or_reversion_reason: string; // HU-31: "Motivo. Observación: ..." o ""
+};
+
+// HU-31 (DS-52): lista cerrada; debe coincidir con LOSS_REASONS de services.py.
+export const LOSS_REASONS = [
+  { value: "PRECIO", label: "Precio" },
+  { value: "OTRA_PROPIEDAD", label: "Eligió otra propiedad" },
+  { value: "NO_RESPONDE", label: "No responde" },
+  { value: "SIN_FINANCIAMIENTO", label: "Sin financiamiento" },
+  { value: "DESISTIO", label: "Desistió" },
+  { value: "OTRO", label: "Otro" },
+] as const;
+
+export type LossReason = (typeof LOSS_REASONS)[number]["value"];
+
+// HU-31: POST /api/opportunities/<id>/lose/
+export type MarkLostPayload = {
+  loss_reason: LossReason;
+  notes?: string; // Opcional, hasta 1000 caracteres
 };
 
 // HU-29: POST /api/opportunities/<id>/status/

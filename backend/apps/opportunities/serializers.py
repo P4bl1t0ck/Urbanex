@@ -1,7 +1,15 @@
 from rest_framework import serializers
 
 from .models import Contact, Opportunity, OpportunityInteraction, OpportunityStatusHistory
-from .services import advance_blocker, assignable_agents, eligible_properties, next_status
+from .services import (
+    LOSS_REASONS,
+    MAX_LOSS_NOTES_LENGTH,
+    accepts_interactions,
+    advance_blocker,
+    assignable_agents,
+    eligible_properties,
+    next_status,
+)
 
 
 def user_display_name(user):
@@ -168,11 +176,13 @@ class OpportunityDetailSerializer(OpportunitySerializer):
     interactions = InteractionSerializer(many=True, read_only=True)
     visits = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
+    can_mark_lost = serializers.SerializerMethodField()
 
     class Meta(OpportunitySerializer.Meta):
         fields = OpportunitySerializer.Meta.fields + [
             'agreed_final_price', 'next_status', 'next_status_display', 'advance_blocked_reason',
             'accepts_interactions', 'status_history', 'interactions', 'visits', 'documents',
+            'can_mark_lost', 'loss_or_reversion_reason',
         ]
         read_only_fields = fields
 
@@ -189,7 +199,11 @@ class OpportunityDetailSerializer(OpportunitySerializer):
         return advance_blocker(obj) if next_status(obj) else ''
 
     def get_accepts_interactions(self, obj):
-        return obj.status != Opportunity.Status.CIERRE
+        return accepts_interactions(obj)
+
+    def get_can_mark_lost(self, obj):
+        # HU-31 (DS-52): desde cualquier estado activo.
+        return obj.is_active
 
     def get_next_status_display(self, obj):
         target = next_status(obj)
@@ -210,6 +224,16 @@ class StatusChangeSerializer(serializers.Serializer):  # pylint: disable=abstrac
     agreed_final_price = serializers.DecimalField(
         max_digits=12, decimal_places=2, required=False, allow_null=True, default=None,
     )
+
+
+class MarkLostSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-31. Las reglas las aplica services.mark_lost().'''
+    loss_reason = serializers.ChoiceField(
+        choices=list(LOSS_REASONS.items()),
+        error_messages={'invalid_choice': 'Elige el motivo de la pérdida.'},
+    )
+    notes = serializers.CharField(required=False, allow_blank=True, default='',
+                                  max_length=MAX_LOSS_NOTES_LENGTH, trim_whitespace=True)
 
 
 class InteractionCreateSerializer(serializers.Serializer):  # pylint: disable=abstract-method
