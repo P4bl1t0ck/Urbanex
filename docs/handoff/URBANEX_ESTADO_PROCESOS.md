@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: nuevas secciones **HU-33** y **HU-31** (EP-5), **HU-21** y **HU-23** (EP-4) en **Pruebas** (DS-52); validación visual Pendiente (V-96 a V-103); nota en HU-30 (Perdida tampoco admite interacciones) |
 | Última actualización · ajustes DT-157 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46, criterio "solo usuarios activos" cubierto por su prueba automática (DS-35, decisión de Pablo); fechas de validación corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11) |
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-12 pasa a **Listo** (PR #14, V-60 a V-62 y V-64); V-63 **No aplicable hasta el despliegue (DT-110)**, decisión de Pablo |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-45 pasa a **Listo** (según Pablo, Sebas confirmó que está terminada; V-43 y PR #17); DT-120 sigue abierto aparte |
@@ -88,6 +89,10 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-16](#hu-16) | Registrar interés desde el formulario | EP-4 | 3 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-88 a V-90, Pablo, 2026-11-11) | Aprobado (V-88 a V-90) |
 | [HU-29](#hu-29) | Avanzar el estado de la oportunidad | EP-5 | 6 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-91 a V-93, Pablo, 2026-11-11/12) | Aprobado (V-91 a V-93) |
 | [HU-30](#hu-30) | Registrar interacciones y negociación de precio | EP-5 | 6 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-94, V-95, Pablo, 2026-11-12) | Aprobado (V-94, V-95) |
+| [HU-33](#hu-33) | Consultar una oportunidad y su seguimiento | EP-5 | 5 | **Pruebas** (lotes 5 y 6, 2026-11-13: documentos de la propiedad en la línea de tiempo de I-06A; DS-52) | Aprobado (suite SQLite de Estándares §4, 2026-11-13; PostgreSQL No ejecutado, DT-68) | Pendiente (V-96, V-97) | Pendiente (V-96, V-97) |
+| [HU-31](#hu-31) | Marcar una oportunidad como perdida | EP-5 | 5 | **Pruebas** (lotes 5 y 6, 2026-11-13: `mark_lost()` + diálogo en I-06A; DS-52, DT-154) | Aprobado (ídem) | Pendiente (V-98, V-99) | Pendiente (V-98, V-99) |
+| [HU-21](#hu-21) | Cancelar una visita | EP-4 | 4 | **Pruebas** (lotes 5 y 6, 2026-11-13: `cancel_visit()`, P-08 y agenda I-08; DS-52) | Aprobado (ídem) | Pendiente (V-100, V-101) | Pendiente (V-100, V-101) |
+| [HU-23](#hu-23) | Registrar o reprogramar una visita coordinada | EP-4 | 4 | **Pruebas** (lotes 5 y 6, 2026-11-13: visita coordinada y reprogramación en I-08; DS-52) | Aprobado (ídem) | Pendiente (V-102, V-103) | Pendiente (V-102, V-103) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | **Pruebas** | Pendiente de cierre técnico (suite 116/116 ejecutada en SQLite; suite PostgreSQL local no ejecutada) | V-33..V-39 Pendiente | V-33..V-42 Pendiente; no marcar como validada |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | Pruebas | Aprobado (120 pruebas backend en SQLite en memoria) | Aprobado (V-43; Sebas confirmó el flujo de desbloqueo y login el 2026-11-04) | Aprobado (V-43; Sebas, 2026-11-04, después del último ajuste) |
@@ -564,6 +569,60 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | La negociación no modifica el precio público | `OpportunityInteraction` (`opportunities.0003`): CONTRAOFERTA con `offered_price` > 0, sin tocar `Property.price` ni `agreed_final_price` | `test_counteroffer_does_not_change_the_public_price`, `test_counteroffer_needs_a_positive_price_and_keeps_the_public_price` | Implementado y verificado; visual Pendiente (V-94) · **(2026-11-12)** validación visual aprobada (V-94, Pablo) |
 | El historial no es editable retroactivamente | `save()`, `delete()` y el QuerySet bloquean cambios y borrados; admin de solo lectura; `CheckConstraint` de precio y autor | `OpportunityInteractionModelTests` (13 pruebas) | Implementado y verificado |
 | Registrar NOTA o CONTRAOFERTA (SISTEMA solo el backend), con visita opcional de la misma oportunidad; en Cierre no se registran nuevas | `add_interaction()`; `GET`/`POST /api/opportunities/<id>/interactions/`; formulario y línea de tiempo en I-06A | `InteractionApiTests` (8 pruebas) | Implementado y verificado; visual Pendiente (V-95) · **(2026-11-12)** validación visual aprobada (V-95, Pablo) |
+
+- **(2026-11-13, lotes 5 y 6, nota añadida)** Desde HU-31 (DS-52, cambia DS-50 punto 5), una oportunidad **Perdida** tampoco admite interacciones nuevas (`accepts_interactions()`). La prueba del lote 4 `test_closed_opportunity_rejects_new_interactions_but_lost_one_accepts` pasa a `test_closed_or_lost_opportunity_rejects_new_interactions`. El backend sí deja entradas SISTEMA por las visitas (HU-21, HU-23).
+
+## HU-33
+
+**Consultar una oportunidad y su seguimiento** · EP-5 · RF-06 · Pantalla I-06A (`/dashboard/opportunities/[id]`) · URB-33, lotes 5 y 6 · Estado: **Pruebas** (2026-11-13; validación visual Pendiente, V-96 y V-97)
+
+**Proceso (PROC-05):** el asesor asignado (o el admin) abre la oportunidad y ve en una sola línea de tiempo, de lo más reciente a lo más antiguo, los cambios de estado, las interacciones (notas, contraofertas y entradas del sistema) y los documentos del expediente de la propiedad.
+
+**Mapa de lo que ya existía (I-06A, lote 4):** estado y barra de progreso, historial de estados, interacciones y contraofertas en orden cronológico (`buildTimeline`) y permisos (otro asesor: 404). **Se construyó solo lo que faltaba:** los documentos vinculados (DS-52).
+
+| Criterio (Avance de épicas §5; Anexo 2) | Implementación | Prueba | Resultado |
+|---|---|---|---|
+| Muestra estado, interacciones y documentos vinculados | `OpportunityDetailSerializer.documents` (`document_summary()`, sin archivo ni enlace) en `backend/apps/opportunities/serializers.py`; `buildTimeline(history, interactions, documents)` en `frontend/lib/opportunityPipeline.ts`; insignia "Documento" en I-06A. Son los documentos **de la propiedad** (DT-31 sigue abierta para HU-36) | `test_documents_of_the_property_in_upload_order_without_file_data`, `test_other_agent_does_not_see_the_documents_and_admin_does`, `test_detail_has_next_status_history_interactions_and_visits` | Implementado y verificado; visual Pendiente (V-96) |
+| El historial se presenta en orden cronológico | Orden por `created_at` en el backend (modelos e `id`) y en `buildTimeline` (con la misma hora: estado, interacción, documento) | `test_history_and_interactions_are_chronological`, `test_list_is_chronological_and_includes_system_entries`, `npm test` "buildTimeline suma los documentos de la propiedad en orden cronológico (HU-33)" | Implementado y verificado; visual Pendiente (V-97) |
+| El asesor ve las suyas y el admin todas (DS-52 b) | `get_queryset()` sin cambios (HU-34) | `test_other_agent_gets_404_and_admin_sees_it` | Implementado y verificado (ya validado en V-95 para el detalle) |
+
+## HU-31
+
+**Marcar una oportunidad como perdida** · EP-5 · RF-06 · Pantalla I-06A · URB-32, lotes 5 y 6 · Estado: **Pruebas** (2026-11-13; validación visual Pendiente, V-98 y V-99) · DT-154 resuelto en código
+
+**Proceso (PROC-05, paso 13 "sin interés"):** el asesor asignado (o el admin) pulsa "Marcar como perdida", elige el motivo de la lista y, si quiere, escribe una observación. La oportunidad pasa a Perdida de forma definitiva y sus visitas Programadas se cancelan.
+
+| Criterio (Avance de épicas §5; Anexo 2) | Implementación | Prueba | Resultado |
+|---|---|---|---|
+| Exige un motivo | `mark_lost()` con `LOSS_REASONS` (Precio, Eligió otra propiedad, No responde, Sin financiamiento, Desistió, Otro) y observación opcional de hasta 1000 caracteres; texto en `loss_or_reversion_reason` y en el historial inmutable; `POST /api/opportunities/<id>/lose/`; diálogo con lista en I-06A | `test_reason_is_required_and_must_be_in_the_list`, `test_reason_and_optional_notes_are_kept_in_the_immutable_history`, `test_without_notes_only_the_reason_is_saved`, `test_notes_longer_than_1000_are_rejected` | Implementado y verificado; visual Pendiente (V-98) |
+| Puede hacerse desde cualquier estado | Cualquier estado activo (DS-28); Cierre y Perdida responden 400. Definitiva: sin interacciones ni avance; libera la regla de una activa por contacto e inmueble; cancela las visitas Programadas | `test_can_be_marked_from_every_active_status`, `test_it_is_final_closed_or_lost_cannot_be_marked_again`, `test_lost_opportunity_accepts_no_interactions_nor_advance`, `test_contact_can_open_a_new_opportunity_after_the_loss`, `test_programmed_visits_are_cancelled_and_free_their_slot` | Implementado y verificado; visual Pendiente (V-99) |
+| Solo el asesor asignado o el admin | `can_manage_opportunity()` y la cartera (otro asesor: 404) | `test_admin_can_mark_and_other_agent_gets_404`, `test_anonymous_is_rejected` | Implementado y verificado |
+
+- **Pendiente:** Perdida desde un estado con reserva cuando llegue HU-35 (DT-158).
+
+## HU-21
+
+**Cancelar una visita** · EP-4 · RF-04 · Pantallas P-08 (`/visits/[token]`) e I-08 (`/dashboard/agenda`) · URB-25, lotes 5 y 6 · Estado: **Pruebas** (2026-11-13; validación visual Pendiente, V-100 y V-101)
+
+**Proceso (PROC-04):** el cliente cancela desde el enlace de su correo hasta 1 hora antes; el asesor (o el admin) cancela desde su agenda, con motivo, hasta la hora de inicio. La hora queda libre y, si era la única visita, la oportunidad vuelve a Contacto inicial.
+
+| Criterio (backlog §10 del contexto maestro; Anexo 2 de la tesis **POR CONFIRMAR**) | Implementación | Prueba | Resultado |
+|---|---|---|---|
+| Enlace válido y solo antes de la hora (cliente: hasta 1 h antes; asesor o admin: hasta el inicio, con motivo) | `cancel_visit()` en `backend/apps/visits/services.py`; `POST /api/visits/public/<token>/cancel/` (público, 30/min por IP, 404 igual que P-08) y `POST /api/visits/<id>/cancel/`; `can_cancel` y `cancel_until` en P-08; botón y diálogo en P-08 y en I-08 | `ClientVisitCancelTests` (5), `AgentVisitCancelTests` (6) | Implementado y verificado; visual Pendiente (V-100) |
+| Libera la franja en la agenda del asesor y retrocede la oportunidad si aplica; queda en el historial | Visita Cancelada (`free_slots()` solo resta Programadas); Visita programada → Contacto inicial si no quedan visitas activas (DS-39); entrada SISTEMA; correo al asesor (cancela el cliente) o al cliente si dio correo (cancela el asesor); 409 si ya no estaba Programada | `test_client_cancels_frees_the_slot_and_opportunity_goes_back`, `test_other_active_visit_keeps_visita_programada`, `test_agent_cancels_with_reason_and_client_is_notified`, `test_already_cancelled_is_409_and_started_or_unknown_is_404` | Implementado y verificado; visual Pendiente (V-101) |
+
+## HU-23
+
+**Registrar o reprogramar una visita coordinada** · EP-4 · RF-04 · Pantalla I-08 (`/dashboard/agenda`) · URB-26, lotes 5 y 6 · Estado: **Pruebas** (2026-11-13; validación visual Pendiente, V-102 y V-103)
+
+**Proceso (PROC-04):** cuando la visita se acuerda por WhatsApp, el asesor la registra en su agenda (propiedad, franja libre y datos del cliente) y, si hace falta, la cambia de hora; el cliente recibe el aviso por correo si lo dio y, si no, el asesor le avisa por WhatsApp (queda en el historial).
+
+| Criterio (backlog §10 del contexto maestro; Anexo 2 de la tesis **POR CONFIRMAR**) | Implementación | Prueba | Resultado |
+|---|---|---|---|
+| El asesor registra a mano la visita coordinada, sin doble reserva y con 30 min de antelación | `register_coordinated_visit()` reutiliza `request_visit()` (HU-19) con `registered_by`, canal WhatsApp y `agent_lead_time()`; contacto por celular (DS-28); `POST /api/visits/coordinated/`, `GET /api/visits/coordinated/free-slots/`; `?mine=1` en `eligible-properties`; `ManualVisitDialog` en I-08 | `CoordinatedVisitTests` (9), `test_mine_filters_the_agent_properties_but_not_for_admin` | Implementado y verificado; visual Pendiente (V-102) |
+| Reprogramar sin solapes y notificar | `reschedule_visit()` (mismo registro y enlace; franja exacta de `agent_free_slots()` con el asesor bloqueado); `POST /api/visits/<id>/reschedule/`, `GET /api/visits/<id>/reschedule-slots/`; correo al cliente (y al otro asesor) en consola; sin correo: historial "le avisa por WhatsApp"; `RescheduleVisitDialog` en I-08 | `RescheduleVisitTests` (7) | Implementado y verificado; visual Pendiente (V-103) |
+
+- **Regresión del lote 3:** `request_visit()` llamado como antes (cliente) se comporta igual; lo cubren `VisitRequestTests` y `VisitNotificationTests` sin cambios.
 
 ## Plan de reparto (2026-11-08) **[PLAN]**
 
