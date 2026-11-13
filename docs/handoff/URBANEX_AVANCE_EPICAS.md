@@ -2,6 +2,17 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
+| Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
+| Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
+| Última actualización HU-10 · preparación de integración | 2026-11-13 · DT-92 corregido con storage callable y migración de estado; commits e integración autorizados por Sebas |
+| Última actualización HU-10 · distribución | 2026-11-13 · Filtrar, grupos uniformes y orden junto al conteo; V-46 humana Pendiente |
+| Última actualización HU-10 · orden y simplificación | 2026-11-13 · Interfaz depurada y orden global; validación humana/métricas sin cambio |
+| Última actualización HU-10 · preferencias | 2026-11-12 · Cantidades de parqueaderos acordadas por Sebas; pruebas registradas; sin cambios de métricas |
+| Última actualización HU-10 · slider e histograma | 2026-11-12 · Interfaz y consultas sobre campos existentes; sin aprobación humana ni cambios de métricas |
+| Última actualización HU-10 · barra superior | 2026-11-11 · Rediseño P-02 y comprobaciones automáticas; V-46 Pendiente, métricas sin cambio |
+| Última actualización HU-10 · usabilidad | 2026-11-11 · Mejora móvil y datos de paginación locales; sin aprobaciones ni cambios de métricas |
+| Última actualización HU-10 | 2026-11-11 · Implementación de catálogo en rama URB-16; V-46 Pendiente; métricas sin cambio |
 | Última actualización · EP-1 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), el criterio "solo usuarios activos" de HU-46 se cierra con la salida de `test_inactive_users_cannot_log_in` (DS-35, decisión de Pablo); EP-1 validado **4/6**, **2/3 HU · 5/8 pts (62,5 %)** |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-45 en **Listo** (según Pablo, confirmado por Sebas); métricas sin cambio |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-46 en **Listo** por decisión de Pablo; EP-1 validado 3/6; por el método de §2 sigue 1/3 HU · 2/8 pts (el criterio "solo usuarios activos" no tiene validación humana propia, POR CONFIRMAR) |
@@ -345,6 +356,52 @@ HU-09 incorpora retirada con motivo, reactivación a captación y edición sin a
 
 La corrección de HU-46 agrega dos pruebas de regresión para JWT emitidos en el mismo segundo y para tokens heredados sin versión precisa. La sesión nueva debe funcionar y las anteriores deben rechazarse. Los resultados técnicos se registran en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu). No se recalculan porcentajes ni se modifican registros humanos; HU-46 permanece en Pruebas.
 
+### HU-10 / URB-16 — catálogo con filtros (2026-11-11)
+
+Implementación en rama `feat/URB-16-HU-10-catalogo-filtros`, **Pruebas**: filtros combinados por campos existentes según DS-16, paginación de 20, búsqueda conservada en URL, estados públicos y etiqueta Reservado. Evidencia automática en Estándares §4 y validación humana propuesta V-46 en Progress, **Pendiente**. Sin aprobación del agente ni recálculo de porcentajes; criterios literales del Anexo 2 pendientes de cotejo. No está fusionada en develop.
+
+### HU-10 — ampliación de usabilidad (2026-11-11)
+
+Panel de filtros lateral en escritorio y desplegable en móvil, selectores de mínimos y decimales guiados; cuatro pruebas nuevas de utilidades frontend y seis del comando de preparación de datos. En SQLite local se agregaron 24 ejemplos por el flujo HU-53, conservando exactamente usuarios y propiedades anteriores; permite ejecutar el caso humano de paginación. Se aplicaron dos migraciones existentes de visits para corregir tablas locales faltantes, sin modificar HU-22 ni sus estados. V-46, móvil, fixture Reservado y cotejo literal del Anexo 2 siguen **Pendiente**; no se recalculan porcentajes ni se declaran aprobaciones humanas.
+
+### HU-10 — rediseño de barra superior (2026-11-11)
+
+La barra superior sustituye el lateral para dar ancho al inventario; paneles con borrador/Aplicar/Cancelar, diálogo móvil y tarjetas compactas. Comprobaciones automáticas registradas en Estándares §4 y capturas locales en evidence/HU-10; no constituyen aprobación humana. Estado **Pruebas**, V-46 **Pendiente** y métricas sin cambio. No se amplían RF, campos del modelo, filtros de API ni estados de negocio.
+
+### HU-10 — slider doble e histograma (2026-11-12)
+
+Se conecta distribución agregada real (antes de precio y paginación), una pista con dos controles a pasos de 100 USD y parqueaderos mínimos sobre el campo existente. El mínimo visual proviene de inventario; no se impone cero o una campana ficticia. Pruebas automáticas y evidencia local en Estándares §4. La validación humana V-46 sigue Pendiente, la HU sigue Pruebas y no cambian porcentajes. Ascensor, mascotas y decisiones de modelo se posponen por indicación de Sebas.
+
+### HU-10 — selección Sin preferencia (2026-11-12)
+
+Botones y consulta ajustados al acuerdo de Sebas: habitaciones/baños con mínimos; parqueaderos con exactos 0/1/2 y 3+. Sin preferencia elimina la restricción en los tres grupos; cero no equivale a sin filtro. Evidencia automática en Estándares §4; V-46 humana sigue Pendiente, HU-10 en Pruebas y métricas sin cambio. Sin modelos, migraciones o datos nuevos.
+
+### HU-10 — orden y simplificación (2026-11-13)
+
+Orden global por precio/recientes con conservación de filtros y paginación; UI sin botón de preferencia ni explicaciones visibles; importe junto al control de precio. Parqueaderos 1+/2+/3+ como mínimos por aclaración de Sebas posterior a Fase 0, sin cero visible. Evidencia automática en Estándares §4; HU-10 sigue Pruebas, V-46 humana Pendiente y métricas sin cambio. Pasos de slider por operación/modelos siguen pospuestos.
+
+
+### HU-10 — distribución de controles (2026-11-13)
+
+Fase 0 aprobada por Sebas para tres archivos frontend y siete documentos. `CatalogFilters.tsx` distribuye botones de igual ancho: habitaciones/baños en cuatro columnas, parqueaderos en tres y tipos en dos con Todos en fila completa. El único botón de acción del panel es **Filtrar**; se elimina Cancelar visible y se conservan X, Escape y cierre exterior que descartan el borrador, con retorno del foco. **Limpiar filtros** es global junto a las etiquetas activas, que permiten eliminación individual; no se repite dentro de los paneles y conserva el orden.
+
+El nuevo `CatalogResultsHeader.tsx` muestra conteo a la izquierda y **Ordenar por** a la derecha, fuera de la barra, con ajuste de filas en móvil. `app/properties/page.tsx` conecta conteo, filtros y errores; sin respuesta válida muestra Resultados sin inventar cero coincidencias. Opciones: Más recientes, Precio: menor a mayor y Precio: mayor a menor. No cambia la API. Sin modelos, migraciones, datos, dependencias, SiteNav o layout modificados en esta ampliación.
+
+UX: [Baymard, filtros aplicados](https://baymard.com/research-articles/how-to-design-applied-filters) respalda visibilidad y eliminación de filtros; ubicar el borrado global junto a etiquetas es una aplicación al catálogo, no un requisito literal. [W3C APG, diálogo modal](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) contempla cierre visible, Escape y retorno del foco; la X permite quitar Cancelar. Referencias consultadas el 2026-11-13.
+
+Edge automático: orden fuera de barra, sin Cancelar y con Filtrar; tipos con Todos de 366 px y otras opciones de 179 px. A 320 px, documento de 320 px, botones de habitaciones/baños de 57.5 px y parqueaderos de aproximadamente 79.33 px. Escape cierra y devuelve el foco a Filtros. Capturas locales `evidence/HU-10/distribucion-*-20261113.png`, ignoradas por Git. Los primeros envíos de Escape por CDP no cerraron; activar pestaña y enviar código virtual 27 permitió comprobar el cierre. No se atribuye ese fallo del arnés al producto.
+
+HU-10 sigue **Pruebas**, V-46 humana **Pendiente**. Pasos humanos adicionales: revisar alineación y grupos en escritorio/móvil; Filtrar aplica; X/Escape/exterior descartan; foco retorna al disparador; cada etiqueta quita su filtro; Limpiar filtros elimina todos conservando orden; ordenar conserva filtros y reinicia página. Cotejo literal Anexo 2, Reservado humano y auditoría en chat nuevo pendientes. No se cambian porcentajes ni aprobaciones.
+
+
+### HU-10 — DT-92 y preparación de integración (2026-11-13)
+
+Sebas autorizó corregir DT-92, crear commits por grupos e incorporar develop; no autorizó push ni PR. `backend/apps/documents/models.py` cambia private_storage de instancia con ruta absoluta a función que resuelve BASE_DIR/private_media en el equipo actual; FileField conserva su contrato y serializa la función. `backend/apps/documents/migrations/0002_alter_document_file.py` usa SeparateDatabaseAndState con database_operations vacío: actualiza el estado de migraciones sin reconstruir tablas, mover archivos o reescribir rutas guardadas. No se modifica documents.0001 ni se aplica migrate a la SQLite de trabajo o Supabase. `backend/apps/documents/tests.py` agrega tres casos de serialización sin ruta de equipo, traslado de carpeta y lectura/escritura privada fuera de MEDIA_ROOT. Sin dependencias nuevas.
+
+DT-92: corrección implementada; resultado técnico y criterio de cierre en Estándares §4. Historial previo de exit 1 se conserva. Seguridad: N/A, mantiene ubicación privada y permisos; no cambia exposición pública. V-46 mantiene las nueve aprobaciones humanas de Sebas, con el alcance y limitaciones escritos por él; Reservado humano permanece Pendiente y HU-10 en Pruebas. La decisión de Sebas de no usar Anexo 2 para esta entrega consta en V-46; no se reescriben reglas generales ni registros anteriores.
+
+Archivos compartidos de HU-10: users/views.py, frontend/types/property.ts y frontend/lib/api.ts se preparan en commits propios. Incorporar origin/develop traerá también los cambios ajenos ya fusionados (incluido HU-09), sin atribuirlos a HU-10. Los conflictos se resolverán conservando ambas aportaciones; si requieren nuevos cambios funcionales fuera de alcance, se consultará. Auditoría de solo lectura en chat nuevo sigue Pendiente.
+
 
 ### Corrección aditiva de auditoría HU-09 — 2026-11-11
 
@@ -372,3 +429,20 @@ pie showData title EP-2 — actualización HU-09 en rama (2026-11-11)
 ```
 
 La corrección de privacidad del motivo de retiro se verifica por pruebas automáticas; no cambia las marcas de aceptación ni el registro humano V-45. HU-09 permanece en **Pruebas**. Resultados de ejecución en Estándares §4.
+
+
+### HU-10 — integración de develop c420e56 (2026-11-13)
+
+`git pull --no-rebase --no-commit origin develop` incorporó `c420e56` (PR #24, incluye HU-09 y lotes anteriores). Hubo conflictos solo en los siete documentos de seguimiento. Resolución aditiva: conserva todas las líneas de develop y todas las adiciones de HU-10 respecto de la base común; comprobación por conteos de líneas → ALL_HU10_ADDITIONS_AND_ALL_DEVELOP_LINES_PRESERVED. El primer control que comparaba también líneas históricas de HEAD señaló metadatos modificados legítimamente en develop; se ajustó el control a adiciones de HU-10 frente a base común y contenido completo de develop. No se descartaron aportaciones ajenas. AGENTS incorpora únicamente el cambio entrante de rango DS-50..69 de Pablo.
+
+Las pruebas de retirada/privacidad de HU-09 necesitaban leer results del catálogo paginado. `users/tests.py` adapta cuatro lecturas, conservando las aserciones de ausencia del motivo público y visibilidad interna; /properties/mine/ mantiene array. Primer intento focal: 10 pruebas, 1 error por una lectura heredada adicional; corregida → 10 OK (2.539s), exit 0. No se cambia el serializer ni la implementación de HU-09. La primera suite integrada se interrumpió voluntariamente al detectar la incompatibilidad para corregirla; no cuenta como ejecución completa.
+
+La SQLite de trabajo no se migró: showmigrations devuelve pendientes documents.0002, visits.0003 y opportunities.0002/0003. Las suites usan base de prueba independiente y aplican allí las migraciones. Antes de usar en navegador las funcionalidades entrantes, coordinar respaldo y aplicación local de las migraciones pendientes; no se atribuye la suite a esa SQLite. PostgreSQL No ejecutado (DT-68). Las aprobaciones humanas previas se conservan, Reservado humano y auditoría permanecen Pendiente. Sin push ni PR.
+
+
+**Resultado final de integración HU-10 (2026-11-13):** suite integrada SQLite 372 OK (443.805s), exit 0; migraciones No changes detected, exit 0; frontend 41/41, TypeScript/ESLint/build exit 0, un aviso previo. DT-92 Resuelto por su criterio técnico; sqlmigrate de documents.0002 no-op. Se conserva develop c420e56 y el alcance de HU-10; controles documentales 7/7 y nueve aprobaciones humanas conservadas. Sin push, PR ni migrate en la base de trabajo. PostgreSQL No ejecutado (DT-68). Las notas previas de integración/suite en curso son historial y quedan sustituidas por este resultado. HU-10 en Pruebas; Reservado humano y auditoría Pendiente. Las migraciones locales pendientes indicadas arriba requieren respaldo y aplicación coordinada antes de usar los flujos entrantes en la SQLite de trabajo.
+
+
+### HU-10 — correcciones documentales PR #27 (2026-11-13)
+
+HU-10/URB-16 sigue **Pruebas**, con 5 puntos de estimación y **0 puntos completados atribuibles a HU-10**; no se alteran porcentajes ni totales históricos de otras historias. El catálogo entregado es la primera parte; falta Reservado humano con HU-35. Deudas DT-121..123 registradas. Referencia aceptada por Pablo: contexto maestro/DS-16/ampliaciones; Anexo 2 POR CONFIRMAR.

@@ -1,19 +1,56 @@
 import shutil
 import tempfile
 from datetime import timedelta
+from pathlib import Path
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.db import models
+from django.db.migrations.writer import MigrationWriter
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 
 from apps.users.models import Property
-from .models import Document
+from .models import Document, private_storage
 
 User = get_user_model()
+
+
+class PrivateDocumentStorageTests(SimpleTestCase):
+    def test_file_field_serializes_callable_without_machine_path(self):
+        field = Document._meta.get_field('file')
+        self.assertIs(field.deconstruct()[3]['storage'], private_storage)
+        serialized, _ = MigrationWriter.serialize(field)
+        self.assertIn('apps.documents.models.private_storage', serialized)
+        self.assertNotIn(str(settings.BASE_DIR), serialized)
+        self.assertNotIn('PureWindowsPath', serialized)
+
+    def test_relocating_project_keeps_identical_migration_definition(self):
+        definitions = []
+        with tempfile.TemporaryDirectory() as directory:
+            for folder in ('first-project', 'moved-project'):
+                base_dir = Path(directory) / folder
+                with override_settings(BASE_DIR=base_dir):
+                    field = models.FileField(storage=private_storage)
+                    self.assertEqual(Path(field.storage.location), base_dir / 'private_media')
+                    definitions.append(MigrationWriter.serialize(field)[0])
+        self.assertEqual(definitions[0], definitions[1])
+
+    def test_private_file_round_trip_stays_outside_public_media(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base_dir = Path(directory)
+            public_dir = base_dir / 'media'
+            with override_settings(BASE_DIR=base_dir, MEDIA_ROOT=public_dir):
+                storage = private_storage()
+                name = storage.save('documents/test.pdf', pdf())
+                with storage.open(name, 'rb') as saved:
+                    self.assertTrue(saved.read().startswith(b'%PDF'))
+                self.assertTrue((base_dir / 'private_media' / name).is_file())
+                self.assertFalse((public_dir / name).exists())
 
 
 def pdf(name='contrato.pdf', size=1024):

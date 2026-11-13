@@ -2,6 +2,17 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
+| Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
+| Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
+| Última actualización HU-10 · preparación de integración | 2026-11-13 · DT-92 corregido con storage callable y migración de estado; commits e integración autorizados por Sebas |
+| Última actualización HU-10 · distribución | 2026-11-13 · Filtrar, grupos uniformes y orden junto al conteo; V-46 humana Pendiente |
+| Última actualización HU-10 · orden y simplificación | 2026-11-13 · PROC-02 registra ordenado e interacción numérica; no cambia RF/modelos/corte |
+| Última actualización HU-10 · preferencias | 2026-11-12 · Evolución de filtros existentes; parqueaderos exactos/3+; sin cambios de modelo o corte |
+| Última actualización HU-10 · slider e histograma | 2026-11-12 · PROC-02 agrega distribución de precios y parqueaderos; RF/modelos/corte sin cambios |
+| Última actualización HU-10 · barra superior | 2026-11-11 · PROC-02 agrega evolución de P-02; sin cambiar procesos, RF o corte del 60 % |
+| Última actualización HU-10 · usabilidad | 2026-11-11 · PROC-02 agrega componentes de filtros y herramienta de datos locales; no cambia procesos ni corte |
+| Última actualización HU-10 | 2026-11-11 · Fila aditiva de Código en PROC-02; corte del 60 % sin cambio |
 | Última actualización · HU-46 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-08, criterio "solo usuarios activos" de HU-46 cubierto por su prueba automática (DS-35) |
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-02, HU-12 en **Listo**; V-63 No aplicable hasta el despliegue (DT-110) |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-45 en **Listo** (según Pablo, confirmado por Sebas) |
@@ -154,6 +165,12 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | # | Paso | HU | Pantalla | Código | Estado |
 |---|---|---|---|---|---|
 | 1 | El cliente filtra el catálogo (solo Disponible/Reservado) | HU-10 | P-01, P-02 | **Parcial:** `users/views.py` (`PropertyListCreateView` con `PUBLIC_STATUSES` para anónimos) · `GET auth/properties/` · `app/properties/page.tsx`, `components/PropertyCard.tsx`, `lib/api.ts` (`getProperties`). Sin filtros | — |
+| 1 (actualización 2026-11-11, DS-16) | El cliente combina filtros y recorre el catálogo paginado | HU-10 | P-02 | **Rama sin fusionar** `feat/URB-16-HU-10-catalogo-filtros`: `users/views.py` (`PropertyCatalogQuerySerializer`, `PropertyCatalogPagination`, `PropertyListCreateView`) · `GET auth/properties/` devuelve `count/next/previous/results`; filtros por campos existentes. `app/properties/page.tsx`, `components/PropertyCard.tsx`, `lib/api.ts` (`getProperties`), `types/property.ts`. La fila inicial queda como antecedente | [HU-10](URBANEX_ESTADO_PROCESOS.md#hu-10) |
+| 1 (ampliación de usabilidad 2026-11-11) | Ajusta la búsqueda desde celular o escritorio | HU-10 | P-02 | Misma rama sin fusionar: `components/CatalogFilters.tsx` (panel móvil/lateral), `lib/catalogFilters.ts` y `catalogFilters.test.mjs` (decimales); `users/management/commands/setup_catalog_demo.py` prepara ejemplos locales y publica mediante HU-53 sin cambiar usuarios | [HU-10](URBANEX_ESTADO_PROCESOS.md#hu-10) |
+| 1 (rediseño de barra superior 2026-11-11) | Aplica, cancela y elimina filtros desde la barra superior | HU-10 | P-02 | Misma rama: `CatalogFilters.tsx` sustituye el lateral por barra adherente, paneles y diálogo móvil; `catalogFilters.ts` combina query y valida borradores/rango, `PropertyCard.tsx` compacta tarjetas. Conserva API, DS-16 y páginas de 20. Las filas previas son antecedentes | [HU-10](URBANEX_ESTADO_PROCESOS.md#hu-10) |
+| 1 (slider e histograma 2026-11-12) | Ajusta el rango con una pista de dos controles y consulta concentración de precios; filtra parqueaderos | HU-10 | P-02 | `users/views.py` (`catalog_price_distribution`, catálogo) agrega conteos agregados antes de precio y mínimo `parking_spaces`; `CatalogFilters.tsx`, `lib/catalogFilters.ts`, `types/property.ts`, `app/properties/page.tsx` conectan histograma, controles y URL. Misma rama sin fusionar; sin campos nuevos | [HU-10](URBANEX_ESTADO_PROCESOS.md#hu-10) |
+| 1 (preferencias 2026-11-12) | Elige sin restricción o cantidad de habitaciones/baños/parqueaderos | HU-10 | P-02 | `CatalogFilters.tsx`, `lib/catalogFilters.ts` y `users/views.py` evolucionan la selección: habitaciones/baños mínimos; parqueaderos 0/1/2 exactos, 3+; Sin preferencia elimina el parámetro. Misma rama sin fusionar, sin modelo nuevo | [HU-10](URBANEX_ESTADO_PROCESOS.md#hu-10) |
+| 1 (orden y simplificación 2026-11-13) | Ordena por precio o recientes, confirma mínimos o los desmarca | HU-10 | P-02 | `users/views.py` agrega sort validado/estable sobre todas las coincidencias; `CatalogFilters.tsx`, `lib/catalogFilters.ts`, `types/property.ts`, `app/properties/page.tsx` conservan orden/filtros en URL, muestran importe del slider y eliminan explicaciones visibles. Parqueaderos vuelve a mínimos positivos por decisión posterior de Sebas, sin cero en UI | [HU-10](URBANEX_ESTADO_PROCESOS.md#hu-10) |
 | 2 | Consulta la ficha (precio referencial) | HU-11 | P-03 | `users/views.py` (`PropertyDetailView`, `PUBLIC_STATUSES`) · `GET auth/properties/<id>/` · `app/properties/[id]/page.tsx`, `lib/api.ts` (`getPropertyById`) | — |
 | 3 | Comparte la URL con metaetiquetas | HU-12 | P-03 | ~~**Rama sin fusionar** (`feat/URB-17-HU-12-compartir-ficha`):~~ (2026-11-06: fusionada en `develop` por el PR #14) `lib/propertyMetadata.ts` (`buildPropertyMetadata`), `app/properties/[id]/page.tsx` (`generateMetadata`) | — |
 | 4 | Si está Reservada, deja su interés (Lista de Interesados) | HU-13 | P-04, P-06 | No implementado | — |
@@ -341,6 +358,45 @@ RF sin HU propia: **RF-14** (auditoría) se alimenta de RF-01, 05, 06, 07, 08, 1
 - **Al implementar un paso:** completar la columna **Código** de §4 con los archivos y el endpoint (sin números de línea).
 - **Si se decide algo del §6:** registrar la decisión en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) (DS-xx) y enlazarla aquí.
 
+
+### HU-10 — distribución de controles (2026-11-13)
+
+Fase 0 aprobada por Sebas para tres archivos frontend y siete documentos. `CatalogFilters.tsx` distribuye botones de igual ancho: habitaciones/baños en cuatro columnas, parqueaderos en tres y tipos en dos con Todos en fila completa. El único botón de acción del panel es **Filtrar**; se elimina Cancelar visible y se conservan X, Escape y cierre exterior que descartan el borrador, con retorno del foco. **Limpiar filtros** es global junto a las etiquetas activas, que permiten eliminación individual; no se repite dentro de los paneles y conserva el orden.
+
+El nuevo `CatalogResultsHeader.tsx` muestra conteo a la izquierda y **Ordenar por** a la derecha, fuera de la barra, con ajuste de filas en móvil. `app/properties/page.tsx` conecta conteo, filtros y errores; sin respuesta válida muestra Resultados sin inventar cero coincidencias. Opciones: Más recientes, Precio: menor a mayor y Precio: mayor a menor. No cambia la API. Sin modelos, migraciones, datos, dependencias, SiteNav o layout modificados en esta ampliación.
+
+UX: [Baymard, filtros aplicados](https://baymard.com/research-articles/how-to-design-applied-filters) respalda visibilidad y eliminación de filtros; ubicar el borrado global junto a etiquetas es una aplicación al catálogo, no un requisito literal. [W3C APG, diálogo modal](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) contempla cierre visible, Escape y retorno del foco; la X permite quitar Cancelar. Referencias consultadas el 2026-11-13.
+
+Edge automático: orden fuera de barra, sin Cancelar y con Filtrar; tipos con Todos de 366 px y otras opciones de 179 px. A 320 px, documento de 320 px, botones de habitaciones/baños de 57.5 px y parqueaderos de aproximadamente 79.33 px. Escape cierra y devuelve el foco a Filtros. Capturas locales `evidence/HU-10/distribucion-*-20261113.png`, ignoradas por Git. Los primeros envíos de Escape por CDP no cerraron; activar pestaña y enviar código virtual 27 permitió comprobar el cierre. No se atribuye ese fallo del arnés al producto.
+
+HU-10 sigue **Pruebas**, V-46 humana **Pendiente**. Pasos humanos adicionales: revisar alineación y grupos en escritorio/móvil; Filtrar aplica; X/Escape/exterior descartan; foco retorna al disparador; cada etiqueta quita su filtro; Limpiar filtros elimina todos conservando orden; ordenar conserva filtros y reinicia página. Cotejo literal Anexo 2, Reservado humano y auditoría en chat nuevo pendientes. No se cambian porcentajes ni aprobaciones.
+
+
+### HU-10 — DT-92 y preparación de integración (2026-11-13)
+
+Sebas autorizó corregir DT-92, crear commits por grupos e incorporar develop; no autorizó push ni PR. `backend/apps/documents/models.py` cambia private_storage de instancia con ruta absoluta a función que resuelve BASE_DIR/private_media en el equipo actual; FileField conserva su contrato y serializa la función. `backend/apps/documents/migrations/0002_alter_document_file.py` usa SeparateDatabaseAndState con database_operations vacío: actualiza el estado de migraciones sin reconstruir tablas, mover archivos o reescribir rutas guardadas. No se modifica documents.0001 ni se aplica migrate a la SQLite de trabajo o Supabase. `backend/apps/documents/tests.py` agrega tres casos de serialización sin ruta de equipo, traslado de carpeta y lectura/escritura privada fuera de MEDIA_ROOT. Sin dependencias nuevas.
+
+DT-92: corrección implementada; resultado técnico y criterio de cierre en Estándares §4. Historial previo de exit 1 se conserva. Seguridad: N/A, mantiene ubicación privada y permisos; no cambia exposición pública. V-46 mantiene las nueve aprobaciones humanas de Sebas, con el alcance y limitaciones escritos por él; Reservado humano permanece Pendiente y HU-10 en Pruebas. La decisión de Sebas de no usar Anexo 2 para esta entrega consta en V-46; no se reescriben reglas generales ni registros anteriores.
+
+Archivos compartidos de HU-10: users/views.py, frontend/types/property.ts y frontend/lib/api.ts se preparan en commits propios. Incorporar origin/develop traerá también los cambios ajenos ya fusionados (incluido HU-09), sin atribuirlos a HU-10. Los conflictos se resolverán conservando ambas aportaciones; si requieren nuevos cambios funcionales fuera de alcance, se consultará. Auditoría de solo lectura en chat nuevo sigue Pendiente.
+
 ### Actualización aditiva PROC-01 / HU-09 — 2026-11-09
 
 La fila histórica de PROC-01 paso 10 es anterior a esta implementación. HU-09 añade edición y acciones de retirada/reactivación en `users/serializers.py`, `users/views.py`, `users/urls.py`, `users/tests.py` y `frontend/app/dashboard/page.tsx`. Rutas: `POST auth/properties/<id>/withdraw/` (motivo obligatorio), `POST auth/properties/<id>/reactivate/` (solo a captación); para volver a Disponible se usa la publicación HU-53 existente. No cambia el corte del 60 % ni su reparto. Estado y validación se consultan en [HU-09](URBANEX_ESTADO_PROCESOS.md#hu-09); V-45 fue aprobada por Sebas el 2026-11-10 y está registrada en `Project_Progress.md`.
+
+
+### HU-10 — integración de develop c420e56 (2026-11-13)
+
+`git pull --no-rebase --no-commit origin develop` incorporó `c420e56` (PR #24, incluye HU-09 y lotes anteriores). Hubo conflictos solo en los siete documentos de seguimiento. Resolución aditiva: conserva todas las líneas de develop y todas las adiciones de HU-10 respecto de la base común; comprobación por conteos de líneas → ALL_HU10_ADDITIONS_AND_ALL_DEVELOP_LINES_PRESERVED. El primer control que comparaba también líneas históricas de HEAD señaló metadatos modificados legítimamente en develop; se ajustó el control a adiciones de HU-10 frente a base común y contenido completo de develop. No se descartaron aportaciones ajenas. AGENTS incorpora únicamente el cambio entrante de rango DS-50..69 de Pablo.
+
+Las pruebas de retirada/privacidad de HU-09 necesitaban leer results del catálogo paginado. `users/tests.py` adapta cuatro lecturas, conservando las aserciones de ausencia del motivo público y visibilidad interna; /properties/mine/ mantiene array. Primer intento focal: 10 pruebas, 1 error por una lectura heredada adicional; corregida → 10 OK (2.539s), exit 0. No se cambia el serializer ni la implementación de HU-09. La primera suite integrada se interrumpió voluntariamente al detectar la incompatibilidad para corregirla; no cuenta como ejecución completa.
+
+La SQLite de trabajo no se migró: showmigrations devuelve pendientes documents.0002, visits.0003 y opportunities.0002/0003. Las suites usan base de prueba independiente y aplican allí las migraciones. Antes de usar en navegador las funcionalidades entrantes, coordinar respaldo y aplicación local de las migraciones pendientes; no se atribuye la suite a esa SQLite. PostgreSQL No ejecutado (DT-68). Las aprobaciones humanas previas se conservan, Reservado humano y auditoría permanecen Pendiente. Sin push ni PR.
+
+
+**Resultado final de integración HU-10 (2026-11-13):** suite integrada SQLite 372 OK (443.805s), exit 0; migraciones No changes detected, exit 0; frontend 41/41, TypeScript/ESLint/build exit 0, un aviso previo. DT-92 Resuelto por su criterio técnico; sqlmigrate de documents.0002 no-op. Se conserva develop c420e56 y el alcance de HU-10; controles documentales 7/7 y nueve aprobaciones humanas conservadas. Sin push, PR ni migrate en la base de trabajo. PostgreSQL No ejecutado (DT-68). Las notas previas de integración/suite en curso son historial y quedan sustituidas por este resultado. HU-10 en Pruebas; Reservado humano y auditoría Pendiente. Las migraciones locales pendientes indicadas arriba requieren respaldo y aplicación coordinada antes de usar los flujos entrantes en la SQLite de trabajo.
+
+
+### HU-10 — correcciones documentales PR #27 (2026-11-13)
+
+PROC-02 / HU-10 conserva implementación y endpoints anteriores. Esta corrección solo documenta la primera parte de HU-10 y no incorpora HU-35 ni cambia el corte del 60 %. Estado Pruebas, sin puntos completados nuevos. Contexto maestro/DS-16/ampliaciones aceptados por Pablo para este PR; cotejo Anexo 2 POR CONFIRMAR. DT-121..123 y comprobación humana de Reservado con HU-35 permanecen abiertos.

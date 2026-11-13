@@ -413,7 +413,7 @@ class SetupComparablesDemoCommandTests(TestCase):
         self.assertEqual(set(synthetic.values_list('status', flat=True)), {'vendido'})
         self.assertFalse(synthetic.exclude(agent=None).exists())
         response = APIClient().get('/api/auth/properties/')
-        self.assertFalse(any(row['title'].startswith('[COMP-SINT]') for row in response.data))
+        self.assertFalse(any(row['title'].startswith('[COMP-SINT]') for row in response.data['results']))
 
     @override_settings(DEBUG=True)
     def test_scenarios_cover_high_medium_and_manual(self):
