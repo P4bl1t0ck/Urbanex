@@ -5,7 +5,7 @@
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-02, HU-12 en **Listo**; V-63 No aplicable hasta el despliegue (DT-110) |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-45 en **Listo** (según Pablo, confirmado por Sebas) |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-46 en **Listo** (decisión de Pablo) |
-| Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: notas aditivas en PROC-03 y PROC-05: HU-15, HU-16, HU-29 y HU-30 en **Listo** (PR #22 auditado y fusionado, `c64b41a`) |
+| Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: notas aditivas en PROC-03 y PROC-05: HU-15, HU-16, HU-29 y HU-30 en **Listo** (PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado, `c64b41a`) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · notas aditivas en PROC-03 y PROC-05: validación visual de HU-15, HU-16, HU-29 y HU-30 aprobada por Pablo (V-86 a V-95) |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: HU-19, HU-20 y HU-25 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: validación visual de HU-19, HU-20 y HU-25 aprobada por Pablo (V-78 a V-85) |
@@ -171,7 +171,7 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 
 **Nota (2026-11-12, Ronda 8):** pasos 1 y 2 (HU-15 y HU-16) con validación visual aprobada por Pablo (V-86 a V-90, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
 
-**Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 1 y 2 (HU-15 y HU-16) pasan a **Listo**: PR #22 auditado y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
+**Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 1 y 2 (HU-15 y HU-16) pasan a **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
 
 ### PROC-04 · Agendamiento y visitas
 
@@ -204,7 +204,7 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 
 **Nota (2026-11-12, Ronda 8):** pasos 3 y 4 (HU-29 y HU-30) con validación visual aprobada por Pablo (V-91 a V-95, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
 
-**Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 3 y 4 (HU-29 y HU-30) pasan a **Listo**: PR #22 auditado y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
+**Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 3 y 4 (HU-29 y HU-30) pasan a **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
 
 ### PROC-06 · Reserva y documentación
 

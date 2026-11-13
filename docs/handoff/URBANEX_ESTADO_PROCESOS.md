@@ -5,7 +5,7 @@
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-12 pasa a **Listo** (PR #14, V-60 a V-62 y V-64); V-63 **No aplicable hasta el despliegue (DT-110)**, decisión de Pablo |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-45 pasa a **Listo** (según Pablo, Sebas confirmó que está terminada; V-43 y PR #17); DT-120 sigue abierto aparte |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 pasa a **Listo** por decisión de Pablo (auditoría del PR #20, V-44 y PR #23); nota aditiva en la sección HU-46. La fila resumen de HU-46 ("En Curso") queda como histórica, sin reescribirla |
-| Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-15, HU-16, HU-29 y HU-30 pasan a **Listo** (PR #22 auditado y fusionado en `develop`, `c64b41a`); filas nuevas en la tabla resumen (DT-157) |
+| Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-15, HU-16, HU-29 y HU-30 pasan a **Listo** (PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop`, `c64b41a`); filas nuevas en la tabla resumen (DT-157) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · HU-15, HU-16, HU-29 y HU-30: validación visual aprobada por Pablo (V-86 a V-95); siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25 pasan a **Listo**: PR #21 auditado (§11, chat aparte, "apto para fusionar", según Pablo) y fusionado en `develop` (`5ed0e3b`, por Pablo); filas nuevas en la tabla resumen |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25: validación visual aprobada por Pablo (V-78 a V-85); siguen en Pruebas hasta la auditoría y el merge del PR #21 |
@@ -83,7 +83,7 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-19](#hu-19) | Solicitar una visita | EP-4 | 4 | ~~**Pruebas** (lote 3, 2026-11-09: `request_visit()`, endpoint público + P-07)~~ **Listo** (2026-11-11: PR #21 auditado y fusionado en `develop`, `5ed0e3b`; decisión de Pablo) | Aprobado (suite 277 OK en SQLite, auditoría PR #21; PostgreSQL No ejecutado, DT-143) | Aprobado (V-78 a V-81, Pablo, 2026-11-11) | Aprobado (V-78 a V-81) |
 | [HU-20](#hu-20) | Recibir la confirmación de la visita | EP-4 | 4 | ~~**Pruebas** (lote 3, 2026-11-09: notificaciones + P-08 por token)~~ **Listo** (2026-11-11: PR #21 auditado y fusionado en `develop`, `5ed0e3b`; decisión de Pablo) | Aprobado (ídem; Resend No ejecutado) | Aprobado (V-79, V-82, V-83, Pablo, 2026-11-11) | Aprobado (V-79, V-82, V-83) |
 | [HU-25](#hu-25) | Registrar el resultado de la visita | EP-4 | 5 | ~~**Pruebas** (lote 3, 2026-11-09: `record_outcome()` + modal en I-08)~~ **Listo** (2026-11-11: PR #21 auditado y fusionado en `develop`, `5ed0e3b`; decisión de Pablo) | Aprobado (ídem) | Aprobado (V-84, V-85, Pablo, 2026-11-11) | Aprobado (V-84, V-85) |
-| [HU-15](#hu-15) | Iniciar contacto por WhatsApp | EP-4 | 3 | **Listo** (2026-11-12: PR #22 auditado y fusionado en `develop`, `c64b41a`; decisión de Pablo, DT-157) | Aprobado (suite del PR #22 en SQLite; PostgreSQL No ejecutado, DT-68) | Aprobado (V-86, V-87, Pablo, 2026-11-12) | Aprobado (V-86, V-87) |
+| [HU-15](#hu-15) | Iniciar contacto por WhatsApp | EP-4 | 3 | **Listo** (2026-11-12: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop`, `c64b41a`; decisión de Pablo, DT-157) | Aprobado (suite del PR #22 en SQLite; PostgreSQL No ejecutado, DT-68) | Aprobado (V-86, V-87, Pablo, 2026-11-12) | Aprobado (V-86, V-87) |
 | [HU-16](#hu-16) | Registrar interés desde el formulario | EP-4 | 3 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-88 a V-90, Pablo, 2026-11-11/12) | Aprobado (V-88 a V-90) |
 | [HU-29](#hu-29) | Avanzar el estado de la oportunidad | EP-5 | 6 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-91 a V-93, Pablo, 2026-11-11/12) | Aprobado (V-91 a V-93) |
 | [HU-30](#hu-30) | Registrar interacciones y negociación de precio | EP-5 | 6 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-94, V-95, Pablo, 2026-11-12) | Aprobado (V-94, V-95) |
@@ -506,7 +506,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-15
 
-**Iniciar contacto por WhatsApp** · EP-4 · RF-02 · Pantalla P-07 (botón en la ficha pública) · URB-21, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-86 y V-87) · **(2026-11-12)** validación visual aprobada (V-86 y V-87, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
+**Iniciar contacto por WhatsApp** · EP-4 · RF-02 · Pantalla P-07 (botón en la ficha pública) · URB-21, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-86 y V-87) · **(2026-11-12)** validación visual aprobada (V-86 y V-87, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
 
 **Proceso (PROC-03, T3):** el visitante pulsa "Escribir al asesor por WhatsApp" y se abre `wa.me` con el celular del asesor captador y un mensaje con el título y el código de la propiedad. Decisiones: DS-50.
 
@@ -520,7 +520,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-16
 
-**Registrar interés desde el formulario** · EP-4 · RF-03, RF-05 · Pantalla P-07 (formulario en la ficha pública; el contexto maestro lo ubica en P-05) · URB-20, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-88 a V-90) · **(2026-11-12)** validación visual aprobada (V-88 a V-90, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
+**Registrar interés desde el formulario** · EP-4 · RF-03, RF-05 · Pantalla P-07 (formulario en la ficha pública; el contexto maestro lo ubica en P-05) · URB-20, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-88 a V-90) · **(2026-11-12)** validación visual aprobada (V-88 a V-90, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
 
 **Proceso (PROC-03, T3):** el visitante deja su nombre, su celular, un correo opcional (con casilla de novedades), un mensaje opcional y la aceptación de la política de privacidad. El sistema reutiliza o crea el contacto y la oportunidad sin duplicarla, y el asesor ve el mensaje en I-06A.
 
@@ -536,7 +536,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-29
 
-**Avanzar el estado de la oportunidad** · EP-5 · RF-06 · Pantalla I-06A (`/dashboard/opportunities/[id]`) · URB-35, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-91 a V-93) · **(2026-11-12)** validación visual aprobada (V-91 a V-93, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
+**Avanzar el estado de la oportunidad** · EP-5 · RF-06 · Pantalla I-06A (`/dashboard/opportunities/[id]`) · URB-35, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-91 a V-93) · **(2026-11-12)** validación visual aprobada (V-91 a V-93, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
 
 **Proceso (PROC-05):** el asesor asignado (o el admin) avanza la oportunidad **un paso a la vez** desde la barra de progreso; cada cambio queda en el historial con usuario, fecha y hora.
 
@@ -552,7 +552,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 
 ## HU-30
 
-**Registrar interacciones y negociación de precio** · EP-5 · RF-06 · Pantalla I-06A · URB-36, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-94 y V-95) · **(2026-11-12)** validación visual aprobada (V-94 y V-95, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
+**Registrar interacciones y negociación de precio** · EP-5 · RF-06 · Pantalla I-06A · URB-36, lote 4 · Estado: **Pruebas** (2026-11-09; validación visual Pendiente, V-94 y V-95) · **(2026-11-12)** validación visual aprobada (V-94 y V-95, Pablo); sigue en Pruebas hasta la auditoría (§11) y el merge del PR #22 · **(2026-11-12)** ~~Pruebas~~ **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13; correcciones de la auditoría en `Project_Progress.md`) y fusionado en `develop` (`c64b41a`, 2026-11-12); decisión de Pablo (DT-157)
 
 **Proceso (PROC-05):** el asesor anota llamadas, acuerdos y contraofertas; el historial no se edita ni se borra y las contraofertas no cambian el precio público.
 
