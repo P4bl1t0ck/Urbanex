@@ -19,14 +19,28 @@ from .serializers import (
     AgendaVisitSerializer,
     AvailabilityExceptionSerializer,
     AvailabilitySerializer,
+    OutcomeSerializer,
+    PublicVisitSerializer,
+    VisitRequestSerializer,
 )
-from .services import free_slots, local_datetime, resolve_target_agent
+from .services import (
+    SCHEDULABLE_PROPERTY_STATUSES,
+    OutcomeAlreadyRecorded,
+    SlotUnavailable,
+    VisitAlreadyScheduled,
+    free_slots,
+    local_datetime,
+    public_visit_by_token,
+    record_outcome,
+    request_visit,
+    resolve_target_agent,
+)
 
 User = get_user_model()
 
 # HU-18: solo se agenda sobre propiedades publicadas (Disponible). Una propiedad en captacion o
-# reservada no admite visitas (RF-04; decision de Pablo, 2026-11-06).
-SCHEDULABLE_PROPERTY_STATUSES = ('disponible',)
+# reservada no admite visitas (RF-04; decision de Pablo, 2026-11-06). La constante vive en
+# services.py para que HU-19 use la misma regla.
 DEFAULT_RANGE_DAYS = 14
 MAX_RANGE_DAYS = 31
 
@@ -261,7 +275,8 @@ class AgendaView(APIView):
                           scheduled_start__gte=local_datetime(date_from, time.min),
                           scheduled_start__lt=local_datetime(date_to + timedelta(days=1),
                                                              time.min))
-                  .select_related('property', 'opportunity__contact')
+                  .select_related('property', 'opportunity__contact',
+                                  'opportunity__assigned_agent', 'outcome_recorded_by')
                   .order_by('scheduled_start', 'id'))
         status_value = request.query_params.get('status')
         if not status_value:
@@ -278,3 +293,139 @@ class AgendaView(APIView):
             'timezone': str(ECUADOR_TZ),
             'visits': AgendaVisitSerializer(visits, many=True).data,
         })
+
+
+class IPRateThrottle(SimpleRateThrottle):
+    '''Limite por IP para endpoints publicos sin sesion (DS-39). Cache por defecto de Django.'''
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {'scope': self.scope, 'ident': self.get_ident(request)}
+
+
+class VisitRequestBurstThrottle(IPRateThrottle):
+    scope = 'visits_request_burst'
+    rate = '3/minute'
+
+
+class VisitRequestDailyThrottle(IPRateThrottle):
+    scope = 'visits_request_daily'
+    rate = '10/day'
+
+
+class PublicVisitThrottle(IPRateThrottle):
+    scope = 'visits_public_token'
+    rate = '30/minute'
+
+
+# Mismo texto exista o no el contacto: la respuesta no revela datos de otros clientes (DS-39).
+REQUEST_OK_MESSAGE = 'Tu solicitud de visita quedó registrada.'
+
+
+class VisitRequestView(APIView):
+    '''
+    HU-19 (P-07, RF-04): el cliente sin cuenta solicita una visita en una franja libre.
+
+    POST /api/visits/properties/<id>/request/   (publico; 3/min y 10/dia por IP)
+    {"start": "AAAA-MM-DDTHH:MM:SS-05:00", "full_name", "phone", "email", "email_opt_in",
+     "privacy_accepted"}
+    -> 201 {"detail", "scheduled_start", "scheduled_end", "confirmation": "email"|"whatsapp"}
+       Sin token, sin datos del asesor ni de otros clientes.
+    -> 400 datos invalidos o franja que no es (o ya no es) una de las ofrecidas
+    -> 404 propiedad inexistente o no Disponible
+    -> 409 la oportunidad ya tiene una visita Programada
+    '''
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [VisitRequestBurstThrottle, VisitRequestDailyThrottle]
+
+    def post(self, request, property_id):
+        property_obj = (Property.objects.select_related('agent')
+                        .filter(pk=property_id, status__in=SCHEDULABLE_PROPERTY_STATUSES).first())
+        if property_obj is None:
+            raise Http404
+        serializer = VisitRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        try:
+            visit = request_visit(
+                property_obj=property_obj, start=data['start'], full_name=data.get('full_name'),
+                phone=data.get('phone'), email=data.get('email'),
+                email_opt_in=data['email_opt_in'], privacy_accepted=data['privacy_accepted'],
+            )
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except SlotUnavailable:
+            raise serializers.ValidationError({
+                'start': 'Ese horario ya no está disponible. Actualiza y elige otro.',
+            })
+        except VisitAlreadyScheduled:
+            return Response(
+                {'detail': 'Ya tienes una visita programada para esta propiedad. '
+                           'Para cambiarla, comunícate con tu asesor.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+        return Response({
+            'detail': REQUEST_OK_MESSAGE,
+            'scheduled_start': visit.scheduled_start.astimezone(ECUADOR_TZ).isoformat(),
+            'scheduled_end': visit.scheduled_end.astimezone(ECUADOR_TZ).isoformat(),
+            'confirmation': 'email' if visit.confirmation_email else 'whatsapp',
+        }, status=status.HTTP_201_CREATED)
+
+
+class PublicVisitView(APIView):
+    '''
+    HU-20 (P-08): datos de la visita por su enlace unico, solo lectura y solo hasta la hora de
+    inicio. GET /api/visits/public/<token>/ ; token inexistente o vencido: el mismo 404.
+    Sin boton de cancelar: llega con HU-21 (DS-39).
+    '''
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [PublicVisitThrottle]
+
+    def get(self, request, token):
+        visit = public_visit_by_token(token)
+        if visit is None:
+            raise Http404
+        return Response(PublicVisitSerializer(visit).data)
+
+
+class VisitOutcomeView(APIView):
+    '''
+    HU-25 (I-08, RF-04): resultado de la visita.
+
+    POST /api/visits/<id>/outcome/  {"status": "REALIZADA"|"NO_ASISTIDA"|"CANCELADA",
+                                     "outcome_notes": "..."}
+    - el asesor de la visita o el admin; otro asesor: 404 (no ve visitas ajenas);
+    - solo despues de la hora de inicio (400) y una sola vez (409);
+    - NO_ASISTIDA o CANCELADA de la unica visita activa: Visita Programada -> Contacto Inicial.
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def post(self, request, visit_id):
+        visits = Visit.objects.select_related(
+            'property', 'opportunity__contact', 'opportunity__assigned_agent',
+        )
+        if request.user.role != 'admin':
+            visits = visits.filter(agent=request.user)
+        visit = visits.filter(pk=visit_id).first()
+        if visit is None:
+            raise Http404
+        serializer = OutcomeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            visit = record_outcome(
+                visit=visit, user=request.user, outcome=serializer.validated_data['status'],
+                notes=serializer.validated_data.get('outcome_notes'),
+            )
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except OutcomeAlreadyRecorded:
+            return Response({'detail': 'El resultado de esta visita ya fue registrado.'},
+                            status=status.HTTP_409_CONFLICT)
+        visit = (Visit.objects.select_related('property', 'opportunity__contact',
+                                              'opportunity__assigned_agent',
+                                              'outcome_recorded_by')
+                 .get(pk=visit.pk))
+        return Response(AgendaVisitSerializer(visit).data)

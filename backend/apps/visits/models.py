@@ -187,10 +187,9 @@ class Visit(models.Model):
     Visita presencial (RF-04; Contexto Maestro §7). Una visita PROGRAMADA ocupa la agenda de su
     asesor: free_slots() ya no ofrece esa franja (HU-18) y la agenda la muestra (HU-24).
 
-    En el lote 2 las visitas solo se crean desde el admin de Django o con setup_visits_demo; la
-    solicitud del cliente (HU-19, lote 3) las creara con free_slots() dentro de una transaccion
-    y llevara la oportunidad a Visita Programada. Crear una visita aqui NO cambia el estado de
-    la oportunidad.
+    La solicitud del cliente (HU-19) las crea con services.request_visit(): transaccion, bloqueo
+    del asesor, nueva comprobacion con free_slots() y paso de la oportunidad a Visita Programada.
+    Crear una visita desde el admin o con setup_visits_demo NO cambia el estado de la oportunidad.
 
     agent es el asesor de la visita y no cambia si despues se reasigna la propiedad
     (Contexto Maestro, RF-08: las visitas confirmadas no se transfieren).
@@ -223,6 +222,18 @@ class Visit(models.Model):
     # Enlace de cancelacion del cliente (HU-20 y HU-21): nunca se expone en endpoints publicos.
     cancellation_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     outcome_notes = models.TextField(blank=True, default='')
+    # HU-25: el resultado se registra una sola vez, despues de la hora de inicio (DS-39).
+    outcome_recorded_at = models.DateTimeField(null=True, blank=True)
+    outcome_recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='recorded_visit_outcomes',
+        null=True,
+        blank=True,
+    )
+    # HU-20 (DS-39): correo al que se envio la confirmacion. Vacio si el cliente no dio correo o
+    # no marco la casilla: el asesor confirma por WhatsApp. No modifica el correo del contacto.
+    confirmation_email = models.EmailField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

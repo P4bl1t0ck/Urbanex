@@ -106,3 +106,87 @@ export type AgentOption = {
   id: number;
   name: string;
 };
+
+// ---------------------------------------------------------------------------------------------
+// Lote 4 (DS-50). Debe coincidir con OpportunityDetailSerializer, StatusHistorySerializer,
+// InteractionSerializer, StatusChangeSerializer, InteractionCreateSerializer y las vistas
+// PropertyWhatsAppView y PropertyInterestView de backend/apps/opportunities/.
+// ---------------------------------------------------------------------------------------------
+
+// HU-15 (P-07): público. null = asesor inactivo o sin celular válido: el botón se oculta.
+export type WhatsAppContactResponse = {
+  property: number;
+  whatsapp_phone: string | null; // Solo dígitos: 5939XXXXXXXX
+};
+
+// HU-16 (P-07): público. La respuesta es siempre la misma, exista o no el contacto.
+export type WebInterestPayload = {
+  full_name: string;
+  phone: string;
+  email: string;
+  email_opt_in: boolean;
+  message: string; // Opcional, máximo 1000 caracteres
+  privacy_accepted: boolean;
+};
+
+export type WebInterestResponse = { detail: string };
+
+export type UserSummary = { id: number; name: string };
+
+export type StatusHistoryEntry = {
+  id: number;
+  previous_status: OpportunityStatus | "";
+  previous_status_display: string;
+  new_status: OpportunityStatus;
+  new_status_display: string;
+  changed_by: UserSummary | null; // null: cambio del sistema o del cliente desde el portal
+  reason: string;
+  created_at: string;
+};
+
+export type InteractionType = "NOTA" | "CONTRAOFERTA" | "SISTEMA";
+
+export type Interaction = {
+  id: number;
+  interaction_type: InteractionType;
+  interaction_type_display: string;
+  notes: string;
+  offered_price: string | null; // DecimalField llega como string
+  visit: number | null;
+  author: UserSummary | null; // null en las de tipo SISTEMA
+  created_at: string;
+};
+
+export type OpportunityVisit = {
+  id: number;
+  scheduled_start: string;
+  scheduled_end: string;
+  status: "PROGRAMADA" | "REALIZADA" | "NO_ASISTIDA" | "CANCELADA";
+  status_display: string;
+};
+
+// I-06A: GET /api/opportunities/<id>/
+export type OpportunityDetail = Opportunity & {
+  agreed_final_price: string | null;
+  next_status: OpportunityStatus | null;
+  next_status_display: string;
+  advance_blocked_reason: string; // "" si la visita requerida ya existe
+  accepts_interactions: boolean; // false en CIERRE
+  status_history: StatusHistoryEntry[];
+  interactions: Interaction[];
+  visits: OpportunityVisit[];
+};
+
+// HU-29: POST /api/opportunities/<id>/status/
+export type StatusChangePayload = {
+  status: OpportunityStatus;
+  agreed_final_price?: string | null; // Solo al pasar a PENDIENTE_CIERRE
+};
+
+// HU-30: POST /api/opportunities/<id>/interactions/ (SISTEMA solo lo escribe el backend)
+export type InteractionCreatePayload = {
+  interaction_type: "NOTA" | "CONTRAOFERTA";
+  notes: string;
+  offered_price?: string | null; // Obligatorio y > 0 solo en CONTRAOFERTA
+  visit?: number | null;
+};

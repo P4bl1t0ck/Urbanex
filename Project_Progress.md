@@ -2,6 +2,12 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · ajustes tras la auditoría del PR #25 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 con DS-35 (EP-1 2/3 HU · 5/8 pts), precisión de DT-157 (1) y fechas de V-86 a V-90 en las filas resumen; nota de cierre |
+| Última actualización · estados tras los merges | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: DT-157 y DS-51; HU-12, HU-15, HU-16, HU-29, HU-30, HU-45 y HU-46 en **Listo**; nota de V-63 (No aplicable hasta el despliegue) y nota de cierre |
+| Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (transcrito por Claude Code) · Ronda 8 cerrada: V-86 a V-95 **Aprobado** por Pablo; HU-15, HU-16, HU-29 y HU-30 siguen en Pruebas hasta la auditoría y el merge del PR #22 |
+| Última actualización lote 4 · fusión de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `5ed0e3b` (PR #21) en la rama del lote 4; 332 pruebas OK en SQLite (Estándares §4); HU-19, HU-20 y HU-25 en Listo |
+| Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 cerrada: las 8 Aprobado por Pablo (V-78, V-80 y V-81 tras repetirlas, ~15:46–15:55); HU-19, HU-20 y HU-25 siguen en Pruebas hasta la auditoría y el merge del PR #21 |
+| Última actualización lote 3 · integración de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `97f0e0c` en la rama del lote 3; 277 pruebas OK en SQLite (Estándares §4) |
 | Última actualización de preparación de push HU-09 | 2026-11-11 · comprobación de rama para publicación; push autorizado por Sebas; sin integración ni merge de ramas en este paso |
 | Última actualización de commits HU-09 | 2026-11-11 · correcciones guardadas en commits por archivo; push e integración del develop remoto pendientes |
 | Última actualización de corrección HU-09 | 2026-11-11 · privacidad del motivo de retiro y avance documental corregidos; 253 pruebas OK en SQLite; sin commit ni push de estas correcciones |
@@ -15,7 +21,7 @@
 | Actualización HU-46 (2026-11-06) | Implementación en `feat/URB-04-HU-46-recuperar-contrasena`: recuperación I-02, refresh HttpOnly con CSRF e invalidación de JWT al cambiar contraseña; D-05 personalizado registrado según confirmación de Pablo transmitida por Sebas. V-44 Pendiente |
 | Confirmación para PR #17 (2026-11-05) | Según Sebas, el cambio en `backend/apps/users/views.py` fue coordinado antes. Nota preparada para Pablo: DT-111 (`slug` de HU-12, pendiente y fuera de HU-45), DT-49 (usar `git commit -F` en PowerShell 5.1), DT-120 (notificación persistente fuera de HU-45), DT-92 (diferencia conocida; no se generó ni aplicó migración) y PostgreSQL **No ejecutado**. No se publicó la nota: el PR #17 apunta a `master`, en conflicto con `AGENTS.md` §5; requiere aclaración/corrección por Pablo. |
 | Estado PR #17 (2026-11-06) | El PR ahora apunta a `develop`. DT-120 está registrado localmente en `b30e5c9`, pendiente de push. Sigue pendiente adjuntar al PR la captura solicitada de que una cuenta no administradora no puede desbloquear; la ruta referenciada por V-43 (`evidence/HU-45/V-43.png`) no existe en este checkout. |
-| Última actualización | 2026-11-08 (noche, tarde) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): nota de cierre del merge de `develop`, DS-35, DS-38, DT-148 y plan de reparto. Antes: 2026-11-08 · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, borrador): validación visual del lote 2, **Ronda 6** (V-65 a V-77, todas Aprobadas), DS-37, DT-143 a DT-147 y nota de cierre. Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama de oportunidades: 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. · Rama `docs/post-merge-pr15`: 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` en la worktree correcta, conservando filas de ambos lados en `Project_Progress.md` y `URBANEX_USM_TRAZABILIDAD.md` y dejando sin tocar los cambios de código. Antes: 2026-11-05 · Copilot con Sebas · corrección documental de la auditoría HU-45: DT-120, aclaraciones de Seguridad/USM y pendientes explícitos para el PR. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: nota de cierre de sesión (HU-27 y HU-34 a Listo, DS-32; rango DT-140..169, DS-33; decisiones del diseño del lote 2). Antes: 2026-11-04 · Rama avanzada a `origin/develop` (`043cfb5`, PR #15); se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`. Según Sebas, V-43 cubrió bloqueo tras cinco intentos y desbloqueo por admin. Suite integrada: 159/159 OK en SQLite; migraciones detectan `documents/0002_alter_document_file.py` (DT-92), sin generarla ni aplicarla. Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día, V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. |
+| Última actualización | 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4, sobre el lote 3): HU-15, HU-16, HU-29 y HU-30 implementadas; **Ronda 8** (V-86 a V-95) redactada en Pendiente; DS-50, DT-154, DT-155, C-09, C-10 y nota de cierre. Antes: 2026-11-09 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21, borrador): lote 3 (HU-19, HU-20, HU-25) implementado; **Ronda 7** (V-78 a V-85) redactada en Pendiente; DS-39, DT-149 a DT-152 y nota de cierre. Antes: 2026-11-08 (noche, tarde) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18): nota de cierre del merge de `develop`, DS-35, DS-38, DT-148 y plan de reparto. Antes: 2026-11-08 · Pablo (con Claude) · rama `feat/URB-19-18-27-HU-22-HU-18-HU-24-visitas` (PR #19, borrador): validación visual del lote 2, **Ronda 6** (V-65 a V-77, todas Aprobadas), DS-37, DT-143 a DT-147 y nota de cierre. Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día (push ya hecho), V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades`: merge de `origin/develop` (`5fb3910`, con los PR #14 y #16); se conservan las entradas de ambos lados. Antes (develop): 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: correcciones de la auditoría de solo lectura de HU-12 (rutas de las capturas de V-60 a V-62, DT-111, Seguridad §3.1), suite y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `docs/user-story-mapping` (PR #13, borrador): merge de `origin/develop`, columna Código y anclas del USM, fila en el GPS §3 y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-02-HU-44-gestion-usuarios`: corrección de la documentación según la auditoría del PR #9 (filas de `develop` restauradas, DT-96 POR CONFIRMAR, DT-115 y DT-116). Antes: 2026-11-02 · Sebas · rama `feat/URB-02-HU-44-gestion-usuarios`: merge con `origin/develop`, documentación de HU-44 y validaciones técnicas; suite backend 116/116, build y TypeScript exit 0, ESLint exit 0 con 2 avisos; `makemigrations --check --dry-run` exit 1 por `documents/0002`. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama HU-12: 2026-11-02 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: V-60 a V-62 aprobadas por Pablo, V-63 Pendiente (DT-110), nuevo DT-112. Antes: 2026-11-01 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: HU-12, metaetiquetas de la ficha (FX-24), validaciones V-60 a V-63 Pendientes, DT-110 y DT-111. Antes: 2026-10-31 · Pablo · rama `docs/reglas-ia-y-deuda`: `AGENTS.md` (DS-25), correcciones de auditoría (FX-22, SEC-15) y nota de cierre de sesión · Rama de oportunidades: 2026-11-03 (noche, 23:50) · Pablo (con Claude Code) · V-26 a V-32 repetidas con hora y captura (fila nueva en cada V), suite 155 OK y nota de cierre. Antes: 2026-11-03 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura: título de "Pendiente ahora" y Ronda 4 con un solo estado; DT-117/SEC-16. Antes: 2026-11-03 (tarde) · Pablo (con Claude Code) · rama `feat/URB-30-34-HU-27-HU-34-oportunidades` (PR en borrador): merge de `origin/develop` (`46033df`, con los PR #9 y #13), DT-14 y DT-39 con C-08 confirmada, DT-105 comprobado, pruebas de DT-106 y DT-107 (FX-25), suite 155 OK y nota de cierre. · Rama `docs/post-merge-pr15`: 2026-11-06 · rama `docs/post-merge-pr15`: merge de `origin/develop` en la worktree correcta, conservando filas de ambos lados en `Project_Progress.md` y `URBANEX_USM_TRAZABILIDAD.md` y dejando sin tocar los cambios de código. Antes: 2026-11-05 · Copilot con Sebas · corrección documental de la auditoría HU-45: DT-120, aclaraciones de Seguridad/USM y pendientes explícitos para el PR. Antes: 2026-11-04 · Pablo (con Claude Code) · rama `docs/post-merge-pr15`: nota de cierre de sesión (HU-27 y HU-34 a Listo, DS-32; rango DT-140..169, DS-33; decisiones del diseño del lote 2). Antes: 2026-11-04 · Rama avanzada a `origin/develop` (`043cfb5`, PR #15); se conservaron `PropertyOwnershipTests` y `AccountUnlockApiTests`. Según Sebas, V-43 cubrió bloqueo tras cinco intentos y desbloqueo por admin. Suite integrada: 159/159 OK en SQLite; migraciones detectan `documents/0002_alter_document_file.py` (DT-92), sin generarla ni aplicarla. Antes: 2026-11-04 (noche) · Pablo (con Claude Code) · correcciones de la auditoría de solo lectura del PR #15 (No apto, solo por documentación): nota de cierre del merge al día, V-26..V-32 del 2026-11-03 citadas en Estado y Avance, nueva sección **Traza de la rama** y nota de cierre. Antes: 2026-11-04 (después del merge) · Pablo (con Claude Code) · suite tras el merge (155 OK, `npm test` 9/9), conteo en el paso 6 del protocolo y nota de cierre. Antes: 2026-11-03 · Pablo (con Claude Code) · rama `feat/URB-17-HU-12-compartir-ficha`: merge de `origin/develop` (`40dd147`, sumando filas), BD del worktree reiniciada, V-64 (escape de metaetiquetas) aprobada por Pablo, Seguridad §3.1 y nota de cierre. |
 
 ---
 
@@ -55,6 +61,49 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (PR #25) · ajustes tras la auditoría
+- **Hecho:** cita de la auditoría §11 del PR #22 como apta (comentario de Pablo en el PR #22, `c4125df`). HU-46: el criterio "solo los usuarios activos inician sesión" queda cubierto por la salida de `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; "Ran 1 test … OK", exit 0, SQLite) según DS-35 (decisión de Pablo); EP-1 pasa a **2/3 HU · 5/8 pts (62,5 %)** y validado 4/6. DT-157 precisa que el punto (1) se corrigió con nota aditiva, no en la fila de Sebas. Fechas corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11).
+- **Falta:** lo mismo que en la nota del 2026-11-12 (DT-157 (3) y (4), HU-03/04/06/08, HU-44).
+- **Siguiente paso:** Pablo fusiona el PR #25 en `develop` ("Create a merge commit"); después, el rebase del PR #24.
+
+### 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (desde `develop` `c64b41a`) · estados tras los merges
+- **Hecho:** nuevo **DT-157** (la documentación de estados no refleja lo fusionado) y nueva **DS-51** (las rondas 1 a 3 se aceptan sin hora ni captura). Pasan a **Listo**: HU-15, HU-16, HU-29 y HU-30 (PR #22), HU-46 (decisión de Pablo: auditoría del PR #20, V-44 y PR #23), HU-45 (según Pablo, Sebas confirmó que está terminada; DT-120 sigue abierto) y HU-12 (V-63 No aplicable hasta el despliegue, DT-110). Notas aditivas, sin reescribir filas de Sebas. Línea base: 332 OK en SQLite (Estándares §4).
+- **Hallazgo:** con el método de Avance §2, HU-46 no cuenta como completa en puntos: su criterio "solo los usuarios activos inician sesión" no tiene validación humana propia (V-44 no lo prueba). **POR CONFIRMAR (Pablo).** **(2026-11-13) Cerrado:** Pablo acepta la prueba automática según DS-35 (ver la nota del 2026-11-13).
+- **Falta:** DT-157 (3) y (4): secciones de HU-11 y HU-33 en Estado de procesos y actualizar el Checklist TO-BE (otro PR). HU-03 (probar la subida de una imagen), HU-04, HU-06 y HU-08 (decisión de Pablo), HU-44 (V-33 a V-42 y PostgreSQL, Sebas). Conflictos esperables con el PR #24 (mismos documentos).
+- **Siguiente paso:** Pablo revisa los diffs, ordena el push y abre el PR hacia `develop`; auditoría de solo lectura (§11) en un chat nuevo.
+
+### 2026-11-12 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (PR #22) · cierre de la Ronda 8
+- **Hecho:** transcripción de la validación visual de Pablo: V-86 y V-88 a V-94 desde su bitácora por correo del 2026-11-12; V-87 y V-95 dictadas en el chat. Las 10 **Aprobado** (V-87 y V-95 con observaciones). Decisión de Pablo en DT-117/SEC-20: el celular del asesor puede ser público si es el de trabajo. Estado de procesos, Avance (§5 y §5C), USM y Seguridad (SEC-20) actualizados; HU-15, HU-16, HU-29 y HU-30 siguen en **Pruebas** hasta la auditoría y el merge del PR #22.
+- **Hallazgos:** DT-156 nuevo (I-06A redirige a `/dashboard` después de "no encontrada"); DT-147 visto otra vez en V-87; pregunta para Sebas sobre DT-94 (desactivar deja las propiedades sin asesor y A-01 no reactiva; HU-44/HU-47), sin ID nuevo.
+- **Capturas:** asignadas por hora con el ok de Pablo, `evidencias\Lote4\Captura de pantalla (70)` a `(119)`; cada una de V-86 a V-95 tiene al menos una.
+- **Correcciones de la auditoría del PR #22 (2026-11-12):** frontend registrado en Estándares §4 (build y tsc exit 0 según la auditoría; `npx eslint .` y `npm test` ejecutados en esta sesión). Sebas avisado (2026-11-12) del rango DS-50..69 en AGENTS.md y de DT-94.
+- **Falta:** merge del PR #22.
+- **Siguiente paso:** auditoría §11 del PR #22 y merge; luego el lote 5 según la respuesta del tutor.
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4) · fusión de develop tras el PR #21
+- **Hecho:** `git fetch` y fusión de `origin/develop` `5ed0e3b` (PR #21, lote 3) por orden de Pablo. Dos conflictos solo documentales, resueltos según Pablo conservando las dos partes (Progress: develop arriba y lote 4 debajo; Estándares: orden cronológico); el código se fusionó sin conflictos. Nota añadida en DS-50 (excepción a `AGENTS.md` §5, cerrada). Lote 3 después del merge: HU-19, HU-20 y HU-25 pasan a **Listo** (PR #21 auditado en un chat aparte, "apto para fusionar", según Pablo, 2026-11-11, y fusionado) en Estado de procesos (filas nuevas en la tabla resumen), Avance §5B y USM.
+- **Entorno:** el worktree no tenía virtualenv propio; `pipenv sync --dev` instaló el `Pipfile.lock` sin cambios. `migrate` (SQLite) aplicó solo `users.0009`.
+- **Evidencia:** suite SQLite → `Ran 332 tests`, **OK** (318 + 14 de HU-46); `makemigrations --check` → solo `documents/0002` (DT-92). Frontend y PostgreSQL: **No ejecutado** (Estándares §4).
+- **Falta:** frontend tras la fusión (build, tsc, eslint, `npm test`); validación visual de la Ronda 8 (V-86 a V-95); auditoría de solo lectura (§11) del PR del lote 4, que abre Pablo.
+- **Siguiente paso:** Ronda 8; luego HU-31 (DT-154).
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · cierre de la Ronda 7
+- **Hecho:** Pablo repitió V-78, V-80 y V-81 (~15:46–15:55, incógnito) y las aprobó: las 8 de la Ronda 7 quedan **Aprobado**. Filas nuevas en Progress; validación registrada en Estado de procesos (HU-19, HU-20, HU-25), Avance de épicas §5B y USM (PROC-04). Las tres HU siguen en **Pruebas** (mismo criterio que el lote 2).
+- **Capturas (ok de Pablo):** (66) V-80; (67) y (68) V-78; (69) V-81.
+- **Falta:** capturas de V-79, V-82 y V-83; frontend tras la fusión (build, tsc, eslint, `npm test`); auditoría de solo lectura (§11); DT-143.
+- **Siguiente paso:** auditoría §11 del PR #21 en un chat nuevo de solo lectura.
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · registro de la Ronda 7
+- **Hecho:** transcripción de la validación visual de Pablo (V-78 a V-83 desde sus bitácoras por correo del 2026-11-11, con la corrección de V-80; V-84 y V-85 dictadas en el chat). Según Pablo: V-79, V-82, V-83, V-84 y V-85 **Aprobado**; V-78, V-80 y V-81 **Pendiente (parcial)**. Capturas (57)–(65) asignadas a V-84 y V-85 por orden de Pablo.
+- **Falta:** repetir V-78 (sin correo y la hora que desaparece de la lista), V-80 (celular fijo) y V-81 (mismo celular sobre la misma propiedad); capturas de V-79, V-82 y V-83; con las 8 aprobadas, actualizar Estado de procesos, Avance de épicas y USM (Pablo lo pospone hasta entonces); frontend tras la fusión, auditoría (§11) y DT-143.
+- **Siguiente paso:** Pablo repite V-78, V-80 y V-81.
+
+### 2026-11-11 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21) · integración de develop
+- **Hecho:** `git fetch` y fusión de `origin/develop` `97f0e0c` (PR #20 HU-46 y PR #23 docs) por orden de Pablo. Tres conflictos solo documentales (Progress, Deuda, Estándares), resueltos según Pablo conservando las dos partes: en Progress la nota del lote 3 arriba; en Deuda y Estándares lo de develop primero. El código (`users/*`, `settings.py`, `config/urls.py`, `SiteNav.tsx`, `lib/api.ts`, `users.0009`) se fusionó sin conflictos.
+- **Evidencia:** suite SQLite → `Ran 277 tests`, **OK** (263 + 14 de HU-46); `makemigrations --check` → solo DT-92. Las rutas públicas de visitas (solicitud y P-08 por token) no usan autenticación y responden igual con un JWT invalidado; la agenda lo rechaza con 401 `password_changed`. Detalle en Estándares §4. Frontend y PostgreSQL: **No ejecutado**.
+- **Falta:** frontend tras la fusión (build, tsc, eslint, `npm test`); validación visual V-78 a V-85; auditoría de solo lectura (§11); DT-143.
+- **Siguiente paso:** correr el frontend integrado y la auditoría antes de pasar el PR #21 a listo.
+
 ### 2026-11-11 · Codex con Sebas · verificación para publicar HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
 - **Hecho:** Sebas autorizó continuar los pasos hasta el push y aclaró que este paso consiste en subir la rama, sin integrar ni fusionar ramas. `git status --short --branch` sobre `da8f12b` confirmó el árbol limpio; `git diff origin/develop...HEAD --check` y `git ls-files -u` no encontraron errores ni conflictos. El diff contiene 13 archivos, sin archivos prohibidos ni migraciones modificadas. La revisión de patrones de secretos en los 15 commits propios no encontró coincidencias; esta comprobación no constituye una auditoría exhaustiva de credenciales. `git ls-remote --heads origin refs/heads/feat/URB-09-HU-09-actualizar-propiedad` terminó exit 0 sin referencias: la rama aún no estaba publicada.
 - **Pruebas:** resultado conservado de 253 pruebas backend OK, exit 0, SQLite; no se modificó código desde esa ejecución. DT-92 sigue pendiente con check de migraciones exit 1; PostgreSQL No ejecutado (DT-68). La revisión técnica y las correcciones anteriores quedan documentadas sin añadir aprobaciones humanas.
@@ -79,6 +128,24 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Documentación:** actualizados de forma aditiva Progress, Estado, Avance, Deuda, Estándares, GPS, USM y Seguridad. EP-2 pasa a 17/24 criterios implementados, 15/24 verificados y 12/24 validados; los puntos de HU completas no se suman antes de la auditoría y el merge.
 - **Falta:** realizar la auditoría obligatoria en un chat nuevo de solo lectura. Push requiere orden de Sebas; el PR lo abre la persona. La política sobre oportunidades/visitas al retirar sigue pendiente.
 - **Siguiente paso:** ejecutar la auditoría de `AGENTS.md` §11 y corregir cualquier hallazgo antes del push y el PR.
+
+### 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4, sobre el lote 3)
+- **Entorno:** worktree `C:\Users\Pablo\Desktop\Urbanex-lote4`. La rama se creó desde `origin/develop` y, por decisión de Pablo, se rebasó sin commits propios a la cabeza del lote 3 (`0c0f0a7`, PR #21) para heredar `opportunities.0002`; renombrada con las claves Jira correctas (HU-16 = URB-20, HU-15 = URB-21, HU-29 = URB-35, HU-30 = URB-36). `backend/.env` copiado de la carpeta principal (`DB_ENGINE=sqlite`; `EMAIL_PROVIDER` toma `console` por defecto), base nueva con `migrate` y `setup_demo_data`, `npm install`. Script de demo **fuera del repo** en `evidencias\Lote4\` (Ronda 8).
+- **Commits (por capa, orden de Pablo):** `8d0b3b3` modelo `OpportunityInteraction` y `opportunities.0003` · `a073aa1` pruebas del modelo · `be8841f` API pública HU-15/HU-16 · `dbb49d7` sus pruebas · `9c11c73` tasas configurables · `b9ee341` API HU-29/HU-30 e I-06A · `7767f87` sus pruebas · `a1887d4` CIERRE sin interacciones y motivo de bloqueo · `1943bf4` sus pruebas · `f67c117` tipos, cliente y lógica pura · `9c59167` P-07 · `351a08a` I-06A · `9b83b4b` enlace desde I-06 · un commit por documento (Deuda, AGENTS §4, Seguridad, Estado, Avance, GPS, USM, DoD y este). Push: solo los dos primeros hasta ahora; el resto con la orden de Pablo de este cierre.
+- **Hecho:** HU-15 (botón `wa.me` en P-07, oculto sin celular válido o asesor activo), HU-16 (formulario de interés con LOPDP, sin duplicar contacto ni oportunidad, interacción SISTEMA), HU-29 (un paso a la vez hasta Pendiente de cierre, con requisitos de visita y precio final) y HU-30 (NOTA y CONTRAOFERTA inmutables; Cierre sin interacciones), I-06A nueva y enlace desde I-06. Decisiones en DS-50.
+- **Evidencia:** suite → `Ran 318 tests`, **OK** (263 + 55 nuevas); `makemigrations --check` → solo `documents/0002` (DT-92/DT-77); `npm test` 22/22, build, tsc (tras el build, DT-78) y eslint (0 errores, 2 avisos DT-24) en verde (Estándares §4). PostgreSQL: **No ejecutado** (DT-68).
+- **Hallazgos y preguntas registradas:** DT-154 (PERDIDA, HU-31, siguiente bloque), DT-155 (tasas en las vistas; unificar en `settings.py` tras fusionar lote 3, lote 4 y HU-46), DT-117 con nota (celular del asesor en P-07: **Pendiente de revisión de GUI por Pablo**), SEC-20 y SEC-21, C-09 (corte de RF-06; Pablo citó "C-04", que ya es el plan de sprints) y C-10 (interés sin asesor activo). Rango nuevo DS-50..69 en `AGENTS.md` §4 (Pablo avisa a Sebas).
+- **Falta:** validación visual de Pablo (Ronda 7 del lote 3 y Ronda 8, V-86 a V-95); auditoría de solo lectura (§11) de cada PR; el PR del lote 4 lo abre Pablo (hacia `develop`, después del PR #21 o marcado como dependiente); avisar a Sebas de `AGENTS.md` y DT-155.
+- **Siguiente paso:** Pablo valida del lote 3 al lote 4; luego HU-31 (DT-154).
+
+### 2026-11-09 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21, borrador)
+- **Entorno:** worktree `C:\Users\Pablo\Desktop\Urbanex-lote3` (desde `58c917c`). `backend/.env` copiado de la carpeta principal (`Urbanex`), con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console` (agregado en la copia). Entorno pipenv propio desde `Pipfile.lock`, `npm install`, `migrate` en una base nueva y `setup_demo_data`; `setup_visits_demo` → 0 visitas (no hay propiedades Disponibles; ver la preparación de la Ronda 7).
+- **Commits (por capa, orden de Pablo):** `b37a8bc` modelos y migraciones · `dcb2241` API HU-19/HU-20 (estado intermedio probado: opportunities + visits 134 OK) · `90375d1` API HU-25 · `8878aa5` P-07 y P-08 · `b14ee34` I-08 · el commit de documentación (este registro). Sin push.
+- **Hecho:** HU-19, HU-20 y HU-25 según DS-39. Migraciones nuevas `opportunities.0002` (`changed_by` opcional) y `visits.0003` (`confirmation_email`, `outcome_recorded_at`, `outcome_recorded_by`). Endpoints: `POST /api/visits/properties/<id>/request/`, `GET /api/visits/public/<token>/` y `POST /api/visits/<id>/outcome/`. Pantallas: formulario en P-07, P-08 nueva (`/visits/[token]`) y, en I-08, "Confirmar por WhatsApp" y el modal del resultado.
+- **Evidencia:** suite → `Ran 263 tests`, **OK** (229 + 34 nuevas); `makemigrations --check` → solo `documents/0002` (DT-92/DT-77); `npm test` 17/17, build, tsc y eslint (0 errores, 2 avisos DT-24) en verde (detalle en Estándares §4). PostgreSQL: **No ejecutado** (DT-143).
+- **Decisiones de Pablo (2026-11-09):** commits por capa (6). DT-149 y DT-151 se reparan desde el 2026-11-10, cada uno en un commit aislado; DT-150 pospuesto (antes, entender el proceso de oportunidades); DT-152 aplazado, se propone a Sebas. Seguridad: nueva §1.3 con **toda** la superficie pública sin sesión, SEC-17 a SEC-19 y DT-153 (DRF permite todo por defecto).
+- **Falta:** validación visual de Pablo (V-78 a V-85); push (con orden de Pablo); auditoría de solo lectura (§11); DT-143 (restricción de exclusión y suite en PostgreSQL) en un commit o rama posterior; avisar a Sebas de DT-152 y DT-153 (`settings.py` es compartido).
+- **Siguiente paso:** Ronda 7; desde el 2026-11-10, DT-149 y DT-151.
 
 ### 2026-11-09 · Codex con Sebas · HU-09 en rama independiente · rama `feat/URB-09-HU-09-actualizar-propiedad`
 - **Hecho:** creada `.worktrees/hu09` desde develop `966cc50`; la carpeta principal conserva HU-46 `74d94c4` limpia, sin borrar ramas. Sebas autorizó Fase 0 y definió retiro Disponible/Reservado → No disponible con motivo, y reactivación No disponible → En captación. Nuevas acciones API con permisos y bloqueo transaccional; botones Retirar/Reactivar con Dialog y motivo, actualización de fila y mensaje de republicación; edición sin asignación manual de estados finales. Se conserva el último motivo al reactivar.
@@ -835,6 +902,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 |---|---|---|---|
 | — | — | No se puede hacer en local (DT-110); confirmado por Pablo el 2026-11-02 | Pendiente |
 
+> **Nota (2026-11-12, decisión de Pablo, DT-157):** V-63 queda **No aplicable hasta el despliegue (DT-110)**. No es una validación aprobada: la tabla de arriba sigue sin fila humana. Cuando exista una URL pública, una persona ejecuta V-63 y agrega su fila. Con esta decisión, HU-12 pasa a **Listo**.
+
 ### V-64 · HU-12 / Seguridad §3.1 — Un título malicioso sale escapado en las metaetiquetas
 > **Preparación (2026-11-03, Claude Code, solo SQLite local):** worktree `../Urbanex-hu12` en `40dd147` (merge de `develop`), BD recién creada con `migrate` + `setup_demo_data`, `next build` + `next start` en `localhost:3000` y `runserver` en `127.0.0.1:8000`. El título de la #1 ("[DEMO] Casa en Cumbayá - lista para publicar") se cambió con `manage.py shell` y se restauró al terminar.
 
@@ -1139,6 +1208,179 @@ Los pasos y el registro originales de V-44 se conservan a continuación:
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador; worktree `Urbanex-lote2`, SQLite) | 2026-11-08, ~00:23–00:28 | Asesor B, semana 9–15-nov con "Todas": ninguna visita. Admin sin asesor: "Elija un asesor para ver su agenda."; con A: sus 4 visitas; con B: ninguna. capturas borradas por error (ver nota de cierre 2026-11-08). | **Aprobado** |
+
+### Ronda 7 — Lote 3: HU-19 (P-07), HU-20 (P-08) y HU-25 (I-08) (rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas`, PR #21)
+
+> **Estado (2026-11-11, cierre): Ronda 7 cerrada, las 8 Aprobado por Pablo.** V-78, V-80 y V-81 se repitieron ese día (~15:46–15:55, incógnito) y quedaron Aprobado (fila nueva en cada tabla; la fila anterior se conserva como antecedente). V-79, V-82 y V-83 tienen como evidencia la bitácora por correo. HU-19, HU-20 y HU-25 siguen en **Pruebas** hasta la auditoría (§11) y el merge del PR #21.
+>
+> *Estado intermedio (2026-11-11), según Pablo: 5 Aprobado (V-79, V-82, V-83, V-84, V-85) y 3 Pendiente (parcial) (V-78, V-80, V-81, se repiten).** Pruebas del 2026-11-11 en el worktree `Urbanex-lote3` (SQLite, `EMAIL_PROVIDER=console`). V-78 a V-83 se transcriben de sus bitácoras enviadas por correo ese día (para V-80 manda la corrección de las 13:43); V-84 y V-85, de lo que Pablo dictó en el chat. Capturas en `evidencias\Lote3\`: (57)–(61) V-84 y (62)–(65) V-85; V-79, V-82 y V-83 tienen la captura pendiente.
+>
+> *Estado anterior (2026-11-09): las 8 pruebas Pendiente.* Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\`, fuera del repo).
+>
+> **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote3`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; nunca Supabase ni Resend). La base del worktree ya tiene `migrate` (con `opportunities.0002` y `visits.0003`) y `setup_demo_data` (2026-11-09); `setup_visits_demo` creó 0 visitas porque las 4 propiedades están en captación:
+> 1. Como `asesor.demo`, publicar "[DEMO] Casa en Cumbayá - lista para publicar" (I-10B) y crear en I-09 una franja para los próximos días (por ejemplo, lunes a viernes 09:00–13:00).
+> 2. Opcional para P-08: poner un teléfono al asesor en A-01 (si no, P-08 dice "Teléfono no registrado").
+> 3. Los correos salen en la **terminal del backend** (`EMAIL_PROVIDER=console`).
+
+### V-78 · HU-19 — Solicitar una visita sin correo (P-07)
+
+**Resultado esperado:** ¿Sin sesión, en la ficha, al pulsar una hora se abre "Solicitar visita" con la fecha y la hora elegidas; con nombre, un celular `09XXXXXXXX` y la casilla LOPDP, "Confirmar solicitud" muestra "Tu solicitud de visita quedó registrada." y "El asesor te confirmará la visita por WhatsApp", y esa hora desaparece de la lista? ¿En I-06 la oportunidad nueva está en Visita Programada, con el canal Catálogo web?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador sin sesión; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:10) | Ficha "[DEMO] Casa en Cumbayá…", franja miércoles 18-nov 16:00; cliente Julián, celular Ecuador, casillas WhatsApp y LOPDP marcadas y un correo de prueba. Mensaje verde: "Tu solicitud de visita quedó registrada…" (la bitácora transcribe "Miércoles 11 de noviembre a las 4" y "Te enviaremos la confirmación a tu correo…"). En I-06: oportunidad nueva de Julián, Visita Programada, canal Catálogo web. Terminal: correo al cliente (enlace P-08) y al asesor. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el caso sin correo (mensaje "El asesor te confirmará la visita por WhatsApp") y comprobar que la hora desaparece de la lista; se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición) | "Cliente Prueba", 0991111111, LOPDP marcada, sin correo y sin la casilla de confirmación, franja 18-nov 09:00: aviso verde "Tu solicitud de visita quedó registrada." y "El asesor te confirmará la visita por WhatsApp"; la hora desapareció de la lista. En I-06 (asesor.demo): Visita Programada, canal Catálogo web. Capturas: `evidencias\Lote3\Captura de pantalla (67)` y `(68).png`. | **Aprobado** |
+
+### V-79 · HU-19 / HU-20 — Solicitar con correo y casilla
+
+**Resultado esperado:** ¿Con correo y la casilla "Quiero recibir la confirmación…", el mensaje dice "Te enviamos la confirmación a tu correo…"; la terminal muestra un correo al cliente con el enlace `http://localhost:3000/visits/<token>` y otro al asesor ("Se envió la confirmación por correo al cliente."), y la respuesta de la API (pestaña Red) no trae el token ni datos del asesor?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:15) | Pantalla: "Te enviamos la confirmación a tu correo con el enlace para ver los datos de tu visita." Terminal: correo al cliente (Julián) desde `Urbanex <noreply@localhost>`, "tu visita está programada…", con `http://localhost:3000/visits/<token>` y "Para cancelar o cambiar la visita comunícate con tu asesor Urbanex." Pestaña Red: la respuesta del POST público no trae el token ni datos del asesor ni de otros clientes. Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
+
+### V-80 · HU-19 — Errores del formulario
+
+**Resultado esperado:** ¿Sin la casilla LOPDP, con un celular fijo (por ejemplo `022345678`) o con la casilla de correo marcada y el correo vacío, se muestra el error junto al campo y no se crea la visita?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora 13:20; corrección 13:43, que manda) | Sin LOPDP: "Debes aceptar la política de privacidad…". Casilla de correo marcada y correo vacío: "Para recibir la confirmación por correo indica tu correo". Sin teléfono: "Ingresa tu número de teléfono". Varios envíos seguidos: "Hiciste varias solicitudes seguidas" (3/min por IP). En ningún error se creó visita ni oportunidad. Según la corrección, esta bitácora es solo de V-80; la mención de V-81 fue un error. Evidencia: bitácoras por correo; captura no localizada. **Falta (según Pablo):** el celular fijo (`022345678`); se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición) | Celular fijo 022345678, LOPDP marcada, sin correo, franja 18-nov 09:00: error junto al campo del celular (tipo de número no válido); no se creó la visita (esa franja se usó después en V-78). Captura: `evidencias\Lote3\Captura de pantalla (66).png`. | **Aprobado** |
+
+### V-81 · HU-19 — Hora ocupada y visita repetida
+
+**Resultado esperado:** ¿Con dos pestañas en la misma hora, la segunda solicitud dice "Ese horario se ocupó hace un momento…" y la lista se actualiza? ¿El mismo celular, otra vez sobre la misma propiedad, dice "Ya tienes una visita programada para esta propiedad…"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador, dos pestañas; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:43) | Misma ficha y franja (miércoles 11-nov 17:00) en dos pestañas, cliente "otro". Pestaña 1: registro correcto. Pestaña 2: error de horario ya no disponible (la bitácora transcribe "…ya no está disponible, escoge otro horario."). En I-06: una sola oportunidad de "otro" en Visita Programada, sin visita duplicada. Evidencia: bitácora por correo; captura no localizada. **Falta (según Pablo):** el mismo celular otra vez sobre la misma propiedad ("Ya tienes una visita programada…"); se repite. | Pendiente (parcial) |
+| Pablo (navegador en incógnito; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:46–15:55 (repetición, segundo caso) | Mismo celular 0991111111 (el de V-78), misma propiedad, franja 18-nov 10:00: "Ya tienes una visita programada para esta propiedad…". El primer caso (dos pestañas) queda en la fila anterior. Captura: `evidencias\Lote3\Captura de pantalla (69).png`. | **Aprobado** |
+
+### V-82 · HU-20 — Confirmación por enlace (P-08)
+
+**Resultado esperado:** ¿El enlace del correo de V-79 abre "Tu visita" con la propiedad (enlace a la ficha), la fecha y hora en hora de Ecuador, el estado "Programada", el asesor de la visita (nombre, apellido y teléfono) y "Para cancelar o cambiar tu visita, comunícate con tu asesor.", sin botón Cancelar? ¿Un enlace con otro token muestra "Este enlace no es válido o la visita ya comenzó."?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:47) | Enlace del correo: "[DEMO] Casa en Cumbayá…" con enlace a la ficha, miércoles 11-nov 17:00–18:00 hora de Ecuador, "Programada", asesor con nombre y apellido y teléfono "No registrado" (el demo no tiene celular en A-01), "Para cancelar o cambiar tu visita comunícate con tu asesor."; sin botón Cancelar. Token alterado (último carácter): "Este enlace no es válido o la visita ya comenzó…" y botón "Ver catálogo". Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
+
+### V-83 · HU-20 — "Confirmar por WhatsApp" en la agenda (I-08)
+
+**Resultado esperado:** ¿En "Mi agenda", la visita de V-78 (sin correo) tiene el botón "Confirmar por WhatsApp" que abre `wa.me` con el celular del cliente, y la de V-79 (con correo) no lo tiene?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite, `EMAIL_PROVIDER=console`) | 2026-11-11 (bitácora por correo, 13:55) | Solicitud nueva de "another" a las 19:00 con correo, LOPDP marcada y WhatsApp desmarcado: terminal con correo al cliente (P-08) y aviso al asesor; en I-06, Visita Programada. En "Mi agenda": la visita con WhatsApp/sin correo (la de V-78) tiene "Confirmar por WhatsApp" con el celular del cliente; la de "another" (con correo) no lo tiene. Evidencia: bitácora por correo; captura pendiente. | **Aprobado** |
+
+### V-84 · HU-25 — Registrar el resultado (modal en I-08)
+
+**Resultado esperado:** ¿Una visita futura no tiene "Registrar resultado"? ¿Una visita cuya hora ya pasó sí lo tiene; el modal no guarda sin resultado u observación, y con "Realizada" y una observación la visita queda Realizada, muestra "Resultado: …" con el nombre de quien registró y el botón desaparece? ¿La oportunidad sigue en Visita Programada (no pasa a En Negociación)?
+
+Para tener una visita pasada sin esperar: en el worktree, `pipenv run python manage.py shell` y mover una visita de prueba una semana atrás (`Visit.objects.filter(pk=<id>).update(scheduled_start=..., scheduled_end=...)`).
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:20–15:30 | Preparación en el shell: visitas 1 y 2 movidas una semana atrás con `update()`; visita 4 creada en el pasado (28-oct) para la oportunidad 3. La visita futura (hoy 19:00, "Another") solo muestra "Programada", sin "Registrar resultado". La del 4-nov 16:00 (Julián) sí lo tiene. Sin resultado ni observación, el modal dice "Elige resultado" y "Escribe la observación" y no guarda. Con "Realizada" y "Cliente interesado": queda Realizada, desaparece el botón y muestra "Resultado: Cliente interesado · asesor.demo". En I-06 la oportunidad de Julián sigue en Visita Programada. Capturas: `evidencias\Lote3\Captura de pantalla (57)` a `(61).png`. | **Aprobado** |
+
+### V-85 · HU-25 — No asistida devuelve la oportunidad a Contacto Inicial
+
+**Resultado esperado:** ¿Con "No asistida" (o "Cancelada") en la única visita activa de una oportunidad, en I-06 la oportunidad vuelve a Contacto Inicial? ¿Si la oportunidad tiene otra visita Programada, sigue en Visita Programada?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote3`, SQLite) | 2026-11-11, ~15:30–15:36 | Caso A: visita del 4-nov 17:00, única activa de su oportunidad, "No asistida" con "Cliente no llegó": muestra No asistida y el resultado con asesor.demo; en I-06 la oportunidad volvió a Contacto Inicial (Catálogo web). Caso B: visita 4 (28-oct 19:00, cliente "Another", con otra visita Programada hoy 19:00) → No asistida; en I-06 "Another" sigue en Visita Programada. Capturas: caso A `evidencias\Lote3\Captura de pantalla (62)` y `(63).png`; caso B `(64)` y `(65).png`. | **Aprobado** |
+
+### Ronda 8 — Lote 4: HU-15, HU-16 (P-07), HU-29 y HU-30 (I-06A) (rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm`)
+
+> **(2026-11-12) Ronda 8 cerrada: las 10 Aprobado por Pablo** (V-86 y V-88 a V-94 desde su bitácora por correo del 2026-11-12; V-87 y V-95 dictadas en el chat). Capturas asignadas por hora (ok de Pablo): las 10.
+>
+> **Estado (2026-11-09): las 10 pruebas Pendiente.** Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura; DS-35 Nivel 1: una evidencia por criterio, en `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\Lote4\`, fuera del repo).
+>
+> **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote4`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console` por defecto; nunca Supabase ni Resend). La base del worktree ya tiene `migrate` (hasta `opportunities.0003`), `setup_demo_data` y el script **fuera del repo** `C:\Users\Pablo\OneDrive\Documentos\Urbanex\evidencias\Lote4\preparar_demo_lote4.py` (ejecutado el 2026-11-09; las instrucciones están en su cabecera). El script deja:
+> 1. "[DEMO] Casa en Cumbayá - lista para publicar" (#1) en **Disponible** (atajo de demo) y `asesor.demo` con el celular ficticio `0990000001` (cámbialo en el script si quieres ver llegar el mensaje) y disponibilidad de lunes a viernes 09:00–13:00.
+> 2. Oportunidades de ejemplo sobre esa propiedad: **Demo A** (Contacto inicial, sin visitas), **Demo B** (Contacto inicial + visita Programada), **Demo C** (Visita programada + visita Realizada) y **Demo D** (Cierre).
+> 3. Para probar con otro asesor (V-95), crear un asesor B desde A-01.
+
+### V-86 · HU-15 — Botón de WhatsApp con el mensaje prellenado (P-07)
+
+**Resultado esperado:** ¿Sin sesión, en la ficha #1, debajo del precio aparece el botón verde "Escribir al asesor por WhatsApp"; al pulsarlo se abre `wa.me/593990000001` en otra pestaña con el texto "Hola, me interesa la propiedad "[DEMO] Casa en Cumbayá - lista para publicar" (código #1) que vi en Urbanex."? **Decisión pendiente (DT-117, SEC-20):** ¿te parece bien que el celular del asesor quede visible para cualquier visitante?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:05 | Sin sesión, en la ficha #1 aparece el botón verde "Escribir al asesor por WhatsApp" bajo el precio; abre `wa.me` (redirige a `api.whatsapp.com`) con el número del asesor y el texto prellenado "Hola, me interesa la propiedad "[DEMO] Casa en Cumbayá - lista para publicar" (código #1) que vi en Urbanex.". **Decisión DT-117/SEC-20:** Pablo acepta que el celular del asesor sea público, siempre que sea el celular de trabajo. Capturas: `evidencias\Lote4\Captura de pantalla (70)`, `(71)` y `(72).png`. | **Aprobado** |
+
+### V-87 · HU-15 — El botón se oculta sin celular válido o con el asesor inactivo
+
+**Resultado esperado:** ¿Si el asesor no tiene celular, o tiene un fijo (por ejemplo `022345678`), o está desactivado, la ficha #1 ya no muestra el botón (sin mensaje de error)? ¿Una propiedad en captación tampoco lo muestra? (El celular se cambia en A-01 o en el admin de Django; luego volver a `0990000001`.)
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:45–01:04 | Sin celular → sin botón. A-01 no permite guardar un fijo (valida el celular), así que el fijo `022345678` se puso por el shell → sin botón; con `0990000001` vuelve el botón. Asesor desactivado → sin botón. Propiedad en captación → la ficha no se muestra. Hallazgos: (i) al desactivar el asesor, `UserDeactivateView` pone `agent=None` en todas sus propiedades (`backend/apps/users/views.py:367`) y A-01 no permite reactivar: se reactivó y se reasignaron las 4 propiedades por el shell (pregunta para Sebas, DT-94); (ii) la ficha no pública dice "No se pudo cargar… verifica la conexión con el servidor" en vez de "no encontrada" (DT-147, ya registrado). Capturas: `evidencias\Lote4\Captura de pantalla (105)` a `(119).png`. | **Aprobado** (con observaciones) |
+
+### V-88 · HU-16 — Enviar el interés desde la ficha (P-07)
+
+**Resultado esperado:** ¿Sin sesión, en "¿Te interesa esta propiedad?", con nombre, un celular nuevo `09XXXXXXXX`, un mensaje y la casilla LOPDP, "Enviar mi interés" muestra "¡Gracias!" y "Tu interés quedó registrado. Un asesor se comunicará contigo."? ¿En I-06 (como `asesor.demo`) aparece la oportunidad nueva en Contacto inicial con el canal Catálogo web?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:11 | "Interesado Prueba", `0992222222`, "Quiero más información" y LOPDP → "¡Gracias!" y "Tu interés quedó registrado…"; en I-06 la oportunidad en Contacto inicial, canal Catálogo web; I-06A muestra la barra de 4 etapas, el avance deshabilitado sin visita y el historial inmutable. Capturas: `evidencias\Lote4\Captura de pantalla (73)`, `(74)` y `(75).png`. | **Aprobado** |
+
+### V-89 · HU-16 — Errores del formulario y campo de mensaje responsivo
+
+**Resultado esperado:** ¿Sin la casilla LOPDP, con un celular fijo o con la casilla de novedades marcada y el correo vacío, se muestra el error junto al campo y no se crea nada? ¿El campo "Mensaje" crece al escribir varias líneas, luego hace scroll, muestra el contador "n/1000" y no deja pasar de 1000 caracteres? ¿En vista de teléfono (DevTools) el formulario ocupa todo el ancho sin desplazamiento lateral?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:18–17:24 | Sin LOPDP, con el fijo `022345678` y con la casilla de correo marcada y el correo vacío, cada error aparece junto a su campo y no se crea nada. "Mensaje" crece, hace scroll, muestra n/1000 y no deja pasar de 1000. En vista de teléfono (Opera GX) no hay desplazamiento lateral. Capturas: `evidencias\Lote4\Captura de pantalla (76)` a `(81)`, `(83)` y `(84).png`. | **Aprobado** |
+
+### V-90 · HU-16 — Un visitante repetido no duplica y su mensaje llega a I-06A
+
+**Resultado esperado:** ¿Enviando otra vez con el mismo celular de V-88 (y otro nombre), la respuesta es la misma, en I-06 sigue habiendo **una sola** oportunidad para ese contacto con el nombre original, y en su detalle (I-06A) el historial muestra dos entradas "Sistema" con los mensajes ("Interés desde el formulario web: …" o "Interés registrado desde el formulario web (sin mensaje)")?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:23 | Mismo celular, "Otro Nombre", "Segundo mensaje" → misma respuesta; en I-06 una sola oportunidad con el nombre original; en I-06A dos entradas "Sistema" (17:11 y 17:23). Capturas: `evidencias\Lote4\Captura de pantalla (82).png`. | **Aprobado** |
+
+### V-91 · HU-29 — Barra de progreso y avance de un paso (I-06A)
+
+**Resultado esperado:** ¿Desde I-06, "Ver detalle" de **Demo B** abre I-06A con la barra de 4 etapas (Contacto inicial actual); "Avanzar a Visita programada" pide confirmación en un modal y, al aceptar, la barra marca Contacto inicial como hecha, el estado cambia y el historial muestra el cambio con tu usuario, fecha y hora? ¿No hay forma de volver atrás desde la pantalla?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:26 | Demo B: la barra muestra Contacto inicial; "Avanzar a Visita programada" abre un modal de confirmación; al aceptar pasa a Visita programada y el historial registra el cambio con usuario y hora; no hay botón para volver atrás. Capturas: `evidencias\Lote4\Captura de pantalla (85)` a `(88).png`. | **Aprobado** |
+
+### V-92 · HU-29 — Avance bloqueado si falta la visita
+
+**Resultado esperado:** ¿En **Demo A** (sin visitas) el botón "Avanzar a Visita programada" está deshabilitado y muestra "Para pasar a "Visita programada" la oportunidad necesita una visita programada o realizada." con el enlace a la agenda? ¿En **Demo B**, ya en Visita programada (V-91), "Avanzar a En negociación" está deshabilitado porque falta una visita Realizada?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-11, ~17:29 | Demo A: avance deshabilitado con el mensaje de que necesita una visita y el enlace a la agenda. Demo B, en Visita programada: "Avanzar a En negociación" deshabilitado por falta de una visita Realizada. Capturas: `evidencias\Lote4\Captura de pantalla (89)` y `(90).png`. | **Aprobado** |
+
+### V-93 · HU-29 — Pendiente de cierre con precio final acordado
+
+**Resultado esperado:** ¿En **Demo C** se puede avanzar a En negociación y luego aparece el campo "Precio final acordado (USD)"; el botón sigue deshabilitado con 0 o con un texto inválido y, con `142500`, el modal muestra el precio y al confirmar la oportunidad queda en Pendiente de cierre con "Precio final acordado: $142.500,00", sin botón de avance y con el aviso de que el cierre lo confirma el administrador? ¿El precio público de la ficha #1 no cambió?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:15 | Precio de la ficha #1 = $285.000. Demo C → En negociación (confirmado); "Precio final acordado" con 0 y con "abc" deja el botón deshabilitado; con 142500 el modal muestra el precio; queda en Pendiente de cierre con "Precio final acordado: $142.500,00", sin botón de avance y con el aviso de que el cierre lo confirma el administrador; la ficha sigue en $285.000. Capturas: `evidencias\Lote4\Captura de pantalla (91)` a `(95).png`. | **Aprobado** |
+
+### V-94 · HU-30 — Contraoferta sin cambiar el precio público
+
+**Resultado esperado:** ¿En I-06A, "Contraoferta" pide el precio ofrecido; sin precio (o con 0) muestra el error y no guarda; con observaciones y `140000` se registra y aparece arriba en el historial con la etiqueta "Contraoferta", "Precio ofrecido: $140.000,00" y tu nombre? ¿El precio de la ficha #1 sigue igual?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:23 | Demo B: Contraoferta sin precio o con 0 → no guarda (debe ser mayor a 0); con observación y 140000 → aparece en el historial con la etiqueta Contraoferta, "Precio ofrecido: $140.000,00" y `asesor.demo`; la ficha sigue en $285.000. Capturas: `evidencias\Lote4\Captura de pantalla (96)` a `(99).png`. | **Aprobado** |
+
+### V-95 · HU-30 — Nota con visita, Cierre sin interacciones e historial inmutable
+
+**Resultado esperado:** ¿Una "Nota" con la visita relacionada elegida muestra en el historial "Visita del …"; el historial no tiene botones para editar ni borrar? ¿En **Demo D** (Cierre) el formulario se reemplaza por "La oportunidad está cerrada: no se registran interacciones nuevas." y la barra avisa que el estado está fuera de la secuencia? ¿Con un asesor B, abrir `/dashboard/opportunities/<id de Demo A>` muestra "Oportunidad no encontrada"?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:30–00:42 | (a) Demo B: Nota con visita relacionada → en el historial "Visita del …"; el historial no tiene botones de editar ni borrar. (b) Demo D: "La oportunidad está cerrada: no se registran interacciones nuevas." y la barra avisa que el estado está fuera de la secuencia. (c) Con un asesor B creado en A-01, `/dashboard/opportunities/<id de Demo A>` → pantalla de carga y "no encontrada" (404) sin mostrar ningún dato de Demo A; a los segundos redirige a `/dashboard`. Observación: I-06A debería quedarse en el mensaje de no encontrada (DT-156). Capturas: `evidencias\Lote4\Captura de pantalla (100)` a `(104).png`. | **Aprobado** (con observación) |
 
 ## Estado actual (2026-11-02)
 
