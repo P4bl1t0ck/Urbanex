@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-09 integración de develop | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24): nota aditiva en la sección HU-09 (V-45 aprobada por Sebas el 2026-11-10; HU-09 en Pruebas). La fila resumen de HU-09 ("En Curso") es de Sebas y queda sin reescribir, como en DT-157 (1) |
 | Última actualización · ajustes DT-157 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46, criterio "solo usuarios activos" cubierto por su prueba automática (DS-35, decisión de Pablo); fechas de validación corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11) |
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-12 pasa a **Listo** (PR #14, V-60 a V-62 y V-64); V-63 **No aplicable hasta el despliegue (DT-110)**, decisión de Pablo |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-45 pasa a **Listo** (según Pablo, Sebas confirmó que está terminada; V-43 y PR #17); DT-120 sigue abierto aparte |
@@ -10,6 +11,8 @@
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · HU-15, HU-16, HU-29 y HU-30: validación visual aprobada por Pablo (V-86 a V-95); siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25 pasan a **Listo**: PR #21 auditado (§11, chat aparte, "apto para fusionar", según Pablo) y fusionado en `develop` (`5ed0e3b`, por Pablo); filas nuevas en la tabla resumen |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · HU-19, HU-20 y HU-25: validación visual aprobada por Pablo (V-78 a V-85); siguen en Pruebas hasta la auditoría y el merge del PR #21 |
+| Última actualización de corrección HU-09 | 2026-11-11 · privacidad del motivo en respuestas públicas; HU-09 permanece en Pruebas; registro humano V-45 conservado |
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; ambos criterios validados; HU en Pruebas hasta auditoría y merge |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
@@ -589,6 +592,25 @@ Decisión de Pablo (2026-11-08, PR #18). **No cambia ningún estado:** cada HU s
 | C-08 | Pueden existir valores heredados `cliente` en bases de datos, aunque `User.Role` ya solo define `admin` y `asesor`; RF-12 solo reconoce esos dos roles internos | Valores históricos en base vs `models.py` / RF-12 | **Confirmada por Pablo el 2026-10-31 (DS-30):** los clientes no tienen cuenta; eliminar `cliente`. Superusuarios cliente pasan a `admin`; las demás cuentas pasan a `asesor` inactivo con motivo `rol cliente eliminado (C-08)` |
 
 > **Nota añadida (Pablo, 2026-11-03), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`:** la fila C-08 queda con el texto de `develop`. En esta rama decía "confirmada por Pablo (2026-11-01)"; la confirmación vale desde el **2026-10-31 (DS-30)**. El 2026-11-01 Pablo la repitió al cerrar DT-105 en código (FX-23, `033b845`): solo hay roles `admin` y `asesor`, el cliente es anónimo (sin cuenta) y las pruebas de oportunidades ya no usan `role='cliente'`.
+
+### Actualización aditiva HU-09 (2026-11-13, Pablo con Claude Code): estado vigente frente a la fila resumen
+
+La fila resumen de HU-09 en la tabla de estados (`[HU-09](#hu-09) | Actualizar una propiedad publicada | EP-2 | 2 | En Curso | Pendiente | Pendiente | Pendiente`) es de Sebas y **no se reescribe** (`AGENTS.md` §4), con el mismo criterio que DT-157 (1) para HU-46. Estado vigente según las notas aditivas de esta sección: **Pruebas**. Validación: **V-45 aprobada por Sebas el 2026-11-10, 14:59 (Bogotá)**, con los 2 criterios de HU-09 validados (`Project_Progress.md`, V-45). Sigue en Pruebas hasta la auditoría §11 del PR #24 y su merge en `develop`. Integración de `origin/develop` `78b5187` en la rama (`d7318db`, 2026-11-13): 342 pruebas OK en SQLite (Estándares §4).
+
+### Corrección aditiva de privacidad HU-09 — 2026-11-11
+
+`PropertySerializer.to_representation()` devuelve `unavailability_reason: null` en respuestas anónimas y cuando falta el contexto de solicitud. Conserva el motivo almacenado y el acceso autenticado existente, incluida la gestión de propietario/admin después de republicar. No cambia las transiciones ni los criterios de aceptación de HU-09. `PropertyWithdrawalApiTests` cubre las respuestas públicas e internas y la conservación del dato. Resultados reales en Estándares §4; validación humana de esta corrección **Pendiente**, sin modificar V-45. HU-09 permanece en **Pruebas**.
+
+### Actualización aditiva HU-09 — 2026-11-09
+
+**Estado de trabajo: Pruebas. Validación funcional/visual: Aprobada por Sebas (V-45, 2026-11-10, 14:59 Bogotá).** Disponible/Reservado pueden pasar a No disponible con motivo obligatorio; No disponible vuelve únicamente a En captación y debe publicarse de nuevo por HU-53. Se conserva el valor almacenado `reservador` (DT-16), sin migración. Esta actualización supersede la descripción histórica de HU-09 sin acciones de estado; HU-09 permanece en Pruebas hasta la auditoría y el merge.
+
+| Criterio | Implementación y evidencia | Validación humana |
+|---|---|---|
+| Cambiar entre En captación, Disponible y No disponible; No disponible exige motivo | Acciones explícitas `POST /api/auth/properties/<id>/withdraw/` y `reactivate/`; publicación por la acción HU-53. Pruebas `PropertyWithdrawalApiTests` cubren motivo, permisos, estados y visibilidad | Validado, V-45 aprobada por Sebas el 2026-11-10 |
+| No permite asignar Vendido o Arrendado manualmente | `status` sigue siendo de solo lectura en POST/PATCH. Las acciones solo asignan No disponible o En captación; prueba de PATCH conserva el estado al editar precio/título | Validado, V-45 aprobada por Sebas el 2026-11-10 |
+
+La edición de datos no se confunde con una transición: se retira la validación genérica que rechazaba toda edición de propiedades vendidas/arrendadas sin que se estuviera cambiando su estado (DT-44). Los permisos de propietario/admin se conservan. Resultados técnicos en Estándares §4. No se implementa cancelación de visitas/oportunidades al retirar; esa política no está definida por la decisión recibida.
 
 ### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
 

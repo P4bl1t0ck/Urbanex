@@ -11,6 +11,7 @@
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: HU-19, HU-20 y HU-25 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: validación visual de HU-19, HU-20 y HU-25 aprobada por Pablo (V-78 a V-85) |
 | Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: nota aditiva en PROC-08 con el registro humano de V-44 |
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; HU-09 con 2/2 criterios validados en la rama |
 | Última actualización aditiva HU-46 | 2026-11-06 · PROC-08 registra I-02 y la sesión D-05; V-44 Pendiente |
 | Propósito | Ver en un solo lugar **qué proceso de la empresa** cubre cada historia, con su épica, RF, RNF y pantalla, y **definir nuestro 60 %** para la entrega del 14 de noviembre de 2026 |
 | Fecha | 2026-10-31 |
@@ -339,3 +340,7 @@ RF sin HU propia: **RF-14** (auditoría) se alimenta de RF-01, 05, 06, 07, 08, 1
 - **Al cerrar una HU:** no se toca este archivo (el estado está en los enlaces). Solo se actualiza si cambia el mapa, el corte del 60 % o un proceso.
 - **Al implementar un paso:** completar la columna **Código** de §4 con los archivos y el endpoint (sin números de línea).
 - **Si se decide algo del §6:** registrar la decisión en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) (DS-xx) y enlazarla aquí.
+
+### Actualización aditiva PROC-01 / HU-09 — 2026-11-09
+
+La fila histórica de PROC-01 paso 10 es anterior a esta implementación. HU-09 añade edición y acciones de retirada/reactivación en `users/serializers.py`, `users/views.py`, `users/urls.py`, `users/tests.py` y `frontend/app/dashboard/page.tsx`. Rutas: `POST auth/properties/<id>/withdraw/` (motivo obligatorio), `POST auth/properties/<id>/reactivate/` (solo a captación); para volver a Disponible se usa la publicación HU-53 existente. No cambia el corte del 60 % ni su reparto. Estado y validación se consultan en [HU-09](URBANEX_ESTADO_PROCESOS.md#hu-09); V-45 fue aprobada por Sebas el 2026-11-10 y está registrada en `Project_Progress.md`.
