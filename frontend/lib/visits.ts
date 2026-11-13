@@ -6,6 +6,7 @@ import type {
   AgendaResponse,
   AgendaStatusFilter,
   AgendaVisit,
+  CoordinatedVisitPayload,
   PublicVisit,
   VisitCancelPayload,
   VisitOutcomePayload,
@@ -108,6 +109,29 @@ export function cancelVisit(visitId: number, payload: VisitCancelPayload) {
   return authFetch<AgendaVisit>(`${BASE}${visitId}/cancel/`, {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+// HU-23 (I-08, DS-52): franjas libres con la antelación del asesor (30 min). 403 si no la atiende.
+export function getCoordinatedSlots(propertyId: number, from?: string, to?: string) {
+  return authFetch<FreeSlotsResponse>(withQuery(`${BASE}coordinated/free-slots/`, { property: propertyId, from, to }));
+}
+
+// HU-23: registra la visita coordinada por WhatsApp. 400 datos o franja, 403, 409 ya programada.
+export function createCoordinatedVisit(payload: CoordinatedVisitPayload) {
+  return authFetch<AgendaVisit>(`${BASE}coordinated/`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+// HU-23: franjas libres del asesor de la visita, para reprogramarla.
+export function getRescheduleSlots(visitId: number, from?: string, to?: string) {
+  return authFetch<FreeSlotsResponse>(withQuery(`${BASE}${visitId}/reschedule-slots/`, { from, to }));
+}
+
+// HU-23: mueve la visita (mismo enlace de P-08). 400 franja no libre o ya empezó, 409 no programada.
+export function rescheduleVisit(visitId: number, start: string) {
+  return authFetch<AgendaVisit>(`${BASE}${visitId}/reschedule/`, {
+    method: "POST",
+    body: JSON.stringify({ start }),
   });
 }
 

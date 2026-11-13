@@ -5,11 +5,15 @@ from .views import (
     AgendaView,
     AvailabilityExceptionViewSet,
     AvailabilityViewSet,
+    CoordinatedFreeSlotsView,
+    CoordinatedVisitView,
     PropertyFreeSlotsView,
     PublicVisitCancelView,
     PublicVisitView,
     VisitCancelView,
     VisitOutcomeView,
+    VisitRescheduleSlotsView,
+    VisitRescheduleView,
     VisitRequestView,
 )
 
@@ -27,5 +31,11 @@ urlpatterns = [
          name='public-visit-cancel'),
     path('<int:visit_id>/outcome/', VisitOutcomeView.as_view(), name='visit-outcome'),
     path('<int:visit_id>/cancel/', VisitCancelView.as_view(), name='visit-cancel'),
+    path('<int:visit_id>/reschedule/', VisitRescheduleView.as_view(), name='visit-reschedule'),
+    path('<int:visit_id>/reschedule-slots/', VisitRescheduleSlotsView.as_view(),
+         name='visit-reschedule-slots'),
+    path('coordinated/', CoordinatedVisitView.as_view(), name='coordinated-visit'),
+    path('coordinated/free-slots/', CoordinatedFreeSlotsView.as_view(),
+         name='coordinated-free-slots'),
     path('agenda/', AgendaView.as_view(), name='agenda'),
 ] + router.urls

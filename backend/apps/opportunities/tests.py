@@ -523,6 +523,19 @@ class EligiblePropertiesApiTests(OpportunityApiMixin, TestCase):
         self.assertEqual(row['sector'], 'Cumbayá')
         self.assertTrue(row['photo'].endswith('/media/properties/images/foto.png'))
 
+    def test_mine_filters_the_agent_properties_but_not_for_admin(self):
+        # HU-23 (DS-52): el formulario de visita coordinada pide solo las que atiende.
+        Property.objects.create(
+            agent=self.other_agent, title='Del otro asesor', description='Prueba',
+            property_type='casa', price=99000, area_m2=80, location='Tumbaco',
+            status='disponible',
+        )
+        self.client.force_authenticate(self.agent)
+        ids = {row['id'] for row in self.client.get(ELIGIBLE_URL, {'mine': '1'}).data}
+        self.assertEqual(ids, {self.property.id, self.other_property.id})
+        self.client.force_authenticate(self.admin)
+        self.assertEqual(len(self.client.get(ELIGIBLE_URL, {'mine': '1'}).data), 3)
+
 
 class AgentsApiTests(OpportunityApiMixin, TestCase):
     def test_admin_lists_active_agents_only(self):

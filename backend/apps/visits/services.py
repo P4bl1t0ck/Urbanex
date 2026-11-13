@@ -141,6 +141,8 @@ def free_slots(agent, date_from, date_to, *, now=None, lead_time=None):
 # ---------------------------------------------------------------------------------------------
 
 SCHEDULABLE_PROPERTY_STATUSES = ('disponible',)
+# HU-23 (DS-52): motivo del historial cuando el asesor registra la visita coordinada.
+COORDINATED_VISIT_REASON = 'Visita coordinada por WhatsApp, registrada por el asesor (HU-23).'
 
 
 class SlotUnavailable(Exception):
@@ -183,9 +185,14 @@ def validate_request_data(*, full_name, phone, email, email_opt_in, privacy_acce
 
 
 def request_visit(*, property_obj, start, full_name, phone, email='', email_opt_in=False,
-                  privacy_accepted=False):
+                  privacy_accepted=False, registered_by=None,
+                  origin_channel=OriginChannel.CATALOGO_WEB, lead_time=None):
     '''
     HU-19. Registra la visita del cliente en la franja elegida y devuelve la visita.
+
+    HU-23 (DS-52) la reutiliza para la visita coordinada que registra el asesor:
+    registered_by (usuario del historial; None = cliente desde el portal), origin_channel del
+    contacto nuevo (WHATSAPP) y lead_time (30 min para el asesor; None = la del cliente, DS-37).
 
     - La propiedad debe estar Disponible (la vista responde 404 si no lo esta).
     - La franja debe ser exactamente una de free_slots() del asesor de la propiedad, recalculada
@@ -214,15 +221,18 @@ def request_visit(*, property_obj, start, full_name, phone, email='', email_opt_
         # escrituras. La restriccion de exclusion en PostgreSQL queda para DT-143.
         User.objects.select_for_update().filter(pk=agent.pk).first()
         day = start.astimezone(ECUADOR_TZ).date()
-        slot = next((s for s in free_slots(agent, day, day, now=now) if s.start == start), None)
+        slot = next((s for s in free_slots(agent, day, day, now=now, lead_time=lead_time)
+                     if s.start == start), None)
         if slot is None:
             raise SlotUnavailable()
 
         contact, _ = get_or_create_contact(
             phone=phone, full_name=full_name, email=email,
-            origin_channel=OriginChannel.CATALOGO_WEB, privacy_accepted_at=now,
+            origin_channel=origin_channel, privacy_accepted_at=now,
             email_opt_in=email_opt_in,
         )
+        history_reason = (SYSTEM_REASON_CLIENT_PORTAL if registered_by is None
+                          else COORDINATED_VISIT_REASON)
         opportunity = (Opportunity.objects.select_for_update().active()
                        .filter(contact=contact, property=property_obj).first())
         if opportunity is None:
@@ -230,7 +240,7 @@ def request_visit(*, property_obj, start, full_name, phone, email='', email_opt_
                 with transaction.atomic():
                     opportunity = Opportunity.objects.create(
                         contact=contact, property=property_obj, assigned_agent=agent,
-                        origin_channel=OriginChannel.CATALOGO_WEB, last_activity_at=now,
+                        origin_channel=origin_channel, last_activity_at=now,
                     )
             except IntegrityError:
                 # Otra solicitud simultanea abrio la misma oportunidad: se reutiliza.
@@ -239,7 +249,7 @@ def request_visit(*, property_obj, start, full_name, phone, email='', email_opt_
             else:
                 OpportunityStatusHistory.objects.create(
                     opportunity=opportunity, previous_status='', new_status=opportunity.status,
-                    changed_by=None, reason=SYSTEM_REASON_CLIENT_PORTAL,
+                    changed_by=registered_by, reason=history_reason,
                 )
         if opportunity.visits.filter(status=Visit.Status.PROGRAMADA).exists():
             raise VisitAlreadyScheduled()
@@ -252,10 +262,11 @@ def request_visit(*, property_obj, start, full_name, phone, email='', email_opt_
         visit.full_clean()
         visit.save()
         if opportunity.status == Opportunity.Status.CONTACTO_INICIAL:
-            change_status(opportunity, Opportunity.Status.VISITA_PROGRAMADA, changed_by=None,
-                          reason=SYSTEM_REASON_CLIENT_PORTAL)
+            change_status(opportunity, Opportunity.Status.VISITA_PROGRAMADA,
+                          changed_by=registered_by, reason=history_reason)
         visit_id = visit.pk
-        transaction.on_commit(lambda: send_visit_notifications(visit_id))
+        registered_by_id = registered_by.pk if registered_by else None
+        transaction.on_commit(lambda: send_visit_notifications(visit_id, registered_by_id))
     return visit
 
 
@@ -284,12 +295,13 @@ def notification_agents(visit):
     return agents
 
 
-def send_visit_notifications(visit_id):
+def send_visit_notifications(visit_id, registered_by_id=None):
     '''
     Correos de HU-20, llamados con transaction.on_commit. Cada envio falla por separado y solo
     queda en el log: la visita ya esta registrada y el asesor puede confirmar por WhatsApp.
     - Al cliente: solo si dio correo y marco la casilla (confirmation_email), con el enlace a P-08.
     - Al asesor de la visita (y al de la oportunidad si es otro): siempre que tenga correo.
+    HU-23 (DS-52): si la registro un usuario (visita coordinada), ese usuario no recibe aviso.
     '''
     visit = (Visit.objects.select_related('property', 'agent', 'opportunity__contact',
                                           'opportunity__assigned_agent')
@@ -317,14 +329,19 @@ def send_visit_notifications(visit_id):
 
     channel = ('Se envió la confirmación por correo al cliente.' if visit.confirmation_email
                else 'El cliente no pidió confirmación por correo: confírmala por WhatsApp.')
+    origin = 'Nueva visita solicitada desde el portal.'
+    if registered_by_id is not None:
+        registered_by = User.objects.filter(pk=registered_by_id).first()
+        origin = ('Nueva visita coordinada, registrada por '
+                  f'{display_name(registered_by) if registered_by else "un usuario"}.')
     for agent in notification_agents(visit):
-        if not agent.email:
+        if not agent.email or agent.pk == registered_by_id:
             continue
         role = ('Atiendes esta visita.' if agent.pk == visit.agent_id
                 else 'Eres el asesor de la oportunidad; la visita la atiende '
                      f'{display_name(visit.agent)}.')
         body = (
-            f'Nueva visita solicitada desde el portal.\n\n'
+            f'{origin}\n\n'
             f'Propiedad: {visit.property.title} ({visit.property.location})\n'
             f'Fecha y hora: {when} (hora de Ecuador)\n'
             f'Cliente: {contact.full_name} · {contact.phone}\n\n'
@@ -559,3 +576,137 @@ def record_outcome(*, visit, user, outcome, notes, now=None):
                             'no quedan visitas activas (RF-04).'),
                 )
     return visit
+
+
+# ---------------------------------------------------------------------------------------------
+# Lotes 5 y 6 (DS-52): HU-23 registrar o reprogramar una visita coordinada (I-08)
+# ---------------------------------------------------------------------------------------------
+
+WHATSAPP_NOTICE = 'El cliente no dio correo: el asesor le avisa por WhatsApp.'
+
+
+def agent_lead_time():
+    '''
+    Antelacion minima cuando el asesor registra o reprograma (30 min, decision de Pablo,
+    2026-11-13, DS-52). Parametro aparte: el cliente sigue con VISIT_MIN_LEAD_TIME_MINUTES (DS-37).
+    '''
+    return timedelta(minutes=getattr(settings, 'VISIT_AGENT_MIN_LEAD_TIME_MINUTES', 30))
+
+
+def can_schedule_for_property(user, property_obj):
+    '''El asesor solo en las propiedades que atiende; el admin en cualquiera.'''
+    return getattr(user, 'role', None) == 'admin' or property_obj.agent_id == user.pk
+
+
+def register_coordinated_visit(*, user, property_obj, start, full_name, phone, email='',
+                               email_opt_in=False, privacy_accepted=False):
+    '''
+    HU-23 (RF-04, DS-52). El asesor registra a mano la visita coordinada por WhatsApp.
+    - Misma regla que HU-19 (request_visit): transaccion, bloqueo del asesor y franja exacta de
+      free_slots(), sin doble reserva; con 30 min de antelacion en vez de 2 h.
+    - Contacto por celular (DS-28): uno existente se reutiliza sin cambiar sus datos; uno nuevo
+      se crea con el canal WhatsApp. Oportunidad activa reutilizada o nueva con el asesor de la
+      propiedad; 409 si ya tiene una visita Programada (para cambiarla: reprogramar).
+    - Correo de confirmacion con el enlace si el cliente dio correo y acepto; si no, el historial
+      dice que el asesor le avisa por WhatsApp.
+    PermissionDenied si el asesor no atiende la propiedad.
+    '''
+    if not can_schedule_for_property(user, property_obj):
+        raise PermissionDenied('Solo registras visitas en las propiedades que atiendes.')
+    with transaction.atomic():
+        visit = request_visit(
+            property_obj=property_obj, start=start, full_name=full_name, phone=phone,
+            email=email, email_opt_in=email_opt_in, privacy_accepted=privacy_accepted,
+            registered_by=user, origin_channel=OriginChannel.WHATSAPP,
+            lead_time=agent_lead_time(),
+        )
+        notes = (f'{display_name(user)} registró la visita coordinada por WhatsApp para el '
+                 f'{format_local(visit.scheduled_start)}.')
+        if not visit.confirmation_email:
+            notes = f'{notes} {WHATSAPP_NOTICE}'
+        record_visit_event(visit.opportunity, visit, notes)
+    return visit
+
+
+def agent_free_slots(visit_or_agent, date_from, date_to, *, now=None):
+    '''Franjas libres con la antelacion del asesor (HU-23).'''
+    agent = getattr(visit_or_agent, 'agent', visit_or_agent)
+    return free_slots(agent, date_from, date_to, now=now, lead_time=agent_lead_time())
+
+
+def reschedule_visit(*, visit_id, user, start, now=None):
+    '''
+    HU-23 (RF-04, DS-52). Mueve una visita Programada a otra franja libre del mismo asesor.
+    - El asesor de la visita o el admin, antes de la hora de inicio.
+    - La nueva hora debe ser exactamente una de agent_free_slots() (30 min de antelacion),
+      recalculada con el asesor bloqueado: sin solapes ni doble reserva.
+    - Se mueve el mismo registro (el enlace de P-08 sigue sirviendo); la franja anterior queda
+      libre. Sin cambio de estado de la oportunidad.
+    - Entrada SISTEMA en el historial; correo al cliente si dio correo y al otro asesor
+      implicado; si el cliente no dio correo, el historial dice que se le avisa por WhatsApp.
+    VisitNotCancellable si ya no esta Programada (409); SlotUnavailable si la hora no es libre.
+    '''
+    if timezone.is_naive(start):
+        start = start.replace(tzinfo=ECUADOR_TZ)
+    now = now or timezone.now()
+    with transaction.atomic():
+        visit = (Visit.objects.select_for_update().select_related('opportunity', 'agent')
+                 .get(pk=visit_id))
+        if not can_manage_visit(user, visit):
+            raise PermissionDenied('Solo el asesor de la visita o el administrador la '
+                                   'reprograman.')
+        if visit.status != Visit.Status.PROGRAMADA:
+            raise VisitNotCancellable()
+        if now >= visit.scheduled_start:
+            raise ValidationError({'detail': (
+                'La visita ya empezó: registra su resultado en lugar de reprogramarla.'
+            )})
+        User.objects.select_for_update().filter(pk=visit.agent_id).first()
+        day = start.astimezone(ECUADOR_TZ).date()
+        slot = next((s for s in agent_free_slots(visit.agent, day, day, now=now)
+                     if s.start == start), None)
+        if slot is None:
+            raise SlotUnavailable()
+
+        previous = format_local(visit.scheduled_start)
+        visit.scheduled_start = slot.start
+        visit.scheduled_end = slot.end
+        visit.save(update_fields=['scheduled_start', 'scheduled_end'])
+        notes = (f'{display_name(user)} reprogramó la visita del {previous} al '
+                 f'{format_local(visit.scheduled_start)}.')
+        if not visit.confirmation_email:
+            notes = f'{notes} {WHATSAPP_NOTICE}'
+        record_visit_event(visit.opportunity, visit, notes)
+        visit_pk, user_pk = visit.pk, user.pk
+        transaction.on_commit(lambda: send_reschedule_notifications(visit_pk, previous, user_pk))
+    return visit
+
+
+def send_reschedule_notifications(visit_id, previous, user_id):
+    '''Correos de HU-23 (consola en desarrollo): al cliente si dio correo y a los asesores.'''
+    visit = (Visit.objects.select_related('property', 'agent', 'opportunity__contact',
+                                          'opportunity__assigned_agent')
+             .filter(pk=visit_id).first())
+    if visit is None:
+        return
+    when = format_local(visit.scheduled_start)
+    contact = visit.opportunity.contact
+    messages = []
+    if visit.confirmation_email:
+        messages.append((visit.confirmation_email, 'Urbanex: tu visita fue reprogramada', (
+            f'Hola {contact.full_name}:\n\n'
+            f'Tu visita a "{visit.property.title}" ({visit.property.location}) se cambió del '
+            f'{previous} al {when} (hora de Ecuador).\n\n'
+            f'Puedes ver los datos de tu visita aquí:\n{visit_link(visit)}\n\nUrbanex'
+        )))
+    for agent in notification_agents(visit):
+        if agent.email and agent.pk != user_id:
+            messages.append((agent.email, 'Urbanex: visita reprogramada', (
+                f'La visita a {visit.property.title} con {contact.full_name} se cambió del '
+                f'{previous} al {when} (hora de Ecuador).\n\nRevisa tu agenda en Urbanex.'
+            )))
+    for recipient, subject, body in messages:
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient])
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('No se pudo avisar la reprogramación de la visita #%s.', visit.pk)

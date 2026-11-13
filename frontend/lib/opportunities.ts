@@ -35,8 +35,9 @@ export function openOpportunity(payload: OpportunityOpenPayload) {
   return authFetch<OpportunityOpenResponse>(BASE, { method: "POST", body: JSON.stringify(payload) });
 }
 
-export function getEligibleProperties() {
-  return authFetch<EligibleProperty[]>(`${BASE}eligible-properties/`);
+// mine: HU-23 (DS-52), el asesor solo ve las propiedades que atiende (el admin, todas).
+export function getEligibleProperties(mine = false) {
+  return authFetch<EligibleProperty[]>(`${BASE}eligible-properties/${mine ? "?mine=1" : ""}`);
 }
 
 // Solo el admin: el servidor responde 403 a un asesor.

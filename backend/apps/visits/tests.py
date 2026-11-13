@@ -1480,3 +1480,223 @@ class AgentVisitCancelTests(VisitCancelTestMixin, TestCase):
                                                 'to': (today + timedelta(days=2)).isoformat()})
         flags = {v['id']: v['can_cancel'] for v in response.data['visits']}
         self.assertEqual(flags, {future.pk: True, started.pk: False})
+
+
+# =============================================================================================
+# Lotes 5 y 6 (DS-52): HU-23 registrar o reprogramar una visita coordinada
+# =============================================================================================
+
+COORDINATED_URL = '/api/visits/coordinated/'
+COORDINATED_SLOTS_URL = '/api/visits/coordinated/free-slots/'
+
+
+def reschedule_url(visit_id):
+    return f'/api/visits/{visit_id}/reschedule/'
+
+
+def reschedule_slots_url(visit_id):
+    return f'/api/visits/{visit_id}/reschedule-slots/'
+
+
+class CoordinatedVisitTests(HU19TestMixin, TestCase):
+    '''HU-23 (I-08): el asesor registra la visita coordinada por WhatsApp (DS-52).'''
+
+    def coordinated(self, user=None, start=None, at=None, **overrides):
+        data = self.payload(start=start, property=self.property.pk, **overrides)
+        if user is not None:
+            self.login(user)
+        with mock.patch('django.utils.timezone.now',
+                        return_value=at or local(self.monday, 6)):
+            return self.post_to(COORDINATED_URL, data)
+
+    def post_to(self, url, data):
+        with self.captureOnCommitCallbacks(execute=True):
+            return self.client.post(url, data, format='json')
+
+    def test_agent_registers_new_contact_with_whatsapp_channel(self):
+        response = self.coordinated(self.agent)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(response.data['status'], 'PROGRAMADA')
+        contact = Contact.objects.get(phone=NEW_PHONE_E164)
+        self.assertEqual(contact.origin_channel, OriginChannel.WHATSAPP)
+        visit = Visit.objects.get()
+        self.assertEqual((visit.agent, visit.scheduled_start), (self.agent, self.start))
+        opportunity = visit.opportunity
+        self.assertEqual(opportunity.status, Opportunity.Status.VISITA_PROGRAMADA)
+        self.assertTrue(all(row.changed_by == self.agent
+                            for row in opportunity.status_history.all()))
+        event = opportunity.interactions.get()
+        self.assertIn('registró la visita coordinada', event.notes)
+        self.assertIn('avisa por WhatsApp', event.notes)  # Sin correo del cliente
+        self.assertEqual(mail.outbox, [])  # Quien registra no se avisa a si mismo
+
+    def test_existing_contact_and_opportunity_are_reused_without_changes(self):
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(
+            status=Opportunity.Status.CONTACTO_INICIAL)
+        response = self.coordinated(self.agent, phone=EXISTING_PHONE, full_name='Otro Nombre')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.contact.refresh_from_db()
+        self.assertEqual(self.contact.full_name, 'Carla Cliente')
+        self.assertEqual(Contact.objects.count(), 1)
+        self.assertEqual(Visit.objects.get().opportunity, self.opportunity)
+
+    def test_client_email_gets_the_confirmation_link(self):
+        response = self.coordinated(self.agent, email='nuevo@correo.ec', email_opt_in=True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        visit = Visit.objects.get()
+        self.assertEqual([m.to for m in mail.outbox], [['nuevo@correo.ec']])
+        self.assertIn(str(visit.cancellation_token), mail.outbox[0].body)
+        self.assertNotIn('avisa por WhatsApp', visit.opportunity.interactions.get().notes)
+
+    def test_agent_needs_30_minutes_while_client_still_needs_2_hours(self):
+        at = local(self.monday, 8, 15)  # 45 min antes de las 09:00
+        with mock.patch('django.utils.timezone.now', return_value=at):
+            client_response = self.post(self.payload())
+        self.assertEqual(client_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.coordinated(self.agent, at=at).status_code,
+                         status.HTTP_201_CREATED)
+        late = local(self.monday, 9, 40)  # 20 min antes de las 10:00: no
+        response = self.coordinated(self.agent, start=local(self.monday, 10), at=late,
+                                    phone='0981112222')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('start', response.data)
+
+    def test_no_double_booking(self):
+        self.assertEqual(self.coordinated(self.agent).status_code, status.HTTP_201_CREATED)
+        response = self.coordinated(self.agent, phone='0981112222')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Visit.objects.count(), 1)
+
+    def test_already_scheduled_opportunity_is_409(self):
+        self.coordinated(self.agent)
+        response = self.coordinated(self.agent, start=local(self.monday, 10))
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
+    def test_lopdp_and_phone_are_required(self):
+        self.assertIn('privacy_accepted',
+                      self.coordinated(self.agent, privacy_accepted=False).data)
+        self.assertIn('phone', self.coordinated(self.agent, phone='022345678').data)
+        self.assertFalse(Visit.objects.exists())
+
+    def test_permissions(self):
+        self.assertEqual(self.coordinated().status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(self.coordinated(self.other_agent).status_code,
+                         status.HTTP_403_FORBIDDEN)
+        response = self.coordinated(self.admin)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(Visit.objects.get().agent, self.agent)  # El asesor de la propiedad
+        self.assertEqual([m.to for m in mail.outbox], [['asesor.visitas@urbanex.ec']])
+
+    def test_free_slots_for_the_agent_use_30_minutes(self):
+        self.login(self.agent)
+        params = {'property': self.property.pk, 'from': self.monday.isoformat(),
+                  'to': self.monday.isoformat()}
+        with mock.patch('django.utils.timezone.now', return_value=local(self.monday, 8, 15)):
+            starts = [slot['start'] for slot in
+                      self.client.get(COORDINATED_SLOTS_URL, params).data['slots']]
+        self.assertEqual(starts[0], local(self.monday, 9).isoformat())
+        self.login(self.other_agent)
+        self.assertEqual(self.client.get(COORDINATED_SLOTS_URL, params).status_code,
+                         status.HTTP_403_FORBIDDEN)
+
+
+class RescheduleVisitTests(HU19TestMixin, TestCase):
+    '''HU-23 (I-08): reprogramar sin solapes y con aviso (DS-52).'''
+
+    def setUp(self):
+        super().setUp()
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(
+            status=Opportunity.Status.VISITA_PROGRAMADA)
+        self.scheduled = self.visit(local(self.monday, 9), local(self.monday, 10))
+        Visit.objects.filter(pk=self.scheduled.pk).update(confirmation_email='carla@correo.ec')
+
+    def reschedule(self, user=None, start=None, at=None, visit=None):
+        if user is not None:
+            self.login(user)
+        with mock.patch('django.utils.timezone.now',
+                        return_value=at or local(self.monday, 6)):
+            with self.captureOnCommitCallbacks(execute=True):
+                return self.client.post(reschedule_url((visit or self.scheduled).pk),
+                                        {'start': (start or local(self.monday, 11)).isoformat()},
+                                        format='json')
+
+    def test_moves_the_same_visit_frees_old_slot_and_notifies_client(self):
+        token = self.scheduled.cancellation_token
+        response = self.reschedule(self.agent)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.scheduled.refresh_from_db()
+        self.assertEqual((self.scheduled.scheduled_start, self.scheduled.scheduled_end),
+                         (local(self.monday, 11), local(self.monday, 12)))
+        self.assertEqual(self.scheduled.cancellation_token, token)  # Mismo enlace de P-08
+        starts = [s.start for s in free_slots(self.agent, self.monday, self.monday,
+                                              now=local(self.monday, 6))]
+        self.assertIn(local(self.monday, 9), starts)
+        self.assertNotIn(local(self.monday, 11), starts)
+        event = self.opportunity.interactions.get()
+        self.assertIn('reprogramó la visita', event.notes)
+        self.assertEqual([m.to for m in mail.outbox], [['carla@correo.ec']])
+        self.assertIn(str(token), mail.outbox[0].body)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.VISITA_PROGRAMADA)
+
+    def test_without_client_email_history_says_whatsapp(self):
+        Visit.objects.filter(pk=self.scheduled.pk).update(confirmation_email='')
+        self.assertEqual(self.reschedule(self.agent).status_code, status.HTTP_200_OK)
+        self.assertIn('avisa por WhatsApp', self.opportunity.interactions.get().notes)
+        self.assertEqual(mail.outbox, [])
+
+    def test_no_overlap_with_another_visit(self):
+        other = Opportunity.objects.create(
+            contact=Contact.objects.create(full_name='Otro', phone='+593980000000',
+                                           origin_channel=OriginChannel.MANUAL),
+            property=self.property, assigned_agent=self.agent,
+            origin_channel=OriginChannel.MANUAL)
+        self.visit(local(self.monday, 11), local(self.monday, 12), opportunity=other)
+        response = self.reschedule(self.agent)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('start', response.data)
+        self.scheduled.refresh_from_db()
+        self.assertEqual(self.scheduled.scheduled_start, local(self.monday, 9))
+
+    def test_needs_30_minutes_and_only_before_start(self):
+        later = self.visit(local(self.monday, 11), local(self.monday, 12),
+                           opportunity=Opportunity.objects.create(
+                               contact=Contact.objects.create(
+                                   full_name='Otro', phone='+593980000000',
+                                   origin_channel=OriginChannel.MANUAL),
+                               property=self.property, assigned_agent=self.agent,
+                               origin_channel=OriginChannel.MANUAL))
+        Visit.objects.filter(pk=self.scheduled.pk).update(status=Visit.Status.REALIZADA)
+        # A las 10:00 con 25 min de antelacion: no; con 35 min: si
+        self.assertEqual(self.reschedule(self.agent, start=local(self.monday, 10),
+                                         at=local(self.monday, 9, 35), visit=later).status_code,
+                         status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.reschedule(self.agent, start=local(self.monday, 10),
+                                         at=local(self.monday, 9, 25), visit=later).status_code,
+                         status.HTTP_200_OK)
+        # Visita ya empezada
+        self.assertEqual(self.reschedule(self.agent, start=local(self.monday, 11),
+                                         at=local(self.monday, 10, 5), visit=later).status_code,
+                         status.HTTP_400_BAD_REQUEST)
+
+    def test_not_programmed_is_409(self):
+        Visit.objects.filter(pk=self.scheduled.pk).update(status=Visit.Status.CANCELADA)
+        self.assertEqual(self.reschedule(self.agent).status_code, status.HTTP_409_CONFLICT)
+
+    def test_permissions(self):
+        self.assertEqual(self.reschedule().status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(self.reschedule(self.other_agent).status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.reschedule(self.admin).status_code, status.HTTP_200_OK)
+        # El admin reprograma: avisan al cliente y al asesor de la visita
+        self.assertEqual(sorted(m.to[0] for m in mail.outbox),
+                         ['asesor.visitas@urbanex.ec', 'carla@correo.ec'])
+
+    def test_reschedule_slots_exclude_the_current_slot(self):
+        self.login(self.agent)
+        with mock.patch('django.utils.timezone.now', return_value=local(self.monday, 6)):
+            response = self.client.get(reschedule_slots_url(self.scheduled.pk),
+                                       {'from': self.monday.isoformat(),
+                                        'to': self.monday.isoformat()})
+        self.assertEqual([slot['start'] for slot in response.data['slots']],
+                         [local(self.monday, 10).isoformat(), local(self.monday, 11).isoformat()])

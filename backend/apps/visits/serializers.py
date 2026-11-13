@@ -136,6 +136,16 @@ class VisitRequestSerializer(serializers.Serializer):  # pylint: disable=abstrac
     privacy_accepted = serializers.BooleanField(required=False, default=False)
 
 
+class CoordinatedVisitSerializer(VisitRequestSerializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-23 (I-08): la de HU-19 mas la propiedad. LOPDP la confirma el asesor.'''
+    property = serializers.IntegerField()
+
+
+class RescheduleSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de la reprogramacion (HU-23). Una hora sin zona se toma como hora de Ecuador.'''
+    start = serializers.DateTimeField(default_timezone=ECUADOR_TZ)
+
+
 class OutcomeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     '''Entrada de HU-25; las reglas las aplica services.record_outcome().'''
     status = serializers.CharField()

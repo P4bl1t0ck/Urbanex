@@ -98,6 +98,9 @@ export type AgendaVisit = {
 // HU-21 (I-08): el asesor o el admin cancelan con motivo obligatorio.
 export type VisitCancelPayload = { reason: string };
 
+// HU-23 (I-08, DS-52): visita coordinada por WhatsApp que registra el asesor.
+export type CoordinatedVisitPayload = VisitRequestPayload & { property: number };
+
 // HU-25: resultados que registra el asesor.
 export type VisitOutcome = "REALIZADA" | "NO_ASISTIDA" | "CANCELADA";
 

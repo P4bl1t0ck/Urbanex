@@ -122,6 +122,7 @@ class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
 
     Lotes 5 y 6 (DS-52):
     GET  /api/opportunities/<id>/ -> tambien los documentos de la propiedad (HU-33)
+    GET  /api/opportunities/eligible-properties/?mine=1 -> el asesor, solo las suyas (HU-23)
     POST /api/opportunities/<id>/lose/ {"loss_reason", "notes"?}  -> HU-31, Perdida
     '''
     permission_classes = [permissions.IsAuthenticated, IsInternalUser]
@@ -230,6 +231,10 @@ class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     @action(detail=False, methods=['get'], url_path='eligible-properties')
     def eligible_properties(self, request):
         properties = eligible_properties().prefetch_related('images').order_by('title')
+        # HU-23 (DS-52): ?mine=1 -> el asesor solo ve las que atiende (visita coordinada);
+        # el admin las ve todas.
+        if request.query_params.get('mine') == '1' and request.user.role != 'admin':
+            properties = properties.filter(agent=request.user)
         return Response(
             EligiblePropertySerializer(properties, many=True, context={'request': request}).data
         )

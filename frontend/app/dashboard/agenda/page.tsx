@@ -7,12 +7,14 @@
 // el asesor de seguimiento si no es el de la visita, y el modal para registrar el resultado
 // (HU-25): solo después de la hora de inicio, una vez y con observación obligatoria.
 // Lotes 5 y 6 (DS-52): "Cancelar" (HU-21) en las visitas Programadas que aún no empiezan, con
-// confirmación y motivo obligatorio; se avisa al cliente por correo si lo dio.
+// confirmación y motivo obligatorio; se avisa al cliente por correo si lo dio. HU-23: "Registrar
+// visita coordinada" y "Reprogramar" (components/ManualVisitDialog.tsx).
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Dialog from "@/components/Dialog";
+import { ManualVisitDialog, RescheduleVisitDialog } from "@/components/ManualVisitDialog";
 import { ApiError } from "@/lib/api";
 import { getAuthSessionSnapshot, subscribeToAuthSession } from "@/lib/auth-session";
 import { getAgents } from "@/lib/opportunities";
@@ -85,11 +87,15 @@ export default function AgendaPage() {
   const [savingOutcome, setSavingOutcome] = useState(false);
   const [cancelForm, setCancelForm] = useState<CancelForm | null>(null);
   const [savingCancel, setSavingCancel] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [rescheduling, setRescheduling] = useState<AgendaVisit | null>(null);
+  const [notice, setNotice] = useState("");
+  const [reload, setReload] = useState(0);
 
   const weekTo = addDays(weekFrom, 6);
   const agentId = isAdmin ? (selectedAgent ? Number(selectedAgent) : undefined) : undefined;
   const canLoad = Boolean(session?.access) && (!isAdmin || agentId !== undefined);
-  const requestKey = `${agentId ?? "own"}|${weekFrom}|${status}`;
+  const requestKey = `${agentId ?? "own"}|${weekFrom}|${status}|${reload}`;
   const loading = canLoad && loaded?.key !== requestKey;
   const data = !loading ? loaded?.data ?? null : null;
   const error = !loading ? loaded?.error ?? "" : "";
@@ -209,8 +215,21 @@ export default function AgendaPage() {
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
             {isAdmin ? "Agenda de visitas" : "Mi agenda"}
           </h1>
-          <p className="mt-2 text-sm text-slate-600">Horas de Ecuador.</p>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-600">Horas de Ecuador.</p>
+            <button
+              type="button"
+              onClick={() => setManualOpen(true)}
+              className="w-full rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 sm:w-auto"
+            >
+              Registrar visita coordinada
+            </button>
+          </div>
         </header>
+
+        {notice && (
+          <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">{notice}</div>
+        )}
 
         <section className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
           {isAdmin && (
@@ -333,6 +352,15 @@ export default function AgendaPage() {
                           {visit.can_cancel && (
                             <button
                               type="button"
+                              onClick={() => setRescheduling(visit)}
+                              className="rounded-lg border border-blue-300 bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                            >
+                              Reprogramar
+                            </button>
+                          )}
+                          {visit.can_cancel && (
+                            <button
+                              type="button"
                               onClick={() => setCancelForm({ visit, reason: "", error: "" })}
                               className="rounded-lg border border-red-300 bg-white px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
                             >
@@ -437,6 +465,25 @@ export default function AgendaPage() {
           </div>
         )}
       </Dialog>
+
+      <ManualVisitDialog
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+        onCreated={(visit) => {
+          setNotice(
+            `Visita registrada: ${visit.property.title} · ${visit.client.full_name} · ${formatDayLabel(ecuadorDateOf(visit.scheduled_start))} ${formatTime(visit.scheduled_start)}.`,
+          );
+          setReload((value) => value + 1);
+        }}
+      />
+      <RescheduleVisitDialog
+        visit={rescheduling}
+        onClose={() => setRescheduling(null)}
+        onRescheduled={(visit) => {
+          setNotice(`Visita reprogramada al ${formatDayLabel(ecuadorDateOf(visit.scheduled_start))} ${formatTime(visit.scheduled_start)}.`);
+          setReload((value) => value + 1); // Puede haber cambiado de semana
+        }}
+      />
     </main>
   );
 }
