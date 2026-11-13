@@ -5,10 +5,13 @@
 // Muestra al asesor de la visita (nombre, apellido y teléfono; decisión de Pablo, 2026-11-09) y,
 // si es otro, al asesor que lleva su seguimiento (DS-39).
 
+// HU-21 (DS-52): botón "Cancelar visita" con confirmación, hasta 1 hora antes del inicio.
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Dialog from "@/components/Dialog";
 import { ApiError } from "@/lib/api";
-import { getPublicVisit } from "@/lib/visits";
+import { cancelPublicVisit, getPublicVisit } from "@/lib/visits";
 import { ecuadorDateOf, formatDayLabel, formatTime } from "@/lib/visitsCalendar";
 import type { PublicAgent, PublicVisit } from "@/types/visit";
 
@@ -35,8 +38,37 @@ function AgentCard({ title, agent }: { title: string; agent: PublicAgent }) {
   );
 }
 
+function cancelErrorMessage(err: unknown) {
+  if (err instanceof ApiError) {
+    if (err.status === 409) return "Esta visita ya no está programada.";
+    if (err.status === 404) return "Este enlace no es válido o la visita ya comenzó.";
+    if (err.status === 429) return "Hiciste muchas consultas seguidas. Espera un minuto y vuelve a intentar.";
+    if (err.status === 400) return err.message || "Ya no se puede cancelar por el enlace. Comunícate con tu asesor.";
+  }
+  return "No se pudo cancelar tu visita. Intenta nuevamente.";
+}
+
 export default function PublicVisitView({ token }: { token: string }) {
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState("");
+  const [cancelled, setCancelled] = useState(false);
+
+  async function confirmCancel() {
+    setCancelling(true);
+    setCancelError("");
+    try {
+      const visit = await cancelPublicVisit(token);
+      setState({ kind: "ok", visit });
+      setCancelled(true);
+    } catch (err) {
+      setCancelError(cancelErrorMessage(err));
+    } finally {
+      setCancelling(false);
+      setConfirming(false);
+    }
+  }
 
   useEffect(() => {
     let isActive = true;
@@ -118,11 +150,49 @@ export default function PublicVisitView({ token }: { token: string }) {
             )}
           </div>
 
-          <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-            Para cancelar o cambiar tu visita, comunícate con tu asesor.
-          </p>
+          {cancelled && (
+            <p role="status" className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+              Tu visita quedó cancelada. Tu asesor ya fue avisado.
+            </p>
+          )}
+          {cancelError && (
+            <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{cancelError}</p>
+          )}
+
+          {state.visit.can_cancel ? (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setConfirming(true)}
+                className="w-full rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 sm:w-auto"
+              >
+                Cancelar visita
+              </button>
+              <p className="text-xs text-slate-500">
+                Puedes cancelarla hasta el {formatDayLabel(ecuadorDateOf(state.visit.cancel_until))} a las{" "}
+                {formatTime(state.visit.cancel_until)} (1 hora antes). Para cambiar la hora, comunícate con tu asesor.
+              </p>
+            </div>
+          ) : state.visit.status === "PROGRAMADA" ? (
+            <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+              Falta menos de 1 hora: para cancelar o cambiar tu visita, comunícate con tu asesor.
+            </p>
+          ) : null}
         </section>
       )}
+
+      <Dialog
+        open={confirming}
+        title="¿Cancelar tu visita?"
+        confirmLabel="Sí, cancelar"
+        cancelLabel="Volver"
+        tone="danger"
+        busy={cancelling}
+        onConfirm={confirmCancel}
+        onCancel={() => setConfirming(false)}
+      >
+        <p>La hora quedará libre y no se puede deshacer. Si quieres otra hora, puedes agendarla de nuevo en la ficha de la propiedad.</p>
+      </Dialog>
     </main>
   );
 }

@@ -305,7 +305,8 @@ def send_visit_notifications(visit_id):
             f'Tu visita a "{visit.property.title}" ({visit.property.location}) quedó programada '
             f'para el {when} (hora de Ecuador).\n\n'
             f'Puedes ver los datos de tu visita y de tu asesor aquí:\n{visit_link(visit)}\n\n'
-            'Para cancelar o cambiar la visita, comunícate con tu asesor.\n\n'
+            'En ese mismo enlace puedes cancelarla hasta 1 hora antes. Para cambiar la hora, '
+            'comunícate con tu asesor.\n\n'
             'Urbanex'
         )
         try:
@@ -345,6 +346,157 @@ def public_visit_by_token(token, *, now=None):
             .select_related('property', 'agent', 'opportunity__assigned_agent')
             .filter(cancellation_token=token, scheduled_start__gt=now)
             .first())
+
+
+# ---------------------------------------------------------------------------------------------
+# Lotes 5 y 6 (DS-52): HU-21 cancelar una visita (P-08 para el cliente, I-08 para el asesor)
+# ---------------------------------------------------------------------------------------------
+
+MAX_CANCEL_REASON_LENGTH = 1000
+
+
+def client_cancel_notice():
+    '''El cliente cancela hasta 1 hora antes del inicio (decision de Pablo, 2026-11-13, DS-52).'''
+    return timedelta(minutes=getattr(settings, 'VISIT_CLIENT_CANCEL_NOTICE_MINUTES', 60))
+
+
+def client_cancel_deadline(visit):
+    return visit.scheduled_start - client_cancel_notice()
+
+
+def client_can_cancel(visit, *, now=None):
+    now = now or timezone.now()
+    return visit.status == Visit.Status.PROGRAMADA and now <= client_cancel_deadline(visit)
+
+
+class VisitNotCancellable(Exception):
+    '''La visita ya no esta Programada (cancelada o con resultado): 409.'''
+
+
+def can_manage_visit(user, visit):
+    '''HU-21 y HU-23: el asesor de la visita o el admin (igual que HU-25).'''
+    return getattr(user, 'role', None) == 'admin' or visit.agent_id == user.pk
+
+
+def record_visit_event(opportunity, visit, notes):
+    '''Entrada SISTEMA en el historial de la oportunidad (HU-21, HU-23; se ve en HU-33).'''
+    from apps.opportunities.models import OpportunityInteraction
+
+    interaction = OpportunityInteraction(
+        opportunity=opportunity, author=None, visit=visit, notes=notes,
+        interaction_type=OpportunityInteraction.Type.SISTEMA,
+    )
+    interaction.full_clean()
+    interaction.save()
+    opportunity.last_activity_at = interaction.created_at
+    opportunity.save(update_fields=['last_activity_at'])
+
+
+def cancel_visit(*, visit_id, user=None, reason='', now=None):
+    '''
+    HU-21 (RF-04, DS-52). Cancela una visita Programada y la devuelve.
+    - user=None: el cliente desde su enlace (P-08), hasta 1 hora antes del inicio.
+    - user: el asesor de la visita o el admin desde la agenda (I-08), hasta la hora de inicio,
+      con motivo obligatorio.
+    - La franja queda libre (free_slots() solo resta las PROGRAMADAS).
+    - Si era la unica visita activa y la oportunidad esta en Visita programada, vuelve a
+      Contacto inicial (RF-04, DS-39).
+    - Deja una entrada SISTEMA en el historial de la oportunidad.
+    - Avisos despues del commit: al asesor si cancela el cliente; al cliente (si dio correo)
+      si cancela el asesor.
+    VisitNotCancellable si ya no esta Programada (409).
+    '''
+    by_client = user is None
+    reason = (reason or '').strip()
+    if not by_client:
+        if not reason:
+            raise ValidationError({'reason': 'Escribe el motivo de la cancelación.'})
+        if len(reason) > MAX_CANCEL_REASON_LENGTH:
+            raise ValidationError({'reason': (
+                f'El motivo no puede superar {MAX_CANCEL_REASON_LENGTH} caracteres.'
+            )})
+
+    now = now or timezone.now()
+    with transaction.atomic():
+        visit = (Visit.objects.select_for_update().select_related('opportunity', 'agent')
+                 .get(pk=visit_id))
+        if not by_client and not can_manage_visit(user, visit):
+            raise PermissionDenied('Solo el asesor de la visita o el administrador '
+                                   'la cancelan.')
+        if visit.status != Visit.Status.PROGRAMADA:
+            raise VisitNotCancellable()
+        if by_client and now > client_cancel_deadline(visit):
+            minutes = int(client_cancel_notice().total_seconds() // 60)
+            raise ValidationError({'detail': (
+                f'La visita solo se cancela por el enlace hasta {minutes} minutos antes. '
+                'Comunícate con tu asesor.'
+            )})
+        if not by_client and now >= visit.scheduled_start:
+            raise ValidationError({'detail': (
+                'La visita ya empezó: registra su resultado en lugar de cancelarla.'
+            )})
+
+        when = format_local(visit.scheduled_start)
+        if by_client:
+            visit.outcome_notes = 'Cancelada por el cliente desde su enlace (HU-21).'
+            event = f'El cliente canceló desde su enlace la visita del {when}.'
+        else:
+            visit.outcome_notes = f'Cancelada por {display_name(user)}: {reason}'
+            event = f'{display_name(user)} canceló la visita del {when}. Motivo: {reason}'
+        visit.status = Visit.Status.CANCELADA
+        visit.outcome_recorded_at = now
+        visit.outcome_recorded_by = user
+        visit.save(update_fields=['status', 'outcome_notes', 'outcome_recorded_at',
+                                  'outcome_recorded_by'])
+
+        opportunity = Opportunity.objects.select_for_update().get(pk=visit.opportunity_id)
+        record_visit_event(opportunity, visit, event)
+        still_scheduled = opportunity.visits.filter(status=Visit.Status.PROGRAMADA).exists()
+        if opportunity.status == Opportunity.Status.VISITA_PROGRAMADA and not still_scheduled:
+            change_status(
+                opportunity, Opportunity.Status.CONTACTO_INICIAL, changed_by=user,
+                reason=(SYSTEM_REASON_CLIENT_PORTAL if by_client else
+                        f'Visita #{visit.pk} cancelada: no quedan visitas activas (RF-04).'),
+            )
+        visit_pk = visit.pk
+        transaction.on_commit(lambda: send_cancellation_notifications(visit_pk, by_client))
+    return visit
+
+
+def send_cancellation_notifications(visit_id, by_client):
+    '''Correos de HU-21 (consola en desarrollo). Cada envio falla por separado y solo se loguea.'''
+    visit = (Visit.objects.select_related('property', 'agent', 'opportunity__contact',
+                                          'opportunity__assigned_agent')
+             .filter(pk=visit_id).first())
+    if visit is None:
+        return
+    when = format_local(visit.scheduled_start)
+    contact = visit.opportunity.contact
+    if by_client:
+        recipients = [agent.email for agent in notification_agents(visit) if agent.email]
+        subject = 'Urbanex: el cliente canceló una visita'
+        body = (
+            f'El cliente canceló su visita desde el enlace.\n\n'
+            f'Propiedad: {visit.property.title} ({visit.property.location})\n'
+            f'Fecha y hora: {when} (hora de Ecuador)\n'
+            f'Cliente: {contact.full_name} · {contact.phone}\n\n'
+            'La franja quedó libre en tu agenda.'
+        )
+    else:
+        recipients = [visit.confirmation_email] if visit.confirmation_email else []
+        subject = 'Urbanex: tu visita fue cancelada'
+        body = (
+            f'Hola {contact.full_name}:\n\n'
+            f'Tu visita a "{visit.property.title}" ({visit.property.location}) del {when} '
+            '(hora de Ecuador) fue cancelada por tu asesor.\n\n'
+            'Si quieres agendar otra, comunícate con tu asesor o elige una nueva hora en la '
+            'ficha de la propiedad.\n\nUrbanex'
+        )
+    for recipient in recipients:
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient])
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('No se pudo avisar la cancelación de la visita #%s.', visit.pk)
 
 
 # ---------------------------------------------------------------------------------------------

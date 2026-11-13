@@ -737,7 +737,8 @@ class AgendaTests(HU18TestMixin, TestCase):
                                      'status_display', 'property', 'client', 'opportunity',
                                      'needs_whatsapp_confirmation', 'followup_agent_name',
                                      'can_record_outcome', 'outcome_notes',
-                                     'outcome_recorded_at', 'outcome_recorded_by_name'})
+                                     'outcome_recorded_at', 'outcome_recorded_by_name',
+                                     'can_cancel'})  # HU-21 (DS-52)
         self.assertEqual(item['id'], visit.pk)
         self.assertEqual(item['scheduled_start'], local(self.monday, 9).isoformat())
         self.assertTrue(item['scheduled_end'].endswith('-05:00'))
@@ -1183,7 +1184,9 @@ class PublicVisitTests(HU18TestMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(set(response.data), {'scheduled_start', 'scheduled_end', 'status',
                                               'status_display', 'property', 'visit_agent',
-                                              'followup_agent'})
+                                              'followup_agent',
+                                              # HU-21 (DS-52)
+                                              'can_cancel', 'cancel_until'})
         self.assertEqual(response.data['visit_agent'],
                          {'first_name': 'Ana', 'last_name': 'Asesora', 'phone': '0991112222'})
         self.assertIsNone(response.data['followup_agent'])
@@ -1309,3 +1312,171 @@ class VisitOutcomeTests(HU18TestMixin, TestCase):
                                                 'to': self.monday.isoformat()})
         flags = {v['id']: v['can_record_outcome'] for v in response.data['visits']}
         self.assertEqual(flags, {self.past.pk: True, future.pk: False})
+
+
+# =============================================================================================
+# Lotes 5 y 6 (DS-52): HU-21 cancelar una visita
+# =============================================================================================
+
+def public_cancel_url(token):
+    return f'/api/visits/public/{token}/cancel/'
+
+
+def agent_cancel_url(visit_id):
+    return f'/api/visits/{visit_id}/cancel/'
+
+
+def minutes_from_now(minutes):
+    return datetime.now(timezone.utc) + timedelta(minutes=minutes)
+
+
+class VisitCancelTestMixin(HU18TestMixin):
+    def setUp(self):
+        super().setUp()
+        Opportunity.objects.filter(pk=self.opportunity.pk).update(
+            status=Opportunity.Status.VISITA_PROGRAMADA)
+        self.opportunity.refresh_from_db()
+
+    def visit_in(self, minutes, **extra):
+        start = minutes_from_now(minutes)
+        return self.visit(start, start + timedelta(hours=1), **extra)
+
+    def client_cancel(self, visit):
+        with self.captureOnCommitCallbacks(execute=True):
+            return self.client.post(public_cancel_url(visit.cancellation_token))
+
+    def agent_cancel(self, visit, reason='El cliente pidió cancelar por WhatsApp.'):
+        with self.captureOnCommitCallbacks(execute=True):
+            return self.client.post(agent_cancel_url(visit.pk), {'reason': reason},
+                                    format='json')
+
+
+class ClientVisitCancelTests(VisitCancelTestMixin, TestCase):
+    '''HU-21 (P-08): el cliente cancela con su enlace hasta 1 hora antes (DS-52).'''
+
+    def test_client_cancels_frees_the_slot_and_opportunity_goes_back(self):
+        self.rule(day=0)  # Lunes 09:00-12:00
+        visit = self.visit(local(self.monday, 9), local(self.monday, 10))
+        Visit.objects.filter(pk=visit.pk).update(confirmation_email='carla@correo.ec')
+        self.assertNotIn(local(self.monday, 9),
+                         [s.start for s in free_slots(self.agent, self.monday, self.monday)])
+
+        response = self.client_cancel(visit)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual((response.data['status'], response.data['can_cancel']),
+                         ('CANCELADA', False))
+        visit.refresh_from_db()
+        self.assertEqual(visit.status, Visit.Status.CANCELADA)
+        self.assertIsNone(visit.outcome_recorded_by)
+        # La franja vuelve a ofrecerse
+        self.assertIn(local(self.monday, 9),
+                      [s.start for s in free_slots(self.agent, self.monday, self.monday)])
+        # Unica visita activa: Visita programada -> Contacto inicial, sin usuario (portal)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.CONTACTO_INICIAL)
+        last = self.opportunity.status_history.last()
+        self.assertEqual((last.changed_by, last.reason), (None, SYSTEM_REASON_CLIENT_PORTAL))
+        # Entrada SISTEMA en el historial de la oportunidad (HU-33)
+        event = self.opportunity.interactions.get()
+        self.assertEqual((event.interaction_type, event.author, event.visit_id),
+                         ('SISTEMA', None, visit.pk))
+        self.assertIn('El cliente canceló', event.notes)
+        # Aviso solo al asesor
+        self.assertEqual([m.to for m in mail.outbox], [['asesor.visitas@urbanex.ec']])
+
+    def test_only_until_one_hour_before(self):
+        late = self.visit_in(50)
+        response = self.client_cancel(late)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        late.refresh_from_db()
+        self.assertEqual(late.status, Visit.Status.PROGRAMADA)
+        self.assertFalse(self.client.get(public_url(late.cancellation_token)).data['can_cancel'])
+
+        on_time = self.visit_in(90)
+        self.assertTrue(self.client.get(public_url(on_time.cancellation_token))
+                        .data['can_cancel'])
+        self.assertEqual(self.client_cancel(on_time).status_code, status.HTTP_200_OK)
+
+    def test_already_cancelled_is_409_and_started_or_unknown_is_404(self):
+        visit = self.visit_in(180)
+        self.assertEqual(self.client_cancel(visit).status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client_cancel(visit).status_code, status.HTTP_409_CONFLICT)
+        started = self.visit_in(-5)
+        self.assertEqual(self.client_cancel(started).status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(self.client.post(public_cancel_url(uuid.uuid4())).status_code,
+                         status.HTTP_404_NOT_FOUND)
+
+    def test_other_active_visit_keeps_visita_programada(self):
+        visit = self.visit_in(180)
+        self.visit_in(60 * 30)
+        self.assertEqual(self.client_cancel(visit).status_code, status.HTTP_200_OK)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.VISITA_PROGRAMADA)
+
+    def test_response_has_no_client_data(self):
+        body = self.client_cancel(self.visit_in(180)).content.decode()
+        for private in ('Carla', '+593991234567', 'carla@correo.ec'):
+            self.assertNotIn(private, body)
+
+
+class AgentVisitCancelTests(VisitCancelTestMixin, TestCase):
+    '''HU-21 (I-08): el asesor o el admin cancelan hasta la hora de inicio, con motivo (DS-52).'''
+
+    def test_agent_cancels_with_reason_and_client_is_notified(self):
+        visit = self.visit_in(30)  # Dentro de la ultima hora: el asesor si puede
+        Visit.objects.filter(pk=visit.pk).update(confirmation_email='carla@correo.ec')
+        self.login(self.agent)
+        response = self.agent_cancel(visit)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual((response.data['status'], response.data['can_cancel']),
+                         ('CANCELADA', False))
+        visit.refresh_from_db()
+        self.assertEqual(visit.outcome_recorded_by, self.agent)
+        self.assertIn('El cliente pidió cancelar', visit.outcome_notes)
+        self.opportunity.refresh_from_db()
+        self.assertEqual(self.opportunity.status, Opportunity.Status.CONTACTO_INICIAL)
+        self.assertEqual(self.opportunity.status_history.last().changed_by, self.agent)
+        self.assertIn('Motivo: El cliente pidió cancelar',
+                      self.opportunity.interactions.get().notes)
+        self.assertEqual([m.to for m in mail.outbox], [['carla@correo.ec']])
+        self.assertIn('cancelada por tu asesor', mail.outbox[0].body)
+
+    def test_without_client_email_no_mail_is_sent(self):
+        self.login(self.agent)
+        self.assertEqual(self.agent_cancel(self.visit_in(120)).status_code, status.HTTP_200_OK)
+        self.assertEqual(mail.outbox, [])
+
+    def test_reason_is_required(self):
+        visit = self.visit_in(120)
+        self.login(self.agent)
+        for reason in ('', '   '):
+            response = self.agent_cancel(visit, reason=reason)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn('reason', response.data)
+        visit.refresh_from_db()
+        self.assertEqual(visit.status, Visit.Status.PROGRAMADA)
+
+    def test_not_after_start_and_409_if_not_programmed(self):
+        self.login(self.agent)
+        started = self.visit_in(-5)
+        self.assertEqual(self.agent_cancel(started).status_code, status.HTTP_400_BAD_REQUEST)
+        done = self.visit_in(-120, status=Visit.Status.REALIZADA)
+        self.assertEqual(self.agent_cancel(done).status_code, status.HTTP_409_CONFLICT)
+
+    def test_permissions(self):
+        visit = self.visit_in(120)
+        self.assertEqual(self.agent_cancel(visit).status_code, status.HTTP_401_UNAUTHORIZED)
+        self.login(self.other_agent)
+        self.assertEqual(self.agent_cancel(visit).status_code, status.HTTP_404_NOT_FOUND)
+        self.login(self.admin)
+        self.assertEqual(self.agent_cancel(visit).status_code, status.HTTP_200_OK)
+
+    def test_agenda_marks_which_visits_can_be_cancelled(self):
+        future = self.visit_in(60 * 24)
+        started = self.visit_in(-30)
+        self.login(self.agent)
+        today = ecuador_today()
+        response = self.client.get(AGENDA_URL, {'from': (today - timedelta(days=1)).isoformat(),
+                                                'to': (today + timedelta(days=2)).isoformat()})
+        flags = {v['id']: v['can_cancel'] for v in response.data['visits']}
+        self.assertEqual(flags, {future.pk: True, started.pk: False})

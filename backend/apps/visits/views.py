@@ -19,6 +19,7 @@ from .serializers import (
     AgendaVisitSerializer,
     AvailabilityExceptionSerializer,
     AvailabilitySerializer,
+    CancelVisitSerializer,
     OutcomeSerializer,
     PublicVisitSerializer,
     VisitRequestSerializer,
@@ -28,6 +29,8 @@ from .services import (
     OutcomeAlreadyRecorded,
     SlotUnavailable,
     VisitAlreadyScheduled,
+    VisitNotCancellable,
+    cancel_visit,
     free_slots,
     local_datetime,
     public_visit_by_token,
@@ -376,7 +379,7 @@ class PublicVisitView(APIView):
     '''
     HU-20 (P-08): datos de la visita por su enlace unico, solo lectura y solo hasta la hora de
     inicio. GET /api/visits/public/<token>/ ; token inexistente o vencido: el mismo 404.
-    Sin boton de cancelar: llega con HU-21 (DS-39).
+    HU-21 (DS-52): incluye can_cancel y cancel_until; la cancelacion es PublicVisitCancelView.
     '''
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
@@ -387,6 +390,73 @@ class PublicVisitView(APIView):
         if visit is None:
             raise Http404
         return Response(PublicVisitSerializer(visit).data)
+
+
+class PublicVisitCancelView(APIView):
+    '''
+    HU-21 (P-08, DS-52): el cliente cancela su visita con el enlace unico.
+    POST /api/visits/public/<token>/cancel/   (publico; mismo limite que P-08, 30/min por IP)
+    -> 200 con los datos de P-08 (estado Cancelada)
+    -> 400 si falta menos de 1 hora para el inicio
+    -> 404 token inexistente o visita ya empezada (mismo 404 que P-08)
+    -> 409 si ya no esta Programada
+    '''
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [PublicVisitThrottle]
+
+    def post(self, request, token):
+        visit = public_visit_by_token(token)
+        if visit is None:
+            raise Http404
+        try:
+            cancel_visit(visit_id=visit.pk)
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except VisitNotCancellable:
+            return Response({'detail': 'Esta visita ya no está programada.'},
+                            status=status.HTTP_409_CONFLICT)
+        visit = public_visit_by_token(token)
+        return Response(PublicVisitSerializer(visit).data)
+
+
+def internal_visit_or_404(request, visit_id):
+    '''Visita para el asesor (solo las suyas) o el admin (todas); lo ajeno responde 404.'''
+    visits = Visit.objects.select_related(
+        'property', 'opportunity__contact', 'opportunity__assigned_agent', 'outcome_recorded_by',
+    )
+    if request.user.role != 'admin':
+        visits = visits.filter(agent=request.user)
+    visit = visits.filter(pk=visit_id).first()
+    if visit is None:
+        raise Http404
+    return visit
+
+
+class VisitCancelView(APIView):
+    '''
+    HU-21 (I-08, DS-52): el asesor de la visita o el admin la cancelan desde la agenda.
+    POST /api/visits/<id>/cancel/  {"reason": "..."}  (motivo obligatorio)
+    -> 200 con la visita de la agenda; 400 sin motivo o si ya empezo; 404 visita ajena;
+       409 si ya no esta Programada. Aviso al cliente por correo si lo dio.
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def post(self, request, visit_id):
+        visit = internal_visit_or_404(request, visit_id)
+        serializer = CancelVisitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            cancel_visit(visit_id=visit.pk, user=request.user,
+                         reason=serializer.validated_data['reason'])
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except VisitNotCancellable:
+            return Response({'detail': 'Esta visita ya no está programada.'},
+                            status=status.HTTP_409_CONFLICT)
+        return Response(AgendaVisitSerializer(internal_visit_or_404(request, visit_id)).data)
 
 
 class VisitOutcomeView(APIView):

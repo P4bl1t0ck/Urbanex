@@ -7,6 +7,7 @@ import type {
   AgendaStatusFilter,
   AgendaVisit,
   PublicVisit,
+  VisitCancelPayload,
   VisitOutcomePayload,
   VisitRequestPayload,
   VisitRequestResponse,
@@ -92,6 +93,22 @@ export function requestVisit(propertyId: number, payload: VisitRequestPayload) {
 // HU-20 (P-08): público por enlace único; 404 si no existe o ya empezó la visita.
 export function getPublicVisit(token: string) {
   return apiFetch<PublicVisit>(`${BASE}public/${encodeURIComponent(token)}/`, { cache: "no-store" });
+}
+
+// HU-21 (P-08, DS-52): público por enlace; hasta 1 hora antes. 400 fuera de plazo, 409 ya cancelada.
+export function cancelPublicVisit(token: string) {
+  return apiFetch<PublicVisit>(`${BASE}public/${encodeURIComponent(token)}/cancel/`, {
+    method: "POST",
+    cache: "no-store",
+  });
+}
+
+// HU-21 (I-08, DS-52): el asesor de la visita o el admin, hasta la hora de inicio, con motivo.
+export function cancelVisit(visitId: number, payload: VisitCancelPayload) {
+  return authFetch<AgendaVisit>(`${BASE}${visitId}/cancel/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 // HU-25 (I-08): una sola vez y después de la hora de inicio.

@@ -6,7 +6,9 @@ from .views import (
     AvailabilityExceptionViewSet,
     AvailabilityViewSet,
     PropertyFreeSlotsView,
+    PublicVisitCancelView,
     PublicVisitView,
+    VisitCancelView,
     VisitOutcomeView,
     VisitRequestView,
 )
@@ -21,6 +23,9 @@ urlpatterns = [
     path('properties/<int:property_id>/request/', VisitRequestView.as_view(),
          name='property-visit-request'),
     path('public/<uuid:token>/', PublicVisitView.as_view(), name='public-visit'),
+    path('public/<uuid:token>/cancel/', PublicVisitCancelView.as_view(),
+         name='public-visit-cancel'),
     path('<int:visit_id>/outcome/', VisitOutcomeView.as_view(), name='visit-outcome'),
+    path('<int:visit_id>/cancel/', VisitCancelView.as_view(), name='visit-cancel'),
     path('agenda/', AgendaView.as_view(), name='agenda'),
 ] + router.urls

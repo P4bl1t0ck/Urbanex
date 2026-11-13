@@ -6,6 +6,8 @@
 // Lote 3 (DS-39): "Confirmar por WhatsApp" si el cliente no pidió confirmación por correo (HU-20),
 // el asesor de seguimiento si no es el de la visita, y el modal para registrar el resultado
 // (HU-25): solo después de la hora de inicio, una vez y con observación obligatoria.
+// Lotes 5 y 6 (DS-52): "Cancelar" (HU-21) en las visitas Programadas que aún no empiezan, con
+// confirmación y motivo obligatorio; se avisa al cliente por correo si lo dio.
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
@@ -14,9 +16,10 @@ import Dialog from "@/components/Dialog";
 import { ApiError } from "@/lib/api";
 import { getAuthSessionSnapshot, subscribeToAuthSession } from "@/lib/auth-session";
 import { getAgents } from "@/lib/opportunities";
-import { getAgenda, recordVisitOutcome } from "@/lib/visits";
+import { cancelVisit, getAgenda, recordVisitOutcome } from "@/lib/visits";
 import {
   addDays,
+  ecuadorDateOf,
   ecuadorToday,
   formatDayLabel,
   formatTime,
@@ -42,6 +45,7 @@ function whatsappLink(phone: string) {
 }
 
 type OutcomeForm = { visit: AgendaVisit; status: VisitOutcome | ""; notes: string; error: string };
+type CancelForm = { visit: AgendaVisit; reason: string; error: string };
 
 const STATUS_OPTIONS: { value: AgendaStatusFilter; label: string }[] = [
   { value: "", label: "Activas (sin canceladas)" },
@@ -79,6 +83,8 @@ export default function AgendaPage() {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [outcome, setOutcome] = useState<OutcomeForm | null>(null);
   const [savingOutcome, setSavingOutcome] = useState(false);
+  const [cancelForm, setCancelForm] = useState<CancelForm | null>(null);
+  const [savingCancel, setSavingCancel] = useState(false);
 
   const weekTo = addDays(weekFrom, 6);
   const agentId = isAdmin ? (selectedAgent ? Number(selectedAgent) : undefined) : undefined;
@@ -133,6 +139,34 @@ export default function AgendaPage() {
     };
   }, [canLoad, requestKey, weekFrom, weekTo, agentId, status, handleAuthError]);
 
+  // Reemplaza una visita en la agenda cargada, sin volver a pedirla.
+  function replaceVisit(updated: AgendaVisit) {
+    setLoaded((current) =>
+      current?.data
+        ? { ...current, data: { ...current.data, visits: current.data.visits.map((v) => (v.id === updated.id ? updated : v)) } }
+        : current,
+    );
+  }
+
+  async function saveCancel() {
+    if (!cancelForm) return;
+    const reason = cancelForm.reason.trim();
+    if (!reason) {
+      setCancelForm({ ...cancelForm, error: "Escribe el motivo de la cancelación." });
+      return;
+    }
+    setSavingCancel(true);
+    try {
+      replaceVisit(await cancelVisit(cancelForm.visit.id, { reason }));
+      setCancelForm(null);
+    } catch (err) {
+      if (handleAuthError(err)) return;
+      setCancelForm({ ...cancelForm, error: err instanceof Error ? err.message : "No se pudo cancelar la visita." });
+    } finally {
+      setSavingCancel(false);
+    }
+  }
+
   async function saveOutcome() {
     if (!outcome) return;
     const notes = outcome.notes.trim();
@@ -142,13 +176,7 @@ export default function AgendaPage() {
     }
     setSavingOutcome(true);
     try {
-      const updated = await recordVisitOutcome(outcome.visit.id, { status: outcome.status, outcome_notes: notes });
-      // Se reemplaza la visita en la agenda cargada, sin volver a pedirla.
-      setLoaded((current) =>
-        current?.data
-          ? { ...current, data: { ...current.data, visits: current.data.visits.map((v) => (v.id === updated.id ? updated : v)) } }
-          : current,
-      );
+      replaceVisit(await recordVisitOutcome(outcome.visit.id, { status: outcome.status, outcome_notes: notes }));
       setOutcome(null);
     } catch (err) {
       if (handleAuthError(err)) return;
@@ -302,6 +330,15 @@ export default function AgendaPage() {
                               Registrar resultado
                             </button>
                           )}
+                          {visit.can_cancel && (
+                            <button
+                              type="button"
+                              onClick={() => setCancelForm({ visit, reason: "", error: "" })}
+                              className="rounded-lg border border-red-300 bg-white px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                            >
+                              Cancelar
+                            </button>
+                          )}
                         </div>
                       </li>
                     ))}
@@ -357,6 +394,45 @@ export default function AgendaPage() {
             </label>
             {outcome.error && (
               <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-800">{outcome.error}</p>
+            )}
+          </div>
+        )}
+      </Dialog>
+
+      <Dialog
+        open={cancelForm !== null}
+        title="¿Cancelar la visita?"
+        confirmLabel={savingCancel ? "Cancelando…" : "Cancelar visita"}
+        cancelLabel="Volver"
+        tone="danger"
+        busy={savingCancel}
+        onConfirm={saveCancel}
+        onCancel={() => setCancelForm(null)}
+      >
+        {cancelForm && (
+          <div className="space-y-3">
+            <p>
+              {cancelForm.visit.property.title} · {cancelForm.visit.client.full_name} ·{" "}
+              {formatDayLabel(ecuadorDateOf(cancelForm.visit.scheduled_start))} {formatTime(cancelForm.visit.scheduled_start)}
+            </p>
+            <p className="text-xs text-slate-500">
+              La franja queda libre y no se puede deshacer.{" "}
+              {cancelForm.visit.needs_whatsapp_confirmation
+                ? "El cliente no dio correo: avísale por WhatsApp."
+                : "Se avisará al cliente por correo."}
+            </p>
+            <label className="block text-sm font-semibold text-slate-700">
+              Motivo
+              <textarea
+                rows={3}
+                maxLength={1000}
+                value={cancelForm.reason}
+                onChange={(event) => setCancelForm({ ...cancelForm, reason: event.target.value, error: "" })}
+                className={inputClass}
+              />
+            </label>
+            {cancelForm.error && (
+              <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-800">{cancelForm.error}</p>
             )}
           </div>
         )}
