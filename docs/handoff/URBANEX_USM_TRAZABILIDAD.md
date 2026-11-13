@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-46 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-08, criterio "solo usuarios activos" de HU-46 cubierto por su prueba automática (DS-35) |
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-02, HU-12 en **Listo**; V-63 No aplicable hasta el despliegue (DT-110) |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-45 en **Listo** (según Pablo, confirmado por Sebas) |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-46 en **Listo** (decisión de Pablo) |
@@ -247,6 +248,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 **Actualización aditiva HU-46 (2026-11-11):** la fila "1 (actualización 2026-11-06)" dice "V-44 Pendiente"; ya no es así. Sebas registró V-44 en `Project_Progress.md` como Aprobado en tres filas: 2026-11-07, 16:19, los cinco pasos originales (`evidence/HU-46/Screenshot 2026-11-07 161628.png`); 2026-11-09, 15:13:56, recuperación con desbloqueo y contador en cero (`evidence/ResetPasswordUsuarioBloqueado.png`); y 2026-11-09, 16:13:56, invalidación de la sesión anterior tras recuperar la contraseña (`evidence/HU-46/ResetPasswordUsuarioBloqueado.png`). Es la transcripción de su registro, no una validación nueva del agente.
 
 **Actualización aditiva HU-46 (2026-11-12, decisión de Pablo, DT-157):** HU-46 pasa a **Listo**. Respaldo: auditoría §11 del PR #20 (con la corrección posterior de precisión de JWT registrada el 2026-11-09), V-44 aprobada por Sebas (filas del 2026-11-07 y del 2026-11-09 en `Project_Progress.md`), PR #20 fusionado en `develop` (`47d09ed`) y PR #23 con su cierre documental (`97f0e0c`). No se modifican las filas anteriores de Sebas.
+
+**Nota (2026-11-13, decisión de Pablo, DS-35):** el criterio "solo los usuarios activos inician sesión" de HU-46 queda cubierto por la salida de `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; "Ran 1 test … OK", exit 0, SQLite, 2026-11-13). EP-1 pasa a 2/3 HU · 5/8 pts (Avance de épicas §3).
 
 **Actualización aditiva HU-45 (2026-11-12, DT-157):** HU-45 pasa a **Listo**. Según Pablo (2026-11-12), Sebas confirmó que está terminada: V-43 aprobada por Sebas (2026-11-04 y 2026-11-06) y PR #17 fusionado en `develop` (`94843c7`). DT-120 (notificación persistente al administrador) queda abierto aparte.
 

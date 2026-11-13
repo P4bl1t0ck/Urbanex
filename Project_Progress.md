@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · ajustes tras la auditoría del PR #25 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 con DS-35 (EP-1 2/3 HU · 5/8 pts), precisión de DT-157 (1) y fechas de V-86 a V-90 en las filas resumen; nota de cierre |
 | Última actualización · estados tras los merges | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: DT-157 y DS-51; HU-12, HU-15, HU-16, HU-29, HU-30, HU-45 y HU-46 en **Listo**; nota de V-63 (No aplicable hasta el despliegue) y nota de cierre |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (transcrito por Claude Code) · Ronda 8 cerrada: V-86 a V-95 **Aprobado** por Pablo; HU-15, HU-16, HU-29 y HU-30 siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 4 · fusión de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `5ed0e3b` (PR #21) en la rama del lote 4; 332 pruebas OK en SQLite (Estándares §4); HU-19, HU-20 y HU-25 en Listo |
@@ -56,9 +57,14 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (PR #25) · ajustes tras la auditoría
+- **Hecho:** cita de la auditoría §11 del PR #22 como apta (comentario de Pablo en el PR #22, `c4125df`). HU-46: el criterio "solo los usuarios activos inician sesión" queda cubierto por la salida de `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; "Ran 1 test … OK", exit 0, SQLite) según DS-35 (decisión de Pablo); EP-1 pasa a **2/3 HU · 5/8 pts (62,5 %)** y validado 4/6. DT-157 precisa que el punto (1) se corrigió con nota aditiva, no en la fila de Sebas. Fechas corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11).
+- **Falta:** lo mismo que en la nota del 2026-11-12 (DT-157 (3) y (4), HU-03/04/06/08, HU-44).
+- **Siguiente paso:** Pablo fusiona el PR #25 en `develop` ("Create a merge commit"); después, el rebase del PR #24.
+
 ### 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (desde `develop` `c64b41a`) · estados tras los merges
 - **Hecho:** nuevo **DT-157** (la documentación de estados no refleja lo fusionado) y nueva **DS-51** (las rondas 1 a 3 se aceptan sin hora ni captura). Pasan a **Listo**: HU-15, HU-16, HU-29 y HU-30 (PR #22), HU-46 (decisión de Pablo: auditoría del PR #20, V-44 y PR #23), HU-45 (según Pablo, Sebas confirmó que está terminada; DT-120 sigue abierto) y HU-12 (V-63 No aplicable hasta el despliegue, DT-110). Notas aditivas, sin reescribir filas de Sebas. Línea base: 332 OK en SQLite (Estándares §4).
-- **Hallazgo:** con el método de Avance §2, HU-46 no cuenta como completa en puntos: su criterio "solo los usuarios activos inician sesión" no tiene validación humana propia (V-44 no lo prueba). **POR CONFIRMAR (Pablo).**
+- **Hallazgo:** con el método de Avance §2, HU-46 no cuenta como completa en puntos: su criterio "solo los usuarios activos inician sesión" no tiene validación humana propia (V-44 no lo prueba). **POR CONFIRMAR (Pablo).** **(2026-11-13) Cerrado:** Pablo acepta la prueba automática según DS-35 (ver la nota del 2026-11-13).
 - **Falta:** DT-157 (3) y (4): secciones de HU-11 y HU-33 en Estado de procesos y actualizar el Checklist TO-BE (otro PR). HU-03 (probar la subida de una imagen), HU-04, HU-06 y HU-08 (decisión de Pablo), HU-44 (V-33 a V-42 y PostgreSQL, Sebas). Conflictos esperables con el PR #24 (mismos documentos).
 - **Siguiente paso:** Pablo revisa los diffs, ordena el push y abre el PR hacia `develop`; auditoría de solo lectura (§11) en un chat nuevo.
 

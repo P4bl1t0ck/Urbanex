@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · EP-1 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), el criterio "solo usuarios activos" de HU-46 se cierra con la salida de `test_inactive_users_cannot_log_in` (DS-35, decisión de Pablo); EP-1 validado **4/6**, **2/3 HU · 5/8 pts (62,5 %)** |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-45 en **Listo** (según Pablo, confirmado por Sebas); métricas sin cambio |
 | Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-46 en **Listo** por decisión de Pablo; EP-1 validado 3/6; por el método de §2 sigue 1/3 HU · 2/8 pts (el criterio "solo usuarios activos" no tiene validación humana propia, POR CONFIRMAR) |
 | Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §5C, 4/4 HU · 15/15 pts del lote 4 en **Listo**; §5 (EP-5), **4/9 HU · 16/32 pts (50 %)** (PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado, `c64b41a`) |
@@ -148,9 +149,9 @@ HU-46 pasa a **Listo** (decisión de Pablo, 2026-11-12, DT-157): auditoría §11
 | Métrica / criterio | Resultado vigente |
 |---|---|
 | HU-46: enlace de recuperación de 60 min y de un solo uso | Validado por Sebas mediante V-44 (pasos 1 a 3, 2026-11-07, 16:19) |
-| HU-46: solo los usuarios activos inician sesión | **Sin validación humana propia**: V-44 no lo prueba (sus pasos cubren recuperación, sesión y logout). Lo cubre la prueba automática de `LoginView`; la observación de Sebas en V-37 (HU-44, asesor inactivo rechazado) sigue Pendiente |
-| EP-1 validado | 3/6 = **50 %** (2 de HU-45 y 1 de HU-46) |
-| HU completas / puntos (método §2) | Sin cambio: 1/3 HU · 2/8 pts = **25 %**. Con el método de §2, HU-46 no cuenta como completa mientras su primer criterio no tenga validación humana, aunque su estado sea **Listo** por decisión de Pablo. **POR CONFIRMAR (Pablo):** aceptar la prueba automática para ese criterio o validarlo con V-37 |
+| HU-46: solo los usuarios activos inician sesión | ~~**Sin validación humana propia**: V-44 no lo prueba (sus pasos cubren recuperación, sesión y logout). Lo cubre la prueba automática de `LoginView`; la observación de Sebas en V-37 (HU-44, asesor inactivo rechazado) sigue Pendiente~~ **(2026-11-13, decisión de Pablo, DS-35)** Cuenta como validado con la salida de su prueba automática: `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; `POST /api/auth/login/` con el asesor inactivo → 401, regla `not user.is_active` de `LoginView` en `backend/apps/users/views.py:165`). Ejecutada el 2026-11-13 en SQLite: "Ran 1 test … OK", exit 0. La HU conserva su validación humana (V-44, Sebas). V-37 (HU-44) sigue Pendiente y no cambia esto |
+| EP-1 validado | ~~3/6 = 50 % (2 de HU-45 y 1 de HU-46)~~ **(2026-11-13)** 4/6 = **66,7 %** (2 de HU-45 y 2 de HU-46) |
+| HU completas / puntos (método §2) | ~~Sin cambio: 1/3 HU · 2/8 pts = 25 %. Con el método de §2, HU-46 no cuenta como completa mientras su primer criterio no tenga validación humana, aunque su estado sea **Listo** por decisión de Pablo. POR CONFIRMAR (Pablo): aceptar la prueba automática para ese criterio o validarlo con V-37~~ **(2026-11-13)** 2/3 HU · 5/8 pts = **62,5 %** (HU-45, 2 pts; HU-46, 3 pts). POR CONFIRMAR cerrado: Pablo acepta la prueba automática para ese criterio según DS-35 ("si lo prueba una prueba automática, basta su salida") |
 
 ## 4. EP-2 — Gestión de propiedades y avalúos
 
