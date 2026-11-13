@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · cierre documental para push | 2026-11-13 · Nueve horas humanas y evidencia comprobadas; aclaración idéntica en ambos documentos; push autorizado por Sebas, sin apertura de PR |
+| Última actualización HU-10 · aclaraciones de auditoría | 2026-11-13 · Horas corregidas por Sebas, referencia de aceptación unificada y prueba Reservado diferida a HU-35 por decisión de Sebas |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
 | Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
 | Última actualización HU-10 · preparación de integración | 2026-11-13 · DT-92 corregido con storage callable y migración de estado; commits e integración autorizados por Sebas |
@@ -72,6 +74,19 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+
+
+### 2026-11-13 · Codex con Sebas · HU-10: cierre documental y publicación autorizada · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** horas corregidas por Sebas conservadas; referencia de aceptación unificada y decisión de diferir Reservado a HU-35 documentada en Progress y Estado. Sebas autorizó los commits necesarios y el push de la rama. GitHub confirmó develop c420e56 ya integrado en 5a950b5; la rama HU-10 no existía todavía en remoto al consultar.
+- **Comprobación:** nueve horas y rutas de evidencia correctas, referencia idéntica 2/2, sin conflictos y diff --check exit 0. Sin cambios de código; suite previa registrada de 372 backend y 41 frontend, no repetida por documentación. Sin pruebas humanas nuevas ni declaración Apto del agente.
+- **Siguiente paso:** publicar y verificar que HEAD coincide con la rama remota; presentar las respuestas documentales en la revisión del PR, que abre la persona. HU-10 en Pruebas; Reservado diferido a HU-35. SQLite de trabajo pendiente de respaldo/migrate después del push por decisión de Sebas. PostgreSQL No ejecutado (DT-68). No se fusiona develop ni se abre PR desde el agente.
+
+### 2026-11-13 · Codex con Sebas · HU-10: aclaraciones de auditoría · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** tras el ok de Fase 0, se añadió la misma aclaración de referencia de aceptación en Progress y Estado de procesos. Se registró la decisión expresa de Sebas de diferir Reservado humano hasta el flujo de HU-35, sin marcarlo realizado ni aprobado. Las nueve horas corregidas personalmente por Sebas y sus aprobaciones se conservaron.
+- **Comprobación:** revisión del diff y estructura documental; sin cambios de código, dependencias, migraciones o datos. La suite integrada previa está registrada en Estándares §4 (372 backend y 41 frontend); no se repitió por esta actualización exclusivamente documental.
+- **Falta y siguiente paso:** presentar las aclaraciones como respuesta a los hallazgos de auditoría; no se declara Apto ni se cierra HU-10 automáticamente. Actualización de SQLite de trabajo pospuesta por Sebas hasta después del push, con respaldo y verificación del motor antes de ejecutarla. Sin commit ni push en esta sesión.
 
 ### 2026-11-13 · Codex con Sebas · HU-10: cierre de commits e integración comprobada · rama `feat/URB-16-HU-10-catalogo-filtros`
 
@@ -1732,19 +1747,17 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 
 | Quién | Fecha | Hora (Bogotá) | Qué vio exactamente | Evidencia local | Resultado |
 |---|---|---|---|---|---|
-| Sebas | 2026-11-13 | 15:15–15:23 | Catálogo con 26 propiedades y tarjetas visibles; apertura de la ficha del Ejemplo 22 con sus características y precio. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/01-catalogo.png | Aprobado |
-| Sebas | 2026-11-13 | 15:15–15:23 | Filtros combinados Casa, 3+ habitaciones y precio máximo de 151.600 USD: aparecen dos propiedades compatibles, de 145.000 y 125.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/02-filtros.png | Aprobado |
-| Sebas | 2026-11-13 | 15:15–15:23 | Orden Precio: menor a mayor aplicado; las primeras tarjetas muestran 85.000, 90.000 y 95.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/03-orden.png | Aprobado |
-| Sebas | 2026-11-13 | 15:15–15:23 | Navegación a página 2 de 2 con 22 coincidencias; conserva filtros de habitaciones y baños y orden ascendente. Muestra las dos propiedades restantes, de 200.000 y 285.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/04-pagina.png | Aprobado |
-| Sebas | 2026-11-13 | 15:15–15:23 | Búsqueda zzzzz sin coincidencias: muestra cero propiedades y el mensaje para cambiar valores o limpiar filtros. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/05-vacio.png | Aprobado |
-| Sebas | 2026-11-13 | 15:15–15:23 | Precio mínimo 200 y máximo 100: muestra el error «El precio máximo debe ser mayor o igual al mínimo» y permite corregir los valores. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/06-error.png | Aprobado |
-| Sebas | 2026-11-13 | 15:15–15:23 | Vista estrecha del catálogo con búsqueda, botón Filtros, conteo, selector de orden y tarjetas legibles. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/07-movil.png | Aprobado |
-| Sebas | 2026-11-11 | No registrada | El catálogo sin propiedades mostró «No hay propiedades disponibles por ahora.». La captura corresponde al diseño anterior y documenta ese comportamiento. | evidence/HU-10/01-catalogo-vacio.png | Aprobado |
-| Sebas | 2026-11-11 | No registrada | Con el servicio inaccesible, el catálogo mostró «No pudimos cargar el catálogo. Intenta nuevamente en unos momentos.» y un enlace de recuperación. La captura corresponde al diseño anterior. | evidence/HU-10/06-django-caido.png | Aprobado |
+| Sebas | 2026-11-13 | 15:23 | Catálogo con 26 propiedades y tarjetas visibles; apertura de la ficha del Ejemplo 22 con sus características y precio. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/01-catalogo.png | Aprobado |
+| Sebas | 2026-11-13 | 15:24 | Filtros combinados Casa, 3+ habitaciones y precio máximo de 151.600 USD: aparecen dos propiedades compatibles, de 145.000 y 125.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/02-filtros.png | Aprobado |
+| Sebas | 2026-11-13 | 15:26 | Orden Precio: menor a mayor aplicado; las primeras tarjetas muestran 85.000, 90.000 y 95.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/03-orden.png | Aprobado |
+| Sebas | 2026-11-13 | 15:27 | Navegación a página 2 de 2 con 22 coincidencias; conserva filtros de habitaciones y baños y orden ascendente. Muestra las dos propiedades restantes, de 200.000 y 285.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/04-pagina.png | Aprobado |
+| Sebas | 2026-11-13 | 15:28 | Búsqueda zzzzz sin coincidencias: muestra cero propiedades y el mensaje para cambiar valores o limpiar filtros. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/05-vacio.png | Aprobado |
+| Sebas | 2026-11-13 | 15:29 | Precio mínimo 200 y máximo 100: muestra el error «El precio máximo debe ser mayor o igual al mínimo» y permite corregir los valores. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/06-error.png | Aprobado |
+| Sebas | 2026-11-13 | 15:30 | Vista estrecha del catálogo con búsqueda, botón Filtros, conteo, selector de orden y tarjetas legibles. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/07-movil.png | Aprobado |
+| Sebas | 2026-11-11 | 15:31 | El catálogo sin propiedades mostró «No hay propiedades disponibles por ahora.». La captura corresponde al diseño anterior y documenta ese comportamiento. | evidence/HU-10/01-catalogo-vacio.png | Aprobado |
+| Sebas | 2026-11-11 | 15:34 | Con el servicio inaccesible, el catálogo mostró «No pudimos cargar el catálogo. Intenta nuevamente en unos momentos.» y un enlace de recuperación. La captura corresponde al diseño anterior. | evidence/HU-10/06-django-caido.png | Aprobado |
 
 **Confirmación humana (2026-11-13):** Sebas aprobó expresamente en la conversación las siete comprobaciones del catálogo actual y las dos pruebas anteriores de catálogo vacío y servicio inaccesible. Estas últimas corresponden al diseño anterior.
-
-El intervalo 15:15–15:23 es una referencia obtenida de las marcas de modificación de las siete capturas actuales; no representa una hora de ejecución confirmada independientemente.
 
 **Aclaración de alcance:** según indicación expresa de Sebas en esta conversación, la referencia al Anexo 2 no se utiliza como fuente de aceptación para esta entrega de HU-10, porque no hay un documento vigente disponible. Se toma como referencia el contexto maestro, HU-10/URB-16, la decisión DS-16 y las ampliaciones aprobadas durante esta tarea. Esta aclaración sustituye el pendiente de cotejo con Anexo 2 para esta validación; no modifica por sí sola las reglas generales del repositorio.
 
@@ -1896,3 +1909,19 @@ La SQLite de trabajo no se migró: showmigrations devuelve pendientes documents.
 
 
 **Resultado final de integración HU-10 (2026-11-13):** suite integrada SQLite 372 OK (443.805s), exit 0; migraciones No changes detected, exit 0; frontend 41/41, TypeScript/ESLint/build exit 0, un aviso previo. DT-92 Resuelto por su criterio técnico; sqlmigrate de documents.0002 no-op. Se conserva develop c420e56 y el alcance de HU-10; controles documentales 7/7 y nueve aprobaciones humanas conservadas. Sin push, PR ni migrate en la base de trabajo. PostgreSQL No ejecutado (DT-68). Las notas previas de integración/suite en curso son historial y quedan sustituidas por este resultado. HU-10 en Pruebas; Reservado humano y auditoría Pendiente. Las migraciones locales pendientes indicadas arriba requieren respaldo y aplicación coordinada antes de usar los flujos entrantes en la SQLite de trabajo.
+
+
+### HU-10 — aclaraciones tras auditoría (2026-11-13)
+
+**Aclaración aditiva de referencia de aceptación — HU-10 (2026-11-13):** por indicación expresa de Sebas, para esta entrega se utiliza el contexto maestro, HU-10/URB-16, DS-16 y las ampliaciones aprobadas durante la tarea como referencia de aceptación, al no disponer de un Anexo 2 vigente. Las menciones anteriores al cotejo pendiente de ese anexo quedan como antecedentes y no representan una tarea pendiente de esta entrega. Esta aclaración se limita a HU-10 y no modifica las reglas generales de AGENTS.md ni sustituye las validaciones humanas requeridas.
+
+**Decisión de Sebas sobre la comprobación de Reservado (2026-11-13):** se pospone la comprobación visual humana de la tarjeta Reservado hasta disponer del flujo de HU-35, «Registrar el abono de reserva». El catálogo ya contempla ese estado, pero el corte actual no ofrece una acción funcional para producir una reserva desde la interfaz. Sebas prefiere comprobar de extremo a extremo el cambio de estado y su representación cuando ese flujo exista, sin introducir reservas por código en esta tarea. Referencias: Contexto maestro, backlog §10 (HU-10 / URB-16 y HU-35 / URB-39), y C-09 de Deuda técnica. No se implementa HU-35 dentro de HU-10 ni se altera la base de trabajo para fabricar el caso.
+
+La comprobación humana de Reservado conserva resultado **Pendiente**, con ejecución diferida por decisión de Sebas a la validación de HU-35; no constituye una prueba realizada ni Aprobada. Esta nota sustituye las instrucciones anteriores que la exigían ejecutar ahora para esta entrega. No declara por sí misma que la auditoría sea Aprobada o que la rama sea Apta para PR: documenta la respuesta al hallazgo de alcance para su revisión. Se conservan las nueve aprobaciones humanas de V-46 y HU-10 permanece en Pruebas hasta registrar el cierre correspondiente.
+
+**Horas de V-46:** Sebas corrigió personalmente los horarios de las nueve filas en Project_Progress.md y confirmó esa corrección en la conversación: el 2026-11-13, 15:23, 15:24, 15:26, 15:27, 15:28, 15:29 y 15:30; el 2026-11-11, 15:31 y 15:34, en hora de Bogotá. Son horarios aportados por Sebas, no deducidos por el agente de las capturas. Las rutas de evidencia y los resultados humanos existentes se conservan.
+
+
+**Cierre documental para publicación de la rama (2026-11-13):** Sebas autorizó cerrar la documentación y hacer push de `feat/URB-16-HU-10-catalogo-filtros`. Comprobación documental → nueve filas de V-46 con hora HH:MM y archivo de evidencia existente, aclaración de aceptación idéntica en Progress y Estado de procesos, sin marcadores de conflicto; `git diff --check` → exit 0. Son comprobaciones de consistencia, no una aprobación funcional emitida por el agente. No hubo cambios de código desde la integración `5a950b5`; resultados previos en Estándares §4: 372 backend OK, 41 frontend OK, TypeScript/ESLint/build y chequeo de migraciones exit 0. No se repitieron suites por este cambio exclusivamente documental.
+
+La respuesta documental a los hallazgos de horas y referencia de aceptación queda preparada. La prueba humana de Reservado sigue Pendiente con ejecución diferida a HU-35 por decisión expresa de Sebas. El informe anterior del auditor no se reescribe ni se declara Aprobado por el agente; estas aclaraciones se presentan para su consideración en la revisión del PR. HU-10 permanece en Pruebas. Actualización de SQLite de trabajo pendiente para después del push, según Sebas; requiere respaldo y comprobación de SQLite local antes de migrate. PostgreSQL No ejecutado (DT-68, Nivel 1). El PR lo abre la persona; publicar esta rama no fusiona develop.
