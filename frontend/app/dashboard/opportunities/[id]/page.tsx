@@ -203,7 +203,7 @@ export default function OpportunityDetailPage() {
   }
 
   const progress = data ? pipelineSteps(data.status) : null;
-  const timeline = data ? buildTimeline(data.status_history, data.interactions) : [];
+  const timeline = data ? buildTimeline(data.status_history, data.interactions, data.documents) : [];
   const visitLabel = (visitId: number | null) => {
     const visit = data?.visits.find((row) => row.id === visitId);
     return visit ? `Visita del ${formatDateTime(visit.scheduled_start)}` : "";
@@ -357,6 +357,8 @@ export default function OpportunityDetailPage() {
                         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
                           {item.kind === "status" ? (
                             <span className="rounded-full bg-blue-100 px-2 py-0.5 font-semibold text-blue-800">Cambio de estado</span>
+                          ) : item.kind === "document" ? (
+                            <span className="rounded-full bg-violet-100 px-2 py-0.5 font-semibold text-violet-800">Documento</span>
                           ) : (
                             <span
                               className={`rounded-full px-2 py-0.5 font-semibold ${
@@ -380,6 +382,16 @@ export default function OpportunityDetailPage() {
                             </p>
                             <p className="text-xs text-slate-500">
                               {item.entry.changed_by?.name ?? "Sistema"}{item.entry.reason ? ` · ${item.entry.reason}` : ""}
+                            </p>
+                          </>
+                        ) : item.kind === "document" ? (
+                          <>
+                            <p className="mt-2 text-sm text-slate-800">
+                              {item.entry.doc_type_display} · versión {item.entry.version}
+                              {!item.entry.is_current_version && " (reemplazada)"}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Validación: {item.entry.validation_status_display} · Subido por {item.entry.uploaded_by?.name ?? "—"}
                             </p>
                           </>
                         ) : (

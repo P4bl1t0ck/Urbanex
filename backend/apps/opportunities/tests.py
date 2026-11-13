@@ -14,6 +14,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.documents.models import Document
 from apps.users.models import Property, PropertyImage
 from apps.visits.models import Visit
 from .models import (
@@ -1087,3 +1088,63 @@ class OpportunityDetailApiTests(I06AMixin, TestCase):
     def test_list_filters_do_not_hide_the_detail(self):
         response = self.client.get(detail_url(self.opp.pk), {'status': 'PERDIDA'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class OpportunityFollowUpApiTests(I06AMixin, TestCase):
+    '''HU-33 (RF-06, DS-52): estado, interacciones y documentos vinculados, en orden.'''
+
+    def add_document(self, property_obj, doc_type, version=1, current=True, minutes_ago=0):
+        # El expediente es inmutable (ni update de created_at): la hora se fija al crearlo.
+        uploaded_at = timezone.now() - timedelta(minutes=minutes_ago)
+        with mock.patch('django.utils.timezone.now', return_value=uploaded_at):
+            return Document.objects.create(
+                property=property_obj, doc_type=doc_type,
+                file=f'expedientes/{doc_type}-{version}.pdf',
+                original_filename=f'{doc_type}-cliente.pdf', file_size_bytes=1024,
+                mime_type='application/pdf', version=version, is_current_version=current,
+                issue_date=timezone.localdate(),
+                expiration_date=timezone.localdate() + timedelta(days=365),
+                uploaded_by=self.agent,
+            )
+
+    def test_documents_of_the_property_in_upload_order_without_file_data(self):
+        old = self.add_document(self.property, Document.DocType.CORRETAJE, version=1,
+                                current=False, minutes_ago=30)
+        new = self.add_document(self.property, Document.DocType.CORRETAJE, version=2,
+                                minutes_ago=10)
+        deed = self.add_document(self.property, Document.DocType.ESCRITURA)
+        self.add_document(self.other_property, Document.DocType.PREDIAL)  # Otra propiedad
+
+        documents = self.client.get(detail_url(self.opp.pk)).data['documents']
+        self.assertEqual([row['id'] for row in documents], [str(old.pk), str(new.pk), str(deed.pk)])
+        first = documents[0]
+        self.assertEqual((first['doc_type_display'], first['version'], first['is_current_version'],
+                          first['validation_status_display']),
+                         ('Contrato de corretaje', 1, False, 'Pendiente'))
+        self.assertEqual(first['uploaded_by']['id'], self.agent.pk)
+        for row in documents:
+            # Sin archivo, nombre original ni enlace (la descarga sigue en el expediente, RF-10).
+            self.assertFalse({'file', 'original_filename', 'url', 'download_url'} & set(row))
+
+    def test_history_and_interactions_are_chronological(self):
+        self.add_visit()
+        self.advance(Opportunity.Status.VISITA_PROGRAMADA)
+        self.client.post(interactions_url(self.opp.pk),
+                         {'interaction_type': 'NOTA', 'notes': 'Primera llamada'}, format='json')
+        self.client.post(interactions_url(self.opp.pk),
+                         {'interaction_type': 'CONTRAOFERTA', 'notes': 'Ofrece menos',
+                          'offered_price': '140000'}, format='json')
+        data = self.client.get(detail_url(self.opp.pk)).data
+        self.assertEqual(data['status'], Opportunity.Status.VISITA_PROGRAMADA)
+        stamps = [row['created_at'] for row in data['interactions']]
+        self.assertEqual(stamps, sorted(stamps))
+        self.assertEqual([row['interaction_type'] for row in data['interactions']],
+                         ['NOTA', 'CONTRAOFERTA'])
+
+    def test_other_agent_does_not_see_the_documents_and_admin_does(self):
+        self.add_document(self.property, Document.DocType.ESCRITURA)
+        self.client.force_authenticate(self.other_agent)
+        self.assertEqual(self.client.get(detail_url(self.opp.pk)).status_code,
+                         status.HTTP_404_NOT_FOUND)
+        self.client.force_authenticate(self.admin)
+        self.assertEqual(len(self.client.get(detail_url(self.opp.pk)).data['documents']), 1)

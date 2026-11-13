@@ -133,6 +133,7 @@ class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
             # Los filtros de la cartera no aplican al detalle ni a sus acciones.
             return queryset.prefetch_related(
                 'status_history__changed_by', 'interactions__author', 'visits',
+                'property__documents__uploaded_by',  # HU-33 (DS-52)
             )
         return filter_opportunities(queryset, self.request.query_params)
 

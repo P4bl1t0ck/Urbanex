@@ -134,10 +134,31 @@ class InteractionSerializer(serializers.ModelSerializer):
         return user_summary(obj.author)
 
 
+def document_summary(document):
+    '''
+    HU-33 (DS-52): un documento del expediente de la propiedad, solo datos. Sin archivo, sin
+    nombre original y sin enlace: la descarga sigue en el expediente (URL firmada, RF-10).
+    '''
+    return {
+        'id': str(document.pk),
+        'doc_type': document.doc_type,
+        'doc_type_display': document.get_doc_type_display(),
+        'version': document.version,
+        'is_current_version': document.is_current_version,
+        'validation_status': document.validation_status,
+        'validation_status_display': document.get_validation_status_display(),
+        'uploaded_by': user_summary(document.uploaded_by),
+        'created_at': serializers.DateTimeField().to_representation(document.created_at),
+    }
+
+
 class OpportunityDetailSerializer(OpportunitySerializer):
     '''
     Detalle de la oportunidad (I-06A, HU-29 y HU-30): datos de la cartera mas el precio final
     acordado, el siguiente estado permitido, el historial, las interacciones y las visitas.
+    HU-33 (DS-52): tambien los documentos de la propiedad (todas las versiones, en orden de
+    carga). Son los de la propiedad, no de la oportunidad: Document.opportunity llega con
+    HU-36 (DT-31).
     '''
     next_status = serializers.SerializerMethodField()
     next_status_display = serializers.SerializerMethodField()
@@ -146,13 +167,19 @@ class OpportunityDetailSerializer(OpportunitySerializer):
     status_history = StatusHistorySerializer(many=True, read_only=True)
     interactions = InteractionSerializer(many=True, read_only=True)
     visits = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField()
 
     class Meta(OpportunitySerializer.Meta):
         fields = OpportunitySerializer.Meta.fields + [
             'agreed_final_price', 'next_status', 'next_status_display', 'advance_blocked_reason',
-            'accepts_interactions', 'status_history', 'interactions', 'visits',
+            'accepts_interactions', 'status_history', 'interactions', 'visits', 'documents',
         ]
         read_only_fields = fields
+
+    def get_documents(self, obj):
+        documents = sorted(obj.property.documents.all(),
+                           key=lambda doc: (doc.created_at, doc.version))
+        return [document_summary(document) for document in documents]
 
     def get_next_status(self, obj):
         return next_status(obj)
