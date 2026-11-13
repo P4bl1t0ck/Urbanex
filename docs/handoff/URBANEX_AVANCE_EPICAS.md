@@ -2,6 +2,10 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · EP-1 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), el criterio "solo usuarios activos" de HU-46 se cierra con la salida de `test_inactive_users_cannot_log_in` (DS-35, decisión de Pablo); EP-1 validado **4/6**, **2/3 HU · 5/8 pts (62,5 %)** |
+| Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-45 en **Listo** (según Pablo, confirmado por Sebas); métricas sin cambio |
+| Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-46 en **Listo** por decisión de Pablo; EP-1 validado 3/6; por el método de §2 sigue 1/3 HU · 2/8 pts (el criterio "solo usuarios activos" no tiene validación humana propia, POR CONFIRMAR) |
+| Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §5C, 4/4 HU · 15/15 pts del lote 4 en **Listo**; §5 (EP-5), **4/9 HU · 16/32 pts (50 %)** (PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado, `c64b41a`) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · §5 (EP-5): validado 10/20 con HU-29 y HU-30 (V-91 a V-95); §5C: HU-15 y HU-16 validadas (V-86 a V-90); 0/4 HU del lote completas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · §5B: 3/3 HU · 10/10 pts del lote 3 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · §5B: los 3 criterios del lote 3 validados (V-78 a V-85, Pablo); 0/3 HU completas hasta la auditoría y el merge del PR #21 |
@@ -134,6 +138,21 @@ Esta actualización supersede la lectura anterior de hoy: el flujo detallado de 
 | EP-1 validado | 2/6 = **33,3 %** |
 | HU completas / puntos | 1/3 HU · 2/8 pts = **25 %**; HU-45 aporta 2 puntos según `URBANEX_MASTER_CONTEXT.md` §10 |
 
+### Actualización aditiva de EP-1 para HU-45 (2026-11-12)
+
+HU-45 pasa a **Listo**: según Pablo (2026-11-12), Sebas confirmó que está terminada (V-43, PR #17 fusionado, `94843c7`). **Métricas sin cambio:** la actualización del 2026-11-04 ya la contaba como completa (1/3 HU · 2/8 pts). DT-120 queda abierto aparte (DT-157).
+
+### Actualización aditiva de EP-1 para HU-46 (2026-11-12, decisión de Pablo)
+
+HU-46 pasa a **Listo** (decisión de Pablo, 2026-11-12, DT-157): auditoría §11 del PR #20, V-44 aprobada por Sebas (2026-11-07 y 2026-11-09) y PR #20 y #23 fusionados (`47d09ed`, `97f0e0c`). No se reescriben las notas anteriores de Sebas.
+
+| Métrica / criterio | Resultado vigente |
+|---|---|
+| HU-46: enlace de recuperación de 60 min y de un solo uso | Validado por Sebas mediante V-44 (pasos 1 a 3, 2026-11-07, 16:19) |
+| HU-46: solo los usuarios activos inician sesión | ~~**Sin validación humana propia**: V-44 no lo prueba (sus pasos cubren recuperación, sesión y logout). Lo cubre la prueba automática de `LoginView`; la observación de Sebas en V-37 (HU-44, asesor inactivo rechazado) sigue Pendiente~~ **(2026-11-13, decisión de Pablo, DS-35)** Cuenta como validado con la salida de su prueba automática: `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; `POST /api/auth/login/` con el asesor inactivo → 401, regla `not user.is_active` de `LoginView` en `backend/apps/users/views.py:165`). Ejecutada el 2026-11-13 en SQLite: "Ran 1 test … OK", exit 0. La HU conserva su validación humana (V-44, Sebas). V-37 (HU-44) sigue Pendiente y no cambia esto |
+| EP-1 validado | ~~3/6 = 50 % (2 de HU-45 y 1 de HU-46)~~ **(2026-11-13)** 4/6 = **66,7 %** (2 de HU-45 y 2 de HU-46) |
+| HU completas / puntos (método §2) | ~~Sin cambio: 1/3 HU · 2/8 pts = 25 %. Con el método de §2, HU-46 no cuenta como completa mientras su primer criterio no tenga validación humana, aunque su estado sea **Listo** por decisión de Pablo. POR CONFIRMAR (Pablo): aceptar la prueba automática para ese criterio o validarlo con V-37~~ **(2026-11-13)** 2/3 HU · 5/8 pts = **62,5 %** (HU-45, 2 pts; HU-46, 3 pts). POR CONFIRMAR cerrado: Pablo acepta la prueba automática para ese criterio según DS-35 ("si lo prueba una prueba automática, basta su salida") |
+
 ## 4. EP-2 — Gestión de propiedades y avalúos
 
 | HU | Criterio | Impl. | Verif. | Valid. | Motivo |
@@ -239,7 +258,7 @@ Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Crite
 | Implementado | 4/20 = **20 %** (2026-10-30). **(2026-11-09, lote 4, nota añadida) 10/20 = 50 %** (+4 de HU-29 y +2 de HU-30) |
 | Verificado | **(2026-11-09, lote 4, nota añadida) 10/20 = 50 %** (HU-29 y HU-30 con pruebas en `apps.opportunities.tests`, suite 318 OK). Antes: 4/20 = **20 %** (backend: ~~35~~ 37 pruebas de `apps.opportunities.tests`, FX-25 (corregido por Pablo, 2026-11-03); las pantallas I-06 e I-07 compilan con `tsc`, `eslint` y `next build`, sin pruebas automáticas, DT-37) |
 | Validado | ~~4/20 = **20 %**, sin cambio el 2026-11-09 (V-91 a V-95 Pendiente)~~ **(2026-11-12) 10/20 = 50 %** (+4 de HU-29 y +2 de HU-30, V-91 a V-95, Pablo). Antes: 4/20 = 20 % (validación visual aprobada 2026-11-01, V-26 a V-32, Pablo; **(2026-11-04)** repetida con hora y captura el 2026-11-03, 22:50 a 23:49) |
-| HU completas / puntos | **(2026-11-09, lote 4, nota añadida)** sin cambio: HU-29 y HU-30 quedan en **Pruebas** (0 pts más) hasta la validación de Pablo (V-91 a V-95), la auditoría y el merge. 0/9 HU · 0/32 pts = **0 %** (2026-11-01: los 4 criterios de HU-27 y HU-34 están validados, pero las dos siguen en **Pruebas** por decisión de Pablo: ~~falta comprobar DT-105 con HU-44 fusionada,~~ faltan la auditoría y el merge; DT-105 se comprobó el 2026-11-03, FX-25) (corregido por Pablo, 2026-11-03). **(2026-11-04, nota añadida) 2/9 HU · 6/32 pts = 18,8 %**: HU-27 (3 pts) y HU-34 (3 pts) completas tras el merge del PR #15 en `develop` (`043cfb5`, DS-32). **(2026-11-12, nota añadida)** HU-29 y HU-30 validadas (V-91 a V-95), pero siguen en **Pruebas** hasta la auditoría y el merge del PR #22: sin cambio, 2/9 HU · 6/32 pts |
+| HU completas / puntos | **(2026-11-09, lote 4, nota añadida)** sin cambio: HU-29 y HU-30 quedan en **Pruebas** (0 pts más) hasta la validación de Pablo (V-91 a V-95), la auditoría y el merge. 0/9 HU · 0/32 pts = **0 %** (2026-11-01: los 4 criterios de HU-27 y HU-34 están validados, pero las dos siguen en **Pruebas** por decisión de Pablo: ~~falta comprobar DT-105 con HU-44 fusionada,~~ faltan la auditoría y el merge; DT-105 se comprobó el 2026-11-03, FX-25) (corregido por Pablo, 2026-11-03). **(2026-11-04, nota añadida) 2/9 HU · 6/32 pts = 18,8 %**: HU-27 (3 pts) y HU-34 (3 pts) completas tras el merge del PR #15 en `develop` (`043cfb5`, DS-32). **(2026-11-12, nota añadida)** HU-29 y HU-30 validadas (V-91 a V-95), pero siguen en **Pruebas** hasta la auditoría y el merge del PR #22: sin cambio, 2/9 HU · 6/32 pts. **(2026-11-12, nota añadida, DT-157) 4/9 HU · 16/32 pts = 50 %**: HU-29 (5 pts) y HU-30 (5 pts) completas tras la auditoría y el merge del PR #22 en `develop` (`c64b41a`) |
 
 **Lectura:** el primer corte cubre los dos criterios de HU-27 y los dos de HU-34 en el backend y en la interfaz, y su validación visual se aprobó el 2026-11-01 (V-26 a V-32) y se repitió con hora y captura el 2026-11-03 (Pablo, 22:50 a 23:49; filas nuevas en `Project_Progress.md`, Ronda 4) (corregido por Pablo, 2026-11-04). HU-27 (3 pts) y HU-34 (3 pts) pasarán a completas (**2/9 HU · 6/32 pts, 18,8 %**) cuando se fusionen en `develop` después de la auditoría (criterio conservador, decisión de Pablo del 2026-11-01). **(2026-11-04, nota añadida)** Se cumplió: el PR #15 se fusionó en `develop` (`043cfb5`) y las dos pasan a completas (**2/9 HU · 6/32 pts, 18,8 %**). Lo fusionó el administrador sin la revisión del compañero; Sebas revisa después (DS-32).
 
@@ -285,7 +304,7 @@ Composición: HU-15 (3 pts) y HU-16 (2 pts) de EP-4, más HU-29 (5 pts) y HU-30 
 | Métrica | Valor |
 |---|---|
 | Criterios del lote 4 (EP-4) | 2/2 implementados y verificados (HU-15 con la desviación de DS-50); ~~0/2 validados~~ **(2026-11-12)** 2/2 validados (Ronda 8, Pablo) |
-| HU completas / puntos del lote | **0/4 HU · 0/15 pts**: en **Pruebas** hasta la validación de Pablo (V-86 a V-95), la auditoría (§11) y el merge (después del PR #21 del lote 3). **(2026-11-12)** Validación hecha (V-86 a V-95, Pablo); faltan la auditoría y el merge del PR #22 |
+| HU completas / puntos del lote | **0/4 HU · 0/15 pts**: en **Pruebas** hasta la validación de Pablo (V-86 a V-95), la auditoría (§11) y el merge (después del PR #21 del lote 3). **(2026-11-12)** Validación hecha (V-86 a V-95, Pablo); faltan la auditoría y el merge del PR #22. **(2026-11-12, nota añadida, DT-157)** **4/4 HU · 15/15 pts** del lote: **Listo** (PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop`, `c64b41a`) |
 
 ## 6. Bloqueos y dependencias que afectan al avance
 

@@ -2,6 +2,11 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-46 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-08, criterio "solo usuarios activos" de HU-46 cubierto por su prueba automática (DS-35) |
+| Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-02, HU-12 en **Listo**; V-63 No aplicable hasta el despliegue (DT-110) |
+| Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-45 en **Listo** (según Pablo, confirmado por Sebas) |
+| Última actualización · HU-46 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-46 en **Listo** (decisión de Pablo) |
+| Última actualización lote 4 · merge PR #22 | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: notas aditivas en PROC-03 y PROC-05: HU-15, HU-16, HU-29 y HU-30 en **Listo** (PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado, `c64b41a`) |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · notas aditivas en PROC-03 y PROC-05: validación visual de HU-15, HU-16, HU-29 y HU-30 aprobada por Pablo (V-86 a V-95) |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: HU-19, HU-20 y HU-25 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · nota aditiva en PROC-04: validación visual de HU-19, HU-20 y HU-25 aprobada por Pablo (V-78 a V-85) |
@@ -153,6 +158,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 4 | Si está Reservada, deja su interés (Lista de Interesados) | HU-13 | P-04, P-06 | No implementado | — |
 | 5 | Recibe aviso si la reserva se libera | HU-14 | (notificación) | No implementado | — |
 
+**Nota (2026-11-12, decisión de Pablo, DT-157):** el paso 3 (HU-12) pasa a **Listo**: PR #14 fusionado (`18c150d`), V-60 a V-62 y V-64 aprobadas; V-63 **No aplicable hasta el despliegue (DT-110)**.
+
 ### PROC-03 · Captación multicanal de contactos
 
 | # | Paso | HU | Pantalla | Código | Estado |
@@ -164,6 +171,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 5 | El asesor abre contacto y oportunidad a mano | HU-27 | I-07 | ~~**Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`):~~ (2026-11-04: fusionada en `develop` por el PR #15, `043cfb5`, DS-32) `opportunities/models.py`, `opportunities/services.py`, `opportunities/validators.py`, `opportunities/serializers.py`, `opportunities/views.py` (`OpportunityViewSet.create`, `eligible_properties`, `agents`) · `POST opportunities/`, `GET opportunities/eligible-properties/`, `GET opportunities/agents/` · `app/dashboard/opportunities/new/page.tsx`, `lib/opportunities.ts`, `types/opportunity.ts` | [HU-27](URBANEX_ESTADO_PROCESOS.md#hu-27) |
 
 **Nota (2026-11-12, Ronda 8):** pasos 1 y 2 (HU-15 y HU-16) con validación visual aprobada por Pablo (V-86 a V-90, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
+
+**Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 1 y 2 (HU-15 y HU-16) pasan a **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
 
 ### PROC-04 · Agendamiento y visitas
 
@@ -195,6 +204,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 7 | El admin asigna o reasigna con motivo | HU-28 | A-02 | No implementado | — |
 
 **Nota (2026-11-12, Ronda 8):** pasos 3 y 4 (HU-29 y HU-30) con validación visual aprobada por Pablo (V-91 a V-95, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
+
+**Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 3 y 4 (HU-29 y HU-30) pasan a **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
 
 ### PROC-06 · Reserva y documentación
 
@@ -235,6 +246,12 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 **Aclaración aditiva HU-45 (2026-11-05):** la fila inicial de PROC-08 registra el estado previo a implementar el desbloqueo por admin y queda supersedida por las actualizaciones del 2026-11-03 y 2026-11-04, que documentan `UserUnlockView`, `POST auth/users/<id>/unlock/` y la acción en A-01. La actualización del 2026-11-04 también registra el comportamiento neutral del login.
 
 **Actualización aditiva HU-46 (2026-11-11):** la fila "1 (actualización 2026-11-06)" dice "V-44 Pendiente"; ya no es así. Sebas registró V-44 en `Project_Progress.md` como Aprobado en tres filas: 2026-11-07, 16:19, los cinco pasos originales (`evidence/HU-46/Screenshot 2026-11-07 161628.png`); 2026-11-09, 15:13:56, recuperación con desbloqueo y contador en cero (`evidence/ResetPasswordUsuarioBloqueado.png`); y 2026-11-09, 16:13:56, invalidación de la sesión anterior tras recuperar la contraseña (`evidence/HU-46/ResetPasswordUsuarioBloqueado.png`). Es la transcripción de su registro, no una validación nueva del agente.
+
+**Actualización aditiva HU-46 (2026-11-12, decisión de Pablo, DT-157):** HU-46 pasa a **Listo**. Respaldo: auditoría §11 del PR #20 (con la corrección posterior de precisión de JWT registrada el 2026-11-09), V-44 aprobada por Sebas (filas del 2026-11-07 y del 2026-11-09 en `Project_Progress.md`), PR #20 fusionado en `develop` (`47d09ed`) y PR #23 con su cierre documental (`97f0e0c`). No se modifican las filas anteriores de Sebas.
+
+**Nota (2026-11-13, decisión de Pablo, DS-35):** el criterio "solo los usuarios activos inician sesión" de HU-46 queda cubierto por la salida de `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; "Ran 1 test … OK", exit 0, SQLite, 2026-11-13). EP-1 pasa a 2/3 HU · 5/8 pts (Avance de épicas §3).
+
+**Actualización aditiva HU-45 (2026-11-12, DT-157):** HU-45 pasa a **Listo**. Según Pablo (2026-11-12), Sebas confirmó que está terminada: V-43 aprobada por Sebas (2026-11-04 y 2026-11-06) y PR #17 fusionado en `develop` (`94843c7`). DT-120 (notificación persistente al administrador) queda abierto aparte.
 
 ---
 

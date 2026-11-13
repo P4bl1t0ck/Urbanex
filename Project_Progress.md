@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · ajustes tras la auditoría del PR #25 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 con DS-35 (EP-1 2/3 HU · 5/8 pts), precisión de DT-157 (1) y fechas de V-86 a V-90 en las filas resumen; nota de cierre |
+| Última actualización · estados tras los merges | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: DT-157 y DS-51; HU-12, HU-15, HU-16, HU-29, HU-30, HU-45 y HU-46 en **Listo**; nota de V-63 (No aplicable hasta el despliegue) y nota de cierre |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (transcrito por Claude Code) · Ronda 8 cerrada: V-86 a V-95 **Aprobado** por Pablo; HU-15, HU-16, HU-29 y HU-30 siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 4 · fusión de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `5ed0e3b` (PR #21) en la rama del lote 4; 332 pruebas OK en SQLite (Estándares §4); HU-19, HU-20 y HU-25 en Listo |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 cerrada: las 8 Aprobado por Pablo (V-78, V-80 y V-81 tras repetirlas, ~15:46–15:55); HU-19, HU-20 y HU-25 siguen en Pruebas hasta la auditoría y el merge del PR #21 |
@@ -54,6 +56,17 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (PR #25) · ajustes tras la auditoría
+- **Hecho:** cita de la auditoría §11 del PR #22 como apta (comentario de Pablo en el PR #22, `c4125df`). HU-46: el criterio "solo los usuarios activos inician sesión" queda cubierto por la salida de `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; "Ran 1 test … OK", exit 0, SQLite) según DS-35 (decisión de Pablo); EP-1 pasa a **2/3 HU · 5/8 pts (62,5 %)** y validado 4/6. DT-157 precisa que el punto (1) se corrigió con nota aditiva, no en la fila de Sebas. Fechas corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11).
+- **Falta:** lo mismo que en la nota del 2026-11-12 (DT-157 (3) y (4), HU-03/04/06/08, HU-44).
+- **Siguiente paso:** Pablo fusiona el PR #25 en `develop` ("Create a merge commit"); después, el rebase del PR #24.
+
+### 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (desde `develop` `c64b41a`) · estados tras los merges
+- **Hecho:** nuevo **DT-157** (la documentación de estados no refleja lo fusionado) y nueva **DS-51** (las rondas 1 a 3 se aceptan sin hora ni captura). Pasan a **Listo**: HU-15, HU-16, HU-29 y HU-30 (PR #22), HU-46 (decisión de Pablo: auditoría del PR #20, V-44 y PR #23), HU-45 (según Pablo, Sebas confirmó que está terminada; DT-120 sigue abierto) y HU-12 (V-63 No aplicable hasta el despliegue, DT-110). Notas aditivas, sin reescribir filas de Sebas. Línea base: 332 OK en SQLite (Estándares §4).
+- **Hallazgo:** con el método de Avance §2, HU-46 no cuenta como completa en puntos: su criterio "solo los usuarios activos inician sesión" no tiene validación humana propia (V-44 no lo prueba). **POR CONFIRMAR (Pablo).** **(2026-11-13) Cerrado:** Pablo acepta la prueba automática según DS-35 (ver la nota del 2026-11-13).
+- **Falta:** DT-157 (3) y (4): secciones de HU-11 y HU-33 en Estado de procesos y actualizar el Checklist TO-BE (otro PR). HU-03 (probar la subida de una imagen), HU-04, HU-06 y HU-08 (decisión de Pablo), HU-44 (V-33 a V-42 y PostgreSQL, Sebas). Conflictos esperables con el PR #24 (mismos documentos).
+- **Siguiente paso:** Pablo revisa los diffs, ordena el push y abre el PR hacia `develop`; auditoría de solo lectura (§11) en un chat nuevo.
 
 ### 2026-11-12 · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (PR #22) · cierre de la Ronda 8
 - **Hecho:** transcripción de la validación visual de Pablo: V-86 y V-88 a V-94 desde su bitácora por correo del 2026-11-12; V-87 y V-95 dictadas en el chat. Las 10 **Aprobado** (V-87 y V-95 con observaciones). Decisión de Pablo en DT-117/SEC-20: el celular del asesor puede ser público si es el de trabajo. Estado de procesos, Avance (§5 y §5C), USM y Seguridad (SEC-20) actualizados; HU-15, HU-16, HU-29 y HU-30 siguen en **Pruebas** hasta la auditoría y el merge del PR #22.
@@ -851,6 +864,8 @@ Todas las propiedades demo ya tienen avalúos aprobados y ninguna tiene borrador
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | — | — | No se puede hacer en local (DT-110); confirmado por Pablo el 2026-11-02 | Pendiente |
+
+> **Nota (2026-11-12, decisión de Pablo, DT-157):** V-63 queda **No aplicable hasta el despliegue (DT-110)**. No es una validación aprobada: la tabla de arriba sigue sin fila humana. Cuando exista una URL pública, una persona ejecuta V-63 y agrega su fila. Con esta decisión, HU-12 pasa a **Listo**.
 
 ### V-64 · HU-12 / Seguridad §3.1 — Un título malicioso sale escapado en las metaetiquetas
 > **Preparación (2026-11-03, Claude Code, solo SQLite local):** worktree `../Urbanex-hu12` en `40dd147` (merge de `develop`), BD recién creada con `migrate` + `setup_demo_data`, `next build` + `next start` en `localhost:3000` y `runserver` en `127.0.0.1:8000`. El título de la #1 ("[DEMO] Casa en Cumbayá - lista para publicar") se cambió con `manage.py shell` y se restauró al terminar.
