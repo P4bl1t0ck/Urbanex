@@ -115,7 +115,7 @@ class UrbanexCoreTests(TestCase):
 
         response = self.client.get("/api/auth/properties/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        ids = {item["id"] for item in response.data}
+        ids = {item["id"] for item in response.data["results"]}
         self.assertEqual(ids, {disponible.id, reservado.id})
         self.assertNotIn(captacion.id, ids)
         self.assertNotIn(vendido.id, ids)
@@ -1518,3 +1518,357 @@ class AccountUnlockApiTests(TestCase):
         )
         self.advisor.refresh_from_db()
         self.assertEqual(self.advisor.failed_attempts, 1)
+
+
+class PropertyCatalogApiTests(TestCase):
+    """HU-10: filtros públicos combinables, entradas y paginación estable."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.house = cls.make_property(
+            title="Casa norte", property_type="casa", price="150000.00",
+            bedrooms=3, bathrooms=2, area_m2=120, location="Quito Norte",
+        )
+        cls.apartment = cls.make_property(
+            title="Departamento centro", property_type="departamento", price="90000.00",
+            bedrooms=2, bathrooms=1, area_m2=75, location="Quito Centro", status="reservador",
+        )
+        cls.land = cls.make_property(
+            title="Terreno", property_type="terreno", price="50000.00",
+            bedrooms=0, bathrooms=0, area_m2=200, location="Cuenca",
+        )
+
+    @classmethod
+    def make_property(cls, **overrides):
+        values = dict(title="Propiedad", description="Ejemplo", property_type="casa",
+                      price="100000.00", bedrooms=2, bathrooms=1, area_m2=80,
+                      location="Quito", status="disponible")
+        values.update(overrides)
+        return Property.objects.create(**values)
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def ids(self, params):
+        response = self.client.get("/api/auth/properties/", params)
+        self.assertEqual(response.status_code, 200, response.data)
+        return {item["id"] for item in response.data["results"]}
+
+    def test_each_filter_and_inclusive_boundaries(self):
+        cases = [
+            ({"property_type": "casa"}, {self.house.id}),
+            ({"price_min": "90000.00"}, {self.house.id, self.apartment.id}),
+            ({"price_max": "90000.00"}, {self.land.id, self.apartment.id}),
+            ({"bedrooms": "3"}, {self.house.id}),
+            ({"bathrooms": "2"}, {self.house.id}),
+            ({"area_min": "120"}, {self.house.id, self.land.id}),
+            ({"location": "quito"}, {self.house.id, self.apartment.id}),
+            ({"location": "  Centro  "}, {self.apartment.id}),
+        ]
+        for params, expected in cases:
+            with self.subTest(params=params):
+                self.assertEqual(self.ids(params), expected)
+
+    def test_filters_are_combined_with_and(self):
+        self.assertEqual(self.ids({"property_type": "casa", "price_min": "150000",
+                                  "price_max": "150000", "bedrooms": "3",
+                                  "bathrooms": "2", "area_min": "120",
+                                  "location": "Norte"}), {self.house.id})
+        self.assertEqual(self.ids({"property_type": "casa", "price_max": "100000"}), set())
+
+    def test_invalid_filters_return_field_errors(self):
+        cases = [
+            ("property_type", "villa"), ("price_min", "-1"),
+            ("price_max", "texto"), ("price_max", "NaN"),
+            ("price_min", "Infinity"), ("price_min", "10000000000"),
+            ("price_min", "1.001"), ("bedrooms", "1.5"),
+            ("bathrooms", "-1"), ("bedrooms", "2147483648"),
+            ("area_min", "NaN"), ("area_min", "-0.01"),
+            ("location", "x" * 501),
+        ]
+        for key, value in cases:
+            with self.subTest(key=key, value=value):
+                response = self.client.get("/api/auth/properties/", {key: value})
+                self.assertEqual(response.status_code, 400, response.data)
+                self.assertIn(key, response.data)
+
+    def test_reversed_price_range_is_rejected(self):
+        response = self.client.get("/api/auth/properties/", {"price_min": "100", "price_max": "99"})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("price_max", response.data)
+
+    def test_empty_filters_are_ignored_and_zero_is_valid(self):
+        self.assertEqual(self.ids({"location": "  ", "property_type": "", "price_min": "",
+                                  "bedrooms": "0", "bathrooms": "0", "area_min": "0"}),
+                         {self.house.id, self.apartment.id, self.land.id})
+
+    def test_hidden_statuses_cannot_be_requested_via_filters(self):
+        hidden_ids = set()
+        for property_status in ("captacion", "no_disponible", "vendido", "arrendado"):
+            hidden_ids.add(self.make_property(status=property_status).id)
+        response = self.client.get("/api/auth/properties/", {"location": "Quito", "status": "captacion"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["count"], 2)
+        self.assertFalse(hidden_ids & {item["id"] for item in response.data["results"]})
+        self.assertIn(self.apartment.id, {item["id"] for item in response.data["results"]})
+
+    def test_pagination_is_stable_and_preserves_filters(self):
+        for index in range(22):
+            self.make_property(title=f"Lote {index}", location="Sector paginado")
+        # Empates de fecha deben desempatarse por id, sin omitir ni repetir resultados.
+        Property.objects.filter(location="Sector paginado").update(created_at=timezone.now())
+        first = self.client.get("/api/auth/properties/", {"location": "Sector paginado"})
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(first.data["count"], 22)
+        self.assertEqual(len(first.data["results"]), 20)
+        self.assertIsNone(first.data["previous"])
+        self.assertIn("location=Sector+paginado", first.data["next"])
+        second = self.client.get(first.data["next"])
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(len(second.data["results"]), 2)
+        self.assertIsNone(second.data["next"])
+        actual = [item["id"] for item in first.data["results"] + second.data["results"]]
+        expected = list(Property.objects.filter(location="Sector paginado").order_by("-pk")
+                        .values_list("pk", flat=True))
+        self.assertEqual(actual, expected)
+        back = self.client.get(second.data["previous"])
+        self.assertEqual(back.data["results"], first.data["results"])
+
+    def test_invalid_and_out_of_range_pages(self):
+        for page in ("0", "-1", "abc", "1.5", "999", "last"):
+            with self.subTest(page=page):
+                response = self.client.get("/api/auth/properties/", {"page": page})
+                self.assertEqual(response.status_code, 404, response.data)
+
+    def test_empty_catalog_has_paginated_response(self):
+        Property.objects.all().delete()
+        response = self.client.get("/api/auth/properties/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {"count": 0, "next": None, "previous": None, "results": [],
+                                       "price_distribution": {"min": None, "max": None, "total": 0, "bins": []}})
+
+    def test_authenticated_list_keeps_existing_scope_and_supports_filters(self):
+        agent = User.objects.create_user(username="catalog-agent", role="asesor")
+        hidden = self.make_property(status="captacion", agent=agent, location="Sector interno")
+        self.client.force_authenticate(user=agent)
+        self.assertEqual(self.ids({"location": "Sector interno"}), {hidden.id})
+
+    def test_parking_minimum_combines_with_other_filters(self):
+        self.house.parking_spaces = 2
+        self.house.save()
+        self.apartment.parking_spaces = 1
+        self.apartment.save()
+        three = self.make_property(parking_spaces=3)
+        four = self.make_property(parking_spaces=4)
+        self.assertEqual(self.ids({"parking_spaces": "2"}), {self.house.id, three.id, four.id})
+        self.assertEqual(self.ids({"parking_spaces": "1", "property_type": "departamento"}), {self.apartment.id})
+        self.assertEqual(self.ids({"parking_spaces": "1"}), {self.house.id, self.apartment.id, three.id, four.id})
+        self.assertEqual(self.ids({"parking_spaces": "0"}), {self.house.id, self.apartment.id, self.land.id, three.id, four.id})
+        self.assertEqual(self.ids({"parking_spaces": "3"}), {three.id, four.id})
+        self.assertEqual(self.ids({"parking_spaces": "4"}), {four.id})
+        self.assertEqual(self.ids({"parking_spaces": ""}), {self.house.id, self.apartment.id, self.land.id, three.id, four.id})
+
+    def test_legacy_zero_parking_is_unrestricted_and_distribution_matches(self):
+        self.house.parking_spaces = 2
+        self.house.save()
+        self.apartment.parking_spaces = 1
+        self.apartment.save()
+        all_properties = self.client.get("/api/auth/properties/").data
+        zero_parking = self.client.get("/api/auth/properties/", {"parking_spaces": "0"}).data
+        self.assertEqual(all_properties["count"], 3)
+        self.assertEqual(zero_parking["count"], 3)
+        self.assertEqual(zero_parking["price_distribution"], all_properties["price_distribution"])
+
+    def test_invalid_parking_minimum_returns_field_error(self):
+        for value in ("-1", "1.5", "texto", "2147483648"):
+            with self.subTest(value=value):
+                response = self.client.get("/api/auth/properties/", {"parking_spaces": value})
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("parking_spaces", response.data)
+
+    def test_distribution_covers_all_pages_and_excludes_hidden_properties(self):
+        for index in range(24):
+            self.make_property(location="Histograma", price=Decimal("100.01") + index)
+        self.make_property(location="Histograma", price="0.01", status="captacion")
+        self.make_property(location="Histograma", price="999999.99", status="vendido")
+        response = self.client.get("/api/auth/properties/", {"location": "Histograma", "page": 2})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 4)
+        distribution = response.data["price_distribution"]
+        self.assertEqual((distribution["min"], distribution["max"], distribution["total"]), ("100.01", "123.01", 24))
+        self.assertEqual(sum(item["count"] for item in distribution["bins"]), 24)
+        self.assertLessEqual(len(distribution["bins"]), 20)
+
+    def test_distribution_ignores_only_price_and_preserves_other_filters(self):
+        self.house.parking_spaces = 1
+        self.house.save()
+        self.apartment.parking_spaces = 1
+        self.apartment.save()
+        query = {"location": "Quito", "parking_spaces": "1", "bedrooms": "2"}
+        first = self.client.get("/api/auth/properties/", query)
+        restricted = self.client.get("/api/auth/properties/", {**query, "price_max": "100000"})
+        self.assertEqual(first.data["count"], 2)
+        self.assertEqual(restricted.data["count"], 1)
+        self.assertEqual(first.data["price_distribution"], restricted.data["price_distribution"])
+        self.assertEqual(restricted.data["price_distribution"]["min"], "90000.00")
+
+    def test_distribution_handles_single_price_and_zero(self):
+        Property.objects.all().delete()
+        self.make_property(price="123.45")
+        self.make_property(price="123.45", status="reservador")
+        response = self.client.get("/api/auth/properties/")
+        self.assertEqual(response.data["price_distribution"]["bins"], [{"min": "123.45", "max": "123.45", "count": 2}])
+        self.make_property(price="0.00")
+        response = self.client.get("/api/auth/properties/")
+        self.assertEqual(response.data["price_distribution"]["min"], "0.00")
+        self.assertEqual(sum(item["count"] for item in response.data["price_distribution"]["bins"]), 3)
+
+    def test_distribution_cent_boundaries_count_each_property_once(self):
+        Property.objects.all().delete()
+        prices = [Decimal("10.00") + Decimal(index) / 100 for index in range(41)]
+        for price in prices:
+            self.make_property(price=price)
+        distribution = self.client.get("/api/auth/properties/").data["price_distribution"]
+        for item in distribution["bins"]:
+            expected = sum(Decimal(item["min"]) <= price <= Decimal(item["max"]) for price in prices)
+            self.assertEqual(item["count"], expected)
+        self.assertEqual(sum(item["count"] for item in distribution["bins"]), len(prices))
+
+    def test_distribution_respects_authenticated_scope_and_does_not_write_data(self):
+        actor = User.objects.create_user(username="histogram-agent", email="histogram@example.test", role="asesor")
+        self.make_property(price="0.01", status="captacion")
+        before = list(Property.objects.order_by("pk").values())
+        anonymous = self.client.get("/api/auth/properties/").data["price_distribution"]
+        self.client.force_authenticate(user=actor)
+        authenticated = self.client.get("/api/auth/properties/").data["price_distribution"]
+        self.assertEqual(anonymous["min"], "50000.00")
+        self.assertEqual(authenticated["min"], "0.01")
+        self.assertEqual(list(Property.objects.order_by("pk").values()), before)
+
+    def test_price_sort_is_global_stable_and_preserved_across_pages(self):
+        for index in range(23):
+            self.make_property(location="Orden", price=Decimal("100000") + index // 3)
+        for sort, ordering in (("price_asc", ("price", "pk")), ("price_desc", ("-price", "-pk"))):
+            with self.subTest(sort=sort):
+                first = self.client.get("/api/auth/properties/", {"location": "Orden", "sort": sort})
+                self.assertEqual(first.status_code, 200)
+                self.assertEqual(len(first.data["results"]), 20)
+                self.assertIn(f"sort={sort}", first.data["next"])
+                second = self.client.get(first.data["next"])
+                actual = [item["id"] for item in first.data["results"] + second.data["results"]]
+                expected = list(Property.objects.filter(location="Orden").order_by(*ordering).values_list("pk", flat=True))
+                self.assertEqual(actual, expected)
+                self.assertEqual(len(set(actual)), 23)
+
+    def test_sort_default_recent_and_invalid_sort_rejected(self):
+        first = self.client.get("/api/auth/properties/")
+        expected = list(Property.objects.order_by("-created_at", "-pk").values_list("pk", flat=True))
+        self.assertEqual([row["id"] for row in first.data["results"]], expected)
+        for sort in ("unknown", "price;DELETE", "1"):
+            with self.subTest(sort=sort):
+                response = self.client.get("/api/auth/properties/", {"sort": sort})
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("sort", response.data)
+
+    def test_sort_preserves_filter_scope_and_distribution(self):
+        self.make_property(status="captacion", price="1")
+        normal = self.client.get("/api/auth/properties/", {"location": "Quito"})
+        for sort in ("price_asc", "price_desc"):
+            response = self.client.get("/api/auth/properties/", {"location": "Quito", "sort": sort})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.data["count"], 2)
+            self.assertEqual(response.data["price_distribution"], normal.data["price_distribution"])
+            self.assertNotIn("captacion", {row["status"] for row in response.data["results"]})
+
+
+class SetupCatalogDemoCommandTests(TestCase):
+    def setUp(self):
+        self.agent = User.objects.create_user(username="catalog-existing", email="catalog-existing@example.test", role="asesor")
+        User.objects.create_user(username="catalog-admin", email="catalog-admin@example.test", role="admin")
+        self.existing = Property.objects.create(
+            title="Propiedad previa", description="Conservar", price="148000",
+            area_m2=95, location="La Carolina", status="disponible", agent=self.agent,
+        )
+        media_dir = tempfile.mkdtemp()
+        private_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, media_dir, ignore_errors=True)
+        self.addCleanup(shutil.rmtree, private_dir, ignore_errors=True)
+        setting_patch = override_settings(DEBUG=True, MEDIA_ROOT=media_dir)
+        setting_patch.enable()
+        self.addCleanup(setting_patch.disable)
+        storage_patch = mock.patch.object(Document._meta.get_field("file"), "storage", FileSystemStorage(location=private_dir))
+        storage_patch.start()
+        self.addCleanup(storage_patch.stop)
+
+    def run_command(self, **kwargs):
+        output = io.StringIO()
+        call_command("setup_catalog_demo", stdout=output, **kwargs)
+        return output.getvalue()
+
+    def test_publishes_with_requirements_and_preserves_users_and_existing_properties(self):
+        users_before = list(User.objects.order_by("pk").values())
+        property_before = Property.objects.get(pk=self.existing.pk).__dict__.copy()
+        property_before.pop("_state")
+        self.assertIn("24 creadas", self.run_command())
+        examples = Property.objects.filter(title__startswith="[CAT-HU10]")
+        self.assertEqual(examples.count(), 24)
+        self.assertFalse(examples.exclude(status="disponible", agent=self.agent).exists())
+        for prop in examples:
+            self.assertEqual(get_missing_publication_requirements(prop), [])
+        self.assertEqual(list(User.objects.order_by("pk").values()), users_before)
+        self.existing.refresh_from_db()
+        for key, value in property_before.items():
+            self.assertEqual(getattr(self.existing, key), value, key)
+        response = APIClient().get("/api/auth/properties/", {"location": "DEMO HU10"})
+        self.assertEqual(response.data["count"], 24)
+        self.assertEqual(len(response.data["results"]), 20)
+
+    def test_rerun_preserves_example_edits_without_republishing(self):
+        self.run_command(count=21)
+        prop = Property.objects.filter(title__startswith="[CAT-HU10]").first()
+        prop.status = "no_disponible"
+        prop.unavailability_reason = "Prueba local"
+        prop.price = Decimal("1.00")
+        prop.save()
+        before = list(Property.objects.order_by("pk").values())
+        self.assertIn("0 creadas", self.run_command(count=21))
+        self.assertEqual(list(Property.objects.order_by("pk").values()), before)
+
+    def test_refuses_non_debug_or_non_sqlite(self):
+        with override_settings(DEBUG=False):
+            with self.assertRaises(CommandError):
+                self.run_command()
+        with mock.patch("apps.users.management.commands.setup_catalog_demo.connection") as db:
+            db.vendor = "postgresql"
+            with self.assertRaises(CommandError):
+                self.run_command()
+        self.assertEqual(Property.objects.count(), 1)
+
+    def test_requires_existing_active_unambiguous_agent(self):
+        with self.assertRaises(CommandError):
+            self.run_command(agent_id=999999)
+        other = User.objects.create_user(username="catalog-other", email="catalog-other@example.test", role="asesor")
+        with self.assertRaises(CommandError):
+            self.run_command()
+        other.is_active = False
+        other.save()
+        with self.assertRaises(CommandError):
+            self.run_command(agent_id=other.pk)
+        self.assertEqual(Property.objects.count(), 1)
+
+    def test_bad_counts_do_not_write_data(self):
+        for count in (0, 20, 61):
+            with self.subTest(count=count), self.assertRaises(CommandError):
+                self.run_command(count=count)
+        self.assertEqual(Property.objects.count(), 1)
+
+    def test_publication_failure_rolls_back_database(self):
+        from rest_framework.response import Response
+        with mock.patch("apps.users.management.commands.setup_catalog_demo.PropertyPublishView.as_view",
+                        return_value=lambda *args, **kwargs: Response(status=400)):
+            with self.assertRaises(CommandError):
+                self.run_command(count=21)
+        self.assertEqual(Property.objects.count(), 1)
+        self.assertFalse(PropertyImage.objects.exists())
+        self.assertFalse(Document.objects.exists())
+        self.assertFalse(Appraisal.objects.exists())
