@@ -1,4 +1,4 @@
-import { Property } from '@/types/property';
+import type { Property, PropertyCatalogFilters, PropertyCatalogPage } from '@/types/property';
 import { clearAuthSession, notifyAuthSessionChanged } from "@/lib/auth-session";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -167,17 +167,14 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
 //The API router of how we are gonna used the informaqtion.
 //The asyncronic function that we are gonna use for fetch the images and the database info.
 
-export async function getProperties(): Promise<Property[]>  {
-  const res = await fetch(`${API_URL}/api/auth/properties/`,{
-    cache: 'no-store', // SWe didnt store any type of data inside the we html based.
-  }); //We pass all the info from the backend.
-  
-  if(!res.ok){
-    throw new Error('Error al obtener la lista de propiedades');
-  } //We handle the error with this.
-
-  return res.json(); 
-  //La devolvemos en json.
+export async function getProperties(filters: PropertyCatalogFilters = {}): Promise<PropertyCatalogPage> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value?.trim()) params.set(key, value.trim());
+  }
+  return apiFetch<PropertyCatalogPage>(`/api/auth/properties/?${params}`, {
+    cache: "no-store",
+  });
 }
 
 //More specific Function of seacrhing the Property.
