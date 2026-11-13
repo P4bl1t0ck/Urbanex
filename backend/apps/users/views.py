@@ -1,6 +1,7 @@
 import hashlib
 import secrets
 from datetime import timedelta
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
@@ -8,12 +9,14 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import generics, permissions, serializers, status, viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Count, Min, Max, Q
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from .authentication import PasswordVersionRefreshToken
@@ -454,9 +457,60 @@ class UserActivationView(APIView):
             status=status.HTTP_200_OK,
         )
         
+class PropertyCatalogQuerySerializer(serializers.Serializer):
+    property_type = serializers.ChoiceField(choices=Property.PROPERTY_TYPES, required=False)
+    price_min = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)
+    price_max = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)
+    bedrooms = serializers.IntegerField(min_value=0, max_value=2147483647, required=False)
+    bathrooms = serializers.IntegerField(min_value=0, max_value=2147483647, required=False)
+    parking_spaces = serializers.IntegerField(min_value=0, max_value=2147483647, required=False)
+    area_min = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)
+    location = serializers.CharField(max_length=500, required=False)
+    sort = serializers.ChoiceField(choices=("recent", "price_asc", "price_desc"), default="recent")
+
+    def validate(self, attrs):
+        if ("price_min" in attrs and "price_max" in attrs
+                and attrs["price_min"] > attrs["price_max"]):
+            raise serializers.ValidationError({
+                "price_max": "El precio máximo debe ser mayor o igual al mínimo."
+            })
+        return attrs
+
+
+class PropertyCatalogPagination(PageNumberPagination):
+    page_size = 20
+    last_page_strings = ()
+
+
+def catalog_price_distribution(queryset):
+    """Conteos agregados de todas las coincidencias, sin descargar el inventario."""
+    summary = queryset.aggregate(minimum=Min("price"), maximum=Max("price"), total=Count("pk"))
+    if not summary["total"]:
+        return {"min": None, "max": None, "total": 0, "bins": []}
+    minimum, maximum = summary["minimum"], summary["maximum"]
+    # Límites en centavos para no perder precisión ni contar dos veces las fronteras.
+    low, high = int(minimum * 100), int(maximum * 100)
+    width = max(1, (high - low + 20) // 20)
+    intervals = [(start, min(start + width, high + 1)) for start in range(low, high + 1, width)]
+    counts = queryset.aggregate(**{
+        f"bin_{index}": Count("pk", filter=Q(price__gte=Decimal(start) / 100,
+                                           price__lt=Decimal(end) / 100))
+        for index, (start, end) in enumerate(intervals)
+    })
+    return {
+        "min": format(minimum, ".2f"), "max": format(maximum, ".2f"),
+        "total": summary["total"],
+        "bins": [{"min": format(Decimal(start) / 100, ".2f"),
+                  "max": format(Decimal(end - 1) / 100, ".2f"),
+                  "count": counts[f"bin_{index}"]}
+                 for index, (start, end) in enumerate(intervals)],
+    }
+
+
 class PropertyListCreateView(generics.ListCreateAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
+    pagination_class = PropertyCatalogPagination
     
     #The reason why it doesnt fetch all the properties.
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -466,7 +520,37 @@ class PropertyListCreateView(generics.ListCreateAPIView):
         queryset = super().get_queryset()
         if not self.request.user.is_authenticated:
             queryset = queryset.filter(status__in=PUBLIC_STATUSES)
-        return queryset
+        # Los campos vacíos de un formulario GET equivalen a no filtrar.
+        params = {
+            key: value for key, value in self.request.query_params.items()
+            if value.strip()
+        }
+        query = PropertyCatalogQuerySerializer(data=params)
+        query.is_valid(raise_exception=True)
+        lookups = {
+            "property_type": "property_type", "price_min": "price__gte",
+            "price_max": "price__lte", "bedrooms": "bedrooms__gte",
+            "bathrooms": "bathrooms__gte", "area_min": "area_m2__gte",
+            "parking_spaces": "parking_spaces__gte",
+            "location": "location__icontains",
+        }
+        filters = {lookups[key]: value for key, value in query.validated_data.items() if key != "sort"}
+        # El histograma conserva visibilidad y otros filtros, pero no el rango de precio.
+        self.price_queryset = queryset.filter(**{
+            lookup: value for lookup, value in filters.items()
+            if lookup not in ("price__gte", "price__lte")
+        })
+        ordering = {"recent": ("-created_at", "-pk"), "price_asc": ("price", "pk"),
+                    "price_desc": ("-price", "-pk")}[query.validated_data["sort"]]
+        return (queryset.filter(**filters).select_related("agent")
+                .prefetch_related("images").order_by(*ordering))
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        response = self.get_paginated_response(self.get_serializer(page, many=True).data)
+        response.data["price_distribution"] = catalog_price_distribution(self.price_queryset)
+        return response
 
     def perform_create(self, serializer): # Revisar sobre un inesperado error al momento de intentar crear una propiedad.
         #Verificado.
