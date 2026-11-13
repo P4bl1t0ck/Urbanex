@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-09 Listo | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: PROC-01 paso 10 (HU-09) en **Listo** (nota aditiva) |
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: PROC-04 pasos 5 y 6 (HU-21, HU-23) y PROC-05 pasos 2 y 5 (HU-33, HU-31) con su código; en Pruebas (DS-52) |
 | Última actualización · HU-46 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-08, criterio "solo usuarios activos" de HU-46 cubierto por su prueba automática (DS-35) |
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-02, HU-12 en **Listo**; V-63 No aplicable hasta el despliegue (DT-110) |
@@ -345,6 +346,10 @@ RF sin HU propia: **RF-14** (auditoría) se alimenta de RF-01, 05, 06, 07, 08, 1
 - **Al cerrar una HU:** no se toca este archivo (el estado está en los enlaces). Solo se actualiza si cambia el mapa, el corte del 60 % o un proceso.
 - **Al implementar un paso:** completar la columna **Código** de §4 con los archivos y el endpoint (sin números de línea).
 - **Si se decide algo del §6:** registrar la decisión en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) (DS-xx) y enlazarla aquí.
+
+### Actualización aditiva PROC-01 / HU-09 — 2026-11-13 (merge del PR #24)
+
+PROC-01 paso 10 (HU-09) pasa a **Listo**: V-45 aprobada por Sebas (2026-11-10), PR #24 auditado (§11: apta, según Pablo, 2026-11-13) y fusionado en `develop` (`c420e56`, 2026-11-13). El código de la nota del 2026-11-09 ya está en `develop`.
 
 ### Actualización aditiva PROC-01 / HU-09 — 2026-11-09
 

@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-09 Listo | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: HU-09 pasa a **Listo** (nota aditiva en la sección HU-09; la fila resumen de Sebas no se reescribe) |
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: nuevas secciones **HU-33** y **HU-31** (EP-5), **HU-21** y **HU-23** (EP-4) en **Pruebas** (DS-52); validación visual Pendiente (V-96 a V-103); nota en HU-30 (Perdida tampoco admite interacciones) |
 | Última actualización · HU-09 integración de develop | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24): nota aditiva en la sección HU-09 (V-45 aprobada por Sebas el 2026-11-10; HU-09 en Pruebas). La fila resumen de HU-09 ("En Curso") es de Sebas y queda sin reescribir, como en DT-157 (1) |
 | Última actualización · ajustes DT-157 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46, criterio "solo usuarios activos" cubierto por su prueba automática (DS-35, decisión de Pablo); fechas de validación corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11) |
@@ -651,6 +652,10 @@ Decisión de Pablo (2026-11-08, PR #18). **No cambia ningún estado:** cada HU s
 | C-08 | Pueden existir valores heredados `cliente` en bases de datos, aunque `User.Role` ya solo define `admin` y `asesor`; RF-12 solo reconoce esos dos roles internos | Valores históricos en base vs `models.py` / RF-12 | **Confirmada por Pablo el 2026-10-31 (DS-30):** los clientes no tienen cuenta; eliminar `cliente`. Superusuarios cliente pasan a `admin`; las demás cuentas pasan a `asesor` inactivo con motivo `rol cliente eliminado (C-08)` |
 
 > **Nota añadida (Pablo, 2026-11-03), rama `feat/URB-30-34-HU-27-HU-34-oportunidades`:** la fila C-08 queda con el texto de `develop`. En esta rama decía "confirmada por Pablo (2026-11-01)"; la confirmación vale desde el **2026-10-31 (DS-30)**. El 2026-11-01 Pablo la repitió al cerrar DT-105 en código (FX-23, `033b845`): solo hay roles `admin` y `asesor`, el cliente es anónimo (sin cuenta) y las pruebas de oportunidades ya no usan `role='cliente'`.
+
+### Actualización aditiva HU-09 (2026-11-13, merge del PR #24): HU-09 en Listo
+
+~~Pruebas~~ **Listo**: V-45 aprobada por Sebas (2026-11-10, 14:59 Bogotá; los 2 criterios), PR #24 auditado (§11: apta, según Pablo, 2026-11-13) y fusionado en `develop` (`c420e56`, 2026-11-13); decisión de Pablo. La fila resumen de HU-09 ("En Curso") es de Sebas y no se reescribe (`AGENTS.md` §4): prevalece esta nota. Hallazgos de la auditoría registrados aparte: DT-160 y C-11 (Deuda técnica).
 
 ### Actualización aditiva HU-09 (2026-11-13, Pablo con Claude Code): estado vigente frente a la fila resumen
 

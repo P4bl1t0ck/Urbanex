@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-09 Listo | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: EP-2, HU-09 en **Listo** tras el merge del PR #24: **1/10 HU · 2/33 pts (6,1 %)** completas en `develop` (nota aditiva bajo la actualización EP-2/HU-09) |
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: §5 (EP-5), HU-31 y HU-33 implementadas y verificadas: **14/20 implementado y verificado**, validado sin cambio (10/20; V-96 a V-99 Pendiente); nueva §5D (HU-21 y HU-23 de EP-4, V-100 a V-103 Pendiente). HU completas y puntos sin cambio: las cuatro en **Pruebas** (DS-52) |
 | Última actualización · EP-1 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), el criterio "solo usuarios activos" de HU-46 se cierra con la salida de `test_inactive_users_cannot_log_in` (DS-35, decisión de Pablo); EP-1 validado **4/6**, **2/3 HU · 5/8 pts (62,5 %)** |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: §3 (EP-1), HU-45 en **Listo** (según Pablo, confirmado por Sebas); métricas sin cambio |
@@ -389,3 +390,5 @@ pie showData title EP-2 — actualización HU-09 en rama (2026-11-11)
 ```
 
 La corrección de privacidad del motivo de retiro se verifica por pruebas automáticas; no cambia las marcas de aceptación ni el registro humano V-45. HU-09 permanece en **Pruebas**. Resultados de ejecución en Estándares §4.
+
+**(2026-11-13, nota añadida, merge del PR #24)** HU-09 pasa a **Listo**: PR #24 auditado (§11: apta, según Pablo, 2026-11-13) y fusionado en `develop` (`c420e56`, 2026-11-13); sus 2 criterios están validados (V-45, Sebas). **HU completas / puntos en `develop`: 1/10 HU · 2/33 pts = 6,1 %** (antes 0/10 · 0/33). Implementado, verificado y validado sin cambio (17/24, 15/24 y 12/24). HU-04, HU-06 y HU-08 siguen **POR CONFIRMAR** como completas.
