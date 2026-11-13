@@ -4,6 +4,8 @@
 |---|---|
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: §1.3 con la ruta pública nueva de cancelación por enlace (HU-21) y nota en **SEC-18** (DS-52). Las rutas internas nuevas exigen sesión |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · **SEC-20**: decisión de Pablo (V-86), el celular del asesor puede ser público si es el de trabajo |
+| Última actualización de corrección HU-09 | 2026-11-11 · minimización de datos del motivo de retiro en respuestas públicas; pruebas de regresión incorporadas |
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; sin cambios en riesgos globales |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
@@ -19,6 +21,10 @@
 | Última actualización | 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4): §1.3 con las dos rutas públicas nuevas de P-07 y riesgos **SEC-20** (celular del asesor en el enlace de WhatsApp; Pendiente de revisión de GUI por Pablo) y **SEC-21** (formulario público de interés). Antes: 2026-11-09 · Pablo (con Claude Code) · rama `feat/URB-23-24-28-HU-19-HU-20-HU-25-solicitud-visitas` (PR #21): nuevos **SEC-17** (solicitud pública de visita), **SEC-18** (P-08 por enlace) y **SEC-19** (API pública por defecto, DT-153); nueva **§1.3, superficie pública sin sesión** (revisión pedida por Pablo) |
 | Última actualización aditiva | 2026-11-05 · Copilot con Sebas · afirmaciones históricas aclaradas y SEC-04 mantenido abierto |
 | Registro oficial | Cada riesgo tiene su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md); el estado se actualiza allí y en la tabla de §0 |
+
+### Corrección aditiva de privacidad HU-09 — 2026-11-11
+
+Se limita la representación del motivo de retiro en el catálogo público: el serializer devuelve `null` para solicitudes anónimas o sin contexto, conservando el valor almacenado y el acceso autenticado existente. Las pruebas de regresión cubren la privacidad y la conservación del dato; resultados en Estándares §4. Corrección implementada en código; validación humana **Pendiente**. No cambia el registro de V-45, la política de roles ni el estado de riesgos globales. Seguimiento en la actualización aditiva HU-09 de Deuda técnica, sin ID nuevo.
 
 > **🔒 Documento publicable.** El repositorio es **público**. Por eso este documento describe **qué** está en riesgo y **cómo se corregirá**, pero **no** incluye pasos de explotación, peticiones, payloads ni comandos de ataque.
 >
@@ -419,6 +425,10 @@ Frontend Next.js en Vercel · backend Django REST en Render con Docker · Postgr
 7. **SEC-03, SEC-06, SEC-11 y DT-42** según el sprint.
 
 Al cerrar un riesgo: actualizar su fila en §0, su DT en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) y, si cambia el control de acceso, la tabla de §1.1.
+
+### Actualización aditiva HU-09 — 2026-11-09
+
+Las nuevas acciones de retirada/reactivación requieren autenticación y permiso por objeto (propietario o rol admin), además de `transaction.atomic` y `select_for_update` sobre la propiedad. Una retirada exige motivo no vacío y solo admite Disponible/Reservado; una reactivación solo admite No disponible y termina en captación. Los estados finales siguen fuera de las actualizaciones manuales y volver al catálogo requiere la acción HU-53, con comprobación de sus requisitos. Pruebas de permisos, ocultación al público y estados inválidos en `PropertyWithdrawalApiTests`; resultados en Estándares §4. Sebas aprobó la validación humana V-45 el 2026-11-10. No se cierran riesgos globales ni se prueba concurrencia PostgreSQL en esta sesión (DT-68). No se implementan cambios sobre oportunidades/visitas asociadas.
 
 ### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
 

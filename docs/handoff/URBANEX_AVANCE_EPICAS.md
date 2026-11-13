@@ -10,6 +10,8 @@
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · §5 (EP-5): validado 10/20 con HU-29 y HU-30 (V-91 a V-95); §5C: HU-15 y HU-16 validadas (V-86 a V-90); 0/4 HU del lote completas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 3 · merge PR #21 | 2026-11-11 · Pablo (con Claude Code) · §5B: 3/3 HU · 10/10 pts del lote 3 en **Listo** (PR #21 auditado y fusionado, `5ed0e3b`) |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (con Claude Code) · §5B: los 3 criterios del lote 3 validados (V-78 a V-85, Pablo); 0/3 HU completas hasta la auditoría y el merge del PR #21 |
+| Última actualización de corrección HU-09 | 2026-11-11 · bloque histórico de EP-2 restaurado; actualización vigente en sección aditiva; privacidad del motivo cubierta por pruebas |
+| Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; EP-2: 17/24 implementados, 15/24 verificados y 12/24 validados |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
@@ -352,6 +354,38 @@ Decisión de Pablo (2026-11-08, PR #18). **Es un plan, no avance:** ninguna de e
 | Pablo | Lote 3 | HU-19 Solicitar la visita · HU-20 Confirmación · HU-25 Registrar el resultado de la visita | 5 + 3 + 2 = 10 | EP-4 |
 | Pablo | Lote 4 | HU-15 Contacto por WhatsApp · HU-16 Interés por formulario · HU-29 Avanzar el estado de la oportunidad · HU-30 Registrar interacciones y negociación | 3 + 2 + 5 + 5 = 15 | EP-4, EP-5 |
 
+### Actualización aditiva EP-2/HU-09 — 2026-11-09
+
+HU-09 incorpora retirada con motivo, reactivación a captación y edición sin asignación manual de estados finales. `PropertyWithdrawalApiTests` cubre sus reglas en SQLite; resultados en Estándares §4. Sebas aprobó V-45 el 2026-11-10 a las 14:59 (Bogotá): los dos criterios quedan Implementados, Verificados y Validados. HU-09 permanece en **Pruebas** hasta la auditoría y el merge; por eso sus 2 puntos todavía no se suman al avance de `develop`. La definición de las transiciones procede de Sebas en la conversación del 2026-11-09; no se atribuye a Pablo.
+
 ### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
 
 La corrección de HU-46 agrega dos pruebas de regresión para JWT emitidos en el mismo segundo y para tokens heredados sin versión precisa. La sesión nueva debe funcionar y las anteriores deben rechazarse. Los resultados técnicos se registran en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu). No se recalculan porcentajes ni se modifican registros humanos; HU-46 permanece en Pruebas.
+
+
+### Corrección aditiva de auditoría HU-09 — 2026-11-11
+
+El bloque original de criterios, métricas y gráfico de EP-2 se conserva literalmente respecto de `origin/develop`. Es histórico: para HU-09 prevalecen las filas siguientes y la actualización aditiva del 2026-11-09. Se corrige así la sustitución de filas anteriores detectada en la revisión, conforme a `AGENTS.md` §4.
+
+| HU | Criterio | Implementado | Verificado | Validado | Evidencia |
+|---|---|---|---|---|---|
+| HU-09 | Cambiar entre estados; No disponible con motivo | ✔ | ✔ | ✔ | Acciones explícitas de retirada/reactivación, `PropertyWithdrawalApiTests` y V-45 registrada por Sebas el 2026-11-10 a las 14:59 (Bogotá) |
+| HU-09 | No asignar Vendido/Arrendado manualmente | ✔ | ✔ | ✔ | `status` de solo lectura, pruebas de edición/transiciones y la misma V-45; no se añade una aprobación humana |
+
+| Métrica EP-2 actualizada en esta rama | Valor |
+|---|---|
+| Total de criterios | 24 |
+| Implementado | 17/24 = **70,8 %** (+1 de HU-09 respecto del bloque histórico) |
+| Verificado | 15/24 = **62,5 %** (+2 de HU-09) |
+| Validado | 12/24 = **50,0 %** (+2 de HU-09, según V-45 de Sebas) |
+| HU completas / puntos en `develop` | 0/10 HU · 0/33 pts; los 2 puntos de HU-09 no se suman antes de la auditoría y el merge |
+
+```mermaid
+pie showData title EP-2 — actualización HU-09 en rama (2026-11-11)
+  "Validados (persona + test)" : 12
+  "Verificados sin validar" : 3
+  "Implementados sin test" : 2
+  "No implementados" : 7
+```
+
+La corrección de privacidad del motivo de retiro se verifica por pruebas automáticas; no cambia las marcas de aceptación ni el registro humano V-45. HU-09 permanece en **Pruebas**. Resultados de ejecución en Estándares §4.

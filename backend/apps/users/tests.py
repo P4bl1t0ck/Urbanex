@@ -33,6 +33,7 @@ from apps.users.models import (
     PropertyImage,
     UserActivationToken,
 )
+from apps.users.serializers import PropertySerializer
 from apps.users.views import get_missing_publication_requirements
 # Create your tests here.
 User = get_user_model()
@@ -368,6 +369,175 @@ class UrbanexCoreTests(TestCase):
         self.assertTrue(self.agent.is_locked)
         self.assertEqual(self.agent.failed_attempts, 5)
 
+class PropertyWithdrawalApiTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.agent = User.objects.create_user(
+            username="withdraw.owner", email="withdraw.owner@urbanex.test", password="Safe-Test-2026!", role="asesor",
+        )
+        cls.other = User.objects.create_user(
+            username="withdraw.other", email="withdraw.other@urbanex.test", password="Safe-Test-2026!", role="asesor",
+        )
+        cls.admin_user = User.objects.create_user(
+            username="withdraw.admin", email="withdraw.admin@urbanex.test", password="Safe-Test-2026!", role="admin",
+        )
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(self.agent)
+        self.property = Property.objects.create(
+            title="Withdrawal test", property_type="casa", price="100000.00",
+            area_m2=100, location="Quito", status="disponible", agent=self.agent,
+        )
+        self.url = f"/api/auth/properties/{self.property.pk}/"
+
+    def test_withdraw_requires_reason_and_does_not_change_state_on_error(self):
+        for payload in ({}, {"unavailability_reason": ""}, {"unavailability_reason": "   "}, {"unavailability_reason": None}):
+            with self.subTest(payload=payload):
+                response = self.client.post(self.url + "withdraw/", payload, format="json")
+                self.assertEqual(response.status_code, 400, response.data)
+                self.property.refresh_from_db()
+                self.assertEqual(self.property.status, "disponible")
+                self.assertIsNone(self.property.unavailability_reason)
+
+    def test_only_available_or_reserved_can_be_withdrawn(self):
+        for initial in ("captacion", "disponible", "reservador", "no_disponible", "vendido", "arrendado"):
+            with self.subTest(initial=initial):
+                self.property.status = initial
+                self.property.save(update_fields=["status"])
+                response = self.client.post(self.url + "withdraw/", {"unavailability_reason": "  Owner request  "}, format="json")
+                allowed = initial in ("disponible", "reservador")
+                self.assertEqual(response.status_code, 200 if allowed else 409, response.data)
+                self.property.refresh_from_db()
+                self.assertEqual(self.property.status, "no_disponible" if allowed else initial)
+                if allowed:
+                    self.assertEqual(self.property.unavailability_reason, "Owner request")
+
+    def test_actions_require_owner_or_admin_and_authentication(self):
+        for action, initial, payload in (
+            ("withdraw", "disponible", {"unavailability_reason": "Owner request"}),
+            ("reactivate", "no_disponible", {}),
+        ):
+            for actor, expected in ((None, 401), (self.other, 403), (self.admin_user, 200)):
+                with self.subTest(action=action, actor=actor):
+                    self.property.status = initial
+                    self.property.save(update_fields=["status"])
+                    self.client.force_authenticate(actor)
+                    response = self.client.post(self.url + action + "/", payload, format="json")
+                    self.assertEqual(response.status_code, expected, response.data)
+                    self.property.refresh_from_db()
+                    if expected != 200:
+                        self.assertEqual(self.property.status, initial)
+
+    def test_reactivation_only_from_unavailable_retains_reason_and_cannot_publish(self):
+        for initial in ("captacion", "disponible", "reservador", "no_disponible", "vendido", "arrendado"):
+            with self.subTest(initial=initial):
+                self.property.status = initial
+                self.property.unavailability_reason = "Owner request"
+                self.property.save(update_fields=["status", "unavailability_reason"])
+                response = self.client.post(self.url + "reactivate/", {"status": "disponible"}, format="json")
+                self.assertEqual(response.status_code, 200 if initial == "no_disponible" else 409)
+                self.property.refresh_from_db()
+                self.assertEqual(self.property.status, "captacion" if initial == "no_disponible" else initial)
+                self.assertEqual(self.property.unavailability_reason, "Owner request")
+
+    def test_retirement_hides_catalog_and_reactivation_requires_publication_checks(self):
+        anonymous = APIClient()
+        self.assertEqual(anonymous.get(self.url).status_code, 200)
+        self.assertEqual(self.client.post(self.url + "withdraw/", {"unavailability_reason": "Owner request"}, format="json").status_code, 200)
+        self.assertEqual(anonymous.get(self.url).status_code, 404)
+        self.assertNotIn(self.property.pk, [item["id"] for item in anonymous.get("/api/auth/properties/").data])
+        self.assertEqual(self.client.post(self.url + "withdraw/", {"unavailability_reason": "Again"}, format="json").status_code, 409)
+        self.assertEqual(self.client.post(self.url + "reactivate/", {}, format="json").status_code, 200)
+        self.assertEqual(anonymous.get(self.url).status_code, 404)
+        self.assertEqual(self.client.post(self.url + "reactivate/", {}, format="json").status_code, 409)
+        response = self.client.post(self.url + "publish/", {}, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual({item["code"] for item in response.data["missing_requirements"]}, {"image", "brokerage_contract", "appraisal"})
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.status, "captacion")
+
+    def test_reactivated_property_can_publish_with_current_requirements(self):
+        PropertyImage.objects.create(property=self.property, image="properties/images/test.jpg")
+        Document.objects.create(
+            property=self.property, doc_type=Document.DocType.CORRETAJE,
+            file="synthetic/corretaje.pdf", original_filename="corretaje.pdf",
+            file_size_bytes=100, mime_type="application/pdf", uploaded_by=self.agent,
+            issue_date=timezone.localdate(), expiration_date=timezone.localdate() + timedelta(days=1),
+        )
+        appraisal = Appraisal.create_draft(property=self.property, agent=self.agent)
+        appraisal.calibrate(calibrated_value=Decimal("150000.00"), final_justification="Synthetic market value.")
+        appraisal.approve()
+        self.assertEqual(self.client.post(self.url + "withdraw/", {"unavailability_reason": "Owner request"}, format="json").status_code, 200)
+        self.assertEqual(self.client.post(self.url + "reactivate/", {}, format="json").status_code, 200)
+        response = self.client.post(self.url + "publish/", {}, format="json")
+        self.assertEqual(response.status_code, 200, response.data)
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.status, "disponible")
+        self.assertEqual(self.property.unavailability_reason, "Owner request")
+        anonymous = APIClient()
+        public_detail = anonymous.get(self.url)
+        self.assertEqual(public_detail.status_code, 200)
+        self.assertIsNone(public_detail.data["unavailability_reason"])
+        public_list = anonymous.get("/api/auth/properties/")
+        self.assertEqual(public_list.status_code, 200)
+        public_property = next(item for item in public_list.data if item["id"] == self.property.pk)
+        self.assertIsNone(public_property["unavailability_reason"])
+        for actor in (self.agent, self.admin_user):
+            with self.subTest(actor=actor):
+                self.client.force_authenticate(actor)
+                detail = self.client.get(self.url)
+                self.assertEqual(detail.status_code, 200)
+                self.assertEqual(detail.data["unavailability_reason"], "Owner request")
+
+    def test_public_statuses_hide_reason_but_owner_keeps_it_in_lists(self):
+        self.property.unavailability_reason = "Synthetic internal reason"
+        anonymous = APIClient()
+        for initial in ("disponible", "reservador"):
+            with self.subTest(initial=initial):
+                self.property.status = initial
+                self.property.save(update_fields=["status", "unavailability_reason"])
+                detail = anonymous.get(self.url)
+                self.assertEqual(detail.status_code, 200)
+                self.assertIsNone(detail.data["unavailability_reason"])
+                public_list = anonymous.get("/api/auth/properties/")
+                self.assertEqual(public_list.status_code, 200)
+                public_property = next(item for item in public_list.data if item["id"] == self.property.pk)
+                self.assertIsNone(public_property["unavailability_reason"])
+                for path in ("/api/auth/properties/", "/api/auth/properties/mine/"):
+                    internal_list = self.client.get(path)
+                    self.assertEqual(internal_list.status_code, 200)
+                    internal_property = next(item for item in internal_list.data if item["id"] == self.property.pk)
+                    self.assertEqual(internal_property["unavailability_reason"], "Synthetic internal reason")
+
+    def test_serializer_without_request_hides_reason_without_changing_storage(self):
+        self.property.unavailability_reason = "Synthetic internal reason"
+        self.property.save(update_fields=["unavailability_reason"])
+        self.assertIsNone(PropertySerializer(self.property).data["unavailability_reason"])
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.unavailability_reason, "Synthetic internal reason")
+
+    def test_patch_edits_published_property_without_changing_status(self):
+        for initial in ("disponible", "reservador", "vendido", "arrendado", "no_disponible"):
+            self.property.status = initial
+            self.property.unavailability_reason = "Owner request"
+            self.property.save(update_fields=["status", "unavailability_reason"])
+            for forbidden in ("vendido", "arrendado", "disponible"):
+                with self.subTest(initial=initial, forbidden=forbidden):
+                    response = self.client.patch(self.url, {"title": "Edited title", "price": "120000.00", "status": forbidden}, format="json")
+                    self.assertEqual(response.status_code, 200, response.data)
+                    self.property.refresh_from_db()
+                    self.assertEqual(self.property.status, initial)
+                    self.assertEqual(self.property.price, Decimal("120000.00"))
+                    self.assertEqual(self.property.title, "Edited title")
+
+    def test_other_agent_cannot_edit_and_missing_property_returns_404(self):
+        self.client.force_authenticate(self.other)
+        self.assertEqual(self.client.patch(self.url, {"price": "120000.00"}, format="json").status_code, 403)
+        self.property.refresh_from_db()
+        self.assertEqual(self.property.price, Decimal("100000.00"))
+        for action in ("withdraw", "reactivate"):
+            self.assertEqual(self.client.post(f"/api/auth/properties/999999/{action}/", {}, format="json").status_code, 404)
 
 @override_settings(
     EMAIL_PROVIDER="console",

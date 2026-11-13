@@ -3,12 +3,17 @@
 | Campo | Valor |
 |---|---|
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: HU-33, HU-31, HU-21 y HU-23 implementadas (DS-52); **Ronda 9** (V-96 a V-103) redactada en Pendiente; DT-158; suite 374 OK en SQLite; nota de cierre. Commits por HU con orden de Pablo: `744f062` (HU-33), `8cc4bd4` (HU-31), `eafc49d` (HU-21), `5b6a451` (HU-23) |
+| Última actualización · HU-09 integración de develop | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24): `origin/develop` `78b5187` integrado en `d7318db` (conflictos solo documentales, ambas partes conservadas); 342 pruebas OK en SQLite; DT-159 (`.pyc` versionados); nota aditiva de HU-09 en Estado de procesos; nota de cierre |
 | Última actualización · ajustes tras la auditoría del PR #25 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 con DS-35 (EP-1 2/3 HU · 5/8 pts), precisión de DT-157 (1) y fechas de V-86 a V-90 en las filas resumen; nota de cierre |
 | Última actualización · estados tras los merges | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: DT-157 y DS-51; HU-12, HU-15, HU-16, HU-29, HU-30, HU-45 y HU-46 en **Listo**; nota de V-63 (No aplicable hasta el despliegue) y nota de cierre |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (transcrito por Claude Code) · Ronda 8 cerrada: V-86 a V-95 **Aprobado** por Pablo; HU-15, HU-16, HU-29 y HU-30 siguen en Pruebas hasta la auditoría y el merge del PR #22 |
 | Última actualización lote 4 · fusión de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `5ed0e3b` (PR #21) en la rama del lote 4; 332 pruebas OK en SQLite (Estándares §4); HU-19, HU-20 y HU-25 en Listo |
 | Última actualización lote 3 · Ronda 7 | 2026-11-11 · Pablo (transcrito por Claude Code) · Ronda 7 cerrada: las 8 Aprobado por Pablo (V-78, V-80 y V-81 tras repetirlas, ~15:46–15:55); HU-19, HU-20 y HU-25 siguen en Pruebas hasta la auditoría y el merge del PR #21 |
 | Última actualización lote 3 · integración de develop | 2026-11-11 · Pablo (con Claude Code) · fusión de `origin/develop` `97f0e0c` en la rama del lote 3; 277 pruebas OK en SQLite (Estándares §4) |
+| Última actualización de preparación de push HU-09 | 2026-11-11 · comprobación de rama para publicación; push autorizado por Sebas; sin integración ni merge de ramas en este paso |
+| Última actualización de commits HU-09 | 2026-11-11 · correcciones guardadas en commits por archivo; push e integración del develop remoto pendientes |
+| Última actualización de corrección HU-09 | 2026-11-11 · privacidad del motivo de retiro y avance documental corregidos; 253 pruebas OK en SQLite; sin commit ni push de estas correcciones |
+| Última actualización aditiva HU-09 | 2026-11-11 · `origin/develop` `47d09ed` integrado en `048341a`; V-45 aprobada; 251/251 pruebas OK en SQLite; auditoría pendiente |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; resultados técnicos en Estándares §4 |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
 | Última actualización de integración HU-46 | 2026-11-09 · Revisión aislada: 238 pruebas backend y 17 frontend; registro humano V-44 conservado; fusión pendiente de commit |
@@ -66,6 +71,10 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Commits (orden de Pablo, 2026-11-13, uno por HU):** `744f062` HU-33 · `8cc4bd4` HU-31 · `eafc49d` HU-21 · `5b6a451` HU-23 · luego la documentación del lote, la fusión de `origin/develop` (PR #24) y un commit `docs` con DT-160, C-11 y HU-09 en Listo.
 - **Falta:** datos de demo y Ronda 9 (V-96 a V-103); auditoría §11 del PR.
 - **Siguiente paso:** Ronda 9 de Pablo; luego la auditoría §11.
+### 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24, de Sebas) · integración de develop
+- **Hecho:** con Sebas avisado (según Pablo, 2026-11-13), worktree nuevo `Urbanex-hu09` e integración de `origin/develop` `78b5187` (PR #21, #22 y #25) en `d7318db`. Conflictos solo en 7 documentos (filas "Última actualización" y notas de cierre); se conservaron ambas partes sin reescribir filas de Sebas; el código se fusionó sin conflictos. Suite: línea base 253 OK y, tras integrar, 342 OK en SQLite; frontend 22/22, build, tsc y eslint exit 0 (Estándares §4). Nuevo **DT-159** (`.pyc` versionados; responsable Sebas, PR aparte). Nota aditiva en la sección HU-09 de Estado de procesos (V-45 aprobada por Sebas el 2026-11-10); la fila resumen de Sebas no se toca. DT-158 no se usa: según Pablo, está reservada en otra rama (lotes 5 y 6).
+- **Falta:** push de la rama (lo hace Pablo); auditoría §11 del PR #24 en un chat nuevo de solo lectura; aprobación de revisión en GitHub y merge del PR #24. Suite contra PostgreSQL: No ejecutado (DT-68, Nivel 1).
+- **Siguiente paso:** Pablo hace el push de `feat/URB-09-HU-09-actualizar-propiedad` y lanza la auditoría §11; si es apta, HU-09 puede pasar a Listo al fusionarse.
 
 ### 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (PR #25) · ajustes tras la auditoría
 - **Hecho:** cita de la auditoría §11 del PR #22 como apta (comentario de Pablo en el PR #22, `c4125df`). HU-46: el criterio "solo los usuarios activos inician sesión" queda cubierto por la salida de `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; "Ran 1 test … OK", exit 0, SQLite) según DS-35 (decisión de Pablo); EP-1 pasa a **2/3 HU · 5/8 pts (62,5 %)** y validado 4/6. DT-157 precisa que el punto (1) se corrigió con nota aditiva, no en la fila de Sebas. Fechas corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11).
@@ -110,6 +119,31 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Falta:** frontend tras la fusión (build, tsc, eslint, `npm test`); validación visual V-78 a V-85; auditoría de solo lectura (§11); DT-143.
 - **Siguiente paso:** correr el frontend integrado y la auditoría antes de pasar el PR #21 a listo.
 
+### 2026-11-11 · Codex con Sebas · verificación para publicar HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** Sebas autorizó continuar los pasos hasta el push y aclaró que este paso consiste en subir la rama, sin integrar ni fusionar ramas. `git status --short --branch` sobre `da8f12b` confirmó el árbol limpio; `git diff origin/develop...HEAD --check` y `git ls-files -u` no encontraron errores ni conflictos. El diff contiene 13 archivos, sin archivos prohibidos ni migraciones modificadas. La revisión de patrones de secretos en los 15 commits propios no encontró coincidencias; esta comprobación no constituye una auditoría exhaustiva de credenciales. `git ls-remote --heads origin refs/heads/feat/URB-09-HU-09-actualizar-propiedad` terminó exit 0 sin referencias: la rama aún no estaba publicada.
+- **Pruebas:** resultado conservado de 253 pruebas backend OK, exit 0, SQLite; no se modificó código desde esa ejecución. DT-92 sigue pendiente con check de migraciones exit 1; PostgreSQL No ejecutado (DT-68). La revisión técnica y las correcciones anteriores quedan documentadas sin añadir aprobaciones humanas.
+- **Falta y siguiente paso:** publicar únicamente la rama HU-09, sin force push; confirmar que su hash remoto coincide con HEAD. El resultado del push se informa en la respuesta de cierre. No se abre PR ni se modifica `develop` en este paso. Antes de pedir el PR siguen aplicando los requisitos de integración y auditoría de `AGENTS.md` §5 y §11.
+
+### 2026-11-11 · Codex con Sebas · commits de correcciones HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** commits autorizados por Sebas en esta conversación, con rutas explícitas, comprobación y presentación del área preparada antes de cada commit y mensaje mediante `git commit -F`. Serializer compartido en `78ccc5b`; regresiones en `819d59d`; Avance en `7419238`; Deuda en `e9d2c40`; Estado en `634c654`; Estándares en `33e1484`; GPS en `c37d030`; Seguridad en `72596c0`. Cada archivo compartido quedó en su propio commit. Este registro y la preparación del PR quedan en el commit de Progress.
+- **Pruebas:** se conserva la ejecución final de 253 pruebas OK, exit 0, SQLite, registrada en Estándares §4; no hubo cambios de código después de esa ejecución. `git diff --cached --check` sin errores antes de cada commit. DT-92 mantiene el check de migraciones en exit 1; PostgreSQL No ejecutado (DT-68).
+- **Verificación remota previa:** la consulta GitHub `compare_commits(base=47d09ed, head=develop)` devolvió `ahead_by=2`, `behind_by=0`, con cambios en Deuda y USM; no se actualizó ni integró la referencia local en esta sesión. La búsqueda de PR por la rama no devolvió resultados. V-45 permanece sin modificaciones locales y las cuatro rutas de evidencia registradas existen.
+- **Falta:** integrar el `develop` remoto actualizado antes de pedir el PR y comprobar cualquier conflicto. La revisión y las correcciones realizadas en este chat quedan como evidencia; el requisito de auditoría en un chat nuevo de solo lectura de `AGENTS.md` §11 sigue Pendiente. No se hizo push ni se abrió PR. No se añadió una aprobación humana.
+- **Siguiente paso:** integrar `develop` y comprobar el contenido final; completar la auditoría formal y hacer push de la rama cuando Sebas lo ordene. El PR hacia `develop` lo abre la persona; propuesta y checklist en la preparación de revisión al final de este documento.
+
+### 2026-11-11 · Codex con Sebas · correcciones de auditoría HU-09 · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** corregida la representación pública del motivo de retiro en `PropertySerializer`: `null` para consultas anónimas o sin contexto, texto conservado en almacenamiento y en el acceso autenticado existente. Se agregaron dos pruebas y se amplió la de republicación. Restaurado literalmente desde `origin/develop` el bloque histórico de criterios, métricas y gráfico de EP-2; las cifras vigentes de HU-09 quedan en una sección aditiva. Fase 0 autorizada por Sebas en esta conversación. Sin nuevos IDs, dependencias, migraciones ni cambios de frontend.
+- **Pruebas:** línea base sobre `f2312a5`: 251 pruebas OK. Focalizadas antes de corregir: 10 pruebas, 4 fallos; después: 10 OK. Suite final: `Ran 253 tests in 110.251s`, `OK`, exit 0, `connection.vendor=sqlite`. Migraciones exit 1 por DT-92; PostgreSQL No ejecutado (DT-68, Nivel 1). Frontend comprobado en la revisión previa de esta sesión: 17/17, build exit 0, TypeScript sin diagnósticos y ESLint exit 0 con 2 avisos DT-24. Detalle de comandos y salidas en Estándares §4. `git diff --check` sin errores; bloque histórico de EP-2 idéntico a la referencia y filas base conservadas.
+- **Falta:** validación humana de esta corrección Pendiente; se conserva V-45 de Sebas sin añadir aprobaciones. DT-92 y la política de visitas/oportunidades al retirar siguen pendientes. Correcciones locales sin commit; no se hizo push ni se abrió un PR.
+- **Siguiente paso:** revisar el diff y autorizar los commits por capa; antes de pedir el PR, integrar `develop` actualizado conforme a `AGENTS.md` §5 y completar la auditoría de solo lectura en un chat nuevo (§11). Si esa integración cambia código, repetir las comprobaciones afectadas. El PR lo abre la persona; título y descripción propuestos más abajo.
+
+### 2026-11-11 · Codex con Sebas · cierre documental de V-45 · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** Sebas completó y aprobó V-45 el 2026-11-10 a las 14:59 (Bogotá), con observación del recorrido de edición, retirada, reactivación y republicación, y cuatro evidencias locales en `C:/Users/mateo/Documents/Urbanex/evidence/HU-09/`. Los dos criterios de HU-09 quedan Implementados, Verificados y Validados; DT-44 queda Resuelto. HU-09 permanece en Pruebas hasta la auditoría y el merge.
+- **Integración y pruebas:** `origin/develop` `47d09ed` integrado en `048341a`, conservando HU-09 y HU-46. `connection.vendor` = `sqlite`; suite completa de Estándares §4 → 251 pruebas, OK, exit 0. Frontend 17/17; TypeScript y ESLint exit 0, con dos avisos conocidos DT-24; build exit 0, 15/15 páginas. `makemigrations --check --dry-run` exit 1 solo por `documents/0002_alter_document_file.py` (DT-92), sin generar ni aplicar migraciones. PostgreSQL No ejecutado (DT-68, Nivel 1).
+- **Documentación:** actualizados de forma aditiva Progress, Estado, Avance, Deuda, Estándares, GPS, USM y Seguridad. EP-2 pasa a 17/24 criterios implementados, 15/24 verificados y 12/24 validados; los puntos de HU completas no se suman antes de la auditoría y el merge.
+- **Falta:** realizar la auditoría obligatoria en un chat nuevo de solo lectura. Push requiere orden de Sebas; el PR lo abre la persona. La política sobre oportunidades/visitas al retirar sigue pendiente.
+- **Siguiente paso:** ejecutar la auditoría de `AGENTS.md` §11 y corregir cualquier hallazgo antes del push y el PR.
+
 ### 2026-11-09 (noche) · Pablo (con Claude Code) · rama `feat/URB-20-21-35-36-HU-15-HU-16-HU-29-HU-30-contactos-crm` (lote 4, sobre el lote 3)
 - **Entorno:** worktree `C:\Users\Pablo\Desktop\Urbanex-lote4`. La rama se creó desde `origin/develop` y, por decisión de Pablo, se rebasó sin commits propios a la cabeza del lote 3 (`0c0f0a7`, PR #21) para heredar `opportunities.0002`; renombrada con las claves Jira correctas (HU-16 = URB-20, HU-15 = URB-21, HU-29 = URB-35, HU-30 = URB-36). `backend/.env` copiado de la carpeta principal (`DB_ENGINE=sqlite`; `EMAIL_PROVIDER` toma `console` por defecto), base nueva con `migrate` y `setup_demo_data`, `npm install`. Script de demo **fuera del repo** en `evidencias\Lote4\` (Ronda 8).
 - **Commits (por capa, orden de Pablo):** `8d0b3b3` modelo `OpportunityInteraction` y `opportunities.0003` · `a073aa1` pruebas del modelo · `be8841f` API pública HU-15/HU-16 · `dbb49d7` sus pruebas · `9c11c73` tasas configurables · `b9ee341` API HU-29/HU-30 e I-06A · `7767f87` sus pruebas · `a1887d4` CIERRE sin interacciones y motivo de bloqueo · `1943bf4` sus pruebas · `f67c117` tipos, cliente y lógica pura · `9c59167` P-07 · `351a08a` I-06A · `9b83b4b` enlace desde I-06 · un commit por documento (Deuda, AGENTS §4, Seguridad, Estado, Avance, GPS, USM, DoD y este). Push: solo los dos primeros hasta ahora; el resto con la orden de Pablo de este cierre.
@@ -127,6 +161,13 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Decisiones de Pablo (2026-11-09):** commits por capa (6). DT-149 y DT-151 se reparan desde el 2026-11-10, cada uno en un commit aislado; DT-150 pospuesto (antes, entender el proceso de oportunidades); DT-152 aplazado, se propone a Sebas. Seguridad: nueva §1.3 con **toda** la superficie pública sin sesión, SEC-17 a SEC-19 y DT-153 (DRF permite todo por defecto).
 - **Falta:** validación visual de Pablo (V-78 a V-85); push (con orden de Pablo); auditoría de solo lectura (§11); DT-143 (restricción de exclusión y suite en PostgreSQL) en un commit o rama posterior; avisar a Sebas de DT-152 y DT-153 (`settings.py` es compartido).
 - **Siguiente paso:** Ronda 7; desde el 2026-11-10, DT-149 y DT-151.
+
+### 2026-11-09 · Codex con Sebas · HU-09 en rama independiente · rama `feat/URB-09-HU-09-actualizar-propiedad`
+- **Hecho:** creada `.worktrees/hu09` desde develop `966cc50`; la carpeta principal conserva HU-46 `74d94c4` limpia, sin borrar ramas. Sebas autorizó Fase 0 y definió retiro Disponible/Reservado → No disponible con motivo, y reactivación No disponible → En captación. Nuevas acciones API con permisos y bloqueo transaccional; botones Retirar/Reactivar con Dialog y motivo, actualización de fila y mensaje de republicación; edición sin asignación manual de estados finales. Se conserva el último motivo al reactivar.
+- **Pruebas:** línea base 229 OK; focalizadas finales 8 OK; suite final 237 OK, exit 0, SQLite. Frontend 17/17, build/TypeScript/ESLint exit 0, dos avisos preexistentes. Primer test focalizado falló por expectativa de código de error, corregido; primer build falló por descarga de fuentes, repetición con red terminó correctamente. Registro completo de comandos/resultados en Estándares §4. Migraciones exit 1 por DT-92; no se generan ni aplican. PostgreSQL No ejecutado (DT-68, Nivel 1).
+- **Documentación:** Estado, Avance, Deuda, GPS, Seguridad, USM y Estándares actualizados de forma aditiva. V-45 preparada con tabla vacía y Pendiente, ID comprobado contra las referencias remotas tras fetch. No se aprueban validaciones humanas ni se recalculan porcentajes. HU-09 queda en Pruebas; DT-44 resuelto en código, validación Pendiente.
+- **Falta:** Sebas realiza V-45; política de efectos del retiro sobre visitas/oportunidades sigue pendiente, sin inventar cancelaciones. DT-103, filtro de propiedades de I-06, queda fuera del alcance aprobado y requiere coordinación con Pablo. No se agregan dependencias, migraciones ni cambios en oportunidades. No se hace commit, push ni PR de HU-09: requieren su orden correspondiente.
+- **Siguiente paso:** abrir la carpeta `.worktrees/hu09` en otra ventana y revisar el flujo con datos sintéticos locales; mantener HU-46 mientras Pablo revisa PR #20. Cuando HU-46 se fusione, incorporar develop a esta rama y comprobar cualquier conflicto antes del PR de HU-09. HU-10 se trabaja después en su propia rama.
 
 ### 2026-11-09 · Codex con Sebas · publicación de corrección PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
 - **Hecho:** Sebas autorizó revisión, commit y push a la rama del PR existente. Commits: `ff92374` (autenticación y pruebas), `c4e07b1` (solo el compartido `users/views.py`) y `e84c1f9` (handoff y resultados). `git fetch origin` completado: develop sigue en `966cc50` y la cabeza remota del PR antes del push en `00dd676`. Comentarios del PR: lista vacía mediante GitHub.
@@ -178,6 +219,7 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 - **Evidencia técnica:** suite backend integrada 165/165 OK en SQLite; `npm test` 9/9; TypeScript y build exit 0; ESLint exit 0 con 2 avisos preexistentes. `makemigrations --check --dry-run` exit 1 por la diferencia preexistente `documents/0002_alter_document_file.py` (DT-92); no se generó ni aplicó esa migración. PostgreSQL **No ejecutado**: el intento inicial encontró que `test_postgres` ya existía y se detuvo; no se borró ni reutilizó esa base.
 - **Pendiente:** V-44 y validación visual por Sebas; revisar los dominios reales de producción para CORS/CSRF. No se hizo commit, push ni PR.
 - **Siguiente paso:** Sebas ejecuta V-44 en la interfaz con una cuenta de prueba, registra quién/fecha/hora/resultado y guarda las capturas sin tokens ni datos personales.
+
 ### 2026-11-08 (noche, tarde) · Pablo (con Claude Code) · rama `docs/post-merge-pr15` (PR #18, solo documentación)
 - **Hecho:** merge de `origin/develop` (`e19a5df`, PR #19) en `2d1ac9a`, conservando las filas de ambos lados. El merge lo había empezado otro asistente, que dejó texto reescrito (celda "Última actualización" de este archivo resumida y duplicada; "DS-35 sigue reservado" borrado en DS-36): restaurado en `3976508`. Comando de la DoD con `apps.visits.tests` y registro de ejecución en formato de párrafo (`f03d45a`); HU-22, HU-18 y HU-24 a **Listo** (`b8f2b16`); **DS-35** (definición de acabado en dos niveles, decisión aplicada por Pablo), **DS-38** (PR #19 sin revisión formal aprobada en GitHub) y **DT-148** (límite de 30/min por proceso) en `d6c0ed3`; DoD con historial al final (`0b2c9a8`); `AGENTS.md` §10, formato de los registros (`6bea04c`); plan de reparto como PLAN (`70ccf00`). DT-140..169 en `AGENTS.md` §4 (DS-33).
 - **Evidencia:** con `connection.vendor` = `sqlite`, la suite de Estándares §4 → 229 pruebas, **OK** (exit 0); `makemigrations --check --dry-run` → exit 1 solo por `documents/0002` (DT-92). `git diff --name-only origin/develop...HEAD` → solo `.md`, más `.gitattributes` y `.gitignore` (de `b312737`, DS-36; se quedan por decisión de Pablo). Suite contra PostgreSQL: **No ejecutado** (DT-68). Sin cambios de código.
@@ -1670,3 +1712,66 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 - **Pruebas de entonces:** pruebas manuales de UI en el Dashboard; corrección del error de hidratación al anidar el mapa; `ssr: false` para el mapa; manejo visual del 401; `apps.documents.tests` 19/19 OK; `apps.users.tests` con 4 errores preexistentes (corregidos después: FX-02).
 - **Migraciones de entonces:** `users/0006` (latitude, longitude, terreno) y `documents/0001_initial`.
 - **Decisiones aprobadas:** Leaflet en lugar de Google Maps (costos); nombres de campos en inglés (`latitude`, `longitude`) para alinear JSON y modelo.
+
+### V-45 · HU-09 — Edición, retirada y reactivación de propiedades
+
+**Aprobado por Sebas el 2026-11-10 a las 14:59 (Bogotá).** ID comprobado después de `git fetch origin` contra las referencias remotas disponibles; no se encontró otro encabezado V-45. Sebas completó la tabla personalmente con fecha, hora, observación y evidencia local; el agente no aprueba esta validación. Una evidencia por criterio: la prueba automática cubre estados y permisos y las capturas locales respaldan el criterio visual, sin datos reales.
+
+1. Como asesor propietario, editar el título y precio de una propiedad publicada: guardar y comprobar los nuevos valores sin cambio de estado.
+2. Pulsar Retirar en una Disponible: intentar confirmar sin motivo (debe mostrar error y conservar estado); escribir motivo y confirmar. Debe quedar No disponible, mostrar el motivo y dejar de aparecer en catálogo/ficha pública. Repetir desde Reservado si existe un dato de prueba adecuado.
+3. Pulsar Reactivar: confirmar que vuelve a En captación y continúa oculta al público. Pulsar Publicar: si falta foto, corretaje vigente o avalúo aprobado, debe mostrar los requisitos; al completarlos, la publicación puede devolverla a Disponible.
+4. Comprobar que no hay botones para asignar Vendido/Arrendado manualmente y que un asesor distinto no puede modificar la propiedad por API (esto último también tiene prueba automática).
+
+| Quién | Fecha y hora | Qué observó | Resultado y ruta de evidencia |
+|---|---|---|---|
+| Sebas | 2026-11-10, 14:59 (Bogotá; hora de registro) | Realicé el recorrido manual hasta el punto 8: edición de título y precio conservada después de recargar y estado Disponible; retiro con motivo obligatorio, paso a No disponible y exclusión del catálogo público; reactivación a En captación manteniéndose oculta; publicación posterior con retorno a Disponible y aparición en el catálogo. | Evidencias locales: `C:/Users/mateo/Documents/Urbanex/evidence/HU-09/PropiedadActualizada.png`, `C:/Users/mateo/Documents/Urbanex/evidence/HU-09/RetiroPropiedad.png`, `C:/Users/mateo/Documents/Urbanex/evidence/HU-09/PublicarPropiedad.png` y `C:/Users/mateo/Documents/Urbanex/evidence/HU-09/ReplubicarPropiedad.png`. Resultado: Aprobado. |
+
+**Regla recibida de Sebas (2026-11-09):** retiro solo desde Disponible o Reservado con motivo obligatorio; retorno de No disponible únicamente a En captación. El motivo se conserva al reactivar y se vuelve a validar la publicación por HU-53. La política sobre visitas/oportunidades existentes sigue como pregunta en Deuda técnica; no se implementan cancelaciones automáticas.
+
+### DoD de trabajo — URB-09 / HU-09 (2026-11-09)
+
+Casillas sin aprobación del agente; evidencia técnica en Estándares §4, registro de esta rama. Copiar al PR cuando se autorice su preparación.
+
+| Punto | Evidencia / pendiente |
+|---|---|
+| Criterios Anexo 2 / Estado | HU-09: motivo y cambios de estado controlados; sin Vendido/Arrendado manual. Regla de reactivación indicada por Sebas en esta conversación |
+| Proceso y contrato | POST withdraw con `{unavailability_reason: string}` no vacío; POST reactivate con `{}`; ambos responden 200 con DTO Property. 400 motivo inválido, 401 anónimo, 403 otro asesor, 404 inexistente, 409 estado no permitido |
+| Reglas en servidor | Permiso dueño/admin, transacción y select_for_update; status sigue de solo lectura en POST/PATCH |
+| Pruebas | 8 API nuevas y suite integrada 251 OK en SQLite; frontend 17/17 |
+| TypeScript, ESLint, build | exit 0; ESLint conserva 2 avisos DT-24 |
+| Migraciones | Pendiente DT-92: check exit 1 conocido; no se agregan migraciones |
+| PostgreSQL | No ejecutado, DT-68, permitido en Nivel 1; obligatorio al cerrar lote/entrega |
+| Errores/casos límite | Motivo ausente/vacío/espacios/null, permisos, estados finales, repetición, ocultación y requisitos de republicación cubiertos por PropertyWithdrawalApiTests |
+| Validación de interfaz | Aprobada por Sebas en V-45, 2026-11-10 a las 14:59 (Bogotá); cuatro evidencias locales referenciadas en la tabla humana |
+| Regresiones | Suite integrada completa 251 OK; concurrencia PostgreSQL No verificada |
+| Docs y explicación | Handoff y nota de cierre de esta sesión; GPS explica conexión API/cliente |
+| Auditoría y revisión | Pendientes antes del PR; esta sesión de implementación no es auditoría independiente |
+| Git y archivos compartidos | views.py y dashboard/page.tsx incluidos en Fase 0; deben ir en commits separados cuando se autoricen. Sin commit/push en esta sesión |
+
+### Preparación de revisión — correcciones HU-09 (2026-11-11)
+
+**Título propuesto para el PR:** `feat(URB-09): permite retirar y reactivar propiedades con motivo privado`.
+
+**Ramas propuestas:** `feat/URB-09-HU-09-actualizar-propiedad` → `develop`. Esta propuesta no constituye una orden para abrir el PR.
+
+**Descripción propuesta:** HU-09 permite editar propiedades publicadas, retirarlas con motivo obligatorio y reactivarlas a En captación; volver al catálogo exige comprobar de nuevo los requisitos de publicación HU-53. Los cambios de estado se autorizan para propietario/admin y no permiten asignar Vendido/Arrendado manualmente. El motivo se conserva para la gestión interna y las respuestas públicas devuelven `null`. La actualización de avance conserva los registros históricos y agrega los resultados de HU-09 por separado.
+
+**Cómo se conectan los cambios:** las rutas y vistas de retirada/reactivación usan los serializers de `backend/apps/users/`; el dashboard llama a esas acciones y actualiza la propiedad con la respuesta de la API. La corrección de esta sesión actúa solo en la representación de `PropertySerializer`: mantiene el contrato `string | null` que ya usa `frontend/types/property.ts`, por lo que no requiere editar el frontend. `backend/apps/users/tests.py` comprueba privacidad, conservación del motivo y acceso interno. Los documentos de handoff registran pruebas, alcance y pendientes; V-45 conserva la atribución humana existente.
+
+| DoD / preparación | Evidencia o pendiente |
+|---|---|
+| Criterios y proceso de negocio | HU-09 en Estado de procesos: motivo obligatorio y cambios de estado controlados; estados finales sin asignación manual |
+| Contrato backend/frontend | `PropertySerializer` y `frontend/types/property.ts`: motivo `string | null`; público `null`, acceso autenticado existente conservado |
+| Reglas en servidor | `PropertyWithdrawalApiTests`: permisos, transiciones, errores y republicación; serializer restringe la representación pública |
+| Pruebas unitarias e integración/API | Focalizadas 10 OK; suite completa 253 OK, exit 0, SQLite; comandos y resultados en Estándares §4 |
+| TypeScript, ESLint, build y pruebas frontend | Revisión previa en esta sesión: TypeScript sin diagnósticos, ESLint exit 0 con 2 avisos DT-24, build exit 0, npm test 17/17; no hubo cambios posteriores de frontend |
+| Migraciones | Pendiente: check exit 1 por DT-92; ninguna migración generada, aplicada o editada |
+| PostgreSQL | No ejecutado (DT-68, permitido para Nivel 1; obligatorio para cierre de lote/entrega) |
+| Casos límite y regresiones | 253 pruebas OK; privacidad comprobada en Disponible/Reservado, después de republicar y sin contexto de solicitud; motivo almacenado y acceso interno conservados |
+| Documentación y evidencia | Progress, Estado, Avance, Deuda, GPS, Estándares y Seguridad actualizados; bloque histórico de EP-2 idéntico a `origin/develop` |
+| Validación humana | V-45 existente de Sebas, 2026-11-10 14:59, conservada. Comprobación humana de la corrección: Pendiente |
+| Archivos prohibidos, credenciales y migraciones históricas | Sin archivos prohibidos ni migraciones en el diff local de esta corrección; auditoría integral de rama/commits Pendiente |
+| Integración, commits y push | Pendientes: integrar `develop` actualizado antes de pedir PR; commits por capa y archivos compartidos separados; mostrar staged antes de cada commit; requieren orden |
+| Auditoría y revisión del otro integrante | Pendiente: auditoría de solo lectura en chat nuevo sobre el contenido final; esta implementación no la sustituye |
+
+**Comprobación humana propuesta (Pendiente, sin aprobación del agente):** al gestionar una propiedad retirada, comprobar que propietario/admin siguen viendo el motivo en el panel; al reactivar y publicar, comprobar que el catálogo y la ficha públicos cargan y que sus respuestas no contienen el texto del motivo. Registrar quién, fecha, hora, observación y evidencia local si se realiza. No se modifica la tabla humana de V-45.
