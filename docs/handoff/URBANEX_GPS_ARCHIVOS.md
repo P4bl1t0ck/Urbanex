@@ -2,6 +2,14 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · preparación de integración | 2026-11-13 · DT-92 corregido con storage callable y migración de estado; commits e integración autorizados por Sebas |
+| Última actualización HU-10 · distribución | 2026-11-13 · Filtrar, grupos uniformes y orden junto al conteo; V-46 humana Pendiente |
+| Última actualización HU-10 · orden y simplificación | 2026-11-13 · Contrato sort, orden estable por precio y UI/URL conectados; sin modelos/migraciones |
+| Última actualización HU-10 · preferencias | 2026-11-12 · CatalogFilters cambia parqueaderos a botones; consulta y etiquetas distinguen cero y sin preferencia |
+| Última actualización HU-10 · slider e histograma | 2026-11-12 · GET del catálogo agrega price_distribution y filtro parking_spaces; contrato y controles conectados |
+| Última actualización HU-10 · barra superior | 2026-11-11 · CatalogFilters integra navegación por URL, diálogos nativos y barra adherente; PropertyCard compacta |
+| Última actualización HU-10 · usabilidad | 2026-11-11 · CatalogFilters, utilidades/pruebas numéricas y setup_catalog_demo; sin dependencias nuevas |
+| Última actualización HU-10 | 2026-11-11 · Catálogo con filtros, contrato paginado y pruebas; archivos compartidos avisados en Fase 0 |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas aplicada; validación visual del comportamiento nuevo Pendiente |
@@ -265,3 +273,98 @@ flowchart LR
 ### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
 
 `backend/apps/users/authentication.py` define `PasswordVersionRefreshToken`: añade `password_version` al refresh y el access la hereda. La comprobación compartida exige coincidencia con `User.password_changed_at` completo; conserva compatibilidad conservadora para JWT antiguos, rechazando el segundo ambiguo. `backend/apps/users/views.py` (**compartido**, incluido en la Fase 0 autorizada) usa esa clase en `LoginView`; no cambia otras vistas. `backend/apps/users/tests.py` comprueba login anterior, recuperación y nuevo login con el mismo `iat`, rechazo de access/refresh anteriores, acceso con los nuevos y renovación válida; también cubre tokens heredados ambiguos. Sin cambios de frontend, dependencias, modelos ni migraciones. Comandos y resultados en Estándares §4.
+
+### HU-10 / URB-16 — archivos del catálogo (2026-11-11)
+
+| Archivo | Función y conexión | Compartido / precaución |
+|---|---|---|
+| `backend/apps/users/views.py` | Valida query mediante `PropertyCatalogQuerySerializer`; filtros combinados y paginación de 20 con `PropertyCatalogPagination`; orden estable por fecha/id. Lista GET cambia a `count/next/previous/results`; POST conserva su respuesta | **Sí**, avisado y aprobado en Fase 0. Conserva PUBLIC_STATUSES y visibilidad autenticada; sin cambiar permisos |
+| `backend/apps/users/tests.py` | Diez pruebas de API nuevas para filtros, límites, entradas inválidas, visibilidad y paginación; prueba existente adaptada a results | Área users de Sebas |
+| `backend/apps/appraisals/tests.py` | Única adaptación de prueba de comparables sintéticos al campo results | Ampliación de alcance autorizada expresamente por Sebas; sin cambio de motor |
+| `frontend/lib/api.ts`, `frontend/types/property.ts` | `getProperties(filters)` usa `apiFetch` para conservar errores 400/404 y devolver el contrato paginado; tipos específicos de búsqueda/respuesta | **Sí**, avisados en Fase 0; firmas de apiFetch/authFetch sin cambios |
+| `frontend/app/properties/page.tsx` | P-02: formulario GET, filtros persistidos en URL, errores por campo, limpiar búsqueda, resultados/paginación y metadatos SEO | Catálogo; validación humana V-46 Pendiente |
+| `frontend/components/PropertyCard.tsx` | Traduce el valor heredado reservador a la etiqueta Reservado | Sin cambiar estados guardados ni ficha |
+
+Sin dependencias, cambios de esquema ni rutas nuevas. Evidencia automática en Estándares §4; no equivale a aprobación humana.
+
+### HU-10 — archivos adicionales de usabilidad (2026-11-11)
+
+| Archivo / recurso | Función y precaución |
+|---|---|
+| `frontend/components/CatalogFilters.tsx` (nuevo) | Componente cliente del formulario GET; panel móvil expandible y visible en escritorio, campos decimales controlados, selectores de mínimos, mensajes accesibles y campos vacíos sin límite |
+| `frontend/lib/catalogFilters.ts`, `frontend/lib/catalogFilters.test.mjs` (nuevos) | Normalización decimal sin exponentes/signos/letras, valores iniciales y vista previa con unidades; cuatro pruebas de lógica |
+| `frontend/app/properties/page.tsx` | Mantiene carga/errores/paginación en servidor; integra el componente y distribución lateral. Cambiar la query reinicia el estado del formulario mediante key |
+| `backend/apps/users/management/commands/setup_catalog_demo.py` (nuevo), `users/tests.py` | Comando local SQLite/DEBUG con 24 ejemplos por defecto (21–60), asesor existente, sin cambiar usuarios; requisitos demo reutilizados y publicación por HU-53. Seis pruebas de conservación, idempotencia, rechazo y rollback |
+| SQLite/media locales y `evidence/HU-10/sqlite-antes-visits-20261111.sqlite3` | Respaldo antes de aplicar migraciones existentes de visits y agregar ejemplos; no versionar. No se editan migraciones ni archivos de visits |
+
+Ampliación presentada y aprobada por Sebas; sin dependencias nuevas. `setup_catalog_demo` es de uso local y no se ejecuta contra Supabase. V-46 conserva validación humana Pendiente.
+
+### HU-10 — evolución a barra superior (2026-11-11)
+
+| Archivo | Responsabilidad actual |
+|---|---|
+| `frontend/components/CatalogFilters.tsx` | Sustituye lateral: barra sticky con altura de SiteNav observada mediante ResizeObserver; búsqueda, paneles y diálogo nativo móvil con Aplicar/Cancelar/Escape, borradores independientes, etiquetas y limpieza. useTransition/useRouter solicitan resultados al servidor conservando URL |
+| `frontend/lib/catalogFilters.ts`, `catalogFilters.test.mjs` | Composición de URL conservando filtros y reiniciando página, validación por panel, escala visual ampliable y límites de manijas del slider. Siete pruebas adicionales, once de catálogo en total |
+| `frontend/app/properties/page.tsx` | Mantiene consulta al backend/errores/paginación; grid de ancho completo hasta 1600 px y columnas de objetivo 280 px, adaptables a móvil |
+| `frontend/components/PropertyCard.tsx` | Imagen 4:3, precio destacado, atributos en línea, título enlazado y ubicación truncada; mantiene estados públicos y acceso a ficha |
+
+Sin tocar SiteNav, layout, backend, modelos ni SQLite en este rediseño. No se añaden dependencias: diálogo y sliders nativos. Comprobaciones Edge/capturas en Estándares §4; evidencia visual local ignorada por Git. V-46 humana Pendiente.
+
+### HU-10 — conexión de distribución y parqueaderos (2026-11-12)
+
+| Archivo | Cambio autorizado y conexión |
+|---|---|
+| `backend/apps/users/views.py` (**compartido**) | Query serializer/lookup para mínimo parking_spaces; list mantiene las cuatro claves y agrega price_distribution. `catalog_price_distribution` calcula hasta 20 intervalos con centavos y Count/Min/Max, sobre visibilidad/otros filtros antes de precio y paginación |
+| `backend/apps/users/tests.py` | Siete pruebas nuevas para parqueaderos inválidos/combinados, conteo sobre todas las páginas, exclusión de estados ocultos, exclusión del propio precio, precio único/cero y fronteras en centavos; ajusta contrato vacío |
+| `frontend/types/property.ts` (**compartido**) | PriceDistribution y bins; parking_spaces en filtros; metadata del catálogo en el contrato |
+| `frontend/app/properties/page.tsx` | Conserva parking_spaces en query/paginación y pasa price_distribution del resultado al componente |
+| `frontend/components/CatalogFilters.tsx` | Una pista con dos controles ARIA slider, pointer capture para ratón/táctil, teclado a 100 USD, barras reales, parqueaderos en Más filtros y etiquetas; chevrón SVG con espacio |
+| `frontend/lib/catalogFilters.ts`, `catalogFilters.test.mjs` | Límites reales ampliables por inputs, saltos en centavos de 100 USD, bloqueo de cruce y validación/URL de parqueaderos; tres casos nuevos y actualización de los anteriores del slider |
+
+Sin editar modelos, migraciones, configuración, rutas, SiteNav o datos locales. Documentación y contratos actualizados en el alcance aprobado; V-46 humana Pendiente.
+
+### HU-10 — archivos de preferencias y cantidades (2026-11-12)
+
+| Archivo | Responsabilidad actualizada |
+|---|---|
+| `backend/apps/users/views.py` (**compartido**) | Reemplaza parking_spaces__gte por igualdad para 0/1/2; 3 y mayores mantienen mínimo. La selección alimenta tanto resultados como distribución; sin cambio de permisos |
+| `backend/apps/users/tests.py` | Cubre 0/1/2 exactos, 3+ incluyendo cuatro, ausencia de filtro, combinación y distribución coherente; agrega prueba de diferencia cero/sin preferencia y adapta fixture de histograma |
+| `frontend/components/CatalogFilters.tsx` | Sin preferencia en habitaciones/baños/parqueaderos; primera opción en fila propia y estado activo visible. Parqueaderos usa botones 0/1/2/3+ y título sin mínimos; chip explícito para cero |
+| `frontend/lib/catalogFilters.ts`, `catalogFilters.test.mjs` | parkingFilterLabel distingue Sin parqueadero, singular/exacto y mínimo 3+; prueba conservación del string 0 y eliminación del filtro al volver a Sin preferencia |
+
+Cinco archivos de código y siete documentos en Fase 0 aprobada. No cambian modelos, migraciones, datos, dependencias, layout o SiteNav. Tipos/contrato mantienen el mismo parámetro, con interpretación de 0/1/2 explicitada aquí y en Deuda. V-46 humana Pendiente.
+
+### HU-10 — archivos de orden y simplificación (2026-11-13)
+
+| Archivo | Responsabilidad actualizada |
+|---|---|
+| `backend/apps/users/views.py` (**compartido**) | sort recent/price_asc/price_desc validado; orden en servidor antes de paginar y desempate por id. Parqueaderos vuelve a __gte en todos los valores; distribución conserva alcance y filtros |
+| `backend/apps/users/tests.py` | Orden global sobre varias páginas y empates, rechazo de sort inválido, alcance/distribución invariantes; adapta parqueaderos a mínimos y cero heredado sin restricción |
+| `frontend/types/property.ts` (**compartido**) | sort en el contrato de parámetros, sin cambiar respuesta o esquema de modelo |
+| `frontend/app/properties/page.tsx` | Lee y conserva sort al paginar, lo excluye del indicador de filtros; normaliza ceros numéricos heredados como sin restricción |
+| `frontend/lib/catalogFilters.ts`, `catalogFilters.test.mjs` | toggleSelection para desmarcar; URL conserva orden al cambiar/limpiar filtros y reinicia página; normaliza mínimo cero; etiquetas de parqueaderos positivas siempre con + |
+| `frontend/components/CatalogFilters.tsx` | Dropdown de orden, grupos numéricos sin preferencia/cero visibles, tooltip del importe al mover/enfocar control; placeholders con ejemplos y explicaciones sr-only; errores visibles preservados |
+
+Siete archivos de código y siete documentos presentados en Fase 0; aclaración posterior de parqueaderos atribuida a Sebas. Sin SiteNav, layout, modelos, migraciones, datos o dependencias nuevos. V-46 humana Pendiente; evidencia visual automatizada local no se versiona.
+
+
+### HU-10 — distribución de controles (2026-11-13)
+
+Fase 0 aprobada por Sebas para tres archivos frontend y siete documentos. `CatalogFilters.tsx` distribuye botones de igual ancho: habitaciones/baños en cuatro columnas, parqueaderos en tres y tipos en dos con Todos en fila completa. El único botón de acción del panel es **Filtrar**; se elimina Cancelar visible y se conservan X, Escape y cierre exterior que descartan el borrador, con retorno del foco. **Limpiar filtros** es global junto a las etiquetas activas, que permiten eliminación individual; no se repite dentro de los paneles y conserva el orden.
+
+El nuevo `CatalogResultsHeader.tsx` muestra conteo a la izquierda y **Ordenar por** a la derecha, fuera de la barra, con ajuste de filas en móvil. `app/properties/page.tsx` conecta conteo, filtros y errores; sin respuesta válida muestra Resultados sin inventar cero coincidencias. Opciones: Más recientes, Precio: menor a mayor y Precio: mayor a menor. No cambia la API. Sin modelos, migraciones, datos, dependencias, SiteNav o layout modificados en esta ampliación.
+
+UX: [Baymard, filtros aplicados](https://baymard.com/research-articles/how-to-design-applied-filters) respalda visibilidad y eliminación de filtros; ubicar el borrado global junto a etiquetas es una aplicación al catálogo, no un requisito literal. [W3C APG, diálogo modal](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) contempla cierre visible, Escape y retorno del foco; la X permite quitar Cancelar. Referencias consultadas el 2026-11-13.
+
+Edge automático: orden fuera de barra, sin Cancelar y con Filtrar; tipos con Todos de 366 px y otras opciones de 179 px. A 320 px, documento de 320 px, botones de habitaciones/baños de 57.5 px y parqueaderos de aproximadamente 79.33 px. Escape cierra y devuelve el foco a Filtros. Capturas locales `evidence/HU-10/distribucion-*-20261113.png`, ignoradas por Git. Los primeros envíos de Escape por CDP no cerraron; activar pestaña y enviar código virtual 27 permitió comprobar el cierre. No se atribuye ese fallo del arnés al producto.
+
+HU-10 sigue **Pruebas**, V-46 humana **Pendiente**. Pasos humanos adicionales: revisar alineación y grupos en escritorio/móvil; Filtrar aplica; X/Escape/exterior descartan; foco retorna al disparador; cada etiqueta quita su filtro; Limpiar filtros elimina todos conservando orden; ordenar conserva filtros y reinicia página. Cotejo literal Anexo 2, Reservado humano y auditoría en chat nuevo pendientes. No se cambian porcentajes ni aprobaciones.
+
+
+### HU-10 — DT-92 y preparación de integración (2026-11-13)
+
+Sebas autorizó corregir DT-92, crear commits por grupos e incorporar develop; no autorizó push ni PR. `backend/apps/documents/models.py` cambia private_storage de instancia con ruta absoluta a función que resuelve BASE_DIR/private_media en el equipo actual; FileField conserva su contrato y serializa la función. `backend/apps/documents/migrations/0002_alter_document_file.py` usa SeparateDatabaseAndState con database_operations vacío: actualiza el estado de migraciones sin reconstruir tablas, mover archivos o reescribir rutas guardadas. No se modifica documents.0001 ni se aplica migrate a la SQLite de trabajo o Supabase. `backend/apps/documents/tests.py` agrega tres casos de serialización sin ruta de equipo, traslado de carpeta y lectura/escritura privada fuera de MEDIA_ROOT. Sin dependencias nuevas.
+
+DT-92: corrección implementada; resultado técnico y criterio de cierre en Estándares §4. Historial previo de exit 1 se conserva. Seguridad: N/A, mantiene ubicación privada y permisos; no cambia exposición pública. V-46 mantiene las nueve aprobaciones humanas de Sebas, con el alcance y limitaciones escritos por él; Reservado humano permanece Pendiente y HU-10 en Pruebas. La decisión de Sebas de no usar Anexo 2 para esta entrega consta en V-46; no se reescriben reglas generales ni registros anteriores.
+
+Archivos compartidos de HU-10: users/views.py, frontend/types/property.ts y frontend/lib/api.ts se preparan en commits propios. Incorporar origin/develop traerá también los cambios ajenos ya fusionados (incluido HU-09), sin atribuirlos a HU-10. Los conflictos se resolverán conservando ambas aportaciones; si requieren nuevos cambios funcionales fuera de alcance, se consultará. Auditoría de solo lectura en chat nuevo sigue Pendiente.

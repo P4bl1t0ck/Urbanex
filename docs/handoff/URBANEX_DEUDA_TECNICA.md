@@ -2,6 +2,14 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · preparación de integración | 2026-11-13 · DT-92 corregido con storage callable y migración de estado; commits e integración autorizados por Sebas |
+| Última actualización HU-10 · distribución | 2026-11-13 · Filtrar, grupos uniformes y orden junto al conteo; V-46 humana Pendiente |
+| Última actualización HU-10 · orden y simplificación | 2026-11-13 · Sebas vuelve a parqueaderos mínimos, sin botón cero; pasos por operación siguen pendientes |
+| Última actualización HU-10 · preferencias | 2026-11-12 · URLs parking_spaces=0/1/2 pasan a exactos; 3 y superiores conservan mínimo; sin migraciones |
+| Última actualización HU-10 · slider e histograma | 2026-11-12 · Parqueaderos existente habilitado como mínimo con autorización de Sebas; ascensor/mascotas/modelos pospuestos |
+| Última actualización HU-10 · barra superior | 2026-11-11 · Diseño adaptado a DS-16; sin campos nuevos ni cambios de base; operación y Reservado humano siguen pendientes |
+| Última actualización HU-10 · usabilidad | 2026-11-11 · Migraciones de visits faltantes aplicadas solo a SQLite; fixture Reservado humana Pendiente; DT-92/DT-68 conservados |
+| Última actualización HU-10 | 2026-11-11 · DS-16 implementada; DT-118 resuelto en código, validación Pendiente; DT-19, DT-92 y DT-68 conservados |
 | Última actualización · cierre HU-46 | 2026-11-11 · Pablo (con Claude Code) · rama `docs/HU-46-cierre`: cerrada la pregunta pendiente HU-46 (sin ID) sobre el desbloqueo al recuperar la contraseña |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; HU-46 permanece en Pruebas |
 | Última actualización · registro humano V-44 | 2026-11-09 · Fila incorporada por Sebas; auditoría y revisión pendientes |
@@ -452,3 +460,67 @@ No volver a discutirlas sin una razón nueva; si cambian, registrar aquí la rev
 ### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
 
 **DT-33/D-05:** se corrige la aceptación de JWT anteriores al cambio dentro del mismo segundo: tokens nuevos llevan `password_version` y requieren coincidencia exacta con la marca completa. Para tokens heredados, el segundo ambiguo se rechaza de forma conservadora. Pruebas y resultados en [Estándares §4](URBANEX_ESTANDARES_DOD.md#4-pruebas-y-definition-of-done-por-hu). No se crea un ID nuevo ni se declara cierre global de DT-33/SEC-05. DT-92 sigue pendiente; PostgreSQL No ejecutado (DT-68, Nivel 1).
+
+### HU-10 / DS-16 — actualización aditiva (2026-11-11)
+
+DS-16 implementada con los campos actuales: `property_type`, precios mínimo/máximo, dormitorios/baños mínimos, superficie mínima y texto en `location`; filtros en servidor y páginas de 20. Sebas confirmó ese alcance en Fase 0. Operación deshabilitada; DT-19 y N-03 siguen abiertos, sin modelos ni migraciones nuevos. DT-118: **Resuelto en código; validación Pendiente**: el catálogo vacío muestra «No hay propiedades disponibles por ahora.» y la búsqueda sin coincidencias tiene un mensaje propio; el cierre exige navegador humano (V-46).
+
+El contrato del listado pasa de array a `count/next/previous/results`; cliente y pruebas consumidores adaptados. No se altera la visibilidad autenticada existente ni se cierran DT-39/SEC-01 o riesgos ajenos. DT-92 mantiene diferencia de migraciones; PostgreSQL **No ejecutado** (DT-68, Nivel 1). Pruebas y fallos reales en Estándares §4. Cotejo literal de criterios del Anexo 2: Pendiente, no disponible en esta copia. No se asignan IDs nuevos de DT/FX/DS.
+
+### HU-10 — hallazgos y ampliación autorizada (2026-11-11)
+
+**Disponibilidad local: Confirmado.** La SQLite principal no tenía tablas de visits; `AvailabilityViewSet` fallaba para admin/asesor con `no such table: visits_agentavailability`. Se aplicaron, con autorización y respaldo local, las dos migraciones existentes de visits. Disponibilidad y excepciones respondieron 200 en ambos perfiles. No se cambió código de otra HU ni se declara una nueva aprobación de HU-22. Validación humana de pantalla Pendiente.
+
+**Datos para V-46:** `setup_catalog_demo` requiere DEBUG=True/SQLite, reutiliza solo la preparación de requisitos de `setup_demo_data` (sin invocar su actualización de cuentas) y publica por la acción HU-53. Veinticuatro ejemplos creados; usuarios y cuatro propiedades previas conservados exactamente según comparación contra respaldo. Datos/media y respaldo quedan locales. No ofrece borrado: los avalúos aprobados son inmutables; una reversión de datos requeriría coordinar la restauración del respaldo y considerar los cambios posteriores. Un fallo de publicación revierte filas de la transacción, pero puede dejar archivos locales huérfanos generados antes del fallo; no afecta datos anteriores.
+
+**Pendiente sin inventar negocio:** HU-35 no aporta aquí una acción de reserva disponible para generar un caso real de Reservado. No se cambia `status` directamente ni se agrega una reserva ficticia a esta base; V-46 de etiqueta Reservado sigue Pendiente de fixture aislada acordada o flujo real. DT-19/N-03, DT-92 y DT-68 siguen abiertos. DT-118 conserva validación humana Pendiente. No se asignan nuevos IDs.
+
+### HU-10 — límites del rediseño superior (2026-11-11)
+
+Tercera Fase 0 aprobada por Sebas: cambio de presentación e interacción, conservando DS-16. Comprar/Alquilar continúa deshabilitado; Suite/ascensor/mascotas no existen en el contrato y no se inventan. Parqueaderos existe en modelo pero no se habilita como filtro sin ampliar la API. La escala inicial del slider de precio es visual, no un límite de inventario: se amplía al escribir importes superiores y vacío significa sin límite. No hay migraciones, dependencias ni datos nuevos en este rediseño.
+
+DT-118 conserva validación humana Pendiente; DT-19/N-03, DT-92 y DT-68 siguen abiertos. Reservado humano y cotejo de Anexo 2 pendientes. Las comprobaciones automáticas Edge y capturas del agente no llenan la tabla humana de V-46 ni sustituyen revisión del compañero/auditoría. No se crean IDs nuevos.
+
+### HU-10 — ampliación acordada con campos existentes (2026-11-12)
+
+Sebas autorizó en Fase 0 habilitar `parking_spaces` como mínimo, además del slider doble, histograma e iconos. Es una ampliación del conjunto de filtros de DS-16 usando un campo que ya existía, sin migración ni cambios de `Property`. Se conserva operación deshabilitada y no se añaden Suite/ascensor/mascotas. Estas decisiones de modelo se hablarán después, según Sebas.
+
+La distribución se calcula en servidor con agregados (min/max/total y conteos por intervalos), no descargando todas las propiedades ni usando solo la página visible. Conserva el alcance de visibilidad existente y los demás filtros, sin incluir el propio precio. Agrega dos consultas agregadas al listado; la comprobación contra PostgreSQL sigue No ejecutado (DT-68), sin declarar rendimiento de producción. Los precios escritos se conservan sin forzarlos a múltiplos de 100; solo el desplazamiento del control usa esos saltos. Si hubiera un precio real cero se representa; no se crea cero cuando el inventario comienza más arriba.
+
+DT-19/N-03, DT-92 y DT-68 siguen abiertos; DT-118 y Reservado humanos conservan validación Pendiente. No se registra una aprobación del agente ni se usan nuevos IDs. No cambia el riesgo de permisos/exposición: se mantiene el alcance de la consulta existente y no se cierran sus riesgos abiertos.
+
+### HU-10 — interpretación de cantidades acordada por Sebas (2026-11-12)
+
+Sebas confirmó Sin preferencia como estado sin restricción, habitaciones/baños mínimos y parqueaderos 0/1/2 exactos más 3+. La Fase 0 avisó el impacto en URLs antiguas: parking_spaces=0/1/2 deja de representar un mínimo; los valores 3 y superiores siguen siendo mínimos por compatibilidad. No hay decisión inventada ni migración, se usa el campo existente. Los parámetros vacíos eliminan el filtro y el string 0 debe conservarse en URL e histograma.
+
+Pruebas aisladas distinguen cero/sin filtro y dos/tres/cuatro parqueaderos. No se crearon reservas ni datos de tres parqueaderos en la SQLite principal solo para aprobar visualmente; ese caso conserva evidencia automática y revisión humana Pendiente según corresponda. DT-19/N-03, DT-92, DT-68 y riesgos ajenos siguen abiertos. Sin IDs nuevos ni aprobación humana emitida por el agente.
+
+### HU-10 — aclaración posterior de parqueaderos y orden (2026-11-13)
+
+Según Sebas en esta conversación: no ofrecer cero; todos los botones de parqueaderos son mínimos y llevan +. La regla de exactos 0/1/2 del 2026-11-12 queda supersedida. El parámetro existente vuelve a mínimo para todo valor; cero heredado no restringe y se elimina de UI/URL, igual que cero de habitaciones/baños. No hay nuevo campo, migración o decisión de modelo. No se inventa búsqueda exacta de cero bajo una etiqueta +.
+
+El nuevo parámetro sort usa un conjunto cerrado de opciones y desempate por id; el histograma no depende del orden. Limpiar filtros conserva el orden elegido. Pasos de 1000 renta/50000 venta expresados por Sebas quedan pospuestos a la futura operación (DT-19); se conserva 100 USD actual y operación deshabilitada. Ascensor/mascotas/Suite, DT-19/N-03, DT-92 y DT-68 siguen pendientes. No se crean IDs ni aprobaciones humanas; el conteo de resultados permanece como información útil fuera de los paneles.
+
+
+### HU-10 — distribución de controles (2026-11-13)
+
+Fase 0 aprobada por Sebas para tres archivos frontend y siete documentos. `CatalogFilters.tsx` distribuye botones de igual ancho: habitaciones/baños en cuatro columnas, parqueaderos en tres y tipos en dos con Todos en fila completa. El único botón de acción del panel es **Filtrar**; se elimina Cancelar visible y se conservan X, Escape y cierre exterior que descartan el borrador, con retorno del foco. **Limpiar filtros** es global junto a las etiquetas activas, que permiten eliminación individual; no se repite dentro de los paneles y conserva el orden.
+
+El nuevo `CatalogResultsHeader.tsx` muestra conteo a la izquierda y **Ordenar por** a la derecha, fuera de la barra, con ajuste de filas en móvil. `app/properties/page.tsx` conecta conteo, filtros y errores; sin respuesta válida muestra Resultados sin inventar cero coincidencias. Opciones: Más recientes, Precio: menor a mayor y Precio: mayor a menor. No cambia la API. Sin modelos, migraciones, datos, dependencias, SiteNav o layout modificados en esta ampliación.
+
+UX: [Baymard, filtros aplicados](https://baymard.com/research-articles/how-to-design-applied-filters) respalda visibilidad y eliminación de filtros; ubicar el borrado global junto a etiquetas es una aplicación al catálogo, no un requisito literal. [W3C APG, diálogo modal](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) contempla cierre visible, Escape y retorno del foco; la X permite quitar Cancelar. Referencias consultadas el 2026-11-13.
+
+Edge automático: orden fuera de barra, sin Cancelar y con Filtrar; tipos con Todos de 366 px y otras opciones de 179 px. A 320 px, documento de 320 px, botones de habitaciones/baños de 57.5 px y parqueaderos de aproximadamente 79.33 px. Escape cierra y devuelve el foco a Filtros. Capturas locales `evidence/HU-10/distribucion-*-20261113.png`, ignoradas por Git. Los primeros envíos de Escape por CDP no cerraron; activar pestaña y enviar código virtual 27 permitió comprobar el cierre. No se atribuye ese fallo del arnés al producto.
+
+HU-10 sigue **Pruebas**, V-46 humana **Pendiente**. Pasos humanos adicionales: revisar alineación y grupos en escritorio/móvil; Filtrar aplica; X/Escape/exterior descartan; foco retorna al disparador; cada etiqueta quita su filtro; Limpiar filtros elimina todos conservando orden; ordenar conserva filtros y reinicia página. Cotejo literal Anexo 2, Reservado humano y auditoría en chat nuevo pendientes. No se cambian porcentajes ni aprobaciones.
+
+
+### HU-10 — DT-92 y preparación de integración (2026-11-13)
+
+Sebas autorizó corregir DT-92, crear commits por grupos e incorporar develop; no autorizó push ni PR. `backend/apps/documents/models.py` cambia private_storage de instancia con ruta absoluta a función que resuelve BASE_DIR/private_media en el equipo actual; FileField conserva su contrato y serializa la función. `backend/apps/documents/migrations/0002_alter_document_file.py` usa SeparateDatabaseAndState con database_operations vacío: actualiza el estado de migraciones sin reconstruir tablas, mover archivos o reescribir rutas guardadas. No se modifica documents.0001 ni se aplica migrate a la SQLite de trabajo o Supabase. `backend/apps/documents/tests.py` agrega tres casos de serialización sin ruta de equipo, traslado de carpeta y lectura/escritura privada fuera de MEDIA_ROOT. Sin dependencias nuevas.
+
+DT-92: corrección implementada; resultado técnico y criterio de cierre en Estándares §4. Historial previo de exit 1 se conserva. Seguridad: N/A, mantiene ubicación privada y permisos; no cambia exposición pública. V-46 mantiene las nueve aprobaciones humanas de Sebas, con el alcance y limitaciones escritos por él; Reservado humano permanece Pendiente y HU-10 en Pruebas. La decisión de Sebas de no usar Anexo 2 para esta entrega consta en V-46; no se reescriben reglas generales ni registros anteriores.
+
+Archivos compartidos de HU-10: users/views.py, frontend/types/property.ts y frontend/lib/api.ts se preparan en commits propios. Incorporar origin/develop traerá también los cambios ajenos ya fusionados (incluido HU-09), sin atribuirlos a HU-10. Los conflictos se resolverán conservando ambas aportaciones; si requieren nuevos cambios funcionales fuera de alcance, se consultará. Auditoría de solo lectura en chat nuevo sigue Pendiente.
+
+**Cierre aditivo DT-92 (2026-11-13): Resuelto.** `makemigrations --check --dry-run` → No changes detected, exit 0; `test apps.documents.tests --verbosity 1` → 22 OK, exit 0 (20.006s). `sqlmigrate documents 0002` → no-op, exit 0. Se satisface el criterio de cierre de DT-92 sin editar documents.0001 ni migrar la SQLite de trabajo. Evidencia completa en Estándares §4; suite integrada aún por ejecutar.

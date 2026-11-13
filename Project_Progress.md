@@ -2,6 +2,14 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · preparación de integración | 2026-11-13 · DT-92 corregido con storage callable y migración de estado; commits e integración autorizados por Sebas |
+| Última actualización HU-10 · distribución | 2026-11-13 · Filtrar, grupos uniformes y orden junto al conteo; V-46 humana Pendiente |
+| Última actualización HU-10 · orden y simplificación | 2026-11-13 · Orden global por precio/recientes, importes junto al slider y filtros numéricos sin opción vacía visible; V-46 Pendiente |
+| Última actualización HU-10 · preferencias | 2026-11-12 · Sin preferencia en habitaciones/baños/parqueaderos; parqueaderos 0/1/2 exactos y 3+; V-46 Pendiente |
+| Última actualización HU-10 · slider e histograma | 2026-11-12 · Una pista con dos controles, saltos de 100 USD, distribución real y parqueaderos; sin modelos/migraciones nuevos; V-46 Pendiente |
+| Última actualización HU-10 · barra superior | 2026-11-11 · Rediseño aprobado por Sebas: paneles superiores, tarjetas compactas y comprobación automática Edge; V-46 humana Pendiente |
+| Última actualización HU-10 · usabilidad | 2026-11-11 · Filtros laterales en escritorio y desplegables en móvil; datos de paginación; disponibilidad local reparada; V-46 Pendiente |
+| Última actualización HU-10 | 2026-11-11 · URB-16: filtros en servidor, paginación de 20 y pantalla P-02; V-46 Pendiente |
 | Última actualización HU-46 · precisión JWT | 2026-11-09 · Corrección posterior a auditoría PR #20; resultados técnicos en Estándares §4 |
 | Última actualización HU-46 · desbloqueo | 2026-11-09 · Decisión de Sebas implementada; 241 pruebas backend OK; visual nuevo Pendiente |
 | Última actualización de integración HU-46 | 2026-11-09 · Revisión aislada: 238 pruebas backend y 17 frontend; registro humano V-44 conservado; fusión pendiente de commit |
@@ -50,6 +58,67 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+
+### 2026-11-13 · Codex con Sebas · HU-10: DT-92 y preparación de integración · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Fase 0 y ok explícito para corregir DT-92, commits por grupos e integración de develop. Storage privado serializado por función y migración nueva solo de estado, sin editar la inicial ni migrar la base de trabajo. Tres pruebas nuevas de Documents. Se conservan aprobaciones humanas de Sebas en V-46.
+- **Línea base:** SQLite 270 OK (362.968s); frontend 36/36, TypeScript/ESLint/build exit 0, un aviso previo. Antes de la corrección, migraciones exit 1 DT-92; resultados posteriores e integración se registran en Estándares §4. PostgreSQL No ejecutado (DT-68).
+- **Falta:** completar commits e integración y comprobar suite integrada. Reservado humano y auditoría en chat nuevo Pendiente. Sin push ni PR; HU-10 en Pruebas.
+
+### 2026-11-13 · Codex con Sebas · HU-10: distribución de controles · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** grupos uniformes, Filtrar sin Cancelar, borrado global junto a etiquetas y nuevo CatalogResultsHeader con orden junto al conteo. Tres archivos frontend y siete documentos autorizados. Sin cambios de API/modelos/datos en esta ampliación.
+- **Comprobación:** backend final 270 OK (422.326s), exit 0; check de migraciones exit 1 por DT-92, PostgreSQL No ejecutado (DT-68). Frontend 36/36, TypeScript/ESLint/build exit 0; ESLint conserva un aviso preexistente. Edge automático y capturas locales a 1600 y 320 px, Escape y retorno de foco; resultados técnicos en Estándares §4. No son aprobación humana.
+- **Falta y siguiente paso:** Sebas realiza V-46, cotejo literal Anexo 2 y Reservado; luego revisión/auditoría de solo lectura. HU en Pruebas, validaciones humanas Pendiente. Sin commit, push ni PR.
+
+### 2026-11-13 · Codex con Sebas · HU-10: orden por precio e interfaz limpia · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Fase 0 presentada para siete archivos de código y siete documentos. Sebas aclaró parqueaderos: no cero, todos mínimos con +; supersede exactos y Sin preferencia del 2026-11-12. API valida sort recent/price_asc/price_desc y ordena todo el inventario filtrado antes de paginar, con id como desempate; histograma sin cambio por orden. UI conserva filtros al ordenar y sort al cambiar/limpiar filtros, reiniciando página. Grupos numéricos inician sin selección; repetir el activo desmarca. Parqueaderos solo 1+/2+/3+; ceros heredados equivalen a sin restricción. Tooltip del importe al mover/enfocar/hover, ejemplos numéricos en inputs, explicaciones no visibles y accesibilidad/errores preservados. Sin modelos, migraciones, datos o dependencias nuevos.
+- **Pruebas:** línea base SQLite 267 OK; focalizadas 21 OK; suite final **270 OK** (212.055s), exit 0. Frontend **36/36**, TypeScript/build exit 0, ESLint exit 0 con aviso preexistente; repetición frontend tras guardia del tooltip vacío también correcta. DT-92 conserva check exit 1; PostgreSQL No ejecutado (DT-68). Resultados reales en Estándares §4.
+- **Navegador:** Edge aislado comprobó orden asc/desc, conservación de filtros, reinicio de página, desmarcado, parqueaderos 1+ con 14 resultados, ausencia de cero/preferencia, tooltip por foco y vista a 320 px sin desbordamiento. Caso sin precios sin tooltip inventado y recuperación de sort inválido comprobados. Tres capturas locales con sufijo 20261113 en evidence/HU-10; navegadores de prueba cerrados. No constituyen aprobación humana.
+- **Falta:** V-46 humana vigente, cotejo literal Anexo 2 y Reservado humano; revisión del compañero/auditoría en chat nuevo. Pasos de 1000 renta/50000 venta quedan pendientes de operación (se conserva paso actual 100), además de modelos pospuestos. Sin cambios de porcentajes ni validaciones humanas.
+- **Siguiente paso:** Sebas prueba orden, filtros numéricos sin selección, desmarcado y precio limpio en escritorio/móvil y registra observación/fecha/hora/evidencia reales en V-46. Después auditoría y autorización explícita para commit/push. No se hizo commit, push ni PR; worktrees conservados.
+
+### 2026-11-12 · Codex con Sebas · HU-10: Sin preferencia y parqueaderos exactos · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Fase 0 de cinco archivos de código y siete documentos aprobada por Sebas, con compartido views.py avisado. Habitaciones/baños usan Sin preferencia y 1+/2+/3+/4+ conservando mínimos. Parqueaderos pasa a botones Sin preferencia/0/1/2/3+; 0/1/2 exactos y 3 mínimo, con valores heredados mayores aún como mínimos. Sin preferencia elimina la restricción, cero permanece en URL y chip Sin parqueadero. Opción inicial en fila propia y estilo activo reforzado. Cambio de significado de URLs antiguas 0/1/2 comunicado antes de editar. Sin modelos/migraciones/datos/dependencias nuevos.
+- **Pruebas:** línea base SQLite 266 OK; focalizadas 18 OK; suite final **267 OK** (119.922s), exit 0. Frontend **33/33**, TypeScript/build exit 0 y ESLint exit 0 con aviso preexistente; repetición frontend tras refuerzo de estilos también correcta. DT-92 mantiene check de migraciones exit 1; PostgreSQL No ejecutado (DT-68). Comandos/salidas en Estándares §4.
+- **Navegador:** Edge aislado comprobó selecciones iniciales, habitaciones como mínimos, parqueaderos cero con 12 resultados, chip y persistencia al reabrir; Sin preferencia restaura 26; 3+ sin resultados en la base actual y cubierto con tres/cuatro por pruebas aisladas. A 320 px los tres grupos usan Sin preferencia sin desbordamiento; fondo seleccionado distinto comprobado. Cuatro capturas preferencias-*-20261112.png locales en evidence/HU-10; navegadores de prueba cerrados. No son aprobación humana.
+- **Falta:** V-46 humana de la versión vigente, cotejo literal Anexo 2 y Reservado humano; revisión del compañero y auditoría en chat nuevo. Sin cambios de porcentajes ni validaciones humanas.
+- **Siguiente paso:** Sebas prueba Sin preferencia y cantidades, especialmente diferencia entre cero y ausencia de filtro, y registra quién/fecha/hora/observación/evidencia reales en V-46. Después auditoría y autorización explícita para commit/push. No se hizo commit, push ni PR; worktrees conservados.
+
+### 2026-11-12 · Codex con Sebas · HU-10: slider doble, histograma y parqueaderos · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Fase 0 presentada y aprobada por Sebas para siete archivos de código y siete documentos; compartidos views.py y types/property.ts avisados. Una sola pista con dos controles accesibles, saltos de 100 USD y límites del inventario; inputs exactos y sin límite implícito. Histograma real agregado de todas las coincidencias, antes del propio precio y de paginar; respeta otros filtros/visibilidad. Parqueaderos mínimos usa el campo existente en Más filtros y se conserva en URL/chips/paginación. Chevrones SVG de 16 px con más separación. Sin cambios de modelos, migraciones, usuarios, propiedades o dependencias; ascensor/mascotas y decisiones de modelo quedan para después, según Sebas.
+- **Pruebas:** línea base SQLite 259 OK (334.903s) y frontend 28/28. Focalizadas 17 OK; suite final **266 OK** (304.324s), exit 0; frontend **31/31**, TypeScript/build exit 0, ESLint exit 0 con el aviso previo. Migraciones exit 1 por DT-92; PostgreSQL No ejecutado (DT-68). Comandos y salidas en Estándares §4.
+- **Navegador automático:** Edge aislado comprobó límites 85000–285000 e histograma de las 26 públicas, pasos de 100 por teclado/ratón/táctil, no cruce, Home/End y no desbordamiento a 375/320 px. Filtro 2+ parqueaderos → siete resultados y distribución de siete. Tres capturas locales en evidence/HU-10 con sufijo 20261112; navegador de prueba cerrado. Estas comprobaciones no llenan la tabla humana.
+- **Falta:** V-46 humana de la versión actual, cotejo literal Anexo 2 y Reservado humano; auditoría en chat nuevo y revisión del compañero antes del PR. Sin cambio de porcentajes ni estados humanos.
+- **Siguiente paso:** Sebas abre Precio y prueba ambos controles y gráfico, aplica parqueaderos en Más filtros y revisa teclado/celular. Registrar observación/fecha/hora/evidencia reales en V-46. No se hizo commit, push ni PR; worktrees conservados.
+
+### 2026-11-11 · Codex con Sebas · HU-10: barra superior y tarjetas compactas · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** tercera Fase 0 presentada y aprobada por Sebas. Se sustituye el lateral por barra superior adherente debajo de SiteNav sin editar navegación compartida. Paneles de precio (slider visual ampliable e inputs), habitaciones/baños mínimos, tipos reales y superficie en Más filtros; móvil agrupa controles en diálogo nativo. Aplicar confirma solo el panel y actualiza URL/resultados, vuelve a página 1 y conserva otros filtros; Cancelar/Escape descartan borradores, con foco restaurado. Etiquetas permiten quitar o limpiar filtros. Grid de ancho completo hasta 1600 px con tarjetas flexibles de objetivo 280 px, imagen 4:3, precio/atributos compactos, título enlazado y ubicación.
+- **Límites:** se conserva DS-16: operación deshabilitada, sin Suite/ascensor/mascotas ni parqueaderos como filtro. No se cambian backend, esquema, SQLite, usuarios, datos o dependencias en este rediseño. Las notas previas del panel lateral se conservan como historial y quedan supersedidas por esta presentación.
+- **Pruebas:** línea base 259 backend OK y 21 frontend OK. Final: **259 backend OK**, **28 frontend OK**, TypeScript/build exit 0, ESLint exit 0 con un aviso preexistente. DT-92 mantiene migraciones exit 1; PostgreSQL No ejecutado (DT-68). Edge headless aislado comprobó cinco columnas a 1600 px, no desbordamiento a 375/320 px, diálogo móvil, Escape/foco, Cancelar, rango inválido, Aplicar con conservación/reinicio de página, limpieza y barra adherente. Cuatro capturas locales `evidence/HU-10/barra-superior-*.png`; no son aprobación humana. Se cerró el navegador de prueba. Reintentos/fallos del script y comandos reales registrados en Estándares §4.
+- **Falta:** revisión humana V-46 del rediseño, cotejo literal Anexo 2 y caso humano Reservado. No se aprueban validaciones ni se recalculan porcentajes.
+- **Siguiente paso:** Sebas revisa /properties en escritorio y celular, prueba paneles/aplicar/cancelar/Escape, rango de precio y paginación con ubicación DEMO HU10; registra quién/fecha/hora/observación y evidencia en V-46. Después auditoría en chat nuevo y autorización explícita para commit/push. No se hizo commit, push ni PR; worktrees conservados.
+
+### 2026-11-11 · Codex con Sebas · HU-10: usabilidad, datos y disponibilidad SQLite · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Sebas reportó dos publicaciones y 500 de disponibilidad. Segunda Fase 0 presentada y aprobada con archivos nuevos. Se respaldó SQLite en `evidence/HU-10/sqlite-antes-visits-20261111.sqlite3` (integridad OK) y se aplicaron `visits.0001_initial` y `visits.0002_visit`: faltaban sus tablas, confirmado reproduciendo el error. Disponibilidad y excepciones responden 200 para admin/asesor mediante vistas autenticadas; no se modificó código de visits. Se conservan exactamente las filas de los dos usuarios y cuatro propiedades previas según comparación SQLite contra respaldo.
+- **Catálogo:** `CatalogFilters.tsx` integra panel lateral en escritorio y desplegable en móvil; precios/superficie con teclado decimal, ejemplos y vista previa, rechazo de letras y selectores para dormitorios/baños. `catalogFilters.ts` y sus cuatro pruebas implementan y verifican la entrada. Sin nuevas dependencias. `setup_catalog_demo` creó 24 ejemplos en captación con requisitos demo y los publicó por la acción HU-53; sin crear usuarios, cambiar contraseñas ni tocar propiedades anteriores. Solo SQLite/DEBUG; al repetir no actualiza ejemplos existentes.
+- **Pruebas:** línea base 253 OK; focalizadas finales 16 OK tras corregir correos ficticios duplicados en el setUp (primer intento: 6 errores); suite final **259 OK**, exit 0, SQLite. Frontend **21/21**, TypeScript/build exit 0, ESLint exit 0 con un aviso preexistente. Cuatro escenarios de renderizado simulado OK. Búsqueda local DEMO HU10: 24 resultados, 20+4 sin repetidos. Primer seed se rechazó por DEBUG=False y se repitió con DEBUG=True explícito. Resultados y fallos completos en Estándares §4. DT-92 sigue con migraciones exit 1; PostgreSQL No ejecutado (DT-68).
+- **Falta:** validación humana V-46 del panel móvil, teclado, filtros/paginación y disponibilidad reparada; cotejo literal Anexo 2. Reservado sigue Pendiente de fixture aislada acordada o flujo de reserva; no se inventó una transición. No se cambian porcentajes ni se emiten aprobaciones humanas.
+- **Siguiente paso:** Sebas recarga disponibilidad y catálogo, busca `DEMO HU10`, recorre las páginas y prueba ancho de celular (375 px) con el botón Filtros. Registrar evidencia local y observación con fecha/hora reales en V-46. Después auditoría en chat nuevo y autorización de commit/push. No se hizo commit, push ni PR; worktrees conservados.
+
+### 2026-11-11 · Codex con Sebas · HU-10: filtros y paginación · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Fase 0 presentada y aprobada por Sebas. Carpeta principal actualizada por avance directo de develop hasta `97f0e0c` (merge del PR #23 de cierre HU-46); rama HU-10 creada desde ese commit sin worktree nuevo. Se conservan worktrees y ramas de HU-09/HU-46. DS-16 implementada: filtros combinados en servidor, validación de parámetros, páginas de 20 y orden estable; búsqueda en URL, limpiar filtros, mensajes vacíos/errores, metadatos y etiqueta Reservado en P-02. Contrato GET cambia a `count/next/previous/results`; cliente y tipos actualizados. No hay cambios de modelo, migraciones o dependencias.
+- **Alcance:** archivos compartidos avisados en Fase 0 (`users/views.py`, `lib/api.ts`, `types/property.ts`). Sebas autorizó expresamente ampliar a `apps/appraisals/tests.py` para una sola línea de adaptación a `results` después de que la primera suite completa detectara esa incompatibilidad. Se agregan diez pruebas de catálogo en users; sin cambiar el motor ni flujos de otras HU.
+- **Pruebas:** línea base SQLite 243 OK; focalizadas 33 OK; primera suite con HU-10: 253 ejecutadas, 1 error en la prueba antigua de avalúos; suite final tras adaptarla: **253 OK**, exit 0. Frontend 17/17, TypeScript exit 0, ESLint exit 0 con un aviso preexistente; build exit 0 después de un intento fallido por red al descargar Google Fonts; siete escenarios de renderizado de servidor con API simulada OK. Detalles y fallos en Estándares §4. Migraciones exit 1 por DT-92; PostgreSQL **No ejecutado** (DT-68). No se generaron ni aplicaron migraciones.
+- **Falta:** V-46 humana **Pendiente**, cotejo literal del Anexo 2 no disponible en esta copia, revisión del compañero y auditoría de solo lectura antes del PR. DT-118 resuelto en código, validación Pendiente; DT-19/N-03, DT-92 y DT-68 siguen abiertos. No se recalculan porcentajes ni se emiten aprobaciones humanas.
+- **Siguiente paso:** Sebas prueba `/properties` con los pasos V-46 y registra su evidencia local; cotejar criterios literales. Después, auditoría en chat nuevo y autorización explícita para commit/push. No se hizo commit, push ni PR; documentación y código permanecen locales en esta rama.
 
 ### 2026-11-09 · Codex con Sebas · publicación de corrección PR #20 · rama `feat/URB-04-HU-46-recuperar-contrasena`
 - **Hecho:** Sebas autorizó revisión, commit y push a la rama del PR existente. Commits: `ff92374` (autenticación y pruebas), `c4e07b1` (solo el compartido `users/views.py`) y `e84c1f9` (handoff y resultados). `git fetch origin` completado: develop sigue en `966cc50` y la cabeza remota del PR antes del push en `00dd676`. Comentarios del PR: lista vacía mediante GitHub.
@@ -1348,3 +1417,108 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 - **Pruebas de entonces:** pruebas manuales de UI en el Dashboard; corrección del error de hidratación al anidar el mapa; `ssr: false` para el mapa; manejo visual del 401; `apps.documents.tests` 19/19 OK; `apps.users.tests` con 4 errores preexistentes (corregidos después: FX-02).
 - **Migraciones de entonces:** `users/0006` (latitude, longitude, terreno) y `documents/0001_initial`.
 - **Decisiones aprobadas:** Leaflet en lugar de Google Maps (costos); nombres de campos en inglés (`latitude`, `longitude`) para alinear JSON y modelo.
+
+### V-46 · HU-10 — Catálogo con filtros y paginación
+
+**Pendiente.** ID comprobado antes de usarlo en `origin/develop` y las demás referencias remotas mediante `git show <ref>:Project_Progress.md` tras el fetch del 2026-11-11; sin coincidencias anteriores de V-46. No modifica V-45 de HU-09. Los puntos siguientes corresponden al alcance DS-16 aprobado; el cotejo con los criterios literales del Anexo 2 está Pendiente.
+
+1. Abrir `/properties` como visitante. Confirmar filtros legibles en móvil y escritorio, operación deshabilitada, solo Disponible/Reservado y etiqueta «Reservado».
+2. Combinar tipo, ubicación, precio mínimo/máximo, dormitorios/baños mínimos y superficie; confirmar resultados acordes. Probar los límites exactos y limpiar filtros. La URL debe conservar la búsqueda al recargar o compartirla.
+3. Con más de 20 coincidencias, avanzar y retroceder; confirmar 20 en la primera página, filtros conservados, conteo correcto y sin repetidos. Al cambiar filtros, volver a la primera página.
+4. Probar búsqueda sin coincidencias; con un catálogo realmente vacío, comprobar «No hay propiedades disponibles por ahora.» (DT-118). No retirar ni alterar datos compartidos para esta prueba; usar datos locales preparados por Sebas.
+5. Probar URL con rango de precio invertido, tipo inválido o número no válido; confirmar mensaje junto al campo y posibilidad de corregir. Abrir `?page=999` y volver a la primera página. Comprobar navegación por teclado y foco visible.
+6. Verificar la tarjeta, acceso a ficha y título/descripción del catálogo. Con el servicio inaccesible, comprobar el mensaje de reintento. La comprobación del agente por renderizado simulado no cubre navegador ni integración en vivo.
+
+**Evidencia humana:** una por criterio del Anexo 2 cuando se coteje, guardada localmente en `evidence/HU-10/`; para Nivel 2 agregar video/GIF de flujo completo (DS-35). Solo Sebas u otra persona completa la tabla con quién, fecha, hora, observación y ruta. No se adjuntan capturas al repositorio.
+
+| Quién | Fecha | Hora (Bogotá) | Qué vio exactamente | Evidencia local | Resultado |
+|---|---|---|---|---|---|
+| Sebas | 2026-11-13 | 15:15–15:23 | Catálogo con 26 propiedades y tarjetas visibles; apertura de la ficha del Ejemplo 22 con sus características y precio. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/01-catalogo.png | Aprobado |
+| Sebas | 2026-11-13 | 15:15–15:23 | Filtros combinados Casa, 3+ habitaciones y precio máximo de 151.600 USD: aparecen dos propiedades compatibles, de 145.000 y 125.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/02-filtros.png | Aprobado |
+| Sebas | 2026-11-13 | 15:15–15:23 | Orden Precio: menor a mayor aplicado; las primeras tarjetas muestran 85.000, 90.000 y 95.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/03-orden.png | Aprobado |
+| Sebas | 2026-11-13 | 15:15–15:23 | Navegación a página 2 de 2 con 22 coincidencias; conserva filtros de habitaciones y baños y orden ascendente. Muestra las dos propiedades restantes, de 200.000 y 285.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/04-pagina.png | Aprobado |
+| Sebas | 2026-11-13 | 15:15–15:23 | Búsqueda zzzzz sin coincidencias: muestra cero propiedades y el mensaje para cambiar valores o limpiar filtros. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/05-vacio.png | Aprobado |
+| Sebas | 2026-11-13 | 15:15–15:23 | Precio mínimo 200 y máximo 100: muestra el error «El precio máximo debe ser mayor o igual al mínimo» y permite corregir los valores. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/06-error.png | Aprobado |
+| Sebas | 2026-11-13 | 15:15–15:23 | Vista estrecha del catálogo con búsqueda, botón Filtros, conteo, selector de orden y tarjetas legibles. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/07-movil.png | Aprobado |
+| Sebas | 2026-11-11 | No registrada | El catálogo sin propiedades mostró «No hay propiedades disponibles por ahora.». La captura corresponde al diseño anterior y documenta ese comportamiento. | evidence/HU-10/01-catalogo-vacio.png | Aprobado |
+| Sebas | 2026-11-11 | No registrada | Con el servicio inaccesible, el catálogo mostró «No pudimos cargar el catálogo. Intenta nuevamente en unos momentos.» y un enlace de recuperación. La captura corresponde al diseño anterior. | evidence/HU-10/06-django-caido.png | Aprobado |
+
+**Confirmación humana (2026-11-13):** Sebas aprobó expresamente en la conversación las siete comprobaciones del catálogo actual y las dos pruebas anteriores de catálogo vacío y servicio inaccesible. Estas últimas corresponden al diseño anterior.
+
+El intervalo 15:15–15:23 es una referencia obtenida de las marcas de modificación de las siete capturas actuales; no representa una hora de ejecución confirmada independientemente.
+
+**Aclaración de alcance:** según indicación expresa de Sebas en esta conversación, la referencia al Anexo 2 no se utiliza como fuente de aceptación para esta entrega de HU-10, porque no hay un documento vigente disponible. Se toma como referencia el contexto maestro, HU-10/URB-16, la decisión DS-16 y las ampliaciones aprobadas durante esta tarea. Esta aclaración sustituye el pendiente de cotejo con Anexo 2 para esta validación; no modifica por sí sola las reglas generales del repositorio.
+
+**Ampliación de pasos V-46 tras usabilidad (2026-11-11, Pendiente):**
+
+- Recargar `/dashboard/availability` como admin, seleccionar asesor.demo y repetir como asesor en Mi disponibilidad. Debe cargar sin 500; puede mostrar cero franjas porque no se agregaron horarios. El endpoint respondió 200 en pruebas del agente, pero la pantalla necesita comprobación humana.
+- Para paginación abrir `/properties?location=DEMO+HU10`. Hay 24 ejemplos: 20 tarjetas en página 1 y 4 en página 2; probar Siguiente/Anterior y cambiar un filtro desde página 2 para volver a la 1. Las dos publicaciones originales siguen disponibles; no forman parte de esa búsqueda.
+- En escritorio comprobar filtros a la izquierda y resultados a la derecha. A 375 px comprobar botón Filtros: abrir/cerrar, teclado, selección de mínimos y búsqueda; tarjetas sin desplazamiento horizontal. Los errores de URL deben abrir el panel para corregirlos. Esta comprobación no requiere más datos.
+- Probar precios `285000`, superficie `95,5` (normaliza a punto), campos vacíos y cero. Letras, negativos y notación como `1e3` no deben entrar en los campos del formulario. Los valores de ejemplo no son filtros activos. Los enlaces manipulados manualmente siguen validados por el servidor.
+- La base sigue sin Reservado. Ese caso conserva Pendiente; los ejemplos se publicaron por HU-53 y no se crearon reservas ficticias. No se puede marcar V-46 completa por las pruebas automáticas.
+
+Mantener la tabla humana de V-46 vacía hasta que Sebas registre sus observaciones, fecha, hora y evidencia reales. No se transcribe el reporte de publicaciones como aprobación global.
+
+**V-46 — pasos vigentes tras barra superior (2026-11-11, validación humana Pendiente):** esta ampliación supersede las instrucciones anteriores de panel lateral. Las cuatro capturas barra-superior-*.png son del agente y no llenan la tabla humana.
+
+1. En escritorio, confirmar barra superior y grid de ancho completo. Desplazarse y comprobar que la barra permanezca debajo de la navegación. A 1600 px se esperan cinco columnas; el número disminuye con el ancho. La imagen debe conservar 4:3 y título/ubicación deben ser legibles o consultables al abrir la ficha.
+2. Buscar DEMO HU10 desde la lupa o Enter. Abrir Precio: mover ambos controles y escribir límites exactos, incluido un valor mayor a 5 millones. La escala debe ampliarse sin recortar el importe. Vacío significa sin límite. Probar mínimo mayor a máximo: debe mostrar error sin aplicar ni cerrar.
+3. Desde página 2, aplicar un precio válido: conservar ubicación, volver a página 1 y actualizar resultados. Probar Cancelar y Escape después de editar: URL y resultados deben conservarse; el foco debe volver al botón que abrió el panel.
+4. Probar pills de habitaciones/baños (mínimos), grid de tipos reales y superficie en Más filtros. Aplicar un grupo no debe cambiar otros filtros aplicados. Quitar una etiqueta y Limpiar todo deben actualizar URL/resultados sin dejar filtros ocultos.
+5. A 375 y 320 px, comprobar búsqueda y botón Filtros, abrir el diálogo, recorrer todo con teclado/desplazamiento, aplicar/cancelar y cerrar con Escape. Verificar que ningún control ni tarjeta provoque desplazamiento horizontal. Operación sigue deshabilitada; no hay controles ficticios para campos ausentes.
+6. Completar los casos vigentes de estados públicos, errores/servicio caído, metadatos y paginación de 20. Reservado humano y cotejo literal del Anexo 2 conservan Pendiente; no se crearon reservas sobre la base local.
+
+Registrar solo observaciones humanas reales en la tabla V-46 con quién, fecha, hora Bogotá y evidencia local. No se marca el rediseño aprobado por inferencia de las pruebas del agente.
+
+**V-46 — pasos vigentes del slider doble/histograma/parqueaderos (2026-11-12, Pendiente):** esta nota supersede las referencias anteriores a dos controles de rango independientes y a un máximo visual inicial de 5 millones. No modifica observaciones humanas previas ni declara una aprobación nueva.
+
+1. Abrir /properties sin filtros y Precio. Verificar una sola pista y dos controles, mínimo y máximo; en esta SQLite, sin otros filtros, deben partir de 85000 y 285000 USD. El histograma debe indicar 26 propiedades aunque la página muestre 20. Las barras reflejan datos reales, no una campana dibujada.
+2. Mover mínimo hacia la derecha y máximo hacia la izquierda con ratón y en celular. Deben avanzar de 100 en 100 USD sin cruzarse. Tab debe permitir enfocar cada control; flechas ±100, PageUp/PageDown ±1000, Home/End hasta los extremos permitidos sin cruzar el otro. Si ambos coinciden, el teclado y los inputs deben permitir ampliar otra vez.
+3. Escribir importes exactos con centavos y uno fuera del rango original. Los inputs deben conservarlos; la pista se ajusta y no recorta el importe. Cancelar/Escape conserva la búsqueda aplicada; Aplicar actualiza resultados/URL y reinicia la página. Un campo vacío sigue sin limitar.
+4. Abrir Más filtros y seleccionar 2 o más parqueaderos. Aplicar: en los datos locales actuales deben quedar siete resultados; abrir Precio y comprobar distribución de siete. Cambiar el rango de precio no debe eliminar la distribución de los demás filtros. Quitar el chip de parqueaderos o Limpiar todo restablece búsqueda y gráfico.
+5. Revisar chevron SVG y separación del texto en Precio, Habitaciones y baños, Tipo de propiedad y Más filtros. A 375 y 320 px confirmar que no haya desplazamiento horizontal y que el diálogo permita usar ambos controles, superficie y parqueaderos.
+6. Buscar una ubicación inexistente y abrir Precio: mostrar ausencia de precios sin inventar barras. El caso de precio único está cubierto por prueba automática; si se comprueba visualmente, usar una búsqueda que tenga un solo precio sin modificar datos compartidos. No aprobar casos no observados.
+
+Evidencia automática local del agente: slider-doble-desktop-20261112.png, slider-doble-mobile-20261112.png y parqueaderos-20261112.png en evidence/HU-10. Sirve como antecedente; Sebas completa la tabla humana solo con fecha/hora, observaciones y evidencia propias. Ascensor/mascotas/modelos se tratarán después; Reservado humano y Anexo 2 siguen Pendiente.
+
+**V-46 — pasos vigentes de Sin preferencia y cantidades (2026-11-12, Pendiente):** supersede las instrucciones anteriores que llamaban mínimos a todas las cantidades de parqueaderos.
+
+1. Abrir Habitaciones y baños sin filtros: ambos grupos deben tener Sin preferencia activo en fila propia y 1+/2+/3+/4+ debajo. Elegir 2+ en habitaciones exige al menos dos, sin restringir baños si sigue Sin preferencia. Cancelar no aplica cambios.
+2. En Más filtros, Parqueaderos debe mostrar Sin preferencia/0/1/2/3+ como botones; Sin preferencia inicialmente activo. Elegir 0 y aplicar exige exactamente cero, no todos. En los datos locales actuales hay 12 coincidencias; chip Sin parqueadero y parking_spaces=0 en URL. Reabrir: cero sigue seleccionado.
+3. Volver a Sin preferencia y aplicar: desaparece el parámetro de parqueaderos y se recuperan las 26 públicas actuales. Elegir 1 o 2 exige cantidades exactas; 3+ incluye tres o más. La base actual no tiene públicas con 3+; ese caso tiene prueba automática con datos aislados, sin simular validación visual humana.
+4. Combinar con ubicación/precio y comprobar que el histograma siga la misma selección; al cambiar/aplicar desde página 2, volver a la 1. Limpiar todo elimina todos los filtros; habitaciones/baños/parqueaderos vuelven a Sin preferencia.
+5. A 320/375 px verificar que la primera opción completa sea legible, números juntos y selección activa visible; probar teclado, Aplicar/Cancelar y Escape. Capturas del agente preferencias-*-20261112.png solo son antecedente local; la tabla humana requiere observación/fecha/hora/evidencia propias.
+
+Cotejo literal Anexo 2, Reservado humano y validación humana global de V-46 siguen Pendiente. No se marcan aprobaciones ni se cambian porcentajes con esta nota.
+
+**V-46 — pasos vigentes de orden e interfaz limpia (2026-11-13, Pendiente):** supersede la selección exacta de parqueaderos y los botones Sin preferencia anteriores. Sebas indicó no ofrecer cero y usar mínimos con +.
+
+1. Elegir Ordenar: Precio menor a mayor y mayor a menor. Revisar también página 2: orden global, sin duplicados; cambiar orden desde página 2 debe volver a la 1 y conservar los filtros. Volver a Más recientes restaura el orden original. Cambiar/limpiar filtros conserva el orden elegido.
+2. Abrir Habitaciones y baños sin filtros: ningún número seleccionado y sin botón Sin preferencia. Seleccionar 2+, repetir click para desmarcar y aplicar: no debe quedar parámetro ni restricción. Probar conservación de otros filtros y Cancelar.
+3. Parqueaderos debe mostrar solo 1+/2+/3+, todos mínimos. En los datos actuales 1+ devuelve 14 propiedades. Repetir el activo lo desmarca; aplicar elimina parking_spaces. No se ofrece cero; enlaces antiguos con cero ya no buscan cantidades exactas, equivalen a sin restricción.
+4. Abrir Precio: histograma y controles sin instrucciones de arrastre, campo vacío o conteo del panel; inputs con ejemplos numéricos. Al arrastrar/enfocar debe aparecer el importe junto al control. Errores reales siguen visibles; lectores de pantalla conservan etiquetas/instrucciones ocultas. La ausencia de precios no debe mostrar un tooltip con importe inventado.
+5. Revisar ordenado, barra y diálogo a 320/375 px, sin desbordamiento. Pasos por operación (1000 renta/50000 venta) no se prueban todavía: operación sigue pendiente, paso actual 100 USD. Mantener pruebas de teclado, aplicar/cancelar/Escape, historial URL y estados públicos.
+
+Capturas del agente orden-precio-tooltip-desktop-20261113.png, orden-catalogo-mobile-20261113.png y filtros-numeros-mobile-20261113.png en evidence/HU-10 solo son antecedente automático. La tabla humana sigue Pendiente hasta registro de Sebas con fecha/hora/observación/evidencia propias. Anexo 2 y Reservado humano conservan Pendiente; sin aprobación del agente ni recálculo de porcentajes.
+
+
+### HU-10 — distribución de controles (2026-11-13)
+
+Fase 0 aprobada por Sebas para tres archivos frontend y siete documentos. `CatalogFilters.tsx` distribuye botones de igual ancho: habitaciones/baños en cuatro columnas, parqueaderos en tres y tipos en dos con Todos en fila completa. El único botón de acción del panel es **Filtrar**; se elimina Cancelar visible y se conservan X, Escape y cierre exterior que descartan el borrador, con retorno del foco. **Limpiar filtros** es global junto a las etiquetas activas, que permiten eliminación individual; no se repite dentro de los paneles y conserva el orden.
+
+El nuevo `CatalogResultsHeader.tsx` muestra conteo a la izquierda y **Ordenar por** a la derecha, fuera de la barra, con ajuste de filas en móvil. `app/properties/page.tsx` conecta conteo, filtros y errores; sin respuesta válida muestra Resultados sin inventar cero coincidencias. Opciones: Más recientes, Precio: menor a mayor y Precio: mayor a menor. No cambia la API. Sin modelos, migraciones, datos, dependencias, SiteNav o layout modificados en esta ampliación.
+
+UX: [Baymard, filtros aplicados](https://baymard.com/research-articles/how-to-design-applied-filters) respalda visibilidad y eliminación de filtros; ubicar el borrado global junto a etiquetas es una aplicación al catálogo, no un requisito literal. [W3C APG, diálogo modal](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) contempla cierre visible, Escape y retorno del foco; la X permite quitar Cancelar. Referencias consultadas el 2026-11-13.
+
+Edge automático: orden fuera de barra, sin Cancelar y con Filtrar; tipos con Todos de 366 px y otras opciones de 179 px. A 320 px, documento de 320 px, botones de habitaciones/baños de 57.5 px y parqueaderos de aproximadamente 79.33 px. Escape cierra y devuelve el foco a Filtros. Capturas locales `evidence/HU-10/distribucion-*-20261113.png`, ignoradas por Git. Los primeros envíos de Escape por CDP no cerraron; activar pestaña y enviar código virtual 27 permitió comprobar el cierre. No se atribuye ese fallo del arnés al producto.
+
+HU-10 sigue **Pruebas**, V-46 humana **Pendiente**. Pasos humanos adicionales: revisar alineación y grupos en escritorio/móvil; Filtrar aplica; X/Escape/exterior descartan; foco retorna al disparador; cada etiqueta quita su filtro; Limpiar filtros elimina todos conservando orden; ordenar conserva filtros y reinicia página. Cotejo literal Anexo 2, Reservado humano y auditoría en chat nuevo pendientes. No se cambian porcentajes ni aprobaciones.
+
+
+### HU-10 — DT-92 y preparación de integración (2026-11-13)
+
+Sebas autorizó corregir DT-92, crear commits por grupos e incorporar develop; no autorizó push ni PR. `backend/apps/documents/models.py` cambia private_storage de instancia con ruta absoluta a función que resuelve BASE_DIR/private_media en el equipo actual; FileField conserva su contrato y serializa la función. `backend/apps/documents/migrations/0002_alter_document_file.py` usa SeparateDatabaseAndState con database_operations vacío: actualiza el estado de migraciones sin reconstruir tablas, mover archivos o reescribir rutas guardadas. No se modifica documents.0001 ni se aplica migrate a la SQLite de trabajo o Supabase. `backend/apps/documents/tests.py` agrega tres casos de serialización sin ruta de equipo, traslado de carpeta y lectura/escritura privada fuera de MEDIA_ROOT. Sin dependencias nuevas.
+
+DT-92: corrección implementada; resultado técnico y criterio de cierre en Estándares §4. Historial previo de exit 1 se conserva. Seguridad: N/A, mantiene ubicación privada y permisos; no cambia exposición pública. V-46 mantiene las nueve aprobaciones humanas de Sebas, con el alcance y limitaciones escritos por él; Reservado humano permanece Pendiente y HU-10 en Pruebas. La decisión de Sebas de no usar Anexo 2 para esta entrega consta en V-46; no se reescriben reglas generales ni registros anteriores.
+
+Archivos compartidos de HU-10: users/views.py, frontend/types/property.ts y frontend/lib/api.ts se preparan en commits propios. Incorporar origin/develop traerá también los cambios ajenos ya fusionados (incluido HU-09), sin atribuirlos a HU-10. Los conflictos se resolverán conservando ambas aportaciones; si requieren nuevos cambios funcionales fuera de alcance, se consultará. Auditoría de solo lectura en chat nuevo sigue Pendiente.
