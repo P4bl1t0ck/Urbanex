@@ -41,7 +41,9 @@ MUTABLE_FIELDS = {
 
 # Almacenamiento privado: fuera de MEDIA_ROOT para que Django no lo sirva por /media/.
 # Se reemplazara por Supabase Storage + URLs firmadas (HU-38, Sprint 6).
-private_storage = FileSystemStorage(location=settings.BASE_DIR / 'private_media')
+def private_storage():
+    # FileField serializa esta funcion, no la ruta absoluta del equipo actual.
+    return FileSystemStorage(location=settings.BASE_DIR / 'private_media')
 
 
 def document_upload_path(instance, filename):
