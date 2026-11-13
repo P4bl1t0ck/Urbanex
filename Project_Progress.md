@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · cierre documental para push | 2026-11-13 · Nueve horas humanas y evidencia comprobadas; aclaración idéntica en ambos documentos; push autorizado por Sebas, sin apertura de PR |
 | Última actualización HU-10 · aclaraciones de auditoría | 2026-11-13 · Horas corregidas por Sebas, referencia de aceptación unificada y prueba Reservado diferida a HU-35 por decisión de Sebas |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
@@ -75,6 +76,18 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
 
+
+### 2026-11-13 · Codex con Sebas · HU-10: publicación de correcciones documentales PR #27 · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Sebas autorizó commit y push de las correcciones documentales preparadas. Solo siete .md: referencia aceptada por Pablo y Anexo 2 POR CONFIRMAR, Hora (Guayaquil), notas históricas aclaradas y DT-121..123. HU-10 continúa en Pruebas, sin puntos nuevos; nueve filas humanas conservadas. Trazabilidad se guarda en commit propio por ser compartida.
+- **Comprobación:** diff --check exit 0; sin diferencias de backend/ o frontend/ respecto de 43b1e18. GitHub confirmó rama en 43b1e18 y develop en c420e56 antes de publicar. Se conservan suites previas 372 backend SQLite y 41 frontend, sin repetirlas por documentación. No se aplican migraciones ni se toca .env.
+- **Siguiente paso:** publicar y comprobar coincidencia de HEAD con GitHub; compartir el hash nuevo con Pablo para revisar las correcciones. La descripción del PR está preparada en evidence/HU-10/pr-27.md y no se edita remotamente en este paso. Auditoría sin nueva declaración Apto del agente. Reservado humano pendiente con HU-35, DT-121..123 abiertos y PostgreSQL No ejecutado (DT-68). Base SQLite de trabajo pendiente de respaldo y actualización según lo acordado; no se borra la rama ni se fusiona develop.
+
+### 2026-11-13 · Codex con Sebas · HU-10: correcciones documentales de auditoría PR #27 · rama `feat/URB-16-HU-10-catalogo-filtros`
+
+- **Hecho:** Fase 0 y ok para siete documentos y borrador local del PR. Decisión de Pablo atribuida al prompt de auditoría §11 del PR #27: contexto maestro/DS-16/ampliaciones, Anexo 2 POR CONFIRMAR; sin crear DS. V-46 con encabezado Hora (Guayaquil), horas y aprobaciones de Sebas conservadas; notas antiguas aclaradas sin borrarlas. DT-121..123 libres tras revisar 12 referencias remotas, registrados en Deuda. HU-10 en Pruebas, sin puntos nuevos.
+- **Comprobación:** solo documentación; suites anteriores 372 backend SQLite, 41 frontend y controles exit 0 citados como anteriores, sin repetición ni nueva aprobación del agente. Consistencia documental 7/7, nueve filas humanas intactas, tres DT únicos y borrador local comprobados; diff --check exit 0. No se ejecutan migraciones ni se toca .env.
+- **Falta y siguiente paso:** revisar el borrador evidence/HU-10/pr-27.md y autorizar por separado commit/push y, si corresponde según DS-31, edición del PR. No se envían mensajes a Pablo. Reservado humano diferido a HU-35; DT-121..123 abiertos; PostgreSQL No ejecutado (DT-68). SQLite de trabajo pendiente de actualización según lo acordado.
 
 ### 2026-11-13 · Codex con Sebas · HU-10: cierre documental y publicación autorizada · rama `feat/URB-16-HU-10-catalogo-filtros`
 
@@ -1736,6 +1749,8 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 
 **Pendiente.** ID comprobado antes de usarlo en `origin/develop` y las demás referencias remotas mediante `git show <ref>:Project_Progress.md` tras el fetch del 2026-11-11; sin coincidencias anteriores de V-46. No modifica V-45 de HU-09. Los puntos siguientes corresponden al alcance DS-16 aprobado; el cotejo con los criterios literales del Anexo 2 está Pendiente.
 
+Sustituido: la tabla ya está completa (2026-11-13). La validación humana de Reservado continúa Pendiente, diferida a HU-35.
+
 1. Abrir `/properties` como visitante. Confirmar filtros legibles en móvil y escritorio, operación deshabilitada, solo Disponible/Reservado y etiqueta «Reservado».
 2. Combinar tipo, ubicación, precio mínimo/máximo, dormitorios/baños mínimos y superficie; confirmar resultados acordes. Probar los límites exactos y limpiar filtros. La URL debe conservar la búsqueda al recargar o compartirla.
 3. Con más de 20 coincidencias, avanzar y retroceder; confirmar 20 en la primera página, filtros conservados, conteo correcto y sin repetidos. Al cambiar filtros, volver a la primera página.
@@ -1745,7 +1760,7 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 
 **Evidencia humana:** una por criterio del Anexo 2 cuando se coteje, guardada localmente en `evidence/HU-10/`; para Nivel 2 agregar video/GIF de flujo completo (DS-35). Solo Sebas u otra persona completa la tabla con quién, fecha, hora, observación y ruta. No se adjuntan capturas al repositorio.
 
-| Quién | Fecha | Hora (Bogotá) | Qué vio exactamente | Evidencia local | Resultado |
+| Quién | Fecha | Hora (Guayaquil) | Qué vio exactamente | Evidencia local | Resultado |
 |---|---|---|---|---|---|
 | Sebas | 2026-11-13 | 15:23 | Catálogo con 26 propiedades y tarjetas visibles; apertura de la ficha del Ejemplo 22 con sus características y precio. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/01-catalogo.png | Aprobado |
 | Sebas | 2026-11-13 | 15:24 | Filtros combinados Casa, 3+ habitaciones y precio máximo de 151.600 USD: aparecen dos propiedades compatibles, de 145.000 y 125.000 USD. Comprobación realizada y aprobada por Sebas. | evidence/HU-10/02-filtros.png | Aprobado |
@@ -1761,6 +1776,8 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 
 **Aclaración de alcance:** según indicación expresa de Sebas en esta conversación, la referencia al Anexo 2 no se utiliza como fuente de aceptación para esta entrega de HU-10, porque no hay un documento vigente disponible. Se toma como referencia el contexto maestro, HU-10/URB-16, la decisión DS-16 y las ampliaciones aprobadas durante esta tarea. Esta aclaración sustituye el pendiente de cotejo con Anexo 2 para esta validación; no modifica por sí sola las reglas generales del repositorio.
 
+**Decisión de Pablo, 2026-11-13, auditoría §11 del PR #27:** para HU-10 se acepta como referencia de criterios el backlog del contexto maestro (filtros combinados, paginación, estados visibles y SEO), DS-16 y las ampliaciones aprobadas; el cotejo con el Anexo 2 queda **POR CONFIRMAR**, como en el lote 2. Esta decisión prevalece sobre las aclaraciones anteriores que lo descartaban como pendiente; no se crea un DS aquí, pues Pablo lo registra en su PR.
+
 **Ampliación de pasos V-46 tras usabilidad (2026-11-11, Pendiente):**
 
 - Recargar `/dashboard/availability` como admin, seleccionar asesor.demo y repetir como asesor en Mi disponibilidad. Debe cargar sin 500; puede mostrar cero franjas porque no se agregaron horarios. El endpoint respondió 200 en pruebas del agente, pero la pantalla necesita comprobación humana.
@@ -1770,6 +1787,8 @@ Movidas a la sección **"Validaciones pendientes de Pablo"** al inicio de este a
 - La base sigue sin Reservado. Ese caso conserva Pendiente; los ejemplos se publicaron por HU-53 y no se crearon reservas ficticias. No se puede marcar V-46 completa por las pruebas automáticas.
 
 Mantener la tabla humana de V-46 vacía hasta que Sebas registre sus observaciones, fecha, hora y evidencia reales. No se transcribe el reporte de publicaciones como aprobación global.
+
+Sustituido: la tabla ya está completa (2026-11-13). La validación humana de Reservado continúa Pendiente, diferida a HU-35.
 
 **V-46 — pasos vigentes tras barra superior (2026-11-11, validación humana Pendiente):** esta ampliación supersede las instrucciones anteriores de panel lateral. Las cuatro capturas barra-superior-*.png son del agente y no llenan la tabla humana.
 
@@ -1812,6 +1831,8 @@ Cotejo literal Anexo 2, Reservado humano y validación humana global de V-46 sig
 5. Revisar ordenado, barra y diálogo a 320/375 px, sin desbordamiento. Pasos por operación (1000 renta/50000 venta) no se prueban todavía: operación sigue pendiente, paso actual 100 USD. Mantener pruebas de teclado, aplicar/cancelar/Escape, historial URL y estados públicos.
 
 Capturas del agente orden-precio-tooltip-desktop-20261113.png, orden-catalogo-mobile-20261113.png y filtros-numeros-mobile-20261113.png en evidence/HU-10 solo son antecedente automático. La tabla humana sigue Pendiente hasta registro de Sebas con fecha/hora/observación/evidencia propias. Anexo 2 y Reservado humano conservan Pendiente; sin aprobación del agente ni recálculo de porcentajes.
+
+Sustituido: la tabla ya está completa (2026-11-13). La validación humana de Reservado continúa Pendiente, diferida a HU-35.
 
 
 ### HU-10 — distribución de controles (2026-11-13)
@@ -1925,3 +1946,9 @@ La comprobación humana de Reservado conserva resultado **Pendiente**, con ejecu
 **Cierre documental para publicación de la rama (2026-11-13):** Sebas autorizó cerrar la documentación y hacer push de `feat/URB-16-HU-10-catalogo-filtros`. Comprobación documental → nueve filas de V-46 con hora HH:MM y archivo de evidencia existente, aclaración de aceptación idéntica en Progress y Estado de procesos, sin marcadores de conflicto; `git diff --check` → exit 0. Son comprobaciones de consistencia, no una aprobación funcional emitida por el agente. No hubo cambios de código desde la integración `5a950b5`; resultados previos en Estándares §4: 372 backend OK, 41 frontend OK, TypeScript/ESLint/build y chequeo de migraciones exit 0. No se repitieron suites por este cambio exclusivamente documental.
 
 La respuesta documental a los hallazgos de horas y referencia de aceptación queda preparada. La prueba humana de Reservado sigue Pendiente con ejecución diferida a HU-35 por decisión expresa de Sebas. El informe anterior del auditor no se reescribe ni se declara Aprobado por el agente; estas aclaraciones se presentan para su consideración en la revisión del PR. HU-10 permanece en Pruebas. Actualización de SQLite de trabajo pendiente para después del push, según Sebas; requiere respaldo y comprobación de SQLite local antes de migrate. PostgreSQL No ejecutado (DT-68, Nivel 1). El PR lo abre la persona; publicar esta rama no fusiona develop.
+
+### HU-10 — respuesta documental a auditoría PR #27 (2026-11-13)
+
+**Decisión de Pablo, 2026-11-13, auditoría §11 del PR #27:** para HU-10 se acepta como referencia de criterios el backlog del contexto maestro (filtros combinados, paginación, estados visibles y SEO), DS-16 y las ampliaciones aprobadas; el cotejo con el Anexo 2 queda **POR CONFIRMAR**, como en el lote 2. Esta decisión prevalece sobre las aclaraciones anteriores que lo descartaban como pendiente; no se crea un DS aquí, pues Pablo lo registra en su PR.
+
+Se registran DT-121 (renderizado Reservado), DT-122 (SEO/canonical del catálogo) y DT-123 (tamaño de página duplicado). HU-10 permanece Pruebas, sin sumar puntos; el cierre de la primera parte no equivale a pasar la HU a Listo. Reservado humano se comprueba con HU-35. El PR continúa con sus cambios de código originales; esta preparación no los modifica. Borrador de descripción en evidence/HU-10/pr-27.md, sin publicar.

@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · cierre documental para push | 2026-11-13 · Nueve horas humanas y evidencia comprobadas; aclaración idéntica en ambos documentos; push autorizado por Sebas, sin apertura de PR |
 | Última actualización HU-10 · aclaraciones de auditoría | 2026-11-13 · Horas corregidas por Sebas, referencia de aceptación unificada y prueba Reservado diferida a HU-35 por decisión de Sebas |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
@@ -742,3 +743,10 @@ La comprobación humana de Reservado conserva resultado **Pendiente**, con ejecu
 **Cierre documental para publicación de la rama (2026-11-13):** Sebas autorizó cerrar la documentación y hacer push de `feat/URB-16-HU-10-catalogo-filtros`. Comprobación documental → nueve filas de V-46 con hora HH:MM y archivo de evidencia existente, aclaración de aceptación idéntica en Progress y Estado de procesos, sin marcadores de conflicto; `git diff --check` → exit 0. Son comprobaciones de consistencia, no una aprobación funcional emitida por el agente. No hubo cambios de código desde la integración `5a950b5`; resultados previos en Estándares §4: 372 backend OK, 41 frontend OK, TypeScript/ESLint/build y chequeo de migraciones exit 0. No se repitieron suites por este cambio exclusivamente documental.
 
 La respuesta documental a los hallazgos de horas y referencia de aceptación queda preparada. La prueba humana de Reservado sigue Pendiente con ejecución diferida a HU-35 por decisión expresa de Sebas. El informe anterior del auditor no se reescribe ni se declara Aprobado por el agente; estas aclaraciones se presentan para su consideración en la revisión del PR. HU-10 permanece en Pruebas. Actualización de SQLite de trabajo pendiente para después del push, según Sebas; requiere respaldo y comprobación de SQLite local antes de migrate. PostgreSQL No ejecutado (DT-68, Nivel 1). El PR lo abre la persona; publicar esta rama no fusiona develop.
+
+
+### HU-10 — decisión de aceptación y estado tras auditoría PR #27 (2026-11-13)
+
+**Decisión de Pablo, 2026-11-13, auditoría §11 del PR #27:** para HU-10 se acepta como referencia de criterios el backlog del contexto maestro (filtros combinados, paginación, estados visibles y SEO), DS-16 y las ampliaciones aprobadas; el cotejo con el Anexo 2 queda **POR CONFIRMAR**, como en el lote 2. Esta decisión prevalece sobre las aclaraciones anteriores que lo descartaban como pendiente; no se crea un DS aquí, pues Pablo lo registra en su PR.
+
+HU-10 permanece **Pruebas**; no pasa a Listo ni suma sus 5 puntos como completados. Reservado humano se verifica con HU-35; la falta de prueba automática de renderizado se registra en DT-121, sin implementar reservas aquí. SEO/canonical y tamaño de página duplicado quedan registrados en DT-122 y DT-123. Las notas anteriores de Anexo 2 pendiente se leen como POR CONFIRMAR según la decisión de Pablo.
