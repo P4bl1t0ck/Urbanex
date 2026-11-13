@@ -360,6 +360,10 @@ class PropertyImageSerializer(serializers.ModelSerializer):
         read_only_fields = ['uploaded_at']
 
 #Now we create the class thats going to handle the property Serializer
+class PropertyWithdrawalSerializer(serializers.Serializer):
+    unavailability_reason = serializers.CharField(trim_whitespace=True)
+
+
 class PropertySerializer(serializers.ModelSerializer):
     agent_name = serializers.SerializerMethodField()
     #Agregamos las imagenes vinculadas.
@@ -378,6 +382,14 @@ class PropertySerializer(serializers.ModelSerializer):
         # DT-09: status solo cambia por acciones de negocio (PropertyPublishView, HU-53),
         # nunca por un POST/PATCH generico.
         read_only_fields = ('agent', 'status', 'created_at', 'updated_at')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if request is None or not request.user.is_authenticated:
+            # Keep the public DTO shape without exposing an internal withdrawal reason.
+            data['unavailability_reason'] = None
+        return data
     
     def get_agent_name(self,obj): #This function it made for get the full name and user name of who make or add the proerty.
         if obj.agent:
@@ -392,11 +404,6 @@ class PropertySerializer(serializers.ModelSerializer):
         if status == 'no_disponible' and not unavailability_reason:
             raise serializers.ValidationError({
                 "unavailability_reason": "Debe especificar un motivo para marcar la propiedad como No disponible."
-            })
-
-        if status in ['vendido', 'arrendado']:
-            raise serializers.ValidationError({
-                "status": "Las propiedades solo pueden pasar a Vendido o Arrendado mediante la confirmación de Cierre definitivo."
             })
 
         return attrs

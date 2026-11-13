@@ -1,15 +1,17 @@
 "use client";
 
 // P-07 (HU-18, RF-09): franjas libres del asesor responsable en la ficha pública, próximos 14 días
-// en hora de Ecuador. Solo se muestran, sin selección: la solicitud de visita es HU-19 (decisión
-// de Pablo, 2026-11-06). Se vuelve a consultar al pulsar "Actualizar" y al regresar a la pestaña,
+// en hora de Ecuador. Se vuelve a consultar al pulsar "Actualizar" y al regresar a la pestaña,
 // para reflejar en tiempo real los horarios ocupados.
+// HU-19 (lote 3, DS-39): cada franja es un botón; al elegirla se abre VisitRequestForm. Si la
+// franja se ocupó mientras tanto, el servidor responde 400 y aquí se vuelven a cargar los horarios.
 
 import { useEffect, useState } from "react";
+import VisitRequestForm from "@/components/VisitRequestForm";
 import { ApiError } from "@/lib/api";
 import { getFreeSlots } from "@/lib/visits";
-import { addDays, ecuadorToday, formatDayLabel, formatTime, groupByEcuadorDay } from "@/lib/visitsCalendar";
-import type { FreeSlotsResponse } from "@/types/visit";
+import { addDays, ecuadorDateOf, ecuadorToday, formatDayLabel, formatTime, groupByEcuadorDay } from "@/lib/visitsCalendar";
+import type { FreeSlot, FreeSlotsResponse, VisitRequestResponse } from "@/types/visit";
 
 const RANGE_DAYS = 14;
 
@@ -19,8 +21,22 @@ export default function FreeSlotsPicker({ propertyId }: { propertyId: number }) 
   const [reload, setReload] = useState(0);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [chosenDay, setChosenDay] = useState("");
+  const [chosenSlot, setChosenSlot] = useState<FreeSlot | null>(null);
+  const [requested, setRequested] = useState<VisitRequestResponse | null>(null);
+  const [notice, setNotice] = useState("");
 
   const loading = loaded?.key !== reload;
+
+  function finishRequest(result: VisitRequestResponse | null) {
+    setChosenSlot(null);
+    if (result) {
+      setRequested(result);
+      setNotice("");
+    } else {
+      setNotice("Ese horario se ocupó hace un momento. Elige otro de la lista actualizada.");
+    }
+    setReload((value) => value + 1);
+  }
 
   useEffect(() => {
     let isActive = true;
@@ -82,7 +98,28 @@ export default function FreeSlotsPicker({ propertyId }: { propertyId: number }) 
           Actualizar
         </button>
       </div>
-      <p className="mt-1 text-sm text-slate-600">Próximos {RANGE_DAYS} días, en hora de Ecuador.</p>
+      <p className="mt-1 text-sm text-slate-600">
+        Próximos {RANGE_DAYS} días, en hora de Ecuador. Elige un horario para solicitar tu visita.
+      </p>
+
+      {requested && (
+        <div role="status" className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+          <p className="font-semibold">{requested.detail}</p>
+          <p className="mt-1">
+            <span className="capitalize">{formatDayLabel(ecuadorDateOf(requested.scheduled_start))}</span>
+            {" a las "}
+            {formatTime(requested.scheduled_start)} (hora de Ecuador).
+          </p>
+          <p className="mt-1">
+            {requested.confirmation === "email"
+              ? "Te enviamos la confirmación a tu correo, con el enlace para ver los datos de tu visita."
+              : "El asesor te confirmará la visita por WhatsApp."}
+          </p>
+        </div>
+      )}
+      {notice && (
+        <p role="alert" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{notice}</p>
+      )}
 
       {loading && !data ? (
         <p className="mt-4 text-sm text-slate-500">Cargando horarios…</p>
@@ -116,16 +153,41 @@ export default function FreeSlotsPicker({ propertyId }: { propertyId: number }) 
             ))}
           </div>
           <ul role="tabpanel" className="mt-3 flex flex-wrap gap-2">
-            {selectedSlots.map((slot) => (
-              <li key={slot.start} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-800">
-                {formatTime(slot.start)}
-              </li>
-            ))}
+            {selectedSlots.map((slot) => {
+              const isChosen = chosenSlot?.start === slot.start;
+              return (
+                <li key={slot.start}>
+                  <button
+                    type="button"
+                    aria-pressed={isChosen}
+                    onClick={() => {
+                      setChosenSlot(slot);
+                      setNotice("");
+                    }}
+                    className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition ${
+                      isChosen
+                        ? "border-blue-700 bg-blue-700 text-white"
+                        : "border-slate-200 bg-slate-50 text-slate-800 hover:border-blue-400 hover:bg-blue-50"
+                    }`}
+                  >
+                    {formatTime(slot.start)}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}
 
-      <p className="mt-4 text-sm font-medium text-blue-800">Pronto podrás solicitar tu visita aquí.</p>
+      {chosenSlot && (
+        <VisitRequestForm
+          key={chosenSlot.start}
+          propertyId={propertyId}
+          slot={chosenSlot}
+          onCancel={() => setChosenSlot(null)}
+          onDone={finishRequest}
+        />
+      )}
     </section>
   );
 }

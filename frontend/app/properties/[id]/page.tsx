@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { cache } from "react";
 import FreeSlotsPicker from "@/components/FreeSlotsPicker";
+import InterestForm from "@/components/InterestForm";
 import SiteNav from "@/components/SiteNav";
+import WhatsAppContactButton from "@/components/WhatsAppContactButton";
 import { getPropertyById } from "@/lib/api";
 import {
   buildPropertyMetadata,
@@ -111,6 +113,11 @@ export default async function PropertyDetailPage({
                 })}
               </p>
 
+              {/* HU-15 (P-07, DS-50): se oculta solo si el asesor no tiene celular válido. */}
+              {property.status === "disponible" && (
+                <WhatsAppContactButton propertyId={property.id} title={property.title} />
+              )}
+
               <section className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-6">
                 <h2 className="text-xl font-bold text-slate-900">
                   Características principales
@@ -145,6 +152,9 @@ export default async function PropertyDetailPage({
                   {property.description}
                 </p>
               </section>
+
+              {/* HU-16 (P-07, DS-50): formulario de interés; solo en propiedades Disponibles. */}
+              {property.status === "disponible" && <InterestForm propertyId={property.id} />}
 
               {/* HU-18 (P-07): franjas libres; solo en propiedades publicadas (Disponible). */}
               {property.status === "disponible" && (

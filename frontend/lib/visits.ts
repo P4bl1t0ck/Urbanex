@@ -5,6 +5,11 @@ import { apiFetch, authFetch } from "@/lib/api";
 import type {
   AgendaResponse,
   AgendaStatusFilter,
+  AgendaVisit,
+  PublicVisit,
+  VisitOutcomePayload,
+  VisitRequestPayload,
+  VisitRequestResponse,
   AvailabilityException,
   AvailabilityExceptionPayload,
   AvailabilityRule,
@@ -72,4 +77,27 @@ export function getFreeSlots(propertyId: number, from?: string, to?: string) {
 // HU-24 (I-08). El admin debe indicar el asesor (el servidor responde 400 si falta).
 export function getAgenda(params: { from: string; to: string; agent?: number; status?: AgendaStatusFilter }) {
   return authFetch<AgendaResponse>(withQuery(`${BASE}agenda/`, params));
+}
+
+// HU-19 (P-07): público, sin token. 400 datos o franja ya ocupada, 409 visita ya programada,
+// 429 demasiadas solicitudes.
+export function requestVisit(propertyId: number, payload: VisitRequestPayload) {
+  return apiFetch<VisitRequestResponse>(`${BASE}properties/${propertyId}/request/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+}
+
+// HU-20 (P-08): público por enlace único; 404 si no existe o ya empezó la visita.
+export function getPublicVisit(token: string) {
+  return apiFetch<PublicVisit>(`${BASE}public/${encodeURIComponent(token)}/`, { cache: "no-store" });
+}
+
+// HU-25 (I-08): una sola vez y después de la hora de inicio.
+export function recordVisitOutcome(visitId: number, payload: VisitOutcomePayload) {
+  return authFetch<AgendaVisit>(`${BASE}${visitId}/outcome/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }

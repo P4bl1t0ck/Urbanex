@@ -11,6 +11,8 @@ from .views import (
     PropertyListCreateView,
     PropertyPublicationRequirementsView,
     PropertyPublishView,
+    PropertyWithdrawalView,
+    PropertyReactivationView,
     UserActivationView,
     UserDeactivateView,
     UserDetailView,
@@ -46,6 +48,8 @@ urlpatterns = [
     path("properties/mine/", MyPropertiesView.as_view(), name="my-properties"),
     path("properties/<int:pk>/", PropertyDetailView.as_view(), name="property-detail"), #No aparece la ruta por error
     path("properties/<int:pk>/publish/", PropertyPublishView.as_view(), name="property-publish"),
+    path("properties/<int:pk>/withdraw/", PropertyWithdrawalView.as_view(), name="property-withdraw"),
+    path("properties/<int:pk>/reactivate/", PropertyReactivationView.as_view(), name="property-reactivate"),
     path(
         "properties/<int:pk>/publication-requirements/",
         PropertyPublicationRequirementsView.as_view(),
