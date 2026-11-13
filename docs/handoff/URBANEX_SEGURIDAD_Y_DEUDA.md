@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: §1.3 con la ruta pública nueva de cancelación por enlace (HU-21) y nota en **SEC-18** (DS-52). Las rutas internas nuevas exigen sesión |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · **SEC-20**: decisión de Pablo (V-86), el celular del asesor puede ser público si es el de trabajo |
 | Última actualización de corrección HU-09 | 2026-11-11 · minimización de datos del motivo de retiro en respuestas públicas; pruebas de regresión incorporadas |
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; sin cambios en riesgos globales |
@@ -143,6 +144,7 @@ Revisión pedida por Pablo: todo lo que un visitante **sin cuenta** puede ver o 
 | `GET /api/visits/public/<token>/` | P-08 (`/visits/[token]`) | Ver la visita del enlace del correo (HU-20) | Propiedad, fecha y hora, estado, **nombre, apellido y teléfono del asesor** (y del asesor de seguimiento) | Token UUID4, vale hasta la hora de inicio, 30/min por IP, `noindex` y `no-referrer` | **SEC-18** |
 | `GET /api/opportunities/public/properties/<id>/whatsapp/` (lote 4, 2026-11-09) | P-07 (botón de WhatsApp) | Número para `wa.me` (HU-15) | **Celular del asesor captador**, solo dígitos, o `null` si está inactivo o su celular no es válido (DS-28) | Solo Disponibles (404 si no); 30/min por IP (DT-155) | **SEC-20** |
 | `POST /api/opportunities/public/properties/<id>/interest/` (lote 4, 2026-11-09) | P-07 (formulario de interés) | **Crea** o reutiliza contacto y oportunidad y agrega una interacción SISTEMA (HU-16) | Respuesta 201 siempre igual (`detail`), sin ids ni datos del asesor | Solo Disponibles con asesor activo (404 si no, C-10); 3/min y 10/día por IP; LOPDP obligatoria; mensaje de 1000 caracteres como máximo | **SEC-21** |
+| `POST /api/visits/public/<token>/cancel/` (lotes 5 y 6, 2026-11-13) | P-08 (botón "Cancelar visita") | **Cancela** la visita del enlace (HU-21): la pasa a Cancelada, libera la hora, puede devolver la oportunidad a Contacto inicial y avisa al asesor por correo | Los mismos datos de P-08 (sin datos del cliente) | Mismo token UUID4 y el mismo 404 que P-08 (inexistente o ya empezada); solo hasta 1 h antes (400 después); 409 si ya no está Programada (no se cancela dos veces); 30/min por IP (mismo límite que P-08) | **SEC-18** |
 
 Rutas que exigen sesión (comprobado): el resto de `api/auth/` (usuarios, mis propiedades, publicar, requisitos, fotos), `api/documents/`, `api/appraisals/`, `api/opportunities/` y, en `api/visits/`, disponibilidad, excepciones, agenda y resultado. El admin de Django (`/admin/`) tiene su propio inicio de sesión.
 
@@ -150,6 +152,7 @@ Rutas que exigen sesión (comprobado): el resto de `api/auth/` (usuarios, mis pr
   - *Plan:* caché compartida y `NUM_PROXIES` al desplegar (DT-148, DT-149); evaluar con el equipo una verificación del celular (por ejemplo, un código por WhatsApp) si el abuso aparece (*decisión de negocio*).
 - **SEC-18. P-08 por enlace.** Quien tenga el enlace ve la visita y el teléfono del asesor. Es un dato de contacto comercial, mostrado por decisión de Pablo (DS-39), y el enlace solo viaja en el correo del cliente.
   - *Plan:* sin cambios por ahora; al implementar la cancelación (HU-21), revisar que el token no se pueda reutilizar y su vigencia.
+  - **(2026-11-13, lotes 5 y 6, nota añadida)** Revisado al implementar HU-21 (DS-52): con el mismo token, `POST /api/visits/public/<token>/cancel/` **escribe** sin sesión, pero solo sobre esa visita, solo hasta 1 h antes y una sola vez (después, 409); la vigencia del token no cambia (hasta la hora de inicio) y una visita reprogramada (HU-23) conserva su token. Quien tenga el enlace puede cancelar la visita: es el mismo supuesto que ver sus datos. Pruebas: `ClientVisitCancelTests`.
 - **SEC-19 (DT-153). Permiso por defecto `AllowAny`.**
   - *Plan:* `DEFAULT_PERMISSION_CLASSES = IsAuthenticated` (archivo compartido: avisar a Sebas, commit propio) y `AllowAny` explícito en las rutas de esta tabla, con una prueba que lo compruebe.
 - **SEC-20 (lote 4, 2026-11-09). Celular del asesor en P-07.** El enlace `wa.me` necesita el número, así que cualquier visitante puede leer el celular del asesor captador de cada propiedad Disponible; el límite de 30/min por IP frena la recolección masiva, pero cuenta por proceso (DT-155, DT-148). Es un dato de contacto comercial y la simplificación de HU-15 la aprobó Pablo (DS-50).

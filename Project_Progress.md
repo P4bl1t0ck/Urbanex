@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: HU-33, HU-31, HU-21 y HU-23 implementadas (DS-52); **Ronda 9** (V-96 a V-103) redactada en Pendiente; DT-158; suite 374 OK en SQLite; nota de cierre. Commits por HU con orden de Pablo: `744f062` (HU-33), `8cc4bd4` (HU-31), `eafc49d` (HU-21), `5b6a451` (HU-23) |
 | Última actualización · HU-09 integración de develop | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24): `origin/develop` `78b5187` integrado en `d7318db` (conflictos solo documentales, ambas partes conservadas); 342 pruebas OK en SQLite; DT-159 (`.pyc` versionados); nota aditiva de HU-09 en Estado de procesos; nota de cierre |
 | Última actualización · ajustes tras la auditoría del PR #25 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 con DS-35 (EP-1 2/3 HU · 5/8 pts), precisión de DT-157 (1) y fechas de V-86 a V-90 en las filas resumen; nota de cierre |
 | Última actualización · estados tras los merges | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: DT-157 y DS-51; HU-12, HU-15, HU-16, HU-29, HU-30, HU-45 y HU-46 en **Listo**; nota de V-63 (No aplicable hasta el despliegue) y nota de cierre |
@@ -62,6 +63,14 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6` (lotes 5 y 6, desde `develop` `78b5187`)
+- **Entorno:** worktree `C:\Users\Pablo\Desktop\Urbanex-lote5`; `backend/.env` copiado del lote 3 (`DB_ENGINE=sqlite`, `EMAIL_PROVIDER=console`), `pipenv sync --dev`, `migrate` en base nueva, `npm ci`. Sin datos de demo todavía.
+- **Hecho:** Fase 0 aprobada por Pablo con cambios (DS-52). HU-33 (documentos de la propiedad en la línea de tiempo de I-06A), HU-31 (Perdida con motivo de lista cerrada, definitiva, cancela visitas programadas), HU-21 (cancelar: cliente por enlace hasta 1 h antes; asesor o admin desde la agenda con motivo) y HU-23 (visita coordinada con 30 min de antelación y reprogramación). Sin migraciones ni archivos compartidos. Una prueba del lote 4 cambia por DS-52 (Perdida ya no admite interacciones).
+- **Evidencia:** suite → `Ran 374 tests`, **OK** (332 + 42); `makemigrations --check` → solo DT-92; `npm test` 23/23, build, tsc y eslint (0 errores, 2 avisos DT-24) en verde (Estándares §4). PostgreSQL: **No ejecutado** (DT-68, DT-143).
+- **IDs:** DS-52, DT-158 (Perdida con reserva, HU-35), nota en DT-154 (resuelto en código; validación Pendiente). Ronda 9: V-96 a V-103 Pendiente.
+- **Commits (orden de Pablo, 2026-11-13, uno por HU):** `744f062` HU-33 · `8cc4bd4` HU-31 · `eafc49d` HU-21 · `5b6a451` HU-23 · luego la documentación del lote, la fusión de `origin/develop` (PR #24) y un commit `docs` con DT-160, C-11 y HU-09 en Listo.
+- **Falta:** datos de demo y Ronda 9 (V-96 a V-103); auditoría §11 del PR.
+- **Siguiente paso:** Ronda 9 de Pablo; luego la auditoría §11.
 ### 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24, de Sebas) · integración de develop
 - **Hecho:** con Sebas avisado (según Pablo, 2026-11-13), worktree nuevo `Urbanex-hu09` e integración de `origin/develop` `78b5187` (PR #21, #22 y #25) en `d7318db`. Conflictos solo en 7 documentos (filas "Última actualización" y notas de cierre); se conservaron ambas partes sin reescribir filas de Sebas; el código se fusionó sin conflictos. Suite: línea base 253 OK y, tras integrar, 342 OK en SQLite; frontend 22/22, build, tsc y eslint exit 0 (Estándares §4). Nuevo **DT-159** (`.pyc` versionados; responsable Sebas, PR aparte). Nota aditiva en la sección HU-09 de Estado de procesos (V-45 aprobada por Sebas el 2026-11-10); la fila resumen de Sebas no se toca. DT-158 no se usa: según Pablo, está reservada en otra rama (lotes 5 y 6).
 - **Falta:** push de la rama (lo hace Pablo); auditoría §11 del PR #24 en un chat nuevo de solo lectura; aprobación de revisión en GitHub y merge del PR #24. Suite contra PostgreSQL: No ejecutado (DT-68, Nivel 1).
@@ -1387,6 +1396,76 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:30–00:42 | (a) Demo B: Nota con visita relacionada → en el historial "Visita del …"; el historial no tiene botones de editar ni borrar. (b) Demo D: "La oportunidad está cerrada: no se registran interacciones nuevas." y la barra avisa que el estado está fuera de la secuencia. (c) Con un asesor B creado en A-01, `/dashboard/opportunities/<id de Demo A>` → pantalla de carga y "no encontrada" (404) sin mostrar ningún dato de Demo A; a los segundos redirige a `/dashboard`. Observación: I-06A debería quedarse en el mensaje de no encontrada (DT-156). Capturas: `evidencias\Lote4\Captura de pantalla (100)` a `(104).png`. | **Aprobado** (con observación) |
+
+### Ronda 9 — Lotes 5 y 6: HU-33, HU-31 (I-06A), HU-21 (P-08, I-08) y HU-23 (I-08) (rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`)
+
+> **Estado (2026-11-13): las 8 pruebas Pendiente.** Una por criterio (DS-35). Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura en `evidence/` o en su carpeta de evidencias, fuera del repo).
+>
+> **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote5`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; nunca Supabase ni Resend). La base del worktree tiene `migrate` aplicado y **aún no tiene datos de demo**: falta `setup_demo_data` y una propiedad Disponible con disponibilidad del asesor y oportunidades de ejemplo (como el script del lote 4, **No verificado** en este worktree). Los correos salen en la consola del backend. Para HU-33 hace falta al menos un documento subido en el expediente de la propiedad.
+
+### V-96 · HU-33 — La línea de tiempo muestra estado, interacciones y documentos (I-06A)
+
+**Resultado esperado:** ¿En I-06A de una oportunidad cuya propiedad tiene documentos en el expediente, el historial muestra, además de los cambios de estado y las interacciones (notas, contraofertas, entradas "Sistema"), una entrada **"Documento"** por cada versión subida (tipo, "versión n", "(reemplazada)" si no es la vigente, estado de validación y quién la subió), **sin enlace** de descarga?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-97 · HU-33 — El historial va en orden cronológico
+
+**Resultado esperado:** ¿Las entradas van de la más reciente (arriba) a la más antigua (abajo), mezclando estados, interacciones y documentos según su fecha y hora? (Por ejemplo: registrar una nota después de subir un documento; la nota queda encima.)
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-98 · HU-31 — Marcar como perdida exige un motivo (I-06A)
+
+**Resultado esperado:** ¿"Marcar como perdida" abre un modal con la lista de motivos (Precio, Eligió otra propiedad, No responde, Sin financiamiento, Desistió, Otro) y una observación opcional; sin elegir motivo muestra "Elige el motivo de la pérdida." y no cambia nada; con motivo (y observación) la oportunidad pasa a **Perdida**, se ve "Oportunidad perdida (definitiva). Motivo: …" y el historial registra el cambio con tu usuario, fecha, hora y el motivo?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-99 · HU-31 — Se puede marcar desde cualquier estado activo y es definitiva
+
+**Resultado esperado:** ¿Se puede marcar como perdida desde Contacto inicial, Visita programada, En negociación y Pendiente de cierre? ¿Una vez Perdida, ya no aparece el botón, el formulario de interacciones dice que no se registran nuevas y no hay botón de avance? ¿Si tenía una visita Programada, en la agenda (filtro "Todas") aparece Cancelada y su hora vuelve a estar libre en la ficha?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-100 · HU-21 — Cancelar antes de la hora (cliente por enlace y asesor desde la agenda)
+
+**Resultado esperado:** (a) Cliente: ¿en P-08 (enlace del correo de consola) aparece "Cancelar visita" con la hora límite (1 hora antes); al confirmar se ve "Tu visita quedó cancelada" y el estado Cancelada; si faltan menos de 60 minutos, en lugar del botón aparece "Falta menos de 1 hora: … comunícate con tu asesor"? (b) Asesor: ¿en I-08, "Cancelar" pide confirmación y un motivo obligatorio (sin motivo, error); al confirmar la visita queda Cancelada y, si el cliente dio correo, la consola muestra el aviso al cliente?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-101 · HU-21 — La franja queda libre y la oportunidad retrocede si aplica
+
+**Resultado esperado:** ¿Después de cancelar, la hora vuelve a ofrecerse en la ficha (P-07) y en la agenda ya no aparece la visita (salvo con el filtro "Canceladas" o "Todas")? ¿Si era la única visita activa, la oportunidad pasa de Visita programada a Contacto inicial y su historial (I-06A) muestra la entrada "Sistema" de la cancelación? ¿Cancelar dos veces la misma visita da "Esta visita ya no está programada."?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-102 · HU-23 — Registrar una visita coordinada por WhatsApp (I-08)
+
+**Resultado esperado:** ¿"Registrar visita coordinada" abre un formulario que, para el asesor, solo lista sus propiedades Disponibles y ofrece franjas libres con 30 minutos de antelación; pide nombre, celular y la casilla LOPDP; con un celular ya registrado usa ese contacto sin cambiar su nombre; la visita aparece en la agenda y la oportunidad queda en Visita programada? ¿Una hora ya ocupada no se ofrece (o da error si se ocupó mientras tanto)? ¿Sin correo, el historial de la oportunidad dice que el asesor le avisa por WhatsApp; con correo y casilla, la consola muestra la confirmación con el enlace?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
+
+### V-103 · HU-23 — Reprogramar sin solapes y con aviso
+
+**Resultado esperado:** ¿"Reprogramar" en una visita futura muestra solo franjas libres del mismo asesor (sin la hora actual ni horas ocupadas); al elegir otra la visita se mueve, la hora anterior queda libre, el enlace P-08 del cliente sigue sirviendo con la hora nueva y la consola muestra el aviso al cliente (si dio correo); sin correo, el historial dice que el asesor le avisa por WhatsApp?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| | | | Pendiente |
 
 ## Estado actual (2026-11-02)
 

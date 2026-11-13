@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-09 Listo | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: PROC-01 paso 10 (HU-09) en **Listo** (nota aditiva) |
+| Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: PROC-04 pasos 5 y 6 (HU-21, HU-23) y PROC-05 pasos 2 y 5 (HU-33, HU-31) con su código; en Pruebas (DS-52) |
 | Última actualización · HU-46 con DS-35 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-08, criterio "solo usuarios activos" de HU-46 cubierto por su prueba automática (DS-35) |
 | Última actualización · HU-12 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota en PROC-02, HU-12 en **Listo**; V-63 No aplicable hasta el despliegue (DT-110) |
 | Última actualización · HU-45 Listo | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: nota aditiva en PROC-08, HU-45 en **Listo** (según Pablo, confirmado por Sebas) |
@@ -183,8 +185,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 | 2 | El cliente ve los horarios libres | HU-18 | P-07 | No implementado | — |
 | 3 | Solicita la visita → oportunidad en Visita Programada | HU-19 | P-07 | `backend/apps/visits/services.py` (`request_visit`), `POST /api/visits/properties/<id>/request/`; `frontend/components/FreeSlotsPicker.tsx`, `VisitRequestForm.tsx` (rama sin fusionar, PR #21) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-19) |
 | 4 | Recibe la confirmación (correo o WhatsApp) | HU-20 | P-08 | `send_visit_notifications`, `GET /api/visits/public/<token>/`; `frontend/app/visits/[token]/` (rama sin fusionar, PR #21) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-20) |
-| 5 | Puede cancelar antes de la hora | HU-21 | P-08 | No implementado | — |
-| 6 | El asesor registra o reprograma visitas coordinadas | HU-23 | I-08 | No implementado | — |
+| 5 | Puede cancelar antes de la hora | HU-21 | P-08 | ~~No implementado~~ (2026-11-13) `cancel_visit`, `POST /api/visits/public/<token>/cancel/` (cliente, hasta 1 h antes) y `POST /api/visits/<id>/cancel/` (asesor o admin, con motivo); P-08 y agenda I-08 (rama sin fusionar, lotes 5 y 6, DS-52) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-21) |
+| 6 | El asesor registra o reprograma visitas coordinadas | HU-23 | I-08 | ~~No implementado~~ (2026-11-13) `register_coordinated_visit`, `reschedule_visit`, `POST /api/visits/coordinated/`, `POST /api/visits/<id>/reschedule/`; `frontend/components/ManualVisitDialog.tsx` en la agenda (rama sin fusionar, lotes 5 y 6, DS-52) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-23) |
 | 7 | Consulta su agenda | HU-24 | I-08 | No implementado | — |
 | 8 | Registra el resultado (realizada habilita el avance) | HU-25 | I-08 | `record_outcome`, `POST /api/visits/<id>/outcome/`; modal en `frontend/app/dashboard/agenda/page.tsx` (rama sin fusionar, PR #21). El avance a En Negociación es de HU-29 | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-25) |
 
@@ -192,21 +194,25 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 
 **Nota (2026-11-11, merge del PR #21):** los pasos 3, 4 y 8 (HU-19, HU-20 y HU-25) pasan a **Listo**: PR #21 auditado y fusionado en `develop` (`5ed0e3b`, por Pablo). Donde las celdas dicen "rama sin fusionar, PR #21", ese código ya está en `develop`.
 
+**Nota (2026-11-13, lotes 5 y 6):** pasos 5 y 6 (HU-21 y HU-23) implementados y verificados en la rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`; en **Pruebas**, validación visual Pendiente (V-100 a V-103).
+
 ### PROC-05 · Seguimiento de la oportunidad
 
 | # | Paso | HU | Pantalla | Código | Estado |
 |---|---|---|---|---|---|
 | 1 | El asesor ve su cartera (admin: todas) con filtros | HU-34 | I-06 | ~~**Rama sin fusionar** (`feat/URB-30-34-HU-27-HU-34-oportunidades`):~~ (2026-11-04: fusionada en `develop` por el PR #15, `043cfb5`, DS-32) `opportunities/views.py` (`OpportunityViewSet.get_queryset`, `filter_opportunities`, `OpportunityPagination`), `opportunities/serializers.py` · `GET opportunities/` · `app/dashboard/opportunities/page.tsx`, `lib/opportunities.ts` | [HU-34](URBANEX_ESTADO_PROCESOS.md#hu-34) |
-| 2 | Consulta una oportunidad y su historial | HU-33 | I-06A | No implementado | — |
+| 2 | Consulta una oportunidad y su historial | HU-33 | I-06A | ~~No implementado~~ (2026-11-13) I-06A del lote 4 + documentos de la propiedad en la línea de tiempo (`OpportunityDetailSerializer.documents`, `buildTimeline`); DT-31 abierta (rama sin fusionar, lotes 5 y 6, DS-52) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-33) |
 | 3 | Avanza el estado hasta Pendiente de Cierre (precio final) | HU-29 | I-06A | ~~No implementado~~ (2026-11-09) `advance_status`, `POST /api/opportunities/<id>/status/`; `frontend/app/dashboard/opportunities/[id]/page.tsx` (rama sin fusionar, lote 4). Corte sin Reservada ni Evaluación documental (C-09) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-29) |
 | 4 | Registra interacciones y negociación (no cambia el precio público) | HU-30 | I-06A | ~~No implementado~~ (2026-11-09) `OpportunityInteraction` (`opportunities.0003`), `add_interaction`, `GET`/`POST /api/opportunities/<id>/interactions/`; I-06A (rama sin fusionar, lote 4) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-30) |
-| 5 | Marca Perdida con motivo | HU-31 | I-06A | No implementado | — |
+| 5 | Marca Perdida con motivo | HU-31 | I-06A | ~~No implementado~~ (2026-11-13) `mark_lost`, `POST /api/opportunities/<id>/lose/` (motivo de lista cerrada, DS-52); diálogo en I-06A (rama sin fusionar, lotes 5 y 6) | [Estado](URBANEX_ESTADO_PROCESOS.md#hu-31) |
 | 6 | Recibe recordatorios (inactividad, visita, documento, asignación) | HU-32 | I-03 | No implementado | — |
 | 7 | El admin asigna o reasigna con motivo | HU-28 | A-02 | No implementado | — |
 
 **Nota (2026-11-12, Ronda 8):** pasos 3 y 4 (HU-29 y HU-30) con validación visual aprobada por Pablo (V-91 a V-95, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta la auditoría (§11) y el merge del PR #22.
 
 **Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 3 y 4 (HU-29 y HU-30) pasan a **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
+
+**Nota (2026-11-13, lotes 5 y 6):** pasos 2 y 5 (HU-33 y HU-31) implementados y verificados en la rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`; en **Pruebas**, validación visual Pendiente (V-96 a V-99).
 
 ### PROC-06 · Reserva y documentación
 
@@ -340,6 +346,10 @@ RF sin HU propia: **RF-14** (auditoría) se alimenta de RF-01, 05, 06, 07, 08, 1
 - **Al cerrar una HU:** no se toca este archivo (el estado está en los enlaces). Solo se actualiza si cambia el mapa, el corte del 60 % o un proceso.
 - **Al implementar un paso:** completar la columna **Código** de §4 con los archivos y el endpoint (sin números de línea).
 - **Si se decide algo del §6:** registrar la decisión en [Deuda técnica](URBANEX_DEUDA_TECNICA.md) (DS-xx) y enlazarla aquí.
+
+### Actualización aditiva PROC-01 / HU-09 — 2026-11-13 (merge del PR #24)
+
+PROC-01 paso 10 (HU-09) pasa a **Listo**: V-45 aprobada por Sebas (2026-11-10), PR #24 auditado (§11: apta, según Pablo, 2026-11-13) y fusionado en `develop` (`c420e56`, 2026-11-13). El código de la nota del 2026-11-09 ya está en `develop`.
 
 ### Actualización aditiva PROC-01 / HU-09 — 2026-11-09
 

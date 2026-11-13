@@ -6,17 +6,22 @@
 // Lote 3 (DS-39): "Confirmar por WhatsApp" si el cliente no pidió confirmación por correo (HU-20),
 // el asesor de seguimiento si no es el de la visita, y el modal para registrar el resultado
 // (HU-25): solo después de la hora de inicio, una vez y con observación obligatoria.
+// Lotes 5 y 6 (DS-52): "Cancelar" (HU-21) en las visitas Programadas que aún no empiezan, con
+// confirmación y motivo obligatorio; se avisa al cliente por correo si lo dio. HU-23: "Registrar
+// visita coordinada" y "Reprogramar" (components/ManualVisitDialog.tsx).
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Dialog from "@/components/Dialog";
+import { ManualVisitDialog, RescheduleVisitDialog } from "@/components/ManualVisitDialog";
 import { ApiError } from "@/lib/api";
 import { getAuthSessionSnapshot, subscribeToAuthSession } from "@/lib/auth-session";
 import { getAgents } from "@/lib/opportunities";
-import { getAgenda, recordVisitOutcome } from "@/lib/visits";
+import { cancelVisit, getAgenda, recordVisitOutcome } from "@/lib/visits";
 import {
   addDays,
+  ecuadorDateOf,
   ecuadorToday,
   formatDayLabel,
   formatTime,
@@ -42,6 +47,7 @@ function whatsappLink(phone: string) {
 }
 
 type OutcomeForm = { visit: AgendaVisit; status: VisitOutcome | ""; notes: string; error: string };
+type CancelForm = { visit: AgendaVisit; reason: string; error: string };
 
 const STATUS_OPTIONS: { value: AgendaStatusFilter; label: string }[] = [
   { value: "", label: "Activas (sin canceladas)" },
@@ -79,11 +85,17 @@ export default function AgendaPage() {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [outcome, setOutcome] = useState<OutcomeForm | null>(null);
   const [savingOutcome, setSavingOutcome] = useState(false);
+  const [cancelForm, setCancelForm] = useState<CancelForm | null>(null);
+  const [savingCancel, setSavingCancel] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [rescheduling, setRescheduling] = useState<AgendaVisit | null>(null);
+  const [notice, setNotice] = useState("");
+  const [reload, setReload] = useState(0);
 
   const weekTo = addDays(weekFrom, 6);
   const agentId = isAdmin ? (selectedAgent ? Number(selectedAgent) : undefined) : undefined;
   const canLoad = Boolean(session?.access) && (!isAdmin || agentId !== undefined);
-  const requestKey = `${agentId ?? "own"}|${weekFrom}|${status}`;
+  const requestKey = `${agentId ?? "own"}|${weekFrom}|${status}|${reload}`;
   const loading = canLoad && loaded?.key !== requestKey;
   const data = !loading ? loaded?.data ?? null : null;
   const error = !loading ? loaded?.error ?? "" : "";
@@ -133,6 +145,34 @@ export default function AgendaPage() {
     };
   }, [canLoad, requestKey, weekFrom, weekTo, agentId, status, handleAuthError]);
 
+  // Reemplaza una visita en la agenda cargada, sin volver a pedirla.
+  function replaceVisit(updated: AgendaVisit) {
+    setLoaded((current) =>
+      current?.data
+        ? { ...current, data: { ...current.data, visits: current.data.visits.map((v) => (v.id === updated.id ? updated : v)) } }
+        : current,
+    );
+  }
+
+  async function saveCancel() {
+    if (!cancelForm) return;
+    const reason = cancelForm.reason.trim();
+    if (!reason) {
+      setCancelForm({ ...cancelForm, error: "Escribe el motivo de la cancelación." });
+      return;
+    }
+    setSavingCancel(true);
+    try {
+      replaceVisit(await cancelVisit(cancelForm.visit.id, { reason }));
+      setCancelForm(null);
+    } catch (err) {
+      if (handleAuthError(err)) return;
+      setCancelForm({ ...cancelForm, error: err instanceof Error ? err.message : "No se pudo cancelar la visita." });
+    } finally {
+      setSavingCancel(false);
+    }
+  }
+
   async function saveOutcome() {
     if (!outcome) return;
     const notes = outcome.notes.trim();
@@ -142,13 +182,7 @@ export default function AgendaPage() {
     }
     setSavingOutcome(true);
     try {
-      const updated = await recordVisitOutcome(outcome.visit.id, { status: outcome.status, outcome_notes: notes });
-      // Se reemplaza la visita en la agenda cargada, sin volver a pedirla.
-      setLoaded((current) =>
-        current?.data
-          ? { ...current, data: { ...current.data, visits: current.data.visits.map((v) => (v.id === updated.id ? updated : v)) } }
-          : current,
-      );
+      replaceVisit(await recordVisitOutcome(outcome.visit.id, { status: outcome.status, outcome_notes: notes }));
       setOutcome(null);
     } catch (err) {
       if (handleAuthError(err)) return;
@@ -181,8 +215,21 @@ export default function AgendaPage() {
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
             {isAdmin ? "Agenda de visitas" : "Mi agenda"}
           </h1>
-          <p className="mt-2 text-sm text-slate-600">Horas de Ecuador.</p>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-600">Horas de Ecuador.</p>
+            <button
+              type="button"
+              onClick={() => setManualOpen(true)}
+              className="w-full rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 sm:w-auto"
+            >
+              Registrar visita coordinada
+            </button>
+          </div>
         </header>
+
+        {notice && (
+          <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">{notice}</div>
+        )}
 
         <section className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
           {isAdmin && (
@@ -302,6 +349,24 @@ export default function AgendaPage() {
                               Registrar resultado
                             </button>
                           )}
+                          {visit.can_cancel && (
+                            <button
+                              type="button"
+                              onClick={() => setRescheduling(visit)}
+                              className="rounded-lg border border-blue-300 bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                            >
+                              Reprogramar
+                            </button>
+                          )}
+                          {visit.can_cancel && (
+                            <button
+                              type="button"
+                              onClick={() => setCancelForm({ visit, reason: "", error: "" })}
+                              className="rounded-lg border border-red-300 bg-white px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                            >
+                              Cancelar
+                            </button>
+                          )}
                         </div>
                       </li>
                     ))}
@@ -361,6 +426,64 @@ export default function AgendaPage() {
           </div>
         )}
       </Dialog>
+
+      <Dialog
+        open={cancelForm !== null}
+        title="¿Cancelar la visita?"
+        confirmLabel={savingCancel ? "Cancelando…" : "Cancelar visita"}
+        cancelLabel="Volver"
+        tone="danger"
+        busy={savingCancel}
+        onConfirm={saveCancel}
+        onCancel={() => setCancelForm(null)}
+      >
+        {cancelForm && (
+          <div className="space-y-3">
+            <p>
+              {cancelForm.visit.property.title} · {cancelForm.visit.client.full_name} ·{" "}
+              {formatDayLabel(ecuadorDateOf(cancelForm.visit.scheduled_start))} {formatTime(cancelForm.visit.scheduled_start)}
+            </p>
+            <p className="text-xs text-slate-500">
+              La franja queda libre y no se puede deshacer.{" "}
+              {cancelForm.visit.needs_whatsapp_confirmation
+                ? "El cliente no dio correo: avísale por WhatsApp."
+                : "Se avisará al cliente por correo."}
+            </p>
+            <label className="block text-sm font-semibold text-slate-700">
+              Motivo
+              <textarea
+                rows={3}
+                maxLength={1000}
+                value={cancelForm.reason}
+                onChange={(event) => setCancelForm({ ...cancelForm, reason: event.target.value, error: "" })}
+                className={inputClass}
+              />
+            </label>
+            {cancelForm.error && (
+              <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-800">{cancelForm.error}</p>
+            )}
+          </div>
+        )}
+      </Dialog>
+
+      <ManualVisitDialog
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+        onCreated={(visit) => {
+          setNotice(
+            `Visita registrada: ${visit.property.title} · ${visit.client.full_name} · ${formatDayLabel(ecuadorDateOf(visit.scheduled_start))} ${formatTime(visit.scheduled_start)}.`,
+          );
+          setReload((value) => value + 1);
+        }}
+      />
+      <RescheduleVisitDialog
+        visit={rescheduling}
+        onClose={() => setRescheduling(null)}
+        onRescheduled={(visit) => {
+          setNotice(`Visita reprogramada al ${formatDayLabel(ecuadorDateOf(visit.scheduled_start))} ${formatTime(visit.scheduled_start)}.`);
+          setReload((value) => value + 1); // Puede haber cambiado de semana
+        }}
+      />
     </main>
   );
 }

@@ -16,14 +16,17 @@ import AutoGrowTextarea from "@/components/AutoGrowTextarea";
 import Dialog from "@/components/Dialog";
 import { ApiError } from "@/lib/api";
 import { getAuthSessionSnapshot, subscribeToAuthSession } from "@/lib/auth-session";
-import { advanceOpportunity, createInteraction, getOpportunity } from "@/lib/opportunities";
+import { advanceOpportunity, createInteraction, getOpportunity, markOpportunityLost } from "@/lib/opportunities";
 import {
   MAX_INTERACTION_NOTES,
   buildTimeline,
   isPositiveAmount,
   pipelineSteps,
 } from "@/lib/opportunityPipeline";
-import type { InteractionCreatePayload, OpportunityDetail } from "@/types/opportunity";
+import { LOSS_REASONS, type InteractionCreatePayload, type LossReason, type OpportunityDetail } from "@/types/opportunity";
+
+// HU-31: igual que MAX_LOSS_NOTES_LENGTH del backend.
+const MAX_LOSS_NOTES = 1000;
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString("es-EC", {
@@ -81,6 +84,13 @@ export default function OpportunityDetailPage() {
   const [draft, setDraft] = useState<InteractionDraft>(EMPTY_DRAFT);
   const [draftErrors, setDraftErrors] = useState<Record<string, string>>({});
   const [savingInteraction, setSavingInteraction] = useState(false);
+
+  // HU-31: diálogo de pérdida con motivo obligatorio y observación opcional.
+  const [losing, setLosing] = useState(false);
+  const [lossReason, setLossReason] = useState<LossReason | "">("");
+  const [lossNotes, setLossNotes] = useState("");
+  const [lossError, setLossError] = useState("");
+  const [savingLoss, setSavingLoss] = useState(false);
 
   const canLoad = Boolean(session?.access) && validId;
   const loading = canLoad && loaded?.key !== reload;
@@ -150,6 +160,37 @@ export default function OpportunityDetailPage() {
     }
   }
 
+  function closeLossDialog() {
+    setLosing(false);
+    setLossReason("");
+    setLossNotes("");
+    setLossError("");
+  }
+
+  async function confirmLoss() {
+    if (!data) return;
+    if (!lossReason) {
+      setLossError("Elige el motivo de la pérdida.");
+      return;
+    }
+    setSavingLoss(true);
+    setLossError("");
+    try {
+      const updated = await markOpportunityLost(data.id, { loss_reason: lossReason, notes: lossNotes.trim() });
+      setLoaded({ key: reload, data: updated, error: "", notFound: false });
+      setNotice('La oportunidad quedó como "Perdida".');
+      closeLossDialog();
+    } catch (err) {
+      if (handleAuthError(err)) return;
+      const byField = fieldErrors(err);
+      setLossError(
+        byField.loss_reason ?? byField.notes ?? byField.status ?? (err instanceof Error ? err.message : "No se pudo guardar."),
+      );
+    } finally {
+      setSavingLoss(false);
+    }
+  }
+
   async function submitInteraction(event: React.FormEvent) {
     event.preventDefault();
     if (!data) return;
@@ -203,7 +244,7 @@ export default function OpportunityDetailPage() {
   }
 
   const progress = data ? pipelineSteps(data.status) : null;
-  const timeline = data ? buildTimeline(data.status_history, data.interactions) : [];
+  const timeline = data ? buildTimeline(data.status_history, data.interactions, data.documents) : [];
   const visitLabel = (visitId: number | null) => {
     const visit = data?.visits.find((row) => row.id === visitId);
     return visit ? `Visita del ${formatDateTime(visit.scheduled_start)}` : "";
@@ -291,7 +332,12 @@ export default function OpportunityDetailPage() {
                 ))}
               </ol>
 
-              {!progress.inPipeline && (
+              {data.status === "PERDIDA" && (
+                <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                  Oportunidad perdida (definitiva). Motivo: {data.loss_or_reversion_reason || "—"}
+                </p>
+              )}
+              {!progress.inPipeline && data.status !== "PERDIDA" && (
                 <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
                   &quot;{data.status_display}&quot; está fuera de la secuencia de este corte; no se avanza desde aquí.
                 </p>
@@ -341,6 +387,22 @@ export default function OpportunityDetailPage() {
                   Pendiente de cierre es el último paso del asesor: el cierre lo confirma el administrador (RF-07, fuera de este corte).
                 </p>
               ) : null}
+
+              {/* HU-31: salida a Perdida desde cualquier estado activo */}
+              {data.can_mark_lost && (
+                <div className="mt-5 border-t border-slate-100 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setLosing(true)}
+                    className="w-full rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 sm:w-auto"
+                  >
+                    Marcar como perdida
+                  </button>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Es definitiva: cancela sus visitas programadas y no admite interacciones nuevas.
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* HU-30: línea de tiempo y registro de interacciones */}
@@ -357,6 +419,8 @@ export default function OpportunityDetailPage() {
                         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
                           {item.kind === "status" ? (
                             <span className="rounded-full bg-blue-100 px-2 py-0.5 font-semibold text-blue-800">Cambio de estado</span>
+                          ) : item.kind === "document" ? (
+                            <span className="rounded-full bg-violet-100 px-2 py-0.5 font-semibold text-violet-800">Documento</span>
                           ) : (
                             <span
                               className={`rounded-full px-2 py-0.5 font-semibold ${
@@ -382,6 +446,16 @@ export default function OpportunityDetailPage() {
                               {item.entry.changed_by?.name ?? "Sistema"}{item.entry.reason ? ` · ${item.entry.reason}` : ""}
                             </p>
                           </>
+                        ) : item.kind === "document" ? (
+                          <>
+                            <p className="mt-2 text-sm text-slate-800">
+                              {item.entry.doc_type_display} · versión {item.entry.version}
+                              {!item.entry.is_current_version && " (reemplazada)"}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Validación: {item.entry.validation_status_display} · Subido por {item.entry.uploaded_by?.name ?? "—"}
+                            </p>
+                          </>
                         ) : (
                           <>
                             <p className="mt-2 whitespace-pre-line break-words text-sm text-slate-800">{item.entry.notes}</p>
@@ -404,7 +478,9 @@ export default function OpportunityDetailPage() {
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <h2 className="text-lg font-bold text-slate-900">Registrar interacción</h2>
                   {!data.accepts_interactions ? (
-                    <p className="mt-3 text-sm text-slate-600">La oportunidad está cerrada: no se registran interacciones nuevas.</p>
+                    <p className="mt-3 text-sm text-slate-600">
+                      La oportunidad está en &quot;{data.status_display}&quot;: no se registran interacciones nuevas.
+                    </p>
                   ) : (
                     <form onSubmit={submitInteraction} noValidate className="mt-3 space-y-4">
                       {draftErrors.detail && <p role="alert" className="text-sm text-red-700">{draftErrors.detail}</p>}
@@ -515,6 +591,42 @@ export default function OpportunityDetailPage() {
         {needsPrice && isPositiveAmount(finalPrice) && (
           <p className="mt-2">Precio final acordado: <span className="font-semibold">{formatMoney(finalPrice.trim())}</span></p>
         )}
+      </Dialog>
+
+      <Dialog
+        open={losing}
+        title="¿Marcar la oportunidad como perdida?"
+        confirmLabel="Marcar como perdida"
+        tone="danger"
+        busy={savingLoss}
+        onConfirm={confirmLoss}
+        onCancel={closeLossDialog}
+      >
+        <p>Es definitiva: queda en el historial con tu usuario, fecha y hora, y se cancelan sus visitas programadas.</p>
+        <label className="mt-3 block text-sm font-medium text-slate-800">
+          Motivo
+          <select
+            value={lossReason}
+            onChange={(e) => setLossReason(e.target.value as LossReason | "")}
+            aria-invalid={Boolean(lossError) && !lossReason}
+            className={inputClass}
+          >
+            <option value="">Elige el motivo…</option>
+            {LOSS_REASONS.map((reason) => (
+              <option key={reason.value} value={reason.value}>{reason.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="mt-3 block text-sm font-medium text-slate-800">
+          Observación (opcional)
+          <AutoGrowTextarea
+            value={lossNotes}
+            onValueChange={setLossNotes}
+            maxLength={MAX_LOSS_NOTES}
+            placeholder="Detalle que ayude a entender la pérdida"
+          />
+        </label>
+        {lossError && <p role="alert" className="mt-2 text-sm text-red-700">{lossError}</p>}
       </Dialog>
     </main>
   );

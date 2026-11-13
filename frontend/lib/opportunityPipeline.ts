@@ -3,6 +3,7 @@
 
 import type {
   Interaction,
+  OpportunityDocument,
   OpportunityStatus,
   StatusHistoryEntry,
 } from "../types/opportunity";
@@ -56,11 +57,19 @@ export function isPositiveAmount(text: string) {
 
 export type TimelineItem =
   | { kind: "status"; key: string; createdAt: string; entry: StatusHistoryEntry }
-  | { kind: "interaction"; key: string; createdAt: string; entry: Interaction };
+  | { kind: "interaction"; key: string; createdAt: string; entry: Interaction }
+  | { kind: "document"; key: string; createdAt: string; entry: OpportunityDocument };
 
-// I-06A: historial de estados e interacciones en una sola línea de tiempo, de la más reciente a
-// la más antigua. Con la misma hora, el cambio de estado va primero.
-export function buildTimeline(history: StatusHistoryEntry[], interactions: Interaction[]) {
+// Con la misma hora: primero el cambio de estado, luego la interacción y al final el documento.
+const KIND_ORDER: Record<TimelineItem["kind"], number> = { status: 0, interaction: 1, document: 2 };
+
+// I-06A: historial de estados, interacciones y (HU-33, DS-52) documentos de la propiedad en una
+// sola línea de tiempo, de la más reciente a la más antigua.
+export function buildTimeline(
+  history: StatusHistoryEntry[],
+  interactions: Interaction[],
+  documents: OpportunityDocument[] = [],
+) {
   const items: TimelineItem[] = [
     ...history.map((entry) => ({
       kind: "status" as const, key: `s-${entry.id}`, createdAt: entry.created_at, entry,
@@ -68,10 +77,13 @@ export function buildTimeline(history: StatusHistoryEntry[], interactions: Inter
     ...interactions.map((entry) => ({
       kind: "interaction" as const, key: `i-${entry.id}`, createdAt: entry.created_at, entry,
     })),
+    ...documents.map((entry) => ({
+      kind: "document" as const, key: `d-${entry.id}`, createdAt: entry.created_at, entry,
+    })),
   ];
   return items.sort((a, b) => {
     const byTime = Date.parse(b.createdAt) - Date.parse(a.createdAt);
     if (byTime !== 0) return byTime;
-    return a.kind === b.kind ? 0 : a.kind === "status" ? -1 : 1;
+    return KIND_ORDER[a.kind] - KIND_ORDER[b.kind];
   });
 }

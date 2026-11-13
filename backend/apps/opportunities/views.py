@@ -20,6 +20,7 @@ from .serializers import (
     EligiblePropertySerializer,
     InteractionCreateSerializer,
     InteractionSerializer,
+    MarkLostSerializer,
     OpportunityDetailSerializer,
     OpportunityOpenSerializer,
     OpportunitySerializer,
@@ -35,6 +36,7 @@ from .services import (
     assignable_agents,
     eligible_properties,
     is_internal_user,
+    mark_lost,
     open_manual_opportunity,
     register_web_interest,
 )
@@ -117,6 +119,11 @@ class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     GET  /api/opportunities/<id>/interactions/  -> HU-30, orden cronologico
     POST /api/opportunities/<id>/interactions/
          {"interaction_type": "NOTA"|"CONTRAOFERTA", "notes", "offered_price"?, "visit"?}
+
+    Lotes 5 y 6 (DS-52):
+    GET  /api/opportunities/<id>/ -> tambien los documentos de la propiedad (HU-33)
+    GET  /api/opportunities/eligible-properties/?mine=1 -> el asesor, solo las suyas (HU-23)
+    POST /api/opportunities/<id>/lose/ {"loss_reason", "notes"?}  -> HU-31, Perdida
     '''
     permission_classes = [permissions.IsAuthenticated, IsInternalUser]
     http_method_names = ['get', 'post', 'head', 'options']
@@ -133,6 +140,7 @@ class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
             # Los filtros de la cartera no aplican al detalle ni a sus acciones.
             return queryset.prefetch_related(
                 'status_history__changed_by', 'interactions__author', 'visits',
+                'property__documents__uploaded_by',  # HU-33 (DS-52)
             )
         return filter_opportunities(queryset, self.request.query_params)
 
@@ -150,6 +158,22 @@ class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                 target_status=data.validated_data['status'],
                 agreed_final_price=data.validated_data['agreed_final_price'],
             )
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        return Response(OpportunityDetailSerializer(self.get_object()).data)
+
+    @action(detail=True, methods=['post'])
+    def lose(self, request, pk=None):
+        '''HU-31 (DS-52): POST /api/opportunities/<id>/lose/ {"loss_reason", "notes"?}.'''
+        opportunity = self.get_object()
+        data = MarkLostSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        try:
+            mark_lost(opportunity_id=opportunity.pk, user=request.user,
+                      loss_reason=data.validated_data['loss_reason'],
+                      notes=data.validated_data['notes'])
         except DjangoPermissionDenied as error:
             raise PermissionDenied(str(error))
         except DjangoValidationError as error:
@@ -207,6 +231,10 @@ class OpportunityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     @action(detail=False, methods=['get'], url_path='eligible-properties')
     def eligible_properties(self, request):
         properties = eligible_properties().prefetch_related('images').order_by('title')
+        # HU-23 (DS-52): ?mine=1 -> el asesor solo ve las que atiende (visita coordinada);
+        # el admin las ve todas.
+        if request.query_params.get('mine') == '1' and request.user.role != 'admin':
+            properties = properties.filter(agent=request.user)
         return Response(
             EligiblePropertySerializer(properties, many=True, context={'request': request}).data
         )
