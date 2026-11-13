@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización · HU-09 integración de develop | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24): `origin/develop` `78b5187` integrado en `d7318db` (conflictos solo documentales, ambas partes conservadas); 342 pruebas OK en SQLite; DT-159 (`.pyc` versionados); nota aditiva de HU-09 en Estado de procesos; nota de cierre |
 | Última actualización · ajustes tras la auditoría del PR #25 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 con DS-35 (EP-1 2/3 HU · 5/8 pts), precisión de DT-157 (1) y fechas de V-86 a V-90 en las filas resumen; nota de cierre |
 | Última actualización · estados tras los merges | 2026-11-12 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: DT-157 y DS-51; HU-12, HU-15, HU-16, HU-29, HU-30, HU-45 y HU-46 en **Listo**; nota de V-63 (No aplicable hasta el despliegue) y nota de cierre |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (transcrito por Claude Code) · Ronda 8 cerrada: V-86 a V-95 **Aprobado** por Pablo; HU-15, HU-16, HU-29 y HU-30 siguen en Pruebas hasta la auditoría y el merge del PR #22 |
@@ -60,6 +61,11 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ---
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
+
+### 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24, de Sebas) · integración de develop
+- **Hecho:** con Sebas avisado (según Pablo, 2026-11-13), worktree nuevo `Urbanex-hu09` e integración de `origin/develop` `78b5187` (PR #21, #22 y #25) en `d7318db`. Conflictos solo en 7 documentos (filas "Última actualización" y notas de cierre); se conservaron ambas partes sin reescribir filas de Sebas; el código se fusionó sin conflictos. Suite: línea base 253 OK y, tras integrar, 342 OK en SQLite; frontend 22/22, build, tsc y eslint exit 0 (Estándares §4). Nuevo **DT-159** (`.pyc` versionados; responsable Sebas, PR aparte). Nota aditiva en la sección HU-09 de Estado de procesos (V-45 aprobada por Sebas el 2026-11-10); la fila resumen de Sebas no se toca. DT-158 no se usa: según Pablo, está reservada en otra rama (lotes 5 y 6).
+- **Falta:** push de la rama (lo hace Pablo); auditoría §11 del PR #24 en un chat nuevo de solo lectura; aprobación de revisión en GitHub y merge del PR #24. Suite contra PostgreSQL: No ejecutado (DT-68, Nivel 1).
+- **Siguiente paso:** Pablo hace el push de `feat/URB-09-HU-09-actualizar-propiedad` y lanza la auditoría §11; si es apta, HU-09 puede pasar a Listo al fusionarse.
 
 ### 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo` (PR #25) · ajustes tras la auditoría
 - **Hecho:** cita de la auditoría §11 del PR #22 como apta (comentario de Pablo en el PR #22, `c4125df`). HU-46: el criterio "solo los usuarios activos inician sesión" queda cubierto por la salida de `apps.users.tests.UserManagementApiTests.test_inactive_users_cannot_log_in` (`backend/apps/users/tests.py:1361`; "Ran 1 test … OK", exit 0, SQLite) según DS-35 (decisión de Pablo); EP-1 pasa a **2/3 HU · 5/8 pts (62,5 %)** y validado 4/6. DT-157 precisa que el punto (1) se corrigió con nota aditiva, no en la fila de Sebas. Fechas corregidas en las filas resumen de HU-15 (V-86 el 2026-11-11, V-87 el 2026-11-12) y HU-16 (V-88 a V-90 el 2026-11-11).
