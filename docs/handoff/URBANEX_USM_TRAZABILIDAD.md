@@ -2,6 +2,9 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
+| Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
+| Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
 | Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
@@ -400,3 +403,13 @@ La SQLite de trabajo no se migró: showmigrations devuelve pendientes documents.
 ### HU-10 — correcciones documentales PR #27 (2026-11-13)
 
 PROC-02 / HU-10 conserva implementación y endpoints anteriores. Esta corrección solo documenta la primera parte de HU-10 y no incorpora HU-35 ni cambia el corte del 60 %. Estado Pruebas, sin puntos completados nuevos. Contexto maestro/DS-16/ampliaciones aceptados por Pablo para este PR; cotejo Anexo 2 POR CONFIRMAR. DT-121..123 y comprobación humana de Reservado con HU-35 permanecen abiertos.
+
+
+### HU-46 — corrección de enlace de recuperación en consola (2026-11-16)
+
+PROC-08 / HU-46 conserva endpoints y reglas existentes. La corrección añade una representación copiable del enlace de recuperación solo en consola; Resend permanece sin cambios. No incorpora otra HU ni cambia RF, corte o puntos. Pruebas de enlaces/JWT en users/tests.py; resultados en Estándares §4. Comprobación humana de este ajuste y envío real Pendiente.
+
+
+### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
+
+PROC-08 / HU-46 conserva flujo y endpoints. Se añade presentación HTML en activación y recuperación usando templates/users/emails/{base,activation,password_reset}.html; el envío mantiene texto alternativo y URL/token originales. No incorpora más procesos ni modifica el corte. Prueba humana del nuevo correo Pendiente; resultados técnicos en Estándares §4.
