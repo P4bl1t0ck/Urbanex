@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
 | Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
 | Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
 | Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
@@ -413,3 +414,8 @@ PROC-08 / HU-46 conserva endpoints y reglas existentes. La corrección añade un
 ### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
 
 PROC-08 / HU-46 conserva flujo y endpoints. Se añade presentación HTML en activación y recuperación usando templates/users/emails/{base,activation,password_reset}.html; el envío mantiene texto alternativo y URL/token originales. No incorpora más procesos ni modifica el corte. Prueba humana del nuevo correo Pendiente; resultados técnicos en Estándares §4.
+
+
+### Fix HU-44/HU-46 — cierre documental e integración (2026-11-16)
+
+PROC-08 vincula este fix posterior al merge con HU-44/URB-02 (correo de activación) y HU-46/URB-04 (recuperación de contraseña y pruebas JWT), sin nuevas historias o procesos. Rama fix/URB-02-04-HU-44-46-correos, excepción puntual autorizada por Sebas; PR previsto hacia develop. No cambia el corte, puntos ni estados globales. Alcance detallado y decisión en Progress/Estado.
