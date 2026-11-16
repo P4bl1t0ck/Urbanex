@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
 | Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
 | Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
 | Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
@@ -447,3 +448,8 @@ El alcance preserva la política actual de enlaces simultáneos: solicitar no ca
 Los tokens de activación/recuperación siguen en href de los botones y en la parte de texto: ocultarlos visualmente no es un control de seguridad nuevo. Se conservan hash en base, uso único, vencimiento e invalidación de JWT ya existentes. Las plantillas de Django escapan nombres y atributos automáticamente; las pruebas comprueban que nombres con HTML no se interpretan como etiquetas y que ambas anclas conservan la URL original.
 
 Las plantillas no contienen scripts ni cargan fuentes, imágenes o recursos externos. No se cambia la configuración de seguimiento del proveedor ni se afirma seguridad global o compatibilidad con todos los clientes. El enlace copiable se limita al proveedor/backend de consola; Resend no lo imprime. Pruebas de entrega simuladas y muestras con token ficticio; no se toca .env, la base habitual o sus cuentas. Validación humana del HTML real Pendiente; aprobaciones previas conservadas.
+
+
+### Fix HU-44/HU-46 — cierre documental e integración (2026-11-16)
+
+El renombrado a fix/URB-02-04-HU-44-46-correos y el cierre documental no modifican controles de seguridad, tokens, enlaces, proveedor ni almacenamiento. Develop 6e0caca ya integrado; sin cambios de código desde las 383 pruebas correctas. No se ejecutaron envíos, migraciones o cambios de cuenta en este paso. Se conserva la excepción de alcance/nombre de Sebas sin declarar aprobación de auditoría o cierre global de seguridad.

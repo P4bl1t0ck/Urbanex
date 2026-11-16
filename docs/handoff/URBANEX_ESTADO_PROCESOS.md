@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
 | Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
 | Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
 | Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
@@ -766,3 +767,12 @@ Presentación HTML compartida para activación y recuperación dentro de HU-46; 
 
 
 **Reporte posterior (2026-11-16):** según Sebas, el ajuste funciona y autoriza sus commits. Se conserva como reporte humano sin ampliar los casos observados ni modificar automáticamente estados de HU o V-xx; revisión formal y auditoría del nuevo PR siguen pendientes. Código en dff0eb6, a9e0d1e y 3984e79; sin push en este paso.
+
+
+### Fix compartido HU-44/HU-46 — alcance vigente (2026-11-16)
+
+**Decisión específica de Sebas (2026-11-16):** este trabajo se presenta como corrección posterior al merge del componente de correos de cuenta, con alcance compartido HU-44/URB-02 (activación) y HU-46/URB-04 (recuperación, consola y regresiones JWT). No se vuelven a implementar ni se reabren automáticamente las historias originales. Sebas autorizó renombrar la rama local de feat/URB-04-HU-46-correo-consola a **fix/URB-02-04-HU-44-46-correos**, como excepción puntual al nombre feat y a una historia por rama de AGENTS.md §5. No se modifica AGENTS.md ni se establece una excepción general para otros trabajos.
+
+**Criterio de flujo:** se usa fix/ por la naturaleza correctiva de este ajuste sobre funcionalidades ya integradas, no porque Gitflow prohíba crear otra rama de desarrollo después de un merge. El [modelo original de Gitflow](https://nvie.com/posts/a-successful-git-branching-model/) permite nombres de ramas de trabajo distintos de los reservados; hotfix corresponde a reparaciones urgentes desde master/producción. Este trabajo nace de develop y su PR debe volver a develop; no es un hotfix de producción. Los nombres de rama antiguos en registros de ejecución/commits se conservan como historial. Los cinco commits originales se mantuvieron sin reescritura ni force push.
+
+La excepción registra el alcance real del PR, no una nueva historia o cambio de aceptación global. Se mantiene el reporte de funcionamiento de Sebas y las validaciones previas sin inventar observaciones, hora de ejecución o evidencia. Auditoría del fix Pendiente. Develop 6e0caca ya incluido; pull sin cambios.

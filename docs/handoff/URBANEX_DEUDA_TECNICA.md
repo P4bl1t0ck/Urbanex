@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
 | Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
 | Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
 | Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
@@ -613,3 +614,8 @@ Pregunta de política detectada y no redefinida aquí: hoy varios enlaces pueden
 ### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
 
 Se autorizaron tres plantillas Django con autoescape para activación/recuperación y se conserva alternativa de texto, protocolo de tokens y política JWT. No se crean IDs, dependencias, migraciones ni decisiones de negocio. La presentación en navegador no equivale a compatibilidad verificada en todos los clientes de correo: comprobación humana con Resend Pendiente. El reporte de Sebas sobre recepción previa corresponde al texto anterior. PostgreSQL No ejecutado (DT-68). No se cierra seguridad global ni se resuelve por este cambio la pregunta sobre permitir únicamente el último enlace.
+
+
+### Fix HU-44/HU-46 — cierre documental e integración (2026-11-16)
+
+La excepción puntual de Sebas de nombre fix/ y alcance compartido HU-44/HU-46 se registra en Progress y Estado, sin editar AGENTS ni crear DS/DT nuevo. Motivo: corregir presentación de enlaces de recuperación y unificar HTML de correos de activación/recuperación ya implementados. Gitflow no obliga a este prefijo ni prohíbe nuevas ramas posteriores al merge; es la convención explícita elegida para el ajuste. No se cierran riesgos globales; PostgreSQL No ejecutado (DT-68).

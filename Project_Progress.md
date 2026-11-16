@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
 | Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
 | Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
 | Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
@@ -79,6 +80,12 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
 
+
+### 2026-11-16 · Codex con Sebas · Fix HU-44/HU-46: cierre documental e integración · rama `fix/URB-02-04-HU-44-46-correos`
+
+- **Hecho:** Sebas autorizó los pasos 1 y 2: registrar el fix compartido posterior al merge y comprobar develop. Renombrado conservando commits; excepción puntual de nombre y alcance atribuida a Sebas, sin cambiar AGENTS. HU-44 corresponde a activación; HU-46 a recuperación y regresiones de autenticación. No se reabren estados ni se suman puntos.
+- **Comprobación:** fetch y pull --ff-only origin develop → Already up to date; develop 6e0caca incluido, exit 0, HEAD sin cambios. Suite previa del mismo código: 383 OK, check sin cambios; no se repite por documentación. Diff y preservación de cambios locales comprobados antes de guardar el cierre. PostgreSQL No ejecutado (DT-68).
+- **Falta y siguiente paso:** auditoría de solo lectura en chat nuevo contra origin/develop; después autorización de push y PR hacia develop abierto por la persona. Documentación guardada en commits separados, Trazabilidad en el suyo. Sin push ni PR en este paso. Borrado intencional local de backend/.env.example excluido del fix; no se modifica .env o la base habitual.
 
 ### 2026-11-16 · Codex con Sebas · HU-46: commits del fix y correos HTML · rama `feat/URB-04-HU-46-correo-consola`
 
@@ -1996,3 +2003,12 @@ Según Sebas (2026-11-16), el envío real anterior con Resend y texto funcionó;
 
 
 **Reporte humano del ajuste (2026-11-16):** Sebas confirmó en la conversación que todo funciona y pidió crear los commits. Se registra su confirmación sin atribuir al agente una aprobación ni completar por inferencia horarios, casos específicos o rutas de evidencia. Las validaciones anteriores se conservan. La preparación de commits no sustituye la auditoría de solo lectura del PR.
+
+
+### Fix compartido HU-44/HU-46 — cierre de nombre e integración (2026-11-16)
+
+**Decisión específica de Sebas (2026-11-16):** este trabajo se presenta como corrección posterior al merge del componente de correos de cuenta, con alcance compartido HU-44/URB-02 (activación) y HU-46/URB-04 (recuperación, consola y regresiones JWT). No se vuelven a implementar ni se reabren automáticamente las historias originales. Sebas autorizó renombrar la rama local de feat/URB-04-HU-46-correo-consola a **fix/URB-02-04-HU-44-46-correos**, como excepción puntual al nombre feat y a una historia por rama de AGENTS.md §5. No se modifica AGENTS.md ni se establece una excepción general para otros trabajos.
+
+**Criterio de flujo:** se usa fix/ por la naturaleza correctiva de este ajuste sobre funcionalidades ya integradas, no porque Gitflow prohíba crear otra rama de desarrollo después de un merge. El [modelo original de Gitflow](https://nvie.com/posts/a-successful-git-branching-model/) permite nombres de ramas de trabajo distintos de los reservados; hotfix corresponde a reparaciones urgentes desde master/producción. Este trabajo nace de develop y su PR debe volver a develop; no es un hotfix de producción. Los nombres de rama antiguos en registros de ejecución/commits se conservan como historial. Los cinco commits originales se mantuvieron sin reescritura ni force push.
+
+**Integración comprobada:** git fetch origin confirmó origin/develop en 6e0caca; comparación previa HEAD...origin/develop → 5 0. git pull --ff-only origin develop desde la rama fix → Already up to date, exit 0; HEAD_SIN_CAMBIOS=True; git merge-base --is-ancestor origin/develop HEAD → exit 0. No se incorporó código nuevo; se conserva la suite previa del mismo código de 383 OK (293.867s), check sin cambios, registrados en Estándares §4. Solo se actualiza documentación; no se repite la suite. Sin cambios de frontend, .env, migraciones o base habitual.

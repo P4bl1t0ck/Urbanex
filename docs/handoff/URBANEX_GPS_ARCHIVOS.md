@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
 | Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
 | Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
 | Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
@@ -474,3 +475,8 @@ Son los tres archivos nuevos aprobados; no cambia settings.py, modelos, views, d
 
 
 **Traza de commits HU-46 (2026-11-16):** dff0eb6 guarda las tres plantillas; a9e0d1e guarda exclusivamente serializers.py compartido; 3984e79 guarda las pruebas. Trazabilidad se separa de los otros documentos. Sin cambios de código entre la suite de 383 OK y estos commits. El borrado de .env.example permanece como cambio local de Sebas fuera del fix.
+
+
+### Fix HU-44/HU-46 — cierre documental e integración (2026-11-16)
+
+Rama vigente fix/URB-02-04-HU-44-46-correos; el nombre anterior queda como historial en los registros. Alcance de código permanece igual: tres plantillas, serializers.py y tests.py. Los cinco commits originales (dff0eb6, a9e0d1e, 3984e79, ff04c9d, 06da7c8) se conservan. Actualización exclusivamente documental posterior al renombrado; Trazabilidad compartida en commit propio. Borrado local de .env.example excluido.

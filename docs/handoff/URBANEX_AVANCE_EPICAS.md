@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
 | Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
 | Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
 | Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
@@ -459,3 +460,8 @@ Corrección de presentación dentro de HU-46 / URB-04: enlace legible en consola
 ### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
 
 Ampliación autorizada de presentación para los correos de activación y recuperación, con una base visual reutilizable. Sin nueva HU, cambio de estimación, puntos o estado. La comprobación humana del HTML está Pendiente; el reporte previo de Sebas de recepción de texto por Resend no se extrapola al HTML nuevo.
+
+
+### Fix HU-44/HU-46 — cierre documental e integración (2026-11-16)
+
+Corrección compartida de correos de HU-44/URB-02 y HU-46/URB-04 ya integradas. Sebas autorizó excepcionalmente fix/URB-02-04-HU-44-46-correos. No se crea HU, se cambia su estado, se reabre aceptación ni se suman puntos; es seguimiento del fix posterior al merge. Develop 6e0caca ya incluido, pull sin cambios.
