@@ -81,6 +81,17 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 
 
+### 2026-11-16 · Codex con Sebas · Fix HU-44/HU-46: publicación solicitada por Sebas
+
+- **Hecho:** Sebas pidió publicar sin volver a inspeccionar imágenes. Se comprobó que existen evidence/HU-46/html-activacion.png y evidence/HU-46/html-recuperacion.png. Las aprobaciones y horarios de la tabla son declaraciones de Sebas; no una aprobación del agente.
+- **Limitación y siguiente paso:** la inspección anterior encontró que la captura de activación mostraba el correo anterior sin el botón HTML descrito en la tabla. Esa discrepancia no se considera resuelta por comprobar la existencia del archivo; queda Pendiente antes del merge. No se volvieron a abrir las imágenes. El push publica el trabajo para PR, sin acreditar el cierre de esa validación. Se conserva fuera del commit el borrado local de backend/.env.example.
+
+### 2026-11-16 · Codex con Sebas · Fix HU-44/HU-46: revisión de evidencia antes del push · rama `fix/URB-02-04-HU-44-46-correos`
+
+- **Hecho:** Sebas añadió dos filas Aprobado de HTML con fecha/hora y pidió revisar antes de publicar. Se añadieron encabezado/separador de tabla y atribución, conservando exactamente las filas, horarios y resultados escritos por él.
+- **Comprobación:** las rutas evidence/HU-46/html-activacion.png y html-recuperacion.png no existen al revisar; las capturas automáticas de previews ficticias no se usan como sustitución de correo recibido. No se cambian código, .env, datos o el borrado previo de .env.example.
+- **Falta y siguiente paso:** localizar o guardar las dos capturas reales con las rutas registradas, comprobar el registro, crear el commit documental y hacer el push autorizado condicionado a que la revisión esté completa. Sin commit ni push en este paso. La revisión técnica previa reportada por Sebas fue Apto para PR sobre b69b9c1; no se emite una aprobación nueva del agente.
+
 ### 2026-11-16 · Codex con Sebas · Fix HU-44/HU-46: cierre documental e integración · rama `fix/URB-02-04-HU-44-46-correos`
 
 - **Hecho:** Sebas autorizó los pasos 1 y 2: registrar el fix compartido posterior al merge y comprobar develop. Renombrado conservando commits; excepción puntual de nombre y alcance atribuida a Sebas, sin cambiar AGENTS. HU-44 corresponde a activación; HU-46 a recuperación y regresiones de autenticación. No se reabren estados ni se suman puntos.
@@ -1999,8 +2010,14 @@ Sebas autorizó ampliar la misma rama con tres plantillas: users/emails/base.htm
 
 Según Sebas (2026-11-16), el envío real anterior con Resend y texto funcionó; no se atribuye esa observación al HTML nuevo. Se generaron vistas con Andrea y TOKEN-FICTICIO en evidence/HU-46/email-activation-preview.html y email-password_reset-preview.html, y capturas a 720/375 px con sufijo 20261116. Edge automático: ancho de documento igual al viewport, dos enlaces ficticios correctos y sin scripts en ambos correos/tamaños, EMAIL_BROWSER_QA_EXIT=0. Es revisión en navegador, no evidencia de recepción ni renderizado en Gmail/Outlook.
 
-**Prueba humana de HTML — Pendiente:** reiniciar Django y solicitar recuperación con Resend; comprobar marca, botón, texto, vencimiento y apertura del enlace. Probar activación mediante la creación o reinvitación autorizada de una cuenta de prueba. El acceso de prueba debe conservar uso único y caducidad. No se enviaron correos reales por el agente ni se crean cuentas habituales en esta ampliación. Las versiones de texto y consola se conservan.
+**Prueba humana de HTML:** reiniciar Django y solicitar recuperación con Resend; comprobar marca, botón, texto, vencimiento y apertura del enlace. Probar activación mediante la creación o reinvitación autorizada de una cuenta de prueba. El acceso de prueba debe conservar uso único y caducidad. No se enviaron correos reales por el agente ni se crean cuentas habituales en esta ampliación. Las versiones de texto y consola se conservan.
 
+**Registro humano incorporado por Sebas (2026-11-16):** las filas siguientes documentan su aprobación de la presentación HTML y apertura de ambos botones. Ambas rutas locales existen. La comprobación de existencia no resuelve la discrepancia detectada previamente en la captura de activación, registrada en la nota de cierre de esta sesión; no se sustituyen por vistas ficticias del agente.
+
+| Quién | Fecha | Hora (Guayaquil) | Qué vio exactamente | Evidencia local | Resultado |
+|---|---|---|---|---|---|
+| Sebas | 2026-11-16 | 03:17 | Recibí el correo HTML de activación con estilo Urbanex. El botón «Activar mi cuenta» abrió la página de activación correctamente. | evidence/HU-46/html-activacion.png | Aprobado |
+| Sebas | 2026-11-16 | 03:17 | Recibí el correo HTML de recuperación con estilo Urbanex. El botón «Restablecer contraseña» abrió el formulario correctamente. | evidence/HU-46/html-recuperacion.png | Aprobado |
 
 **Reporte humano del ajuste (2026-11-16):** Sebas confirmó en la conversación que todo funciona y pidió crear los commits. Se registra su confirmación sin atribuir al agente una aprobación ni completar por inferencia horarios, casos específicos o rutas de evidencia. Las validaciones anteriores se conservan. La preparación de commits no sustituye la auditoría de solo lectura del PR.
 
