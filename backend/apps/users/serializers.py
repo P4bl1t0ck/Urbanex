@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.db import transaction
+from django.template.loader import render_to_string
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, AuthenticationFailed
@@ -67,6 +68,15 @@ def send_activation_email(user):
         "Usa este enlace dentro de las próximas 24 horas para establecer tu "
         f"contraseña y activarla:\n{activation_url}\n"
     )
+    html_message = render_to_string(
+        "users/emails/activation.html",
+        {
+            "subject": subject,
+            "recipient_name": user.first_name or user.email,
+            "action_url": activation_url,
+            "action_label": "Activar mi cuenta",
+        },
+    )
 
     if settings.EMAIL_PROVIDER == "resend":
         resend.api_key = settings.RESEND_API_KEY
@@ -77,6 +87,7 @@ def send_activation_email(user):
                     "to": [user.email],
                     "subject": subject,
                     "text": message,
+                    "html": html_message,
                 }
             )
         except ResendError as exc:
@@ -95,7 +106,13 @@ def send_activation_email(user):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
         fail_silently=False,
+        html_message=html_message,
     )
+    if (
+        settings.EMAIL_PROVIDER == "console"
+        and settings.EMAIL_BACKEND == "django.core.mail.backends.console.EmailBackend"
+    ):
+        print(f"Enlace de activación: {activation_url}")
 
 
 def send_password_reset_email(user, token):
@@ -110,6 +127,15 @@ def send_password_reset_email(user, token):
         f"{reset_url}\n\n"
         "Si no solicitaste este cambio, puedes ignorar este mensaje."
     )
+    html_message = render_to_string(
+        "users/emails/password_reset.html",
+        {
+            "subject": subject,
+            "recipient_name": user.first_name or user.email,
+            "action_url": reset_url,
+            "action_label": "Restablecer contraseña",
+        },
+    )
 
     if settings.EMAIL_PROVIDER == "resend":
         resend.api_key = settings.RESEND_API_KEY
@@ -120,6 +146,7 @@ def send_password_reset_email(user, token):
                     "to": [user.email],
                     "subject": subject,
                     "text": message,
+                    "html": html_message,
                 }
             )
         except ResendError as exc:
@@ -139,7 +166,15 @@ def send_password_reset_email(user, token):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=False,
+            html_message=html_message,
         )
+        if (
+            settings.EMAIL_PROVIDER == "console"
+            and settings.EMAIL_BACKEND == "django.core.mail.backends.console.EmailBackend"
+        ):
+            # El correo MIME puede codificar '=' y partir la URL: facilitar su copia
+            # solo en la consola de desarrollo, conservando el token original.
+            print(f"Enlace de recuperación: {reset_url}")
     except (smtplib.SMTPException, OSError) as exc:
         logger.exception(
             "Could not send password reset email for user_id=%s",
