@@ -6,12 +6,15 @@ import shutil
 import tempfile
 from datetime import timedelta
 from decimal import Decimal
+from html import escape
+from html.parser import HTMLParser
 from types import SimpleNamespace
+from urllib.parse import parse_qs, urlsplit
 from unittest import mock
 from resend.exceptions import ResendError
 
 from django.conf import settings
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.apps import apps as django_apps
 from django.core.management import call_command
@@ -33,10 +36,25 @@ from apps.users.models import (
     PropertyImage,
     UserActivationToken,
 )
-from apps.users.serializers import PropertySerializer
+from apps.users.serializers import (
+    PasswordResetEmailError,
+    PropertySerializer,
+    send_password_reset_email,
+)
 from apps.users.views import get_missing_publication_requirements
 # Create your tests here.
 User = get_user_model()
+
+
+class EmailActionLinkParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.links = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self.links.append(dict(attrs).get("href"))
+
 
 class UrbanexCoreTests(TestCase):
     def setUp(self):
@@ -540,6 +558,95 @@ class PropertyWithdrawalApiTests(TestCase):
         for action in ("withdraw", "reactivate"):
             self.assertEqual(self.client.post(f"/api/auth/properties/999999/{action}/", {}, format="json").status_code, 404)
 
+class PasswordResetEmailDeliveryTests(SimpleTestCase):
+    @override_settings(
+        EMAIL_PROVIDER="console",
+        EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend",
+        FRONTEND_BASE_URL="http://localhost:3000",
+    )
+    def test_console_prints_exact_reset_link_on_one_line(self):
+        token = "ficticio_" + "x" * 100
+        expected = f"http://localhost:3000/reset-password#token={token}"
+        output = io.StringIO()
+        with mock.patch("sys.stdout", output), mock.patch(
+            "apps.users.serializers.resend.Emails.send"
+        ) as send_resend:
+            send_password_reset_email(
+                SimpleNamespace(first_name="Ejemplo", email="demo@urbanex.test"), token
+            )
+        self.assertIn(f"Enlace de recuperación: {expected}", output.getvalue().splitlines())
+        send_resend.assert_not_called()
+
+    @override_settings(
+        EMAIL_PROVIDER="resend",
+        RESEND_API_KEY="clave-ficticia-no-valida",
+        DEFAULT_FROM_EMAIL="Urbanex <no-reply@urbanex.test>",
+        FRONTEND_BASE_URL="http://localhost:3000",
+    )
+    def test_resend_receives_original_link_without_printing_token(self):
+        output = io.StringIO()
+        with mock.patch("sys.stdout", output), mock.patch(
+            "apps.users.serializers.resend.Emails.send"
+        ) as send_resend, mock.patch("apps.users.serializers.send_mail") as send_console:
+            send_password_reset_email(
+                SimpleNamespace(first_name="Ejemplo", email="demo@urbanex.test"),
+                "token-ficticio",
+            )
+        send_resend.assert_called_once()
+        payload = send_resend.call_args.args[0]
+        self.assertEqual(payload["to"], ["demo@urbanex.test"])
+        self.assertIn(
+            "http://localhost:3000/reset-password#token=token-ficticio", payload["text"]
+        )
+        parser = EmailActionLinkParser()
+        parser.feed(payload["html"])
+        self.assertEqual(
+            parser.links,
+            ["http://localhost:3000/reset-password#token=token-ficticio"] * 2,
+        )
+        self.assertIn("Restablecer contraseña", payload["html"])
+        self.assertEqual(output.getvalue(), "")
+        send_console.assert_not_called()
+
+    @override_settings(
+        EMAIL_PROVIDER="console",
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        FRONTEND_BASE_URL="http://localhost:3000/",
+    )
+    def test_reset_email_keeps_plaintext_and_html_escapes_name_with_exact_links(self):
+        name = '<img src=x onerror="alert(1)">'
+        send_password_reset_email(
+            SimpleNamespace(first_name=name, email="demo@urbanex.test"), "token-ficticio"
+        )
+        message = mail.outbox[-1]
+        expected = "http://localhost:3000/reset-password#token=token-ficticio"
+        self.assertIn(expected, message.body)
+        self.assertEqual(len(message.alternatives), 1)
+        html, mime_type = message.alternatives[0]
+        self.assertEqual(mime_type, "text/html")
+        self.assertIn(escape(name), html)
+        self.assertNotIn(name, html)
+        self.assertIn("60 minutos", html)
+        self.assertIn("Urbanex", html)
+        parser = EmailActionLinkParser()
+        parser.feed(html)
+        self.assertEqual(parser.links, [expected] * 2)
+
+    @override_settings(EMAIL_PROVIDER="resend", RESEND_API_KEY="clave-ficticia-no-valida")
+    def test_resend_error_is_wrapped_without_logging_token(self):
+        token = "token-ficticio-no-debe-aparecer-en-log"
+        with mock.patch(
+            "apps.users.serializers.resend.Emails.send",
+            side_effect=ResendError(403, "validation_error", "Synthetic rejection", ""),
+        ), self.assertLogs("apps.users.serializers", level="ERROR") as logs:
+            with self.assertRaises(PasswordResetEmailError):
+                send_password_reset_email(
+                    SimpleNamespace(pk=1, first_name="Ejemplo", email="demo@urbanex.test"),
+                    token,
+                )
+        self.assertNotIn(token, " ".join(logs.output))
+
+
 @override_settings(
     EMAIL_PROVIDER="console",
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
@@ -872,6 +979,102 @@ class PasswordResetAndRefreshApiTests(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend")
+    def test_link_copied_from_console_resets_password_and_cannot_be_reused(self):
+        output = io.StringIO()
+        with mock.patch("sys.stdout", output):
+            response = self.client.post(
+                "/api/auth/password-reset/request/", {"email": self.user.email}, format="json"
+            )
+        self.assertEqual(response.status_code, 200)
+        link = next(
+            line.removeprefix("Enlace de recuperación: ")
+            for line in output.getvalue().splitlines()
+            if line.startswith("Enlace de recuperación: ")
+        )
+        token = parse_qs(urlsplit(link).fragment)["token"][0]
+        payload = {"token": token, "password": "Console-New-Safe-2026!"}
+        self.assertEqual(
+            self.client.post("/api/auth/password-reset/confirm/", payload, format="json").status_code,
+            200,
+        )
+        self.assertEqual(
+            self.client.post("/api/auth/password-reset/confirm/", payload, format="json").status_code,
+            400,
+        )
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(payload["password"]))
+
+    def test_using_latest_link_invalidates_all_previously_issued_reset_links(self):
+        _, old_token = self._request_password_reset()
+        mail.outbox.clear()
+        _, latest_token = self._request_password_reset()
+        self.assertNotEqual(old_token, latest_token)
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            {"token": latest_token, "password": "Latest-New-Safe-2026!"}, format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertFalse(PasswordResetToken.objects.filter(user=self.user, is_used=False).exists())
+        response = self.client.post(
+            "/api/auth/password-reset/confirm/",
+            {"token": old_token, "password": "Another-New-Safe-2026!"}, format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_expired_jwt_access_and_refresh_are_rejected(self):
+        refresh = PasswordVersionRefreshToken.for_user(self.user)
+        access = refresh.access_token
+        access.set_exp(lifetime=timedelta(seconds=-1))
+        refresh.set_exp(lifetime=timedelta(seconds=-1))
+        self._assert_old_session_rejected(str(access), str(refresh))
+
+    def test_reset_link_is_rejected_at_exact_expiration_time(self):
+        _, token = self._request_password_reset()
+        record = PasswordResetToken.objects.get(user=self.user)
+        with mock.patch("django.utils.timezone.now", return_value=record.expires_at):
+            response = self.client.post(
+                "/api/auth/password-reset/confirm/",
+                {"token": token, "password": "Boundary-New-Safe-2026!"}, format="json",
+            )
+        self.assertEqual(response.status_code, 400)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("Original-Safe-2026!"))
+
+    def test_requesting_reset_does_not_invalidate_current_jwt_session(self):
+        access, refresh = self._old_session_tokens()
+        self._request_password_reset()
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+        self.assertEqual(client.get("/api/auth/properties/mine/").status_code, 200)
+        client.credentials()
+        client.cookies[settings.JWT_REFRESH_COOKIE_NAME] = refresh
+        client.get("/api/auth/csrf/")
+        response = client.post(
+            "/api/token/refresh/", {}, format="json",
+            HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value,
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+
+    @override_settings(EMAIL_PROVIDER="resend", RESEND_API_KEY="clave-ficticia-no-valida")
+    def test_resend_failure_keeps_neutral_response_and_disables_failed_link(self):
+        with mock.patch(
+            "apps.users.serializers.resend.Emails.send",
+            side_effect=ResendError(403, "validation_error", "Synthetic rejection", ""),
+        ) as send_resend, self.assertLogs("apps.users.serializers", level="ERROR"):
+            known = self.client.post(
+                "/api/auth/password-reset/request/", {"email": self.user.email}, format="json"
+            )
+            unknown = self.client.post(
+                "/api/auth/password-reset/request/",
+                {"email": "unknown@urbanex.test"}, format="json",
+            )
+        self.assertEqual(known.status_code, 200)
+        self.assertEqual(unknown.status_code, 200)
+        self.assertEqual(known.data, unknown.data)
+        self.assertTrue(PasswordResetToken.objects.get(user=self.user).is_used)
+        send_resend.assert_called_once()
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("Original-Safe-2026!"))
 
@@ -1249,6 +1452,32 @@ class UserManagementApiTests(TestCase):
         self.assertEqual(params["to"], ["resend.advisor@urbanex.test"])
         self.assertEqual(params["subject"], "Activa tu cuenta de Urbanex")
         self.assertIn("/activate#", params["text"])
+        activation_url = next(line for line in params["text"].splitlines() if "/activate#" in line)
+        parser = EmailActionLinkParser()
+        parser.feed(params["html"])
+        self.assertEqual(parser.links, [activation_url] * 2)
+        self.assertIn("Activar mi cuenta", params["html"])
+        self.assertIn("24 horas", params["html"])
+
+    def test_activation_email_keeps_plaintext_and_escapes_name_in_html(self):
+        self.client.force_authenticate(user=self.admin)
+        name = '<script>alert("name")</script>'
+        response = self.client.post(
+            "/api/auth/users/",
+            {"email": "html.activation@urbanex.test", "first_name": name, "role": "asesor"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        message = mail.outbox[-1]
+        activation_url = next(line for line in message.body.splitlines() if "/activate#" in line)
+        html, mime_type = message.alternatives[0]
+        self.assertEqual(mime_type, "text/html")
+        self.assertIn(escape(name), html)
+        self.assertNotIn(name, html)
+        self.assertIn("24 horas", html)
+        parser = EmailActionLinkParser()
+        parser.feed(html)
+        self.assertEqual(parser.links, [activation_url] * 2)
 
     def test_resend_failure_returns_gateway_error_and_rolls_back_user_creation(self):
         self.client.force_authenticate(user=self.admin)
