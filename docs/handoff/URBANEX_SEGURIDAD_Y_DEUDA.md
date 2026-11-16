@@ -2,6 +2,9 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
+| Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
+| Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
 | Última actualización lote 4 · Ronda 8 | 2026-11-12 · Pablo (con Claude Code) · **SEC-20**: decisión de Pablo (V-86), el celular del asesor puede ser público si es el de trabajo |
 | Última actualización de corrección HU-09 | 2026-11-11 · minimización de datos del motivo de retiro en respuestas públicas; pruebas de regresión incorporadas |
 | Última actualización aditiva HU-09 | 2026-11-11 · V-45 aprobada por Sebas el 2026-11-10; sin cambios en riesgos globales |
@@ -430,3 +433,17 @@ Las nuevas acciones de retirada/reactivación requieren autenticación y permiso
 ### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
 
 **SEC-05/DT-33:** la comparación anterior truncaba microsegundos y aceptaba JWT previos al cambio dentro del mismo segundo. Los JWT nuevos llevan `password_version`, comparada con la marca completa de contraseña, y mantienen la comprobación de `iat`. Para JWT heredados sin versión precisa, el segundo ambiguo se rechaza: puede requerirse un nuevo login. La regresión cubre tanto access como refresh y comprueba que los nuevos funcionen inmediatamente. Se mantienen los límites documentados de logout, la necesidad de revisar dominios de producción y los riesgos abiertos; no se declara cierre global de SEC-05. Evidencia técnica en Estándares §4; V-44 humana se conserva.
+
+
+### HU-46 — corrección de enlace de recuperación en consola (2026-11-16)
+
+La URL con token se imprime en una sola línea únicamente con EMAIL_PROVIDER=console y django.core.mail.backends.console.EmailBackend; ese backend ya mostraba el mismo token dentro del MIME. No se añade a logger ni a la ruta Resend. El enlace original, su hash almacenado, caducidad y uso único no cambian. Se mantienen las reglas de password_version, CSRF e invalidación de access/refresh tras cambio de contraseña; regresiones nuevas y previas ejecutadas, resultados en Estándares §4. No se afirma un cierre global de SEC-05/DT-33.
+
+El alcance preserva la política actual de enlaces simultáneos: solicitar no cambia la contraseña ni revoca JWT; completar el cambio invalida enlaces pendientes y sesiones anteriores. [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html) respalda tokens aleatorios, caducidad, uso único y controles de abuso, sin obligar a adoptar solo el enlace más reciente. No se añaden aquí controles de abuso ni se declara seguridad integral. Resend solo se simula; no se lee .env ni se envía correo real, y no se alteran cuentas o datos habituales. No hay validación humana nueva del agente.
+
+
+### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
+
+Los tokens de activación/recuperación siguen en href de los botones y en la parte de texto: ocultarlos visualmente no es un control de seguridad nuevo. Se conservan hash en base, uso único, vencimiento e invalidación de JWT ya existentes. Las plantillas de Django escapan nombres y atributos automáticamente; las pruebas comprueban que nombres con HTML no se interpretan como etiquetas y que ambas anclas conservan la URL original.
+
+Las plantillas no contienen scripts ni cargan fuentes, imágenes o recursos externos. No se cambia la configuración de seguimiento del proveedor ni se afirma seguridad global o compatibilidad con todos los clientes. El enlace copiable se limita al proveedor/backend de consola; Resend no lo imprime. Pruebas de entrega simuladas y muestras con token ficticio; no se toca .env, la base habitual o sus cuentas. Validación humana del HTML real Pendiente; aprobaciones previas conservadas.

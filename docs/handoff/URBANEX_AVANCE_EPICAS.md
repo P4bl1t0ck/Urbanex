@@ -2,6 +2,9 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
+| Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
+| Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
 | Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
@@ -446,3 +449,13 @@ La SQLite de trabajo no se migró: showmigrations devuelve pendientes documents.
 ### HU-10 — correcciones documentales PR #27 (2026-11-13)
 
 HU-10/URB-16 sigue **Pruebas**, con 5 puntos de estimación y **0 puntos completados atribuibles a HU-10**; no se alteran porcentajes ni totales históricos de otras historias. El catálogo entregado es la primera parte; falta Reservado humano con HU-35. Deudas DT-121..123 registradas. Referencia aceptada por Pablo: contexto maestro/DS-16/ampliaciones; Anexo 2 POR CONFIRMAR.
+
+
+### HU-46 — corrección de enlace de recuperación en consola (2026-11-16)
+
+Corrección de presentación dentro de HU-46 / URB-04: enlace legible en consola y regresiones de recuperación/JWT, sin nueva funcionalidad, estimación o puntos completados. No cambia el estado previo de HU-46 ni los porcentajes de EP-1. Prueba humana del ajuste y entrega real Resend Pendiente; evidencia automática en Estándares §4.
+
+
+### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
+
+Ampliación autorizada de presentación para los correos de activación y recuperación, con una base visual reutilizable. Sin nueva HU, cambio de estimación, puntos o estado. La comprobación humana del HTML está Pendiente; el reporte previo de Sebas de recepción de texto por Resend no se extrapola al HTML nuevo.

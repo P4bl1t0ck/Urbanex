@@ -2,6 +2,9 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
+| Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
+| Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · cierre documental para push | 2026-11-13 · Nueve horas humanas y evidencia comprobadas; aclaración idéntica en ambos documentos; push autorizado por Sebas, sin apertura de PR |
 | Última actualización HU-10 · aclaraciones de auditoría | 2026-11-13 · Horas corregidas por Sebas, referencia de aceptación unificada y prueba Reservado diferida a HU-35 por decisión de Sebas |
@@ -76,6 +79,24 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
 
+
+### 2026-11-16 · Codex con Sebas · HU-46: commits del fix y correos HTML · rama `feat/URB-04-HU-46-correo-consola`
+
+- **Hecho:** Sebas informó que todo funciona y autorizó crear commits. Plantillas dff0eb6; envío/serializers compartido a9e0d1e; pruebas 3984e79. Documentación separada, con Trazabilidad en commit propio por ser compartida. La rama mantiene el prefijo feat conforme a AGENTS; los cambios de corrección usan fix(URB-04).
+- **Comprobación:** sin cambios de código desde la suite final de 383 OK (293.867s), check sin cambios y diff --check exit 0; no se repiten las pruebas por crear commits. Frontend N/A; PostgreSQL No ejecutado (DT-68). El reporte de funcionamiento es de Sebas (2026-11-16); no se inventan hora de ejecución, cliente de correo o evidencia humana ni se modifica una V-xx por inferencia.
+- **Falta y siguiente paso:** integrar develop si cambia antes del PR, auditoría de solo lectura en chat nuevo, autorización de push y PR abierto por la persona. Sin push, merge o PR en esta sesión. Borrado previo intencional de backend/.env.example conservado localmente y excluido de estos commits. .env, base habitual y cuentas sin modificar.
+
+### 2026-11-16 · Codex con Sebas · HU-46: correos HTML de activación y recuperación · rama `feat/URB-04-HU-46-correo-consola`
+
+- **Hecho:** ok explícito para tres plantillas HTML con base reutilizable Urbanex, texto alternativo y botones; envío Resend/Django conectado sin cambiar enlaces o tokens. Consola conserva línea copiable en activación y recuperación. Dos pruebas nuevas y aserciones HTML/URL en las dos rutas Resend. Datos y .env intactos; borrado previo de .env.example conservado aparte.
+- **Comprobación:** 48 focalizadas OK (29.739s); suite final 383 OK (293.867s), exit 0; check de migraciones sin cambios, exit 0. Previews de datos ficticios y cuatro capturas locales; Edge a 720/375 px sin desbordamiento, dos enlaces exactos y sin scripts, exit 0. Activación en consola comprobada con creación de token simulada y hash coincidente, sin escritura de base ni envío externo. Navegador cerrado y perfil temporal propio retirado. Registro en Estándares §4. No se confunde vista de navegador con recepción en cliente de correo.
+- **Falta y siguiente paso:** Sebas prueba correo HTML real en Resend y registra observaciones propias. Según Sebas, el texto anterior ya llegó; no acredita el HTML nuevo. Sin commit, push o PR. Políticas de reemisión y JWT conservadas; PostgreSQL No ejecutado (DT-68).
+
+### 2026-11-16 · Codex con Sebas · HU-46: fix de enlace legible en consola · rama `feat/URB-04-HU-46-correo-consola`
+
+- **Hecho:** rama desde develop 6e0caca. Línea de URL legible después del correo MIME solo en proveedor/backend de consola; Resend mantiene envío original sin imprimir token. Dos archivos de código dentro del alcance, sin nuevo backend ni settings compartidos. Nueve pruebas nuevas de correo, enlaces y JWT; política de reemisión conservada, sin cambios de views/modelos.
+- **Pruebas:** línea base 372 OK (150.042s), check sin cambios. Regresiones previas al fix: 4 pruebas, 1 fallo y 1 error al faltar línea legible, exit 1. Tras fix: 21 focalizadas OK (7.149s); ampliadas a 23 OK (7.536s); suite completa final 381 OK (150.056s), exit 0. Check sin cambios, exit 0; diff --check exit 0 tras corregir espacios documentales. Registro completo en Estándares §4. PostgreSQL No ejecutado (DT-68).
+- **Falta y siguiente paso:** Sebas prueba consola y luego Resend con su configuración; comprobación humana/entrega real Pendiente. Sin edición de .env, cuentas o base habitual. Se preserva borrado previo intencional de backend/.env.example. Sin commit, push o PR; no se alteran validaciones previas ni estados HU.
 
 ### 2026-11-13 · Codex con Sebas · HU-10: publicación de correcciones documentales PR #27 · rama `feat/URB-16-HU-10-catalogo-filtros`
 
@@ -1952,3 +1973,26 @@ La respuesta documental a los hallazgos de horas y referencia de aceptación que
 **Decisión de Pablo, 2026-11-13, auditoría §11 del PR #27:** para HU-10 se acepta como referencia de criterios el backlog del contexto maestro (filtros combinados, paginación, estados visibles y SEO), DS-16 y las ampliaciones aprobadas; el cotejo con el Anexo 2 queda **POR CONFIRMAR**, como en el lote 2. Esta decisión prevalece sobre las aclaraciones anteriores que lo descartaban como pendiente; no se crea un DS aquí, pues Pablo lo registra en su PR.
 
 Se registran DT-121 (renderizado Reservado), DT-122 (SEO/canonical del catálogo) y DT-123 (tamaño de página duplicado). HU-10 permanece Pruebas, sin sumar puntos; el cierre de la primera parte no equivale a pasar la HU a Listo. Reservado humano se comprueba con HU-35. El PR continúa con sus cambios de código originales; esta preparación no los modifica. Borrador de descripción en evidence/HU-10/pr-27.md, sin publicar.
+
+
+### HU-46 — corrección de enlace de recuperación en consola (2026-11-16)
+
+El correo de consola es MIME quoted-printable: = aparece como =3D y la URL puede partirse. El fix en users/serializers.py añade Enlace de recuperación: <URL original> después de send_mail solo con proveedor console y backend console de Django. Resend mantiene el texto original y no imprime el enlace. Se ejecutan nueve regresiones nuevas y las existentes de recuperación/JWT; resultados en Estándares §4. No se modifica generación de tokens, modelos, settings ni views; tampoco frontend, .env o datos reales. Sin commit/push/PR. Rama desde develop 6e0caca; borrado previo de .env.example de Sebas conservado fuera del fix.
+
+La política actual se conserva: pedir otro enlace no invalida los anteriores aún vigentes; completar el cambio invalida enlaces pendientes y JWT anteriores. Permitir solo el último enlace requeriría confirmar esa regla y ampliar alcance a views.py; no se implementó por inferencia. Comprobación humana del ajuste y envío Resend real Pendiente. No se alteran aprobaciones previas ni estados/puntos de HU.
+
+**Comprobación humana del fix de consola — Pendiente:** iniciar Django con SQLite, EMAIL_PROVIDER=console y el backend de consola; pedir recuperación desde /forgot-password para una cuenta activa existente. Copiar la línea Enlace de recuperación completa y abrirla, cambiar la contraseña y verificar acceso con la nueva; reutilizar el enlace debe fallar. No quitar = ni juntar manualmente líneas MIME. Validar cierre de una sesión anterior al cambio. Registrar persona, fecha, hora, observación y evidencia local solo después de probar. No hay aprobación del agente.
+
+**Prueba Resend posterior — Pendiente:** Sebas configura en su entorno EMAIL_PROVIDER=resend, clave válida y remitente permitido; reinicia Django y comprueba que settings.EMAIL_PROVIDER indique resend sin mostrar claves. El destinatario debe ser real y permitido por su cuenta/dominio. Se probará el enlace desde el correo; este fix conserva esa ruta y sus simulaciones pasan, pero no acredita entrega real. No se enviará correo sin destinatario y autorización concretos.
+
+
+### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
+
+Sebas autorizó ampliar la misma rama con tres plantillas: users/emails/base.html, activation.html y password_reset.html. La base comparte marca Urbanex, botón azul, aviso de uso único, vencimiento y enlace alternativo. Activación indica 24 horas y recuperación 60 minutos, sin cambiar su política. users/serializers.py renderiza con autoescape de Django, envía text+html a Resend y html_message a send_mail; conserva texto y enlaces copiables de consola para ambos casos. No cambia tokens, JWT, modelos, settings, frontend o dependencias. No se lee ni edita .env.
+
+Según Sebas (2026-11-16), el envío real anterior con Resend y texto funcionó; no se atribuye esa observación al HTML nuevo. Se generaron vistas con Andrea y TOKEN-FICTICIO en evidence/HU-46/email-activation-preview.html y email-password_reset-preview.html, y capturas a 720/375 px con sufijo 20261116. Edge automático: ancho de documento igual al viewport, dos enlaces ficticios correctos y sin scripts en ambos correos/tamaños, EMAIL_BROWSER_QA_EXIT=0. Es revisión en navegador, no evidencia de recepción ni renderizado en Gmail/Outlook.
+
+**Prueba humana de HTML — Pendiente:** reiniciar Django y solicitar recuperación con Resend; comprobar marca, botón, texto, vencimiento y apertura del enlace. Probar activación mediante la creación o reinvitación autorizada de una cuenta de prueba. El acceso de prueba debe conservar uso único y caducidad. No se enviaron correos reales por el agente ni se crean cuentas habituales en esta ampliación. Las versiones de texto y consola se conservan.
+
+
+**Reporte humano del ajuste (2026-11-16):** Sebas confirmó en la conversación que todo funciona y pidió crear los commits. Se registra su confirmación sin atribuir al agente una aprobación ni completar por inferencia horarios, casos específicos o rutas de evidencia. Las validaciones anteriores se conservan. La preparación de commits no sustituye la auditoría de solo lectura del PR.

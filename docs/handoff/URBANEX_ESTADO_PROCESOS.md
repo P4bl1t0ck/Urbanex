@@ -2,6 +2,9 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
+| Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
+| Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · cierre documental para push | 2026-11-13 · Nueve horas humanas y evidencia comprobadas; aclaración idéntica en ambos documentos; push autorizado por Sebas, sin apertura de PR |
 | Última actualización HU-10 · aclaraciones de auditoría | 2026-11-13 · Horas corregidas por Sebas, referencia de aceptación unificada y prueba Reservado diferida a HU-35 por decisión de Sebas |
@@ -750,3 +753,16 @@ La respuesta documental a los hallazgos de horas y referencia de aceptación que
 **Decisión de Pablo, 2026-11-13, auditoría §11 del PR #27:** para HU-10 se acepta como referencia de criterios el backlog del contexto maestro (filtros combinados, paginación, estados visibles y SEO), DS-16 y las ampliaciones aprobadas; el cotejo con el Anexo 2 queda **POR CONFIRMAR**, como en el lote 2. Esta decisión prevalece sobre las aclaraciones anteriores que lo descartaban como pendiente; no se crea un DS aquí, pues Pablo lo registra en su PR.
 
 HU-10 permanece **Pruebas**; no pasa a Listo ni suma sus 5 puntos como completados. Reservado humano se verifica con HU-35; la falta de prueba automática de renderizado se registra en DT-121, sin implementar reservas aquí. SEO/canonical y tamaño de página duplicado quedan registrados en DT-122 y DT-123. Las notas anteriores de Anexo 2 pendiente se leen como POR CONFIRMAR según la decisión de Pablo.
+
+
+### HU-46 — corrección de enlace de recuperación en consola (2026-11-16)
+
+Ajuste de presentación de la recuperación: línea copiable de URL original en console + backend console de Django; el token no cambia. Resend conserva envío sin imprimir token. Nueve regresiones nuevas de entrega, copia del enlace, uso único, caducidad exacta, enlaces pendientes, JWT vencidos, sesión al solicitar y neutralidad ante fallo; también se ejecutan los casos existentes de invalidación de JWT dentro del mismo segundo. Resultados reales en Estándares §4. No se modifica el estado global de HU-46 ni validaciones anteriores; la comprobación humana específica y la entrega Resend real quedan Pendiente. Sin cambios de modelos, configuración o base habitual.
+
+
+### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
+
+Presentación HTML compartida para activación y recuperación dentro de HU-46; no se cambian endpoints, reglas o estado global de la historia. Resend recibe las dos partes text/html y Django mantiene alternativa de texto con HTML; consola conserva enlaces copiables. Nuevas pruebas comprueban enlaces exactos y nombres escapados; se mantienen las pruebas de JWT/caducidad. Sebas informó que Resend con texto funcionó; HTML nuevo en cliente de correo y entrega real siguen Pendiente. Resultados en Estándares §4.
+
+
+**Reporte posterior (2026-11-16):** según Sebas, el ajuste funciona y autoriza sus commits. Se conserva como reporte humano sin ampliar los casos observados ni modificar automáticamente estados de HU o V-xx; revisión formal y auditoría del nuevo PR siguen pendientes. Código en dff0eb6, a9e0d1e y 3984e79; sin push en este paso.
