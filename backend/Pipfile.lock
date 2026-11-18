@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9494090eea28352ac47b296f4f9a0f997c368ea3df4e279ad2d4df5f77a49a8c"
+            "sha256": "1a8915579b7f0420cdd442ee82ddf9ad6ac12ddd2af7fb3c165d48718a54c558"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -209,6 +209,14 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==3.5.2"
+        },
+        "cloudinary": {
+            "hashes": [
+                "sha256:a42d1312b9b581a68a387ba81b3df7ce35d1870d6ff7bfd9d2777589c247e014",
+                "sha256:cf14b75d969960ee4dc04125826c12a6ea02a0ecbb75d4bde2ce2e82af0ad010"
+            ],
+            "index": "pypi",
+            "version": "==1.47.0"
         },
         "django": {
             "hashes": [
@@ -468,6 +476,14 @@
             "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==2.50.1"
+        },
+        "six": {
+            "hashes": [
+                "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+                "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
+            ],
+            "markers": "python_version >= '2.7' and python_version != '3.0' and python_version != '3.1' and python_version != '3.2'",
+            "version": "==1.17.0"
         },
         "sqlparse": {
             "hashes": [
