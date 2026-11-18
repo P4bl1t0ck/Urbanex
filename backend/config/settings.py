@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders', #Already installed
     'apps.users.apps.UsersConfig',
+    'apps.telemetry.apps.TelemetryConfig',
     'apps.users.properties.apps.PropertiesConfig',  # <-- Se corrigió 'apss' a 'apps'
     'apps.documents.apps.DocumentsConfig',  # Expediente digital (RF-10)
     'apps.appraisals.apps.AppraisalsConfig',  # Avalúos (RF-11)
@@ -112,7 +113,7 @@ if DB_ENGINE == "sqlite":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": Path(os.getenv("SQLITE_DB_PATH", str(BASE_DIR / "db.sqlite3"))).expanduser().resolve(),
         }
     }
 elif DB_ENGINE == "postgresql":
@@ -229,3 +230,11 @@ import os
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Fotos públicas; el expediente conserva su almacenamiento privado explícito.
+from config.media_storage import public_media_config
+
+STORAGES = {
+    "default": public_media_config(os.environ),
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
