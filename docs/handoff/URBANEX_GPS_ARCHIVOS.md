@@ -1,5 +1,7 @@
 # Urbanex — GPS de archivos y dependencias
 
+Ultima actualizacion de continuidad: 2026-11-18 - respaldo de rama autorizado; HU-11 en Pruebas.
+
 | Campo | Valor |
 |---|---|
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
@@ -445,3 +447,231 @@ La SQLite de trabajo no se migró: showmigrations devuelve pendientes documents.
 ### HU-10 — correcciones documentales PR #27 (2026-11-13)
 
 Corrección exclusivamente documental en Progress, Estado, Deuda, Avance, GPS, Estándares y Trazabilidad. Los archivos frontend/components/PropertyCard.tsx, frontend/app/properties/page.tsx y backend/apps/users/views.py se citan como evidencia de DT-121..123 y no se modifican. Borrador de descripción local en evidence/HU-10/pr-27.md, ignorado por Git. Sin cambios de dependencias, datos, modelos, migraciones, permisos o exposición; Seguridad N/A por no cambiar riesgo.
+# Actualización aditiva HU-11 — 2026-11-16
+
+Última actualización HU-11: 2026-11-16. Rama `feat/URB-14-HU-11-ficha-detalle`.
+
+| Archivo | Responsabilidad |
+|---|---|
+| `frontend/components/PropertyGallery.tsx` | Galería cliente de las URLs de `Property.images`: selección, miniaturas, flechas, captions y errores de carga; no sube archivos |
+| `frontend/app/properties/[id]/page.tsx` | Integra galería y datos públicos; precio referencial, estado y parqueaderos; 404 separado de fallo de conexión; conserva HU-12 y funciones existentes |
+| `backend/apps/users/tests.py` | Regresiones de estados privados, datos públicos y varias fotos sin escribir archivos multimedia |
+
+Se usa el contrato existente `PropertyImage`; no se editan modelos, serializers, API compartida, settings ni migraciones. Trazabilidad y Avance son documentos compartidos: actualización aditiva avisada en Fase 0.
+# Ampliación HU-11 · almacenamiento público configurable — 2026-11-16
+
+Última actualización de esta ampliación: 2026-11-16. Autorizada por Sebas en la conversación; sustituye la decisión pendiente sobre cuándo integrar Cloudinary en la nota HU-11 anterior.
+
+| Archivo | Responsabilidad / coordinación |
+|---|---|
+| `backend/config/settings.py` (**compartido**) | `STORAGES.default` configurable mediante `public_media_config(os.environ)`; staticfiles conserva su backend. Avisado antes de editar |
+| `backend/config/media_storage.py` | `PublicMediaStorage`: nuevas fotos a local o Cloudinary, lectura por referencia conservando archivos anteriores, URLs HTTPS `f_auto,q_auto`, timeout de 30 s y error 503 genérico |
+| `backend/Pipfile` y `backend/Pipfile.lock` | SDK cloudinary 1.47.0 y dependencia six 1.17.0; versiones anteriores conservadas |
+| `backend/apps/users/tests.py` | Nueve pruebas de configuración, archivos locales, subida/API simulada, cambio de proveedor, error 503, almacenamiento privado y borrado explícito |
+
+Configuración local, sin valores secretos:
+
+```dotenv
+MEDIA_PROVIDER=local
+```
+
+Para nuevas fotos en Cloudinary, configurar **solo en `backend/.env` local** y reiniciar Django:
+
+```dotenv
+MEDIA_PROVIDER=cloudinary
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+Los tres valores vacíos deben completarse localmente desde la cuenta propia; no compartirlos ni incorporarlos a Git. El agente no leyó ni editó `.env`. No se recrea `.env.example`, cuya eliminación intencional en la rama fix fue informada por Sebas. Al iniciar con `pipenv run`, Pipenv carga `.env`; las pruebas usan `PIPENV_DONT_LOAD_ENV=1` y `MEDIA_PROVIDER=local` para no usar credenciales reales.
+
+Las rutas `properties/images/...` siguen leyendo disco local incluso al activar Cloudinary; las nuevas referencias `cloudinary/<cuenta>/<id>` generan URLs remotas incluso al volver a local. La cuenta queda en la referencia, sin claves. No se trasladan fotos antiguas; deben conservarse en `MEDIA_ROOT`. En desarrollo Django sirve `/media/` con DEBUG; el despliegue necesita servir los archivos locales restantes o planificar su migración. La subida usa un identificador aleatorio y no sobrescribe originales. No se modifican modelos, rutas API ni migraciones.
+
+Los documentos tienen `private_storage()` explícito y no pasan por el proveedor público. El backend remoto está destinado a subida y URL: `open`, `path`, `size` y `exists` remotos no están implementados. No cambia el borrado automático de archivos: Django no elimina el objeto remoto al eliminar una fila; la limpieza de huérfanos requiere una tarea definida. Subida real y comprobación de cuenta **Pendiente**.
+# Fixes aditivos HU-11 · fotos y navegación — 2026-11-16
+
+Última actualización de estos fixes: 2026-11-16. Archivos adicionales aprobados por Sebas; compartidos avisados antes de editar.
+
+| Archivo | Cambio y conexión |
+|---|---|
+| `frontend/components/PropertyCard.tsx` | Foto enlaza a ficha |
+| `frontend/components/PropertyGallery.tsx` | Vista ampliada nativa, navegación y Escape |
+| `frontend/app/properties/[id]/page.tsx` | Elimina SiteNav duplicado; layout general intacto |
+| `frontend/app/dashboard/page.tsx` (**compartido**) | Confirmación de borrado inmediato vía authFetch, errores y actualización de fotos/tabla/requisitos |
+| `backend/apps/users/views.py` (**compartido**) | Queryset owner/admin y destroy con bloqueo del inmueble; protege última foto pública y borra archivo antes de fila |
+| `backend/apps/users/serializers.py` (**compartido**) | Valida inmueble autorizado al subir; impide trasladar fotos entre inmuebles |
+| `backend/config/media_storage.py` | Borrado local/remoto con respuesta 503 genérica; valida resultado remoto ok/not found |
+| `backend/apps/users/tests.py` | Ocho pruebas de gestión; nueve de proveedor conservadas/adaptadas |
+
+Esta nota sustituye la limitación anterior de no eliminar archivos al borrar fotos por el endpoint. No añade una limpieza general de huérfanos ni cambia el borrado en cascada del modelo. No existe transacción distribuida disco/Cloudinary + BD: si el archivo se elimina y el commit de BD falla, puede quedar una referencia pendiente; repetir acepta remoto not found y permite terminar. PostgreSQL/concurrencia real No verificado. Las fotos ya subidas se siguen resolviendo según proveedor; no se cambia `.env` ni se migran datos.
+**Actualización aditiva HU-11 (2026-11-16, tarjeta completa):** `frontend/components/PropertyCard.tsx` usa un solo Link para imagen y datos, con destino `/properties/<id>` y foco visible; nombre sin enlace independiente. Sin cambios de API, tipos, almacenamiento, dependencias ni archivos compartidos de código en este ajuste.
+**Última actualización aditiva HU-11 (2026-11-17, disposición/collage):** `frontend/components/PropertyCard.tsx` mantiene Link único y agrega target blank con noopener/noreferrer y aviso accesible; estado con punto de color/texto. `frontend/app/properties/[id]/page.tsx` organiza resumen izquierda/galería derecha, regreso compacto y bloques inferiores a una columna; pasa status a galería y conserva metadatos/API. `frontend/components/PropertyGallery.tsx` recibe status, muestra badge sobre principal y miniaturas mayores; clic abre diálogo blanco con rejilla completa, scroll vertical enfocable y posicionamiento a foto elegida, sin contador/Ampliar/carrusel. API, tipos, backend y SiteNav sin cambios. Revisión humana pendiente en Project_Progress; no se añaden dependencias.
+**Última actualización aditiva HU-11 (2026-11-17, proporciones/navegación):** `frontend/app/properties/[id]/page.tsx` coloca galería izquierda/datos derecha a partir de lg y fotos arriba en móvil. `frontend/components/PropertyGallery.tsx` selecciona principal por id, permite flechas/teclado/miniaturas/gesto horizontal y centra fila cuando cabe; desborda solo su contenedor cuando no. img nativa con width adaptable y height auto sustituye marcos fijos/recorte; sin caption visible. Collage blanco en columnas naturales sin gap/padding, con scroll/Escape/foco conservados. Se conserva dato caption en API/BD; no se toca PropertyCard ni backend. Verificación humana móvil y CLS pendientes.
+**Última actualización aditiva HU-11 (2026-11-17, formato final):** PropertyGallery usa marco principal aspect 4:3 y miniaturas h-28/h-32 con object-cover; collage mantiene img de alto natural con p-2/gap-2/mb-2 (8 px). Corrección explícita de Sebas, sin cambiar navegación, columnas o proveedores. Revisión visual móvil Pendiente.
+**Última actualización aditiva HU-11 (2026-11-17, principal completa):** PropertyGallery cambia solo object-cover a object-contain en img principal; marco 4:3 conserva tamaño, fotografía completa con proporción original y posibles franjas. Miniaturas siguen uniformes con object-cover; collage natural separado sin cambios.
+# Ampliación Venta/Alquiler, terrenos y siete demos — 2026-11-17
+
+Última actualización de esta ampliación: 2026-11-17. Scope aprobado por Sebas; compartidos avisados antes de editar.
+
+| Archivos | Función |
+|---|---|
+| users/models.py (**compartido**) y users/migrations/0010_property_operation_type.py (**compartido**) | operación venta/arriendo, compatibilidad Venta confirmada por Sebas, normalización terrenos y constraints. No se editan migraciones anteriores |
+| users/serializers.py y views.py (**compartidos**) | operación explícita en API de alta, filtro por operación y bloqueo temporal de reclasificación con publicación/avalúos |
+| appraisals/services.py, engine/calculator.py, models.py, tests.py | comparables de misma operación, control en motor puro y nuevos snapshots con operación. Sin alterar parámetros DS-21 o snapshots previos |
+| users/management/commands/setup_demo_data.py, setup_catalog_demo.py y tests.py | demos coherentes; --count 7 exige base separada y proveedor local, sin borrar datos. Modo anterior 21..60 se conserva para paginación |
+| config/settings.py (**compartido**) | SQLITE_DB_PATH opcional, por defecto backend/db.sqlite3; selector local no afecta PostgreSQL |
+| frontend/types/property.ts (**compartido**) | operación en DTO y filtros |
+| frontend/app/dashboard/page.tsx (**compartido**) | selector obligatorio de operación, precio contextual y campos de terreno ocultos |
+| frontend/components/PropertyCard.tsx, CatalogFilters.tsx; app/properties/page.tsx, app/properties/[id]/page.tsx | filtro de operación en escritorio/móvil, precio contextual y terreno sin habitaciones/baños; regreso azul |
+| frontend/lib/catalogFilters.ts y su test; propertyMetadata.ts y su test | conservación/validación de operación en URL y metadatos de venta/alquiler |
+
+Muestra preparada en `evidence/HU11-operacion/demo-7.sqlite3`; copia de prueba de migración en `evidence/HU11-operacion/migracion-0010.sqlite3`. Ambas son locales e ignoradas; contienen cuentas de desarrollo y no se publican. La original backend/db.sqlite3 queda sin cambios y sin users.0010. Para usar el nuevo código hay que seleccionar una base ya migrada; el backend anterior debe detenerse antes de reutilizar puerto 8000.
+
+Desde backend/, en una terminal local para esta muestra (sin leer o cambiar .env):
+
+```powershell
+$env:PIPENV_DONT_LOAD_ENV = "1"
+$env:DB_ENGINE = "sqlite"
+$env:DEBUG = "True"
+$env:MEDIA_PROVIDER = "local"
+$env:EMAIL_PROVIDER = "console"
+$env:SQLITE_DB_PATH = "C:\Users\mateo\Documents\Urbanex\evidence\HU11-operacion\demo-7.sqlite3"
+pipenv run python manage.py runserver
+```
+
+Mantener frontend en localhost:3000 y API local en puerto 8000. Volver a iniciar sesión al cambiar de backend; las cuentas conservan sus contraseñas anteriores, sin valores en documentación. La configuración no usa las claves de .env ni prueba envíos reales. No hace falta ejecutar migrate otra vez en la muestra preparada. No ejecutar migrate sobre Supabase.
+
+El comando de muestras `pipenv run python manage.py setup_catalog_demo --count 7 --agent-id <id>` es idempotente en la base de muestra y rechaza bases con otras propiedades. Los siete ya están creados; repetirlo no reduce una base existente de 28. Fotos y documentos demo nuevos se guardan localmente sin sobrescribir archivos anteriores. Para volver a la base original se necesita coordinar su migración antes de usar el nuevo modelo; no basta cambiar la variable.
+**Última actualización aditiva (2026-11-17, atribución de fixes):** modelo/selector/API de operación → fix HU-01/URB-05; reglas de terreno → fix HU-05/URB-08; restricción de edición → fix HU-09/URB-09; CatalogFilters/PropertyCard y consulta filtrada → fix HU-10/URB-16; appraisals/services → fix HU-04/URB-10; engine/calculator y traza → fix HU-06/URB-11; propertyMetadata → fix HU-12/URB-17. Página de ficha y galería → HU-11/URB-14. Infraestructura Cloudinary/demos → DT-69/DT-14. HU-53/URB-15 conserva publicador sin chequeo independiente nuevo; usa la operación válida garantizada por alta/constraint.
+# Base demo activa habitual — 2026-11-17
+
+Última actualización: 2026-11-17. Por autorización expresa de Sebas condicionada a conservar usuarios/contraseñas, la muestra de siete pasa a **backend/db.sqlite3**, ya con users.0010 aplicada. Sustituye la indicación anterior de usar SQLITE_DB_PATH para probar la muestra. La base de 28 queda respaldada íntegramente en `evidence/HU11-operacion/backup-28-20261117-2b58429f.sqlite3`; fotos/archivos anteriores y Cloudinary no se eliminan.
+
+Comprobado: 3 usuarios con todos sus campos/hashes/IDs idénticos; registros auxiliares de activación/recuperación conservados, 7 propiedades públicas, 4 ventas/3 alquileres, sin errores de FK. Configuración habitual usa SQLite y db.sqlite3. Backend reiniciado; API real HTTP 200/count 7. No es necesario definir parámetros adicionales ni ejecutar migrate otra vez para la base preparada. Desde backend: `pipenv run python manage.py runserver` (si ya está funcionando, basta recargar frontend). Copias de evidence/ y DB activa no se versionan.
+
+El servidor debe detenerse antes de volver a sustituir SQLite para evitar conexiones/escrituras concurrentes. La migración existe para añadir operación y restricciones; cambiar de base no elimina esa necesidad de esquema. No se migra Supabase. Recuperación del conjunto anterior: detener backend y restaurar una copia del backup; antes de usar el nuevo modelo con ese conjunto antiguo hay que coordinar/aplicar users.0010 en la copia restaurada. No borrar el respaldo ni archivos que referencia.
+# Barra, flujos bajo demanda y similares — 2026-11-17
+
+Última actualización: 2026-11-17. Fase 0/ok de Sebas, sin dependencias nuevas ni backend/BD modificados.
+
+| Archivo | Función / HU |
+|---|---|
+| `frontend/app/properties/[id]/page.tsx` | HU-11/URB-14: cuadro principal gris con datos positivos, descripción sin bloque duplicado, candidatos del catálogo por tipo y fila de tarjetas similares; monta acciones con key por inmueble |
+| `frontend/components/PropertyActions.tsx` (nuevo) | HU-11: barra fija y diálogo nativo; safe area, reserva de espacio, foco/scroll, bloqueo de cierre al enviar; reutiliza contacto y visitas. Reservado sin acciones |
+| `frontend/lib/propertyDetail.ts` y `.test.mjs` (nuevos) | selección de principales/similares y extracción de solo nombre/celular/correo, con tres pruebas |
+| `frontend/components/InterestForm.tsx` | fix HU-16/URB-20: datos iniciales/callback opcionales, conserva datos personales tras envío y reinicia mensaje/consentimientos; mismo payload |
+| `frontend/components/FreeSlotsPicker.tsx` | fix HU-18/URB-18 y HU-19/URB-23: transmite borrador personal al formulario; 404 muestra mensaje dentro del diálogo |
+| `frontend/components/VisitRequestForm.tsx` | fix HU-19/URB-23: datos iniciales/callback opcionales; consentimientos de visita nuevos y separados |
+| `WhatsAppContactButton.tsx` (reutilizado sin editar) | fix de colocación HU-15/URB-21: mismo enlace/celular/reglas DS-50, ahora dentro de Contactar agente |
+
+No se editan PropertyCard, Dialog genérico, lib/api o tipos de payload en esta etapa. Nombre/celular/correo compartidos solo durante interacción con la misma ficha; cierre/reapertura conserva esos tres campos pero monta consentimiento sin marcar. Cambiar de inmueble reinicia acciones. No envía interés antes de solicitar visita ni copia opt-in de novedades al de confirmación.
+
+Similar usa GET catálogo público filtrado por tipo, elimina id actual/duplicados y no públicos, prioriza operación y limita a seis sobre candidatos de primera página. Con muestra actual, casa/departamento/local tienen un candidato del otro régimen; etiqueta de operación visible en tarjeta. Terreno único no muestra sección. Fallo de consulta secundaria no bloquea ficha.
+
+Evidencia técnica local: `evidence/HU11-ux/review.cjs`, `review-results.json` y capturas desktop/mobile-page/contact/visit.png. Edge headless aislado/CDP sin paquetes nuevos, horarios mock y cero envíos/escrituras. Verificación técnica no sustituye validación humana ni prueba física de teclado/safe area; tabla Pendiente en Progress.
+
+
+### Ajuste HU-11: caracteristicas y acciones al desplazarse - 2026-11-17
+
+Ultima actualizacion: 2026-11-17. Rama `feat/URB-14-HU-11-ficha-detalle`. Solicitud y autorizacion de Sebas: tarjetas blancas sobre fondo gris, titulo a la izquierda, valor encima de etiqueta y solo datos positivos/aplicables. Acciones iniciales junto a las caracteristicas; `IntersectionObserver` muestra barra inferior solo cuando el bloque inicial ya paso por encima de la pantalla. Contactar agente es principal azul; Agendar visita secundario con borde. Dialogos nativos abiertos (incluida galeria) ocultan barra; altura de pantalla <=450px tambien la oculta. Se conservan restricciones de Reservado, formularios bajo demanda, datos en memoria y consentimientos independientes. Sin dependencias nuevas ni cambios de backend/BD.
+
+Archivos: `frontend/app/properties/[id]/page.tsx` y `frontend/components/PropertyActions.tsx`. Composicion HU-11/URB-14; presentacion de contacto fix HU-15/URB-21 y HU-16/URB-20, visitas fix HU-18/URB-18 y HU-19/URB-23; no cambian contratos ni reglas de esos flujos. Riesgos a revisar: transicion de barra, retorno de foco, zoom, teclado/safe area y telefono fisico. Validacion humana Pendiente; HU-11 en Pruebas, sin puntos ni nueva V aprobada.
+
+Limpieza expresamente autorizada: `evidence/` conserva solo seis PNG de `HU11-ux/`. Se eliminaron borradores, scripts, JSON, perfil temporal y bases auxiliares/respaldo. `backend/db.sqlite3` se conserva. Las rutas historicas a archivos eliminados se mantienen como historial; ya no son evidencias disponibles. Los seis PNG conservados corresponden a la version anterior del footer y no verifican este ajuste. No se guardaran archivos auxiliares ni bases en evidence; solo capturas segun instruccion de Sebas. Sin commit/push/PR.
+
+
+### Fixes de contacto, visita y ayuda de celular - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama `feat/URB-14-HU-11-ficha-detalle`. Alcance autorizado tras Fase 0: WhatsApp primero en panel Contactar agente, numero del asesor visible, separador antes del formulario. Fix HU-15/URB-21 y HU-16/URB-20. Si no hay asesor activo/celular valido o falla API, no se inventa enlace; se conserva formulario. No se agrega WhatsApp al selector de horarios; se agrega en tarjetas de asesores del detalle de visita existente (fix HU-20), solo celular ecuatoriano valido, normalizado a 5939 seguido de ocho digitos, target blank y rel noopener noreferrer.
+
+Fix HU-19/URB-23 y HU-20: por instruccion expresa de Sebas se sustituye la casilla de confirmacion por correo de DS-39 por campo Correo para recibir la confirmacion (opcional) con ayuda visible de finalidad/canal. Campo vacio al montar visita, aunque haya correo en el borrador de interes. `visitConfirmation` recorta espacios y envia email_opt_in=true solo con email no vacio; vacio/blancos envia false. Backend mantiene validacion de email, envio tras commit y ausencia de token en respuesta. No cambia API, migraciones, backend ni opt-in del formulario de interes; privacidad LOPDP sigue obligatoria. La regla anterior de DS-39 queda como historial; esta modificacion de interfaz se atribuye a Sebas, sin reescribir decision de Pablo ni asignar DS nuevo.
+
+Ayuda visual de celular: convencion del proyecto `09XXXXXXXX` (ocho X), no norma internacional ni mascara de entrada. Guias consultadas no prescriben X mayuscula/minuscula/asterisco: ONS https://service-manual.ons.gov.uk/design-system/patterns/phone-numbers y GOV.UK https://design-system.service.gov.uk/components/text-input/ recomiendan tipo de telefono explicito y ayuda visible. Se agrega texto permanente de diez digitos/prefijo 09; internacional +5939XXXXXXXX solo donde ya se acepta. Registro de usuarios conserva su entrada local de diez digitos. Fix HU-44/URB-02 y ayudas de contacto/oportunidad/visita, sin cambiar validadores.
+
+Archivos: PropertyActions.tsx, WhatsAppContactButton.tsx, VisitRequestForm.tsx, InterestForm.tsx, app/visits/[token]/PublicVisitView.tsx, app/dashboard/users/page.tsx, app/dashboard/opportunities/new/page.tsx, lib/propertyDetail.ts y propertyDetail.test.mjs. Sin dependencias nuevas. Pruebas frontend 47/47; tipos/lint/build exit 0, aviso previo SiteNav. Validacion humana Pendiente: orden WhatsApp/formulario y numero, visita con/sin correo, enlace de asesores valido/invalido y ayudas en movil. Envios reales No verificado. HU-11 permanece en Pruebas; sin commit/push/PR. evidence conserva seis PNG anteriores; no se generaron archivos adicionales ni bases.
+
+
+### HU-11: mapa de ficha y estadisticas operativas - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama `feat/URB-14-HU-11-ficha-detalle`. Fase 0 y ok explicito: mapa publico con punto exacto guardado, estadisticas solo admin. HU-11/URB-14: `PropertyLocationMap.tsx` entre descripcion y similares, Leaflet/OSM existente, marcador azul propio, contenedor redondeado, zoom con rueda desactivado, carga al acercarse a viewport, sin SSR de Leaflet y enlace Abrir en Google Maps. No se cambia proveedor/estilo de calles ni se usan mapas de Google; estetica propia en controles/marcador/contenedor. Coordenadas finitas y dentro de rango; faltantes/invalidas muestran mensaje y no inicializan mapa. No se agrega mapa al catalogo (ampliacion HU-10/URB-16 pendiente) ni se ocultan coordenadas del dashboard en esta etapa.
+
+Trabajo transversal adicional, no criterio original HU-11: modulo `backend/apps/telemetry/` (apps.py, models.py, views.py, urls.py, tests.py, __init__.py, migrations/0001_initial.py y migrations/__init__.py), settings.py y urls.py compartidos. Una tabla DailyMapLoads en la MISMA BD, agregados por dia local/pantalla/proveedor, incremento F atomico y clave unica. Solo detail/leaflet instrumentado. POST /api/telemetry/map-loads/ anonimo con CSRF obligatorio, payload cerrado de valores admitidos, propiedad publica existente y throttle 30/min/IP. No guarda IP, property_id ni datos personales en tabla; throttle DRF usa IP transitoriamente en cache. Cache limitadora actual por proceso: no proteccion global distribuida. Contador susceptible de reportes perdidos/repetidos/falsificados, bots y bloqueo de cookies/JS; no sirve para garantizar ausencia de cobros ni visitantes unicos. Reporte best effort, no reintenta ni bloquea mapa; cookie CSRF debe ser accesible en despliegue conforme configuracion compartida frontend/backend.
+
+GET /api/dev/stats/ requiere usuario activo con role admin, no is_staff, Cache-Control private,no-store. Incluye periodo mes actual hasta hoy en zona configurada, total/serie diaria, referencias de fotos locales/cloudinary, versiones actuales/totales y suma file_size_bytes de TODAS las versiones documentales. Tamano de fotos, trafico, transformaciones y cobro oficial son null/no medidos; no se escanea disco ni se consulta Cloudinary. Documento usa private_storage local existente; traslado a almacenamiento privado remoto es HU-38, no implementado. Inventario no verifica existencia fisica ni archivos huerfanos. Correos, tamano BD, hosting y facturacion oficial declarados unmeasured, sin inventar ceros ni umbral de Google. Referencias de costos: Cloudinary storage/bandwidth/transformations (https://cloudinary.com/documentation/developer_onboarding_faq_track_credits), Supabase compute/disk/egress (https://supabase.com/docs/guides/platform/billing-on-supabase).
+
+Migracion nueva telemetry.0001 aplicada solo SQLite backend/db.sqlite3 tras assert de motor y ruta; no nuevas bases, no Supabase, no alteraciones a usuarios/propiedades ni migraciones existentes. Comprobacion APIClient local: stats anonimo 401, admin 200; 7 fotos locales, 0 cloudinary, 7 versiones/7 vigentes, 1351 bytes declarados documentales, 0 cargas; propiedades 7, usuarios 3. Sin contenido de .env ni claves expuestas. Sin dependencias nuevas, Google key ni cambio automatico de proveedor. Seis pruebas de permisos, agregacion, mes, CSRF/throttle, propiedad privada y valores invalidos e inventario. Frontend nueva prueba de coordenadas (incluye cero y limites).
+
+Validacion humana Pendiente: revisar Ubicacion en escritorio/movil, scroll sin zoom accidental, marcador y popup, abrir Google, galeria/formularios sobre mapa y endpoint admin con sesion real. Revisar contador antes/despues de abrir mapa; APIClient y suite no sustituyen navegador ni facturacion oficial. HU-11 en Pruebas, sin nueva V aprobada ni puntos; Anexo 2 POR CONFIRMAR. Sin commit/push/PR; evidence solo seis PNG anteriores, sin capturas nuevas ni scripts/bases auxiliares.
+
+Uso del endpoint: backend /api/dev/stats/ no es una pagina frontend /dev; requiere Authorization Bearer del acceso de un administrador, igual que otras API internas. No poner token en URL ni compartirlo. GET no modifica contadores. Cargas instrumentadas solo al inicializar el mapa cercano a viewport, no por marcador, imagen de mosaico o gesto de zoom. La medicion empieza con este despliegue; no reconstruye meses anteriores.
+
+
+### HU-11: posicion del zoom - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama feat/URB-14-HU-11-ficha-detalle. Solicitud de Sebas dentro del alcance del mapa: PropertyLocationMap.tsx desactiva zoomControl por defecto y agrega ZoomControl bottomright, titulos Acercar/Alejar. Sin cambio de proveedor, mosaicos, marcador, telemetria, dependencias ni backend. Iconos de lugares estan integrados en mosaicos raster OSM y no se ocultaron; estilo base mas limpio requiere evaluar proveedor/estilo, pendiente de decision. Revision visual desktop/movil y convivencia con atribucion Pendiente; HU-11 sigue en Pruebas. Frontend 48/48, tipos/lint/build exit 0, aviso previo SiteNav; sin commit/push/PR ni nuevas capturas.
+
+
+### Acceso visual a estadisticas operativas - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama feat/URB-14-HU-11-ficha-detalle. Solicitud expresa de Sebas: no depender de consola para consultar estadisticas. Trabajo transversal adicional a HU-11: nueva pantalla `frontend/app/dashboard/dev/page.tsx` en /dashboard/dev, contrato `frontend/types/telemetry.ts`, enlace Estadisticas solo admin junto a Administrar usuarios en `frontend/app/dashboard/page.tsx` (archivo compartido), grupo de botones con flex-wrap para movil. No se toca SiteNav. Usa authFetch y sesion existente, renovacion de token habitual y respuesta 401/403 controlada; no muestra token ni lo pone en URL. Suscripcion a cambios de sesion y cancelacion logica de respuestas obsoletas evitan mostrar datos anteriores a cambio/cierre de sesion. Backend conserva autorizacion admin real; ocultar enlace no es permiso de seguridad.
+
+Pantalla con estados de sesion, carga, error/reintento y sin actividad; Actualizar manual sin polling, tarjetas de mapas/fotos/versiones, peso documental registrado y tabla diaria desplazable en movil. Indica ausencia de medicion de costos/trafico/transformaciones/correos, inventario vs archivos reales y estimaciones vs factura. No incluye comparacion con cupos gratuitos ni API de facturacion externa. Sin cambios backend/BD/migraciones ni dependencias. Atribucion: pantalla de consumo transversal y enlace en panel, no nuevo criterio HU-11; HU-11 permanece en Pruebas. Sin ID nuevo ni V aprobada.
+
+Comprobaciones: linea base y final npm test 48/48; tsc y eslint exit 0 con aviso previo SiteNav; backend focal telemetry 6 OK en 0.085s. Resultado build en registro de Estandares. Validacion humana Pendiente: administrador ve boton y datos, Actualizar, sin actividad/error y telefono; asesor no ve enlace y no consulta endpoint. API autorizacion cubierta por pruebas, GUI no verificada en navegador. Sin commit/push/PR ni archivos nuevos en evidence. Siguiente paso: Sebas entra como administrador a Panel del agente > Estadisticas.
+
+
+### HU-11: prueba de fondos CARTO - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama feat/URB-14-HU-11-ficha-detalle. Continuacion del cambio de fondo autorizado por Sebas; segun Sebas ya obtuvo API key, no entregada ni leida por agente. `PropertyLocationMap.tsx` lee NEXT_PUBLIC_CARTO_BASEMAP_API_KEY: con valor no vacio inicia Voyager, sin clave mantiene OSM sin peticiones anonimas a CARTO. En NODE_ENV development, con clave presente muestra selector OSM/Voyager/Positron. Cambia solo TileLayer, mantiene MapContainer, marcador, zoom y contador de inicializaciones; selector no se muestra en build de produccion. No atribuir a la prueba de build comparacion visual de estilos: no clave configurada ni pruebas reales de CARTO por agente. tileerror muestra aviso generico sin imprimir URL/key; no se agrega fallback automatico de proveedor. Ayuda y controles existentes conservados.
+
+`lib/propertyDetail.ts` agrega mapTileSource y MapStyle, prueba nueva en propertyDetail.test.mjs para fallback sin clave, rutas voyager/positron, encodeURIComponent de valor ficticio y atribucion OSM+CARTO. No dependencias nuevas ni cambio backend/API/BD. Flujo de configuracion: Sebas crea/edita frontend/.env.local con NEXT_PUBLIC_CARTO_BASEMAP_API_KEY=<valor local>, sin compartir clave; reinicia npm run dev. En produccion variables NEXT_PUBLIC se fijan al compilar, requiere rebuild/redeploy al cambiarlas. Archivo ignorado por .gitignore, no escrito por agente. Clave browser-delivered visible en solicitudes: restringir dominios autorizados en CARTO, no afirmar que .env la oculta al navegador. No modificar backend/.env.
+
+Fuente oficial de estilos/rutas/atribucion y consumo: https://carto.com/basemaps/ y https://carto.com/basemaps/apikey/; condiciones https://carto.com/legal/basemap-terms/. Solicitudes de mosaicos no equivalen a inicializaciones del contador actual; mover/zoom/cambiar fondo puede consumir mas mosaicos. Sin medicion de velocidad ni uso facturado. Validacion humana Pendiente: configurar clave, comparar Quito en tres fondos, atribucion, errores, telefono y controles inferiores; uso real de CARTO No verificado. Sin V aprobada ni puntos; HU-11 en Pruebas. Sin commit/push/PR, sin nuevos archivos evidence. Siguiente paso: Sebas configura variable local y revisa selector en ficha.
+
+
+### 2026-11-18 - Codex con Sebas - retirar prueba CARTO y diagnostico de consistencia
+
+Ultima actualizacion: 2026-11-18. Rama feat/URB-14-HU-11-ficha-detalle. Sebas solicita mantener solo Leaflet y evitar consumo CARTO. Se retira lectura de clave, selector desarrollo, URLs/atribucion CARTO, helper y prueba especifica; queda Leaflet + mosaicos OSM, zoom inferior derecho y aviso generico de error. Archivos de entorno intactos y clave ya no referenciada por codigo del mapa. Esta version no solicita CARTO; otras pestanas/despliegues anteriores deben recargarse/reemplazarse. No prometer ausencia de condiciones/capacidad limitada del servicio OSM.
+
+Diagnostico pendiente de nuevo alcance: catalogo py-6 (24px), panel/oportunidades/disponibilidad/agenda py-10 (40px), enlaces Volver al panel agregan altura. Se propone componente PageLayout + guia de vistas, ajustar paginas y retirar enlaces redundantes de vistas principales tras confirmar alcance. Sesion access en sessionStorage y enlaces target blank con noopener no comparten acceso; cookie refresh HttpOnly existe pero frontend no restaura al iniciar pesta?a nueva. No se desactiva autenticacion ni se comparte token con localStorage. Pregunta a Sebas pendiente: molestia en desarrollo se refiere a perdida de sesion o mensaje Browser Use. No cambio de sesiones, plantillas ni margenes en esta etapa.
+
+Resultados: linea base 49/49 frontend; tras retirar caso exclusivo CARTO quedan 48/48, tsc y eslint exit 0 (aviso previo SiteNav), build exit 0 16/16 paginas, sin mostrar valores .env. Backend sin cambios, suite no repetida; referencia previa sqlite 406 OK/check sin cambios. Validacion humana Pendiente, HU-11 en Pruebas, PostgreSQL No ejecutado DT-68. Sin commit/push/PR ni evidencia auxiliar. Siguiente paso: confirmar alcance de plantilla/espacios y aclarar problema de desarrollo.
+
+
+### Fix HU-10/URB-16: navegacion de tarjetas durante desarrollo - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama feat/URB-14-HU-11-ficha-detalle. Sebas aclara que la molestia es acumular pestanas al probar; solicita mantener nueva pestana al publicar sin depender de recordar un cambio. PropertyCard.tsx usa NODE_ENV production: solo entonces target blank, rel noopener noreferrer y anuncio accesible de nueva pestana. npm run dev y test navegan misma pestana; npm run build/npm start y despliegues produccion abren nueva. Aplica a catalogo y similares porque reutilizan tarjeta. Sin flag extra, credenciales ni bypass de autenticacion. CTRL/cmd+clic del navegador sigue disponible.
+
+Sesion: navegar en misma pestana conserva sessionStorage en desarrollo, pero NO implementa restauracion en pestanas nuevas de produccion. Cookie refresh existe, bootstrap de sesion pendiente de alcance separado; no prometer solucion ni cambiar seguridad/localStorage. No se modifica Browser Use (aclarado que no era la molestia). Ajustes de PageLayout/espacios y enlaces principales siguen pendientes del ok de alcance visual anterior. Sin backend/BD/migraciones/dependencias nuevos. HU-11 sigue en Pruebas; GUI y prueba humana de admin Pendiente.
+
+Resultado: frontend48/48, tipos/lint/build exit0, aviso previo SiteNav. Lectura HTML local /properties: 7 enlaces de tarjeta, 0 target blank y 0 anuncios de pesta?a nueva. Eso verifica atributos servidos, no validacion humana ni restauracion real de sesion. Sin commit/push/PR ni archivos evidence. Siguiente paso: Sebas prueba misma pestana y confirma alcance de plantilla visual.
+
+
+### Fixes visuales: plantilla comun de paginas - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama feat/URB-14-HU-11-ficha-detalle. Alcance visual confirmado por Sebas: nuevo `frontend/components/PageLayout.tsx` (PageLayout y PageHeader) y `docs/handoff/PLANTILLA_VISTA.md`; adopcion en `frontend/app/properties/page.tsx`, `frontend/app/dashboard/page.tsx`, `frontend/app/dashboard/opportunities/page.tsx`, `frontend/app/dashboard/availability/page.tsx`, `frontend/app/dashboard/agenda/page.tsx`. Archivo dashboard compartido avisado antes. Separacion principal py-6=24px con configuracion actual, gutters px-4/sm:px-6/lg:px-8, ancho conservado catalogo1600/standard6xl/narrow5xl. Antetitulo/titulo/descripcion y acciones responsivas uniformes. PageHeader mb-6; carga de panel/disponibilidad/agenda tambien usa contenedor comun. SiteNav raiz intacto, sin duplicarlo.
+
+Se retira Volver al panel de listas principales oportunidades/disponibilidad/agenda, conservando navegacion superior. Sin retirar regresos contextuales de detalles/formularios fuera de alcance. Sin cambios de autenticacion, pesta?as, backend, DB, migraciones, reglas de negocio, dependencias ni proveedor de mapas. Sesion entre pesta?as nuevas de produccion sigue pendiente, misma pesta?a en desarrollo ya implementada antes. No se agrega template a login, ficha o estadisticas porque no forman parte de esta adopcion.
+
+Trazabilidad: ajuste catalogo fix HU-10/URB-16; panel plantilla compartida transversal; oportunidades fix HU-34/URB-34; disponibilidad fix HU-22/URB-19; agenda fix HU-24/URB-27. No son nuevos criterios HU-11 ni se cambian estados de otras HU. Sin IDs nuevos. Guia documenta ejemplo de nueva vista, anchos, espaciado, acciones, carga, limites y que autorizacion sigue en API. Seguridad sin cambio de riesgos.
+
+Comprobaciones: linea base y final frontend48/48, tsc/ESLint/build exit0 (aviso previo SiteNav), build16/16. No se crean pruebas que solo repliquen clases visuales. Sin backend nuevo: referencia anterior sqlite406 OK/check sin cambios, no repetidos. PostgreSQL No ejecutado DT-68. Validacion humana Pendiente: comparar los cinco antetitulos a24px bajo la misma navegacion en escritorio/movil, acciones sin overflow, pantallas de carga, ausencia de enlaces redundantes y funcionalidad de filtros/formularios/agenda. No hay captura nueva ni V aprobada. HU-11 sigue en Pruebas sin puntos adicionales; sin commit/push/PR. Siguiente paso: Sebas revisa las cinco vistas y la guia.
+
+
+### Correccion de ancho agenda/disponibilidad - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama feat/URB-14-HU-11-ficha-detalle. Sebas reporta diferencia de ancho tras plantilla. Causa confirmada: availability y agenda usaban width narrow=max-w-5xl, a diferencia de panel/oportunidades standard=max-w-6xl. Se corrigen ambos estados carga/contenido a standard en las dos paginas; PLANTILLA_VISTA.md actualiza standard para cuatro vistas internas y reserva narrow para futuros casos justificados. Correccion sustituye indicacion anterior de conservar5xl en esas dos vistas; historial previo conservado. Fix HU-22/URB-19 y HU-24/URB-27, sin logica/auth/backend/BD/dependencias nuevos. Frontend48/48, tsc/lint/build exit0, aviso previo SiteNav. Validacion visual humana Pendiente; HU-11 sigue en Pruebas. Sin commit/push/PR ni capturas nuevas; siguiente paso comparar anchos en escritorio y movil.
+
+
+### Respaldo de trabajo para retomar - 2026-11-18
+
+Ultima actualizacion: 2026-11-18. Codex con Sebas, rama `feat/URB-14-HU-11-ficha-detalle`. Sebas autoriza expresamente commits y push para conservar avance en GitHub y retomar en dos dias (2026-11-20); NO solicita abrir PR ni integrar develop. Ajuste final pedido: ficha reduce direccion de text-lg/mt-2 a text-base/mt-1, espacio hasta precio y cuadro de mt-6 a mt-4, titulo Caracteristicas principales centrado. Implementado en `frontend/app/properties/[id]/page.tsx`; revision visual humana Pendiente.
+
+Estado de continuidad: 16 commits de codigo por capa guardados desde b75e227 hasta 3d5552a; contratos serializer+Property juntos conforme GPS y archivos compartidos con commits dedicados. Documentacion se guarda despues de registrar resultados. git fetch origin ejecutado; origin/develop sigue 6e0caca, misma base (comparacion previa HEAD...origin/develop 0/0), sin cambios que integrar. No se abre PR ni se declara Apto para PR; auditoria obligatoria en chat nuevo sigue pendiente antes del futuro PR. Esta subida es respaldo de trabajo, HU-11 sigue en Pruebas y validaciones humanas Pendiente.
+
+Comprobacion final nueva: con PIPENV_DONT_LOAD_ENV=1, DB_ENGINE=sqlite, EMAIL_PROVIDER=console, MEDIA_PROVIDER=local, suite completa incluyendo telemetry 406 OK en 164.451s, SUITE_EXIT=0; makemigrations --check --dry-run No changes detected, MIGRATIONS_EXIT=0. Frontend48/48, tsc/ESLint/build exit0 y aviso previo SiteNav; build16/16. Sin PostgreSQL (No ejecutado DT-68, Nivel1), sin capturas nuevas. No se versionan archivos .env, DB, media/private_media o evidence; fotos antiguas ya rastreadas en develop no cambiaron y no se incluyeron en estos commits.
+
+Al retomar: abrir esta rama y leer esta nota primero; comprobar git status y referencias remotas. Base local habitual backend/db.sqlite3 conserva siete propiedades y tres usuarios; no se sube, ni se suben sus fotos/documentos locales. Otras maquinas deben configurar su propio entorno, aplicar migraciones solo contra BD local comprobada y recrear datos demo si corresponde. Migraciones nuevas: users.0010 y telemetry.0001; no editar aplicadas ni migrar Supabase desde rama. CARTO retirado, clave local sin uso; mapa Leaflet/OSM. Desarrollo navega fichas en misma pestana y produccion en nueva.
+
+Pendientes para continuar: recuperacion de sesion al iniciar nueva pestana en produccion (sin bypass ni localStorage), validacion humana movil/desktop y envios de formularios, criterios Anexo2 POR CONFIRMAR, auditoria de solo lectura antes de PR y documentar cualquier hallazgo. No mapa de catalogo ni medicion de facturacion oficial implementados. Plantilla visual PageLayout y guia PLANTILLA_VISTA disponibles; panel/oportunidades/disponibilidad/agenda usan standard y24px arriba. Estadisticas en Panel > Estadisticas, solo admin. Explicacion de backend/frontend y fixes por HU permanece en notas anteriores/GPS. Push se confirma por hash remoto al terminar, no se presume exito en esta nota.
