@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
+import PageLayout, { PageHeader } from "@/components/PageLayout";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { getAgents, getEligibleProperties, listOpportunities } from "@/lib/opportunities";
@@ -170,25 +171,16 @@ export default function OpportunitiesPage() {
     "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-600 focus:outline-none";
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <Link href="/dashboard" className="text-sm font-semibold text-blue-700 hover:underline">
-              ← Volver al panel
-            </Link>
-            <p className="mt-4 text-sm font-semibold uppercase tracking-wider text-blue-700">Seguimiento de oportunidades</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-              {isAdmin ? "Oportunidades del equipo" : "Mi cartera de oportunidades"}
-            </h1>
-          </div>
-          <Link
+    <PageLayout width="standard">
+      <div className="space-y-6">
+        <PageHeader eyebrow="Seguimiento de oportunidades"
+          title={isAdmin ? "Oportunidades del equipo" : "Mi cartera de oportunidades"}
+          actions={<Link
             href="/dashboard/opportunities/new"
             className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
           >
             + Abrir oportunidad
-          </Link>
-        </header>
+          </Link>} />
 
         {openedId && (
           <div role="status" className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">
@@ -370,6 +362,6 @@ export default function OpportunitiesPage() {
           )}
         </section>
       </div>
-    </main>
+    </PageLayout>
   );
 }

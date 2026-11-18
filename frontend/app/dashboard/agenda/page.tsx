@@ -8,7 +8,7 @@
 // (HU-25): solo después de la hora de inicio, una vez y con observación obligatoria.
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
+import PageLayout, { PageHeader } from "@/components/PageLayout";
 import { useRouter } from "next/navigation";
 import Dialog from "@/components/Dialog";
 import { ApiError } from "@/lib/api";
@@ -167,22 +167,14 @@ export default function AgendaPage() {
   // Sin la sesión del navegador (prerender y primer render) no se pintan fechas: "hoy" depende
   // del momento en que se abre la página y no debe salir distinto en el servidor y el cliente.
   if (!sessionSnapshot) {
-    return <main className="min-h-screen bg-slate-50 px-4 py-10 text-sm text-slate-500">Cargando…</main>;
+    return <PageLayout width="standard"><p role="status" className="text-sm text-slate-500">Cargando…</p></PageLayout>;
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <header>
-          <Link href="/dashboard" className="text-sm font-semibold text-blue-700 hover:underline">
-            ← Volver al panel
-          </Link>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-wider text-blue-700">Agendamiento de visitas</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-            {isAdmin ? "Agenda de visitas" : "Mi agenda"}
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">Horas de Ecuador.</p>
-        </header>
+    <PageLayout width="standard">
+      <div className="space-y-6">
+        <PageHeader eyebrow="Agendamiento de visitas"
+          title={isAdmin ? "Agenda de visitas" : "Mi agenda"} description="Horas de Ecuador." />
 
         <section className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2">
           {isAdmin && (
@@ -361,6 +353,6 @@ export default function AgendaPage() {
           </div>
         )}
       </Dialog>
-    </main>
+    </PageLayout>
   );
 }

@@ -4,9 +4,14 @@ import { Property } from "@/types/property";
 
 export default function PropertyCard({ property }: { property: Property }) {
   const mainImage = property.images?.[0]?.image;
+  // Development stays in this tab; production restores the approved new-tab behavior.
+  const opensNewTab = process.env.NODE_ENV === "production";
 
   return (
     <article className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <Link href={`/properties/${property.id}`} target={opensNewTab ? "_blank" : undefined} rel={opensNewTab ? "noopener noreferrer" : undefined}
+        aria-label={`Ver ficha de ${property.title}${opensNewTab ? " (se abre en una pestaña nueva)" : ""}`}
+        className="block h-full focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-blue-700">
       <div className="relative aspect-[4/3] bg-slate-100">
         {mainImage ? (
           <Image
@@ -22,31 +27,32 @@ export default function PropertyCard({ property }: { property: Property }) {
             Imagen no disponible
           </div>
         )}
-        <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold capitalize text-slate-700 shadow-sm">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold capitalize text-slate-700 shadow-sm">
+          <span aria-hidden="true" className={`h-2 w-2 rounded-full ${property.status === "disponible" ? "bg-emerald-500" : "bg-amber-500"}`} />
           {property.status === "reservador" ? "Reservado" :
             property.status?.replaceAll("_", " ") || "Sin estado"}
         </span>
       </div>
       <div className="p-4">
+        <p className="text-xs font-medium text-slate-500">{property.operation_type === "arriendo" ? "Alquiler mensual" : "Precio de venta"}</p>
         <p className="text-2xl font-extrabold tracking-tight text-slate-900">
             {Number(property.price).toLocaleString("es-EC", {
               style: "currency",
               currency: "USD",
             })}
+            {property.operation_type === "arriendo" && <span className="ml-1 text-sm font-medium text-slate-500">/ mes</span>}
         </p>
-        <p className="mt-2 truncate text-sm text-slate-700" title={`${property.bedrooms} habitaciones · ${property.bathrooms} baños · ${property.area_m2} m²`}>
-          {property.bedrooms} Hab <span aria-hidden="true">·</span> {property.bathrooms} Ba <span aria-hidden="true">·</span> {property.area_m2} m²
+        <p className="mt-2 truncate text-sm text-slate-700">
+          {property.property_type !== "terreno" && <>{property.bedrooms} Hab <span aria-hidden="true">·</span> {property.bathrooms} Ba <span aria-hidden="true">·</span> </>}{property.area_m2} m²
         </p>
         <h2 className="mt-3 truncate text-sm font-semibold text-slate-900" title={property.title}>
-          <Link
-            href={`/properties/${property.id}`}
-            className="flex min-h-11 items-center rounded-sm py-1 hover:text-blue-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-          >
+          <span className="flex min-h-11 items-center py-1">
             {property.title}
-          </Link>
+          </span>
         </h2>
         <p className="mt-1 truncate text-sm text-slate-500" title={property.location}>{property.location}</p>
       </div>
+      </Link>
     </article>
   );
 }

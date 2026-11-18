@@ -306,7 +306,7 @@ export default function UserManagementPage() {
                 <input
                   type="tel"
                   inputMode="numeric"
-                  placeholder="0991234567"
+                  placeholder="09XXXXXXXX"
                   maxLength={10}
                   value={form.phone}
                   onChange={(event) =>
@@ -317,6 +317,7 @@ export default function UserManagementPage() {
                   }
                   className={inputClass}
                 />
+                <span className="mt-1 block text-xs text-slate-500">Celular de Ecuador: 10 dígitos, empieza por 09.</span>
               </label>
               <div className="flex flex-wrap gap-3 sm:col-span-2">
                 <button

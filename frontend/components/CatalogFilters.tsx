@@ -25,7 +25,7 @@ function initialDraft(filters: PropertyCatalogFilters): PropertyCatalogFilters {
     parking_spaces: Number(filters.parking_spaces) > 0 ? filters.parking_spaces : "" };
 }
 function firstErrorPanel(errors: Record<string, string[]>): Panel | null {
-  if (errors.location) return "mobile";
+  if (errors.location || errors.operation_type) return "mobile";
   return (["price", "rooms", "type", "more"] as Panel[]).find((panel) => panelKeys[panel].some((key) => errors[key]?.length)) || null;
 }
 function SearchIcon() {
@@ -145,7 +145,7 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
       update(key, movePriceThumb(draft, key, value, distribution));
     }
     return <fieldset className="space-y-4">
-      <legend className="mb-3 font-semibold text-slate-900">Precio referencial en USD</legend>
+      <legend className="mb-3 font-semibold text-slate-900">{draft.operation_type === "arriendo" ? "Alquiler mensual en USD" : "Precio en USD"}</legend>
       <p id="price-slider-help" className="sr-only">Controles de precio mínimo y máximo. Flechas: 100 USD; Inicio y Fin: extremos.</p>
       <figure>
         {distribution?.total ? <>
@@ -239,6 +239,7 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
     </div>;
   }
   const active = [
+    ...(filters.operation_type ? [{ label: filters.operation_type === "arriendo" ? "Alquiler mensual" : "Venta", keys: ["operation_type"] as CatalogKey[] }] : []),
     ...(filters.location ? [{ label: filters.location, keys: ["location"] as CatalogKey[] }] : []),
     ...(filters.price_min || filters.price_max ? [{ label: `Precio: ${filters.price_min ? amountPreview(filters.price_min, "USD") : "sin mínimo"} – ${filters.price_max ? amountPreview(filters.price_max, "USD") : "sin máximo"}`, keys: ["price_min", "price_max"] as CatalogKey[] }] : []),
     ...(Number(filters.bedrooms) > 0 ? [{ label: `${filters.bedrooms}+ hab.`, keys: ["bedrooms"] as CatalogKey[] }] : []),
@@ -256,7 +257,10 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
         <button type="submit" disabled={pending} aria-label="Buscar ubicación" className="mr-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg text-blue-700 hover:bg-blue-50 focus-visible:outline-2"><SearchIcon /></button>
       </form>
       <div className="hidden flex-wrap gap-2 lg:flex">
-        <button disabled className={`${button} !cursor-not-allowed !opacity-50`}>Operación · Próximamente</button>
+        <select aria-label="Operación" value={filters.operation_type || ""} disabled={pending} className={button}
+          onChange={(event) => navigate({ operation_type: event.target.value, price_min: "", price_max: "" })}>
+          <option value="">Venta y alquiler</option><option value="venta">Venta</option><option value="arriendo">Alquiler mensual</option>
+        </select>
         {(["price", "rooms", "type", "more"] as Panel[]).map((item) => <button key={item} type="button" disabled={pending}
           aria-haspopup="dialog" aria-expanded={panel === item} onClick={(event) => openPanel(item, event.currentTarget)} className={`${button} inline-flex shrink-0 items-center gap-3`}>
           <span>{item === "price" ? "Precio" : item === "rooms" ? "Habitaciones y baños" : item === "type" ? "Tipo de propiedad" : "Más filtros"}</span><Chevron />
@@ -288,6 +292,14 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
             <input id="dialog-location" type="search" maxLength={500} value={draft.location || ""} onChange={(event) => update("location", event.target.value)} className={control} aria-invalid={!!errors.location} aria-describedby={errors.location ? "location-error" : undefined} />{error("location")}
           </div>}
           {(panel === "price" || panel === "mobile") && priceFields()}
+          {panel === "mobile" && <label className="block text-sm font-semibold text-slate-900">Operación
+            <select value={draft.operation_type || ""} className={`${control} mt-2`}
+              aria-invalid={!!errors.operation_type} onChange={(event) => {
+                update("operation_type", event.target.value); update("price_min", ""); update("price_max", "");
+              }}>
+              <option value="">Venta y alquiler</option><option value="venta">Venta</option><option value="arriendo">Alquiler mensual</option>
+            </select>{error("operation_type")}
+          </label>}
           {(panel === "rooms" || panel === "mobile") && roomsFields()}
           {(panel === "type" || panel === "mobile") && typeFields()}
           {(panel === "more" || panel === "mobile") && moreFields()}

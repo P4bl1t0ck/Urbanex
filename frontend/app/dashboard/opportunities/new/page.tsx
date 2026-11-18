@@ -252,7 +252,7 @@ export default function OpenOpportunityPage() {
                   onChange={(e) => update("phone", e.target.value)}
                   aria-invalid={Boolean(errors.phone)}
                 />
-                <span className="mt-1 block text-xs text-slate-500">Celular de Ecuador: 09XXXXXXXX o +5939XXXXXXXX.</span>
+                <span className="mt-1 block text-xs text-slate-500">Celular de Ecuador: 10 dígitos, empieza por 09. También aceptamos +5939XXXXXXXX.</span>
                 {errors.phone && <span role="alert" className="mt-1 block text-xs text-red-700">{errors.phone}</span>}
               </label>
               <label className="text-sm font-medium text-slate-700">

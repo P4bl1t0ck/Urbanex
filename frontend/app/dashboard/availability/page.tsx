@@ -6,7 +6,7 @@
 // las valida el servidor; aquí solo se muestran sus errores junto a cada campo.
 
 import { useCallback, useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
-import Link from "next/link";
+import PageLayout, { PageHeader } from "@/components/PageLayout";
 import { useRouter } from "next/navigation";
 import Dialog from "@/components/Dialog";
 import { ApiError } from "@/lib/api";
@@ -252,24 +252,15 @@ export default function AvailabilityPage() {
 
   // Sin la sesión del navegador (prerender y primer render) no se pinta la fecha mínima de hoy.
   if (!sessionSnapshot) {
-    return <main className="min-h-screen bg-slate-50 px-4 py-10 text-sm text-slate-500">Cargando…</main>;
+    return <PageLayout width="standard"><p role="status" className="text-sm text-slate-500">Cargando…</p></PageLayout>;
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <header>
-          <Link href="/dashboard" className="text-sm font-semibold text-blue-700 hover:underline">
-            ← Volver al panel
-          </Link>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-wider text-blue-700">Agendamiento de visitas</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-            {isAdmin ? "Disponibilidad de los asesores" : "Mi disponibilidad"}
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Los clientes solo ven las franjas libres de estos horarios (hora de Ecuador). Las excepciones bloquean una fecha.
-          </p>
-        </header>
+    <PageLayout width="standard">
+      <div className="space-y-6">
+        <PageHeader eyebrow="Agendamiento de visitas"
+          title={isAdmin ? "Disponibilidad de los asesores" : "Mi disponibilidad"}
+          description="Los clientes solo ven las franjas libres de estos horarios (hora de Ecuador). Las excepciones bloquean una fecha." />
 
         {isAdmin && (
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -504,6 +495,6 @@ export default function AvailabilityPage() {
       >
         Se eliminará {pendingDelete?.label}. Las franjas libres que ven los clientes se actualizan de inmediato.
       </Dialog>
-    </main>
+    </PageLayout>
   );
 }

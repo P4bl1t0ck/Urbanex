@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import PageLayout, { PageHeader } from "@/components/PageLayout";
 import PropertyCard from "@/components/PropertyCard";
 import CatalogFilters from "@/components/CatalogFilters";
 import CatalogResultsHeader from "@/components/CatalogResultsHeader";
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   description: "Explora propiedades disponibles y reservadas. Filtra por tipo, precio, ubicación, habitaciones y superficie.",
 };
 
-const filterKeys = ["property_type", "price_min", "price_max", "bedrooms", "bathrooms", "area_min", "parking_spaces", "location", "page", "sort"] as const;
+const filterKeys = ["property_type", "operation_type", "price_min", "price_max", "bedrooms", "bathrooms", "area_min", "parking_spaces", "location", "page", "sort"] as const;
 export default async function PropertiesPage({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
@@ -53,13 +54,10 @@ export default async function PropertiesPage({ searchParams }: {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1600px]">
-        <header className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">Encuentra tu próximo hogar</p>
-          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Catálogo de propiedades</h1>
-          <p className="mt-2 text-slate-600">Explora propiedades disponibles y reservadas. Los precios se muestran en USD y son referenciales.</p>
-        </header>
+    <PageLayout width="catalog">
+      <div>
+        <PageHeader eyebrow="Encuentra tu próximo hogar" title="Catálogo de propiedades"
+          description="Explora propiedades en venta o alquiler. Precios en USD; alquileres por mes." />
 
         <CatalogFilters key={JSON.stringify([filters, fieldErrors])} filters={filters} fieldErrors={fieldErrors} distribution={data?.price_distribution} />
         <section aria-label="Resultados del catálogo" className="min-w-0">
@@ -91,6 +89,6 @@ export default async function PropertiesPage({ searchParams }: {
             )}
         </section>
       </div>
-    </main>
+    </PageLayout>
   );
 }
