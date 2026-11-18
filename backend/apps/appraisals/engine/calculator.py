@@ -45,6 +45,7 @@ class Sample:
     status: str
     price: Decimal
     area: Decimal
+    operation_type: str = 'venta'
     latitude: Decimal = None
     longitude: Decimal = None
 
@@ -53,6 +54,7 @@ class Sample:
         return cls(
             id=property_obj.id,
             property_type=property_obj.property_type,
+            operation_type=property_obj.operation_type,
             status=property_obj.status,
             price=Decimal(property_obj.price),
             area=Decimal(str(property_obj.area_m2)),
@@ -157,6 +159,7 @@ def _sample_snapshot(sample):
     return {
         'id': sample.id,
         'property_type': sample.property_type,
+        'operation_type': sample.operation_type,
         'status': sample.status,
         'price': str(sample.price),
         'area_m2': str(sample.area),
@@ -197,6 +200,8 @@ def compute(subject, comparables, params, params_version=None):
         raise EngineError(f'Se permiten como máximo {MAX_COMPARABLES} comparables.')
     if any(c.property_type != subject.property_type for c in comparables):
         raise EngineError('Los comparables deben ser del mismo tipo de propiedad.')
+    if subject.operation_type not in ('venta', 'arriendo') or any(c.operation_type != subject.operation_type for c in comparables):
+        raise EngineError('Los comparables deben corresponder a la misma operación: venta o alquiler mensual.')
     if any(c.price <= 0 or c.area <= 0 for c in comparables):
         raise EngineError('Todos los comparables deben tener precio y superficie mayores que 0.')
 

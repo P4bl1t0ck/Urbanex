@@ -34,6 +34,7 @@ def find_candidates(property_obj, params, now=None):
         Property.objects
         .filter(
             property_type=property_obj.property_type,
+            operation_type=property_obj.operation_type,
             status__in=params['estados_comparables'],
             price__gt=0,
             area_m2__gt=0,

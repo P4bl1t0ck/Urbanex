@@ -535,3 +535,28 @@ class AppraisalEngineApiTests(AppraisalTestMixin, TestCase):
         response = self.client.patch(detail, {'suggested_value': '1.00',
                                               'final_justification': 'x'}, format='json')
         self.assertEqual(response.data['suggested_value'], '143861.35')
+class OperationAppraisalTests(TestCase):
+    def test_candidates_never_mix_monthly_rent_and_sale(self):
+        from .services import find_candidates
+        subject = Property.objects.create(title='Sujeto', description='Prueba', property_type='casa',
+            operation_type='venta', price=150000, area_m2=100, location='Quito', latitude='-0.18', longitude='-78.48')
+        sale = Property.objects.create(title='Comparable venta', description='Prueba', property_type='casa',
+            operation_type='venta', status='disponible', price=150000, area_m2=100, location='Quito', latitude='-0.18', longitude='-78.48')
+        rent = Property.objects.create(title='Comparable alquiler', description='Prueba', property_type='casa',
+            operation_type='arriendo', status='disponible', price=650, area_m2=100, location='Quito', latitude='-0.18', longitude='-78.48')
+        self.assertEqual([item.pk for item, _ in find_candidates(subject, THETA_V1)], [sale.pk])
+        subject.operation_type = 'arriendo'
+        subject.save()
+        self.assertEqual([item.pk for item, _ in find_candidates(subject, THETA_V1)], [rent.pk])
+
+    def test_pure_engine_rejects_mixed_operations_before_manual_fallback(self):
+        from dataclasses import replace
+        subject = sample(100, '150000', '100')
+        rent = replace(sample(1, '650', '100'), operation_type='arriendo')
+        with self.assertRaisesMessage(EngineError, 'misma operación'):
+            compute(subject, [rent], THETA_V1)
+
+    def test_new_snapshot_records_operation_without_rewriting_history(self):
+        subject = sample(100, '150000', '100')
+        result = compute(subject, [], THETA_V1)
+        self.assertEqual(result.snapshot['subject']['operation_type'], 'venta')

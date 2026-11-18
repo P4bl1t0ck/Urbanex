@@ -307,7 +307,7 @@ class Appraisal(models.Model):
         invalid = [comparable.id for comparable in comparables if comparable.id not in valid_ids]
         if invalid:
             raise ValidationError({'comparables': (
-                'No son comparables válidos (tipo, estado, antigüedad o zona): '
+                'No son comparables válidos (operación, tipo, estado, antigüedad o zona): '
                 + ', '.join(f'#{pk}' for pk in sorted(invalid)) + '.'
             )})
         try:
