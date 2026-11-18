@@ -24,7 +24,7 @@ const LocationMap = dynamic<MapProps>(async () => {
       whenReady={onReady} className="h-72 w-full sm:h-96" style={{ zIndex: 0 }}>
       <ZoomControl position="bottomright" zoomInTitle="Acercar" zoomOutTitle="Alejar" />
       <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19}
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' 
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         eventHandlers={{ tileerror: () => setTileError(true) }} />
       <Marker position={position} icon={icon} alt={`Ubicación de ${title}`}><Popup>{title}</Popup></Marker>
       </MapContainer>
