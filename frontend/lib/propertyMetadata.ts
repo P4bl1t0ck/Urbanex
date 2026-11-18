@@ -39,7 +39,8 @@ export function buildPropertyDescription(property: Property): string {
     currency: "USD",
   });
   const type = TYPE_LABELS[property.property_type] ?? property.property_type;
-  const summary = `${type} en ${property.location} · ${price} (precio referencial).`;
+  const operation = property.operation_type === "arriendo" ? "alquiler mensual" : property.operation_type === "venta" ? "venta" : "precio referencial";
+  const summary = `${type} en ${property.location} · ${price}${property.operation_type === "arriendo" ? "/mes" : ""} (${operation}).`;
   const description = property.description.replace(/\s+/g, " ").trim();
   return truncate(description ? `${summary} ${description}` : summary, DESCRIPTION_MAX_LENGTH);
 }

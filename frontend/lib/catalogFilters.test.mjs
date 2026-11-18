@@ -154,3 +154,10 @@ test("limpiar filtros mantiene el orden elegido y recientes elimina sort", () =>
   assert.equal(catalogHref({ location: "Quito", parking_spaces: "1", sort: "price_desc" }, { location: "", parking_spaces: "" }), "/properties?sort=price_desc");
   assert.equal(catalogHref({ sort: "price_asc", location: "Quito" }, { sort: "recent" }), "/properties?location=Quito");
 });
+test("operación: conserva filtro y orden y rechaza valores desconocidos", () => {
+  const href = catalogHref({ operation_type: "arriendo", sort: "price_asc" }, { location: "Quito" });
+  assert.match(href, /operation_type=arriendo/);
+  assert.match(href, /sort=price_asc/);
+  assert.deepEqual(validateCatalogDraft({ operation_type: "arriendo" }, ["operation_type"]), {});
+  assert.ok(validateCatalogDraft({ operation_type: "diario" }, ["operation_type"]).operation_type);
+});

@@ -94,3 +94,10 @@ for (const status of ["captacion", "vendido", "arrendado", "no_disponible"]) {
     assert.deepEqual(metadata.robots, { index: false, follow: false });
   });
 }
+test("operación: los metadatos distinguen venta y alquiler mensual", () => {
+  const sale = buildPropertyMetadata(makeProperty({ operation_type: "venta" }));
+  const rental = buildPropertyMetadata(makeProperty({ operation_type: "arriendo", price: "650.00" }));
+  assert.match(sale.description, /\(venta\)/);
+  assert.match(rental.description, /\/mes \(alquiler mensual\)/);
+  assert.doesNotMatch(rental.description, /precio referencial/);
+});

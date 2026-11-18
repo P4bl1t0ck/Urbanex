@@ -1,7 +1,7 @@
 // Entrada decimal sin signo ni notación científica; vacío significa sin filtro.
 import type { PropertyCatalogFilters, PriceDistribution } from "../types/property";
 
-export const catalogKeys = ["location", "price_min", "price_max", "bedrooms", "bathrooms", "property_type", "area_min", "parking_spaces"] as const;
+export const catalogKeys = ["location", "price_min", "price_max", "bedrooms", "bathrooms", "property_type", "area_min", "parking_spaces", "operation_type"] as const;
 export type CatalogKey = typeof catalogKeys[number];
 
 export function toggleSelection(current: string | undefined, selected: string): string {
@@ -58,6 +58,7 @@ export function validateCatalogDraft(draft: PropertyCatalogFilters, keys: readon
     if (key === "property_type" && !["casa", "departamento", "local", "terreno"].includes(value)) {
       errors[key] = ["Selecciona un tipo válido."];
     }
+    if (key === "operation_type" && !["venta", "arriendo"].includes(value)) errors[key] = ["Selecciona Venta o Alquiler."];
     if (key === "location" && value.length > 500) errors[key] = ["Usa hasta 500 caracteres."];
   }
   if (keys.includes("price_min") && keys.includes("price_max") && draft.price_min && draft.price_max &&
