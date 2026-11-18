@@ -90,6 +90,9 @@ class Property(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPES, default='departamento')
+    # Venta es el valor de compatibilidad de los registros existentes, confirmado
+    # por Sebas (2026-11-17). La API exige elegir operación en cada alta nueva.
+    operation_type = models.CharField(max_length=10, choices=OPERATION_CHOICES, default='venta')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='captacion') # We add the status field to our model, for better handle errors
     
     price = models.DecimalField(max_digits=12, decimal_places=2)
@@ -115,6 +118,21 @@ class Property(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(condition=models.Q(operation_type__in=['venta', 'arriendo']),
+                                   name='property_operation_valid'),
+            models.CheckConstraint(condition=~models.Q(property_type='terreno') | models.Q(bedrooms=0, bathrooms=0),
+                                   name='land_without_rooms'),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.property_type == 'terreno':
+            self.bedrooms = self.bathrooms = 0
+            if kwargs.get('update_fields') is not None:
+                kwargs['update_fields'] = set(kwargs['update_fields']) | {'bedrooms', 'bathrooms'}
+        return super().save(*args, **kwargs)
     
     def __str__(self):
         # Definimos nuestra respuesta en string con un simple estatus y titulo.
