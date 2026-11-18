@@ -12,6 +12,7 @@ import { ApiError } from "@/lib/api";
 import { registerInterest } from "@/lib/opportunities";
 import { MAX_INTEREST_MESSAGE } from "@/lib/opportunityPipeline";
 import type { WebInterestPayload } from "@/types/opportunity";
+import { contactFields, type ContactDraft } from "@/lib/propertyDetail";
 
 type FieldErrors = Partial<Record<keyof WebInterestPayload | "general", string>>;
 
@@ -46,14 +47,21 @@ function errorsFrom(err: unknown): FieldErrors {
   return errors;
 }
 
-export default function InterestForm({ propertyId }: { propertyId: number }) {
-  const [form, setForm] = useState<WebInterestPayload>(EMPTY);
+export default function InterestForm({ propertyId, initialContact, onContactChange, onBusyChange }: {
+  propertyId: number;
+  initialContact?: ContactDraft;
+  onContactChange?: (value: ContactDraft) => void;
+  onBusyChange?: (busy: boolean) => void;
+}) {
+  const [form, setForm] = useState<WebInterestPayload>(() => ({ ...EMPTY, ...contactFields(initialContact || {}) }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState("");
 
   function update<K extends keyof WebInterestPayload>(key: K, value: WebInterestPayload[K]) {
-    setForm((current) => ({ ...current, [key]: value }));
+    const next = { ...form, [key]: value };
+    setForm(next);
+    if (["full_name", "phone", "email"].includes(key)) onContactChange?.(contactFields(next));
   }
 
   async function submit(event: React.FormEvent) {
@@ -69,14 +77,16 @@ export default function InterestForm({ propertyId }: { propertyId: number }) {
     if (Object.keys(missing).length > 0) return;
 
     setSending(true);
+    onBusyChange?.(true);
     try {
       const result = await registerInterest(propertyId, form);
       setDone(result.detail);
-      setForm(EMPTY);
+      setForm({ ...EMPTY, ...contactFields(form) });
     } catch (err) {
       setErrors(errorsFrom(err));
     } finally {
       setSending(false);
+      onBusyChange?.(false);
     }
   }
 
@@ -142,6 +152,7 @@ export default function InterestForm({ propertyId }: { propertyId: number }) {
             aria-invalid={Boolean(errors.phone)}
             className={fieldClass}
           />
+          <span className="mt-1 block text-xs text-slate-500">Celular de Ecuador: 10 dígitos, empieza por 09. También aceptamos +5939XXXXXXXX.</span>
           {errors.phone && <span className="mt-1 block text-xs text-red-700">{errors.phone}</span>}
         </label>
         <label className="block text-sm font-medium text-slate-800 sm:col-span-2">

@@ -20,6 +20,8 @@ type State =
 
 function AgentCard({ title, agent }: { title: string; agent: PublicAgent }) {
   const name = `${agent.first_name} ${agent.last_name}`.trim() || "Asesor de Urbanex";
+  const digits = agent.phone?.replace(/\D/g, "") || "";
+  const whatsapp = /^09\d{8}$/.test(digits) ? `593${digits.slice(1)}` : /^5939\d{8}$/.test(digits) ? digits : null;
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
@@ -31,6 +33,8 @@ function AgentCard({ title, agent }: { title: string; agent: PublicAgent }) {
       ) : (
         <p className="mt-1 text-sm text-slate-500">Teléfono no registrado</p>
       )}
+      {whatsapp && <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer"
+        className="mt-3 block text-sm font-semibold text-green-700 hover:underline">Escribir por WhatsApp</a>}
     </div>
   );
 }

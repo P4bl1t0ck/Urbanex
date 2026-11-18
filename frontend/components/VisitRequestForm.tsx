@@ -2,7 +2,7 @@
 
 // P-07 (HU-19, RF-04): formulario para solicitar la visita en la franja elegida en
 // FreeSlotsPicker. El cliente no tiene cuenta. Pide nombre, celular de Ecuador (DS-28), la
-// aceptación de la política de privacidad (LOPDP) y, opcionalmente, un correo con la casilla
+// aceptación de la política de privacidad (LOPDP) y, opcionalmente, un correo
 // para recibir la confirmación (HU-20). La respuesta del servidor es la misma exista o no el
 // contacto, y no trae datos del asesor ni el enlace de P-08: ese llega solo por correo (DS-39).
 
@@ -11,10 +11,11 @@ import { ApiError } from "@/lib/api";
 import { requestVisit } from "@/lib/visits";
 import { ecuadorDateOf, formatDayLabel, formatTime } from "@/lib/visitsCalendar";
 import type { FreeSlot, VisitRequestPayload, VisitRequestResponse } from "@/types/visit";
+import { visitConfirmation, contactFields, type ContactDraft } from "@/lib/propertyDetail";
 
 type FieldErrors = Partial<Record<keyof VisitRequestPayload | "general", string>>;
 
-const EMPTY = { full_name: "", phone: "", email: "", email_opt_in: false, privacy_accepted: false };
+const EMPTY = { full_name: "", phone: "", email: "", privacy_accepted: false };
 
 function firstMessage(value: unknown): string | undefined {
   if (typeof value === "string") return value;
@@ -43,18 +44,26 @@ export default function VisitRequestForm({
   slot,
   onCancel,
   onDone,
+  initialContact,
+  onContactChange,
+  onBusyChange,
 }: {
   propertyId: number;
   slot: FreeSlot;
   onCancel: () => void;
   onDone: (result: VisitRequestResponse | null) => void;
+  initialContact?: ContactDraft;
+  onContactChange?: (value: ContactDraft) => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(() => ({ ...EMPTY, ...contactFields(initialContact || {}), email: "" }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [sending, setSending] = useState(false);
 
   function update<K extends keyof typeof EMPTY>(key: K, value: (typeof EMPTY)[K]) {
-    setForm((current) => ({ ...current, [key]: value }));
+    const next = { ...form, [key]: value };
+    setForm(next);
+    if (["full_name", "phone", "email"].includes(key)) onContactChange?.(contactFields(next));
   }
 
   async function submit(event: React.FormEvent) {
@@ -62,16 +71,14 @@ export default function VisitRequestForm({
     const missing: FieldErrors = {};
     if (!form.full_name.trim()) missing.full_name = "Indica tu nombre.";
     if (!form.phone.trim()) missing.phone = "Indica tu celular.";
-    if (form.email_opt_in && !form.email.trim()) {
-      missing.email = "Para recibir la confirmación por correo, indica tu correo.";
-    }
     if (!form.privacy_accepted) missing.privacy_accepted = "Debes aceptar la política de privacidad (LOPDP).";
     setErrors(missing);
     if (Object.keys(missing).length > 0) return;
 
     setSending(true);
+    onBusyChange?.(true);
     try {
-      const result = await requestVisit(propertyId, { ...form, start: slot.start });
+      const result = await requestVisit(propertyId, { ...form, ...visitConfirmation(form.email), start: slot.start });
       onDone(result);
     } catch (err) {
       const found = errorsFrom(err);
@@ -83,6 +90,7 @@ export default function VisitRequestForm({
       if (found.start) onDone(null);
     } finally {
       setSending(false);
+      onBusyChange?.(false);
     }
   }
 
@@ -129,10 +137,11 @@ export default function VisitRequestForm({
             aria-invalid={Boolean(errors.phone)}
             className={fieldClass}
           />
+          <span className="mt-1 block text-xs text-slate-500">Celular de Ecuador: 10 dígitos, empieza por 09. También aceptamos +5939XXXXXXXX.</span>
           {errors.phone && <span className="mt-1 block text-xs text-red-700">{errors.phone}</span>}
         </label>
         <label className="block text-sm font-medium text-slate-800 sm:col-span-2">
-          Correo (opcional)
+          Correo para recibir la confirmación (opcional)
           <input
             type="email"
             autoComplete="email"
@@ -141,19 +150,11 @@ export default function VisitRequestForm({
             aria-invalid={Boolean(errors.email)}
             className={fieldClass}
           />
+          <span className="mt-1 block text-xs text-slate-500">Si lo completas, enviaremos la confirmación a ese correo. Si lo dejas vacío, el asesor coordinará contigo por WhatsApp.</span>
           {errors.email && <span className="mt-1 block text-xs text-red-700">{errors.email}</span>}
         </label>
       </div>
 
-      <label className="mt-4 flex items-start gap-2 text-sm text-slate-800">
-        <input
-          type="checkbox"
-          checked={form.email_opt_in}
-          onChange={(e) => update("email_opt_in", e.target.checked)}
-          className="mt-0.5"
-        />
-        <span>Quiero recibir la confirmación de la visita en mi correo. Si no la marcas, el asesor te confirmará por WhatsApp.</span>
-      </label>
       <label className="mt-3 flex items-start gap-2 text-sm text-slate-800">
         <input
           type="checkbox"

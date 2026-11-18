@@ -12,12 +12,18 @@ import { ApiError } from "@/lib/api";
 import { getFreeSlots } from "@/lib/visits";
 import { addDays, ecuadorDateOf, ecuadorToday, formatDayLabel, formatTime, groupByEcuadorDay } from "@/lib/visitsCalendar";
 import type { FreeSlot, FreeSlotsResponse, VisitRequestResponse } from "@/types/visit";
+import type { ContactDraft } from "@/lib/propertyDetail";
 
 const RANGE_DAYS = 14;
 
 type Loaded = { key: number; data: FreeSlotsResponse | null; error: string; hidden: boolean };
 
-export default function FreeSlotsPicker({ propertyId }: { propertyId: number }) {
+export default function FreeSlotsPicker({ propertyId, initialContact, onContactChange, onBusyChange }: {
+  propertyId: number;
+  initialContact?: ContactDraft;
+  onContactChange?: (value: ContactDraft) => void;
+  onBusyChange?: (busy: boolean) => void;
+}) {
   const [reload, setReload] = useState(0);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [chosenDay, setChosenDay] = useState("");
@@ -74,7 +80,9 @@ export default function FreeSlotsPicker({ propertyId }: { propertyId: number }) 
     return () => document.removeEventListener("visibilitychange", refreshWhenVisible);
   }, []);
 
-  if (loaded?.hidden) return null;
+  if (loaded?.hidden) return <p role="status" className="mt-6 rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
+    Esta propiedad ya no admite visitas. Cierra esta ventana y actualiza la ficha.
+  </p>;
 
   const data = loaded?.data ?? null;
   const today = data ? ecuadorToday() : "";
@@ -184,6 +192,9 @@ export default function FreeSlotsPicker({ propertyId }: { propertyId: number }) 
           key={chosenSlot.start}
           propertyId={propertyId}
           slot={chosenSlot}
+          initialContact={initialContact}
+          onContactChange={onContactChange}
+          onBusyChange={onBusyChange}
           onCancel={() => setChosenSlot(null)}
           onDone={finishRequest}
         />
