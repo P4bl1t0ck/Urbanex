@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import Link from "next/link";
+import PageLayout, { PageHeader } from "@/components/PageLayout";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import Dialog from "@/components/Dialog";
@@ -25,6 +26,7 @@ type PropertyForm = {
   title: string;
   description: string;
   property_type: string;
+  operation_type: string;
   price: string;
   area_m2: string;
   location: string; //Conservamos esto como direccion en texto (Nayon quito por ejemplo.)
@@ -151,6 +153,7 @@ const EMPTY_FORM: PropertyForm = {
   title: "",
   description: "",
   property_type: "departamento",
+  operation_type: "",
   price: "",
   area_m2: "",
   location: "",
@@ -187,6 +190,7 @@ function validateForm(form: PropertyForm, imageCount: number): Partial<Record<Ta
   const add = (tab: TabId, message: string) => (errors[tab] ??= []).push(message);
 
   if (!form.title.trim()) add("general", "El título es obligatorio.");
+  if (!["venta", "arriendo"].includes(form.operation_type)) add("general", "Selecciona Venta o Alquiler mensual.");
   if (!(Number(form.price) > 0)) add("general", "El precio referencial debe ser mayor a 0.");
   if (!(Number(form.area_m2) > 0)) add("general", "El área debe ser mayor a 0 m².");
   if (!form.description.trim()) add("general", "La descripción es obligatoria.");
@@ -221,6 +225,9 @@ export default function DashboardPage() {
   const [formData, setFormData] = useState<PropertyForm>(EMPTY_FORM);
   const [existingImages, setExistingImages] = useState<PropertyImage[]>([]);
   const [selectedImages, setSelectedImages] = useState<StagedImage[]>([]);
+  const [imageToDelete, setImageToDelete] = useState<PropertyImage | null>(null);
+  const [deletingImage, setDeletingImage] = useState(false);
+  const [imageDeleteError, setImageDeleteError] = useState("");
 
   // Expediente (HU-03): los documentos se preparan aquí y se suben al guardar la propiedad.
   const [savedDocs, setSavedDocs] = useState<SavedDocument[]>([]);
@@ -313,7 +320,9 @@ export default function DashboardPage() {
   }, [router]);
 
   function updateField<K extends keyof PropertyForm>(key: K, value: PropertyForm[K]) {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, [key]: value,
+      ...(key === "property_type" && value === "terreno" ? { bedrooms: 0, bathrooms: 0 } : {}),
+    }));
   }
 
   function resetModalState(form: PropertyForm, images: PropertyImage[], tab: TabId = "general") {
@@ -342,6 +351,7 @@ export default function DashboardPage() {
         title: property.title,
         description: property.description || "",
         property_type: property.property_type || "departamento",
+        operation_type: property.operation_type || "",
         price: property.price.toString(),
         area_m2: property.area_m2 ? property.area_m2.toString() : "",
         location: property.location,
@@ -438,6 +448,7 @@ export default function DashboardPage() {
   }
 
   function closeModal() {
+    if (deletingImage) return;
     selectedImages.forEach((img) => URL.revokeObjectURL(img.preview));
     setSelectedImages([]);
     setShowModal(false);
@@ -446,7 +457,7 @@ export default function DashboardPage() {
   //Esta funcion es inteligente, decide s i hace POST o Patch ante una propiedad.
   async function handleSaveProperty(e: React.FormEvent){
     e.preventDefault();
-    if (saving) return;
+    if (saving || deletingImage) return;
 
     const errors = validateForm(formData, existingImages.length + selectedImages.length);
     setFormErrors(errors);
@@ -563,6 +574,26 @@ export default function DashboardPage() {
     });
   }
 
+  async function deleteSavedImage() {
+    if (!imageToDelete || deletingImage || saving) return;
+    const image = imageToDelete;
+    setDeletingImage(true);
+    setImageDeleteError("");
+    try {
+      await authFetch(`/api/auth/property-images/${image.id}/`, { method: "DELETE" });
+      setExistingImages((previous) => previous.filter((item) => item.id !== image.id));
+      setProperties((previous) => previous.map((property) => property.id === image.property
+        ? { ...property, images: property.images.filter((item) => item.id !== image.id) }
+        : property));
+      setImageToDelete(null);
+      await loadPublicationRequirements(image.property);
+    } catch (error) {
+      setImageDeleteError(error instanceof Error ? error.message : "No se pudo eliminar la fotografía.");
+    } finally {
+      setDeletingImage(false);
+    }
+  }
+
   function handleAddDocument() {
     if (!docFile) return setDocError("Selecciona un archivo.");
     if (!DOC_ACCEPT.split(",").includes(docFile.type)) return setDocError("Solo se admiten PDF o imágenes (JPG, PNG, WEBP).");
@@ -656,11 +687,11 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-50 px-4 py-12">
+      <PageLayout width="standard">
         <p className="mx-auto max-w-6xl animate-pulse text-slate-600">
           Cargando tus propiedades...
         </p>
-      </main>
+      </PageLayout>
     );
   }
 
@@ -690,17 +721,17 @@ export default function DashboardPage() {
   return (
      <>
 
-       <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-         <div className="mx-auto max-w-6xl">
-           <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">Urbanex</p>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">Mis propiedades</h1>
-              <p className="mt-2 flex items-center gap-2 text-slate-600 font-medium bg-slate-200/50 inline-block px-3 py-1 rounded-full">
-                {userInfo.email} <span className="text-slate-400">|</span> <span className="capitalize text-blue-700">Rol: {userInfo.role}</span>
-              </p>
-            </div>
-             <div className="flex items-center gap-3">
+       <PageLayout width="standard">
+         <div>
+           <PageHeader eyebrow="Urbanex" title="Mis propiedades"
+             description={<span className="inline-flex flex-wrap items-center gap-2 rounded-full bg-slate-200/50 px-3 py-1 font-medium">
+               {userInfo.email}<span aria-hidden="true" className="text-slate-400">|</span><span className="capitalize text-blue-700">Rol: {userInfo.role}</span>
+             </span>}
+             actions={<>{userInfo.role === "admin" && (
+                  <Link href="/dashboard/dev" className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50">
+                    Estadísticas
+                  </Link>
+                )}
                 {userInfo.role === "admin" && (
                   <Link href="/dashboard/users" className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50">
                     Administrar usuarios
@@ -708,9 +739,7 @@ export default function DashboardPage() {
                 )}
                 <button onClick={openCreateModal} className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800">
                  + Registrar propiedad
-               </button>
-             </div>
-           </header>
+               </button></>} />
 
            {notice && (
              <div
@@ -822,7 +851,7 @@ export default function DashboardPage() {
              </div>
            )}
          </div>
-       </main>
+       </PageLayout>
 
        {showModal && (
          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
@@ -929,7 +958,14 @@ export default function DashboardPage() {
                    </div>
 
                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                     <Field label="Precio referencial (USD)">
+                     <Field label="Operación">
+                       <select value={formData.operation_type} onChange={(e) => updateField("operation_type", e.target.value)} className={inputClass}>
+                         <option value="">Seleccionar operación</option>
+                         <option value="venta">Venta</option>
+                         <option value="arriendo">Alquiler mensual</option>
+                       </select>
+                     </Field>
+                     <Field label={formData.operation_type === "arriendo" ? "Alquiler mensual (USD/mes)" : "Precio de venta (USD)"}>
                        <input type="number" min="0" step="0.01" value={formData.price} onChange={(e) => updateField("price", e.target.value)} className={inputClass} />
                      </Field>
                      <Field label="Área total (m²)">
@@ -938,12 +974,14 @@ export default function DashboardPage() {
                    </div>
 
                    <div className="grid grid-cols-3 gap-4">
+                     {formData.property_type !== "terreno" && <>
                      <Field label="Habitaciones">
                        <input type="number" min="0" value={formData.bedrooms} onChange={(e) => updateField("bedrooms", Number(e.target.value))} className={inputClass} />
                      </Field>
                      <Field label="Baños">
                        <input type="number" min="0" value={formData.bathrooms} onChange={(e) => updateField("bathrooms", Number(e.target.value))} className={inputClass} />
                      </Field>
+                     </>}
                      <Field label="Parqueaderos">
                        <input type="number" min="0" value={formData.parking_spaces} onChange={(e) => updateField("parking_spaces", Number(e.target.value))} className={inputClass} />
                      </Field>
@@ -999,6 +1037,10 @@ export default function DashboardPage() {
                            <span className="absolute left-2 top-2 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                              {index === 0 ? "Portada" : "Guardada"}
                            </span>
+                           <button type="button" disabled={saving || deletingImage}
+                             onClick={() => { setImageDeleteError(""); setImageToDelete(img); }}
+                             aria-label={`Eliminar fotografía guardada ${index + 1}`}
+                             className="absolute bottom-2 right-2 min-h-9 rounded-lg bg-white/95 px-2 text-xs font-semibold text-red-700 shadow hover:bg-red-50 disabled:opacity-50">Eliminar</button>
                          </figure>
                        ))}
                        {selectedImages.map((img, index) => (
@@ -1200,6 +1242,20 @@ export default function DashboardPage() {
            </form>
          </div>
        )}
+
+       <Dialog
+         open={imageToDelete !== null}
+         title="¿Eliminar esta fotografía?"
+         tone="danger"
+         confirmLabel={deletingImage ? "Eliminando..." : "Eliminar fotografía"}
+         busy={deletingImage}
+         onConfirm={deleteSavedImage}
+         onCancel={() => { if (!deletingImage) setImageToDelete(null); }}
+       >
+         <p>La foto se eliminará del inmueble y de su almacenamiento. Esta acción se aplica inmediatamente y no se deshace al cancelar la edición.</p>
+         <p className="mt-2">Si es la última foto de una propiedad publicada, primero guarda una nueva fotografía.</p>
+         {imageDeleteError && <p role="alert" className="mt-3 text-red-700">{imageDeleteError}</p>}
+       </Dialog>
 
        <Dialog
          open={statusCandidate !== null}
