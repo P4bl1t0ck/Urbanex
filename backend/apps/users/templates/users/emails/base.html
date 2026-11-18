@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ subject }}</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .outer-padding { padding: 24px 12px !important; }
+      .content-padding { padding: 28px 24px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;color:#0f172a;font-family:Arial,Helvetica,sans-serif;">
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+    {% block preheader %}{% endblock %}
+  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;background-color:#f1f5f9;">
+    <tr>
+      <td align="center" class="outer-padding" style="padding:48px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;">
+          <tr>
+            <td style="padding:0 8px 24px;font-size:28px;line-height:34px;font-weight:700;letter-spacing:-1px;">
+              Urbanex<span style="color:#2563eb;">.</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="content-padding" style="padding:40px;background-color:#ffffff;border:1px solid #e2e8f0;border-top:4px solid #2563eb;border-radius:12px;">
+              <h1 style="margin:0 0 24px;font-size:26px;line-height:34px;font-weight:700;letter-spacing:-0.5px;">{% block heading %}{% endblock %}</h1>
+              <p style="margin:0 0 16px;font-size:16px;line-height:26px;">Hola {{ recipient_name }},</p>
+              <p style="margin:0 0 28px;font-size:16px;line-height:26px;color:#475569;">{% block introduction %}{% endblock %}</p>
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                <tr>
+                  <td bgcolor="#2563eb" style="background-color:#2563eb;border-radius:8px;text-align:center;">
+                    <a href="{{ action_url }}" style="display:inline-block;padding:16px 24px;border:1px solid #2563eb;border-radius:8px;color:#ffffff;font-size:16px;line-height:22px;font-weight:700;text-decoration:none;">{{ action_label }}</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 24px;font-size:14px;line-height:22px;color:#475569;">{% block validity %}{% endblock %}</p>
+              <p style="margin:0;padding-top:24px;border-top:1px solid #e2e8f0;font-size:14px;line-height:22px;color:#64748b;">{% block notice %}{% endblock %}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 8px 0;font-size:13px;line-height:21px;color:#64748b;">
+              Si el botón no funciona, <a href="{{ action_url }}" style="color:#1d4ed8;text-decoration:underline;">abre este enlace</a>.
+              <p style="margin:16px 0 0;">Urbanex · Gestión inmobiliaria</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

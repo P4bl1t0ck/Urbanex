@@ -2,6 +2,10 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
+| Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
+| Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
+| Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
 | Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
@@ -598,3 +602,20 @@ IDs DT-121, DT-122 y DT-123 comprobados tras git fetch origin en develop, la ram
 | DT-123 | Tamaño de página 20 duplicado: PropertyCatalogPagination.page_size en backend/apps/users/views.py y cálculo del total de páginas con 20 en frontend/app/properties/page.tsx | Confirmado (lectura de ambos archivos) | Acordar una fuente del tamaño de página o incluirlo en el contrato en un avance posterior; mantener compatibilidad del listado | Cambiar el tamaño desde una sola fuente y comprobar que navegación, conteo y última página siguen coherentes mediante prueba de contrato |
 
 **Referencia de aceptación vigente:** decisión de Pablo, 2026-11-13, auditoría §11 del PR #27: contexto maestro, DS-16 y ampliaciones; Anexo 2 **POR CONFIRMAR**. HU-10 en Pruebas, sin sumar puntos. DT-92 permanece Resuelto por check sin cambios y pruebas de Documents registradas en Estándares §4. Esta actualización no modifica código, migraciones o datos.
+
+
+### HU-46 — corrección de enlace de recuperación en consola (2026-11-16)
+
+No se crean IDs ni se cierran riesgos globales por este fix. La reproducción confirmó codificación MIME de consola, no token incorrecto; users/serializers.py añade una URL copiable solo al backend de consola. Resend y el protocolo JWT permanecen iguales. Las pruebas de D-05/precisión del mismo segundo se conservan y ejecutan; PostgreSQL No ejecutado (DT-68).
+
+Pregunta de política detectada y no redefinida aquí: hoy varios enlaces pueden coexistir hasta su vencimiento; completar el cambio anula todos. La alternativa de permitir únicamente el último requiere confirmación y alcance sobre views.py. [OWASP Forgot Password](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html) recomienda caducidad, uso único y protección contra solicitudes automatizadas, sin imponer aquí esa alternativa. No se afirma cobertura global contra abuso. Según aclaración de Sebas, la clave escrita en la conversación era ficticia; no se registra una credencial real ni se lee .env.
+
+
+### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
+
+Se autorizaron tres plantillas Django con autoescape para activación/recuperación y se conserva alternativa de texto, protocolo de tokens y política JWT. No se crean IDs, dependencias, migraciones ni decisiones de negocio. La presentación en navegador no equivale a compatibilidad verificada en todos los clientes de correo: comprobación humana con Resend Pendiente. El reporte de Sebas sobre recepción previa corresponde al texto anterior. PostgreSQL No ejecutado (DT-68). No se cierra seguridad global ni se resuelve por este cambio la pregunta sobre permitir únicamente el último enlace.
+
+
+### Fix HU-44/HU-46 — cierre documental e integración (2026-11-16)
+
+La excepción puntual de Sebas de nombre fix/ y alcance compartido HU-44/HU-46 se registra en Progress y Estado, sin editar AGENTS ni crear DS/DT nuevo. Motivo: corregir presentación de enlaces de recuperación y unificar HTML de correos de activación/recuperación ya implementados. Gitflow no obliga a este prefijo ni prohíbe nuevas ramas posteriores al merge; es la convención explícita elegida para el ajuste. No se cierran riesgos globales; PostgreSQL No ejecutado (DT-68).

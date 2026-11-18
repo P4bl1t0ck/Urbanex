@@ -2,6 +2,10 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización fix HU-44/HU-46 · nombre e integración | 2026-11-16 · fix/URB-02-04-HU-44-46-correos por decisión de Sebas; develop 6e0caca incluido sin cambios; cierre documental previo a auditoría |
+| Última actualización HU-46 · commits del fix | 2026-11-16 · Sebas informó funcionamiento y autorizó commits; código guardado por grupos, 383 pruebas previas OK; sin push |
+| Última actualización HU-46 · correos HTML | 2026-11-16 · Plantilla compartida de Urbanex para activación/recuperación, alternativa de texto y enlaces originales; prueba humana de HTML Pendiente |
+| Última actualización HU-46 · enlace legible en consola | 2026-11-16 · Fix acotado al correo de recuperación; URL íntegra en consola, Resend conservado y regresiones de enlaces/JWT; comprobación humana Pendiente |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
 | Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
@@ -445,3 +449,34 @@ La SQLite de trabajo no se migró: showmigrations devuelve pendientes documents.
 ### HU-10 — correcciones documentales PR #27 (2026-11-13)
 
 Corrección exclusivamente documental en Progress, Estado, Deuda, Avance, GPS, Estándares y Trazabilidad. Los archivos frontend/components/PropertyCard.tsx, frontend/app/properties/page.tsx y backend/apps/users/views.py se citan como evidencia de DT-121..123 y no se modifican. Borrador de descripción local en evidence/HU-10/pr-27.md, ignorado por Git. Sin cambios de dependencias, datos, modelos, migraciones, permisos o exposición; Seguridad N/A por no cambiar riesgo.
+
+
+### HU-46 — corrección de enlace de recuperación en consola (2026-11-16)
+
+| Archivo | Responsabilidad del fix |
+|---|---|
+| backend/apps/users/serializers.py | Conserva send_mail y añade URL exacta en una línea solo al proveedor/backend de consola; Resend retorna sin imprimirla |
+| backend/apps/users/tests.py | Nueve regresiones de correo, enlace copiado, caducidad/uso único y JWT; pruebas Resend simuladas |
+
+Se redujo el alcance frente a la propuesta inicial: no hay backend nuevo ni cambio de settings.py. No se modifican views, modelos, migraciones, dependencias, frontend o .env. El borrado previo intencional de backend/.env.example no forma parte del fix. Ocho documentos de seguimiento actualizados; sin commit/push/PR.
+
+
+### HU-46 — plantillas HTML de activación y recuperación (2026-11-16)
+
+| Archivo | Responsabilidad de la ampliación |
+|---|---|
+| backend/apps/users/templates/users/emails/base.html | Estructura reutilizable, estilos inline, diseño fluido, marca y botón; sin JS, fuentes o imágenes externas |
+| backend/apps/users/templates/users/emails/activation.html | Contenido de bienvenida/activación y vencimiento de 24 horas |
+| backend/apps/users/templates/users/emails/password_reset.html | Recuperación, vencimiento de 60 minutos y aviso de solicitud no reconocida |
+| backend/apps/users/serializers.py | Renderizado HTML con autoescape, text+html en Resend y html_message en send_mail; enlaces de consola preservados |
+| backend/apps/users/tests.py | Parser de enlaces y dos pruebas nuevas de partes de correo/escape; se amplían aserciones de Resend para ambas plantillas |
+
+Son los tres archivos nuevos aprobados; no cambia settings.py, modelos, views, dependencias o frontend. Vistas/capturas de datos ficticios en evidence/HU-46, ignoradas por Git.
+
+
+**Traza de commits HU-46 (2026-11-16):** dff0eb6 guarda las tres plantillas; a9e0d1e guarda exclusivamente serializers.py compartido; 3984e79 guarda las pruebas. Trazabilidad se separa de los otros documentos. Sin cambios de código entre la suite de 383 OK y estos commits. El borrado de .env.example permanece como cambio local de Sebas fuera del fix.
+
+
+### Fix HU-44/HU-46 — cierre documental e integración (2026-11-16)
+
+Rama vigente fix/URB-02-04-HU-44-46-correos; el nombre anterior queda como historial en los registros. Alcance de código permanece igual: tres plantillas, serializers.py y tests.py. Los cinco commits originales (dff0eb6, a9e0d1e, 3984e79, ff04c9d, 06da7c8) se conservan. Actualización exclusivamente documental posterior al renombrado; Trazabilidad compartida en commit propio. Borrado local de .env.example excluido.
