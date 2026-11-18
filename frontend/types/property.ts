@@ -2,6 +2,7 @@
 // PropertyImageSerializer en backend/apps/users/serializers.py.
 
 export type PropertyType = "casa" | "departamento" | "local" | "terreno";
+export type PropertyOperation = "venta" | "arriendo";
 
 // "reservador" es el valor que hoy guarda Django (errata en Property.STATUS_CHOICES).
 export type PropertyStatus =
@@ -27,6 +28,7 @@ export type Property = {
   title: string;
   description: string;
   property_type: PropertyType;
+  operation_type: PropertyOperation;
   status: PropertyStatus;
   price: string; // DecimalField llega como string
   area_m2: number;
@@ -44,7 +46,7 @@ export type Property = {
 
 export type PropertyCatalogFilters = Partial<Record<
   "property_type" | "price_min" | "price_max" | "bedrooms" | "bathrooms" |
-  "area_min" | "parking_spaces" | "location" | "page" | "sort", string
+  "area_min" | "parking_spaces" | "location" | "page" | "sort" | "operation_type", string
 >>;
 
 export type PriceDistribution = {

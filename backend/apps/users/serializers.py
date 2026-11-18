@@ -354,6 +354,17 @@ class PasswordAwareRefreshSerializer(serializers.Serializer):
         return {"access": str(refresh.access_token)}
     
 class PropertyImageSerializer(serializers.ModelSerializer):
+    def validate_property(self, property_obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated or not user.is_active:
+            raise serializers.ValidationError("No tienes permiso para gestionar estas fotografías.")
+        if user.role != User.Role.ADMIN and property_obj.agent_id != user.pk:
+            raise serializers.ValidationError("No tienes permiso para gestionar estas fotografías.")
+        if self.instance and self.instance.property_id != property_obj.pk:
+            raise serializers.ValidationError("No se puede trasladar una fotografía a otro inmueble.")
+        return property_obj
+
     class Meta:
         model = PropertyImage
         fields = ['id', 'property', 'image', 'caption', 'uploaded_at']
@@ -365,6 +376,7 @@ class PropertyWithdrawalSerializer(serializers.Serializer):
 
 
 class PropertySerializer(serializers.ModelSerializer):
+    operation_type = serializers.ChoiceField(choices=Property.OPERATION_CHOICES, required=True)
     agent_name = serializers.SerializerMethodField()
     #Agregamos las imagenes vinculadas.
     images = PropertyImageSerializer(many=True, read_only=True)
@@ -373,7 +385,7 @@ class PropertySerializer(serializers.ModelSerializer):
         #fields = '__all__' # No hace caso a las peticiones y comrpobaciones durante las modificaciones de json files.
         fields = [
             'id', 'agent', 'agent_name', 'title', 'description', 
-            'property_type', 'status', 'price', 'area_m2', 
+            'property_type', 'operation_type', 'status', 'price', 'area_m2',
             'bedrooms', 'bathrooms', 'parking_spaces', 'location',
             'latitude', 'longitude',
             'images',
@@ -397,6 +409,12 @@ class PropertySerializer(serializers.ModelSerializer):
         return None
     
     def validate(self, attrs): 
+        if self.instance and 'operation_type' in attrs and attrs['operation_type'] != self.instance.operation_type:
+            if self.instance.status != 'captacion' or self.instance.appraisals.exists():
+                raise serializers.ValidationError({'operation_type':
+                    'No cambies la operación de una propiedad publicada o con avalúos. Requiere revisar su historial.'})
+        if attrs.get('property_type', getattr(self.instance, 'property_type', None)) == 'terreno':
+            attrs['bedrooms'] = attrs['bathrooms'] = 0
         # Obtener el estado del objeto actual o de los datos entrantes
         status = attrs.get('status', getattr(self.instance, 'status', None))
         unavailability_reason = attrs.get('unavailability_reason', getattr(self.instance, 'unavailability_reason', None))
