@@ -147,6 +147,29 @@ class PropertyImageViewSet(viewsets.ModelViewSet):
     # Corrección de nombres de variables
     parser_classes = [MultiPartParser, FormParser] 
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated or not user.is_active:
+            return super().get_queryset().none()
+        if user.role == User.Role.ADMIN:
+            return super().get_queryset()
+        return super().get_queryset().filter(property__agent=user)
+
+    def destroy(self, request, *args, **kwargs):
+        with transaction.atomic():
+            image = self.get_object()
+            property_obj = Property.objects.select_for_update().get(pk=image.property_id)
+            # Releer después del bloqueo: dos borrados no pueden quitar la última foto.
+            image = self.get_object()
+            if property_obj.status in PUBLIC_STATUSES and property_obj.images.count() <= 1:
+                raise serializers.ValidationError({
+                    "detail": "Una propiedad publicada debe conservar al menos una fotografía. Sube su reemplazo antes de eliminarla."
+                })
+            if image.image.name:
+                image.image.storage.delete(image.image.name)
+            image.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -459,6 +482,7 @@ class UserActivationView(APIView):
         )
         
 class PropertyCatalogQuerySerializer(serializers.Serializer):
+    operation_type = serializers.ChoiceField(choices=Property.OPERATION_CHOICES, required=False)
     property_type = serializers.ChoiceField(choices=Property.PROPERTY_TYPES, required=False)
     price_min = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)
     price_max = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False)
@@ -529,6 +553,7 @@ class PropertyListCreateView(generics.ListCreateAPIView):
         query = PropertyCatalogQuerySerializer(data=params)
         query.is_valid(raise_exception=True)
         lookups = {
+            "operation_type": "operation_type",
             "property_type": "property_type", "price_min": "price__gte",
             "price_max": "price__lte", "bedrooms": "bedrooms__gte",
             "bathrooms": "bathrooms__gte", "area_min": "area_m2__gte",
