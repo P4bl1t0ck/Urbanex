@@ -179,6 +179,9 @@ class Command(BaseCommand):
             key: value for key, value in spec.items()
             if key not in {'title', 'requirements', 'color'}
         }
+        fields.setdefault('operation_type', 'venta')
+        if fields.get('property_type') == 'terreno':
+            fields['bedrooms'] = fields['bathrooms'] = 0
         # status no se pasa: el modelo crea en captacion (DT-09, DS-17).
         property_obj, _ = Property.objects.get_or_create(
             title=spec['title'],

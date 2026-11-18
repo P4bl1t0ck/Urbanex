@@ -17,14 +17,19 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--agent-id", type=int, help="ID de un asesor activo ya existente.")
-        parser.add_argument("--count", type=int, default=24, help="Total de ejemplos, entre 21 y 60.")
+        parser.add_argument("--count", type=int, default=24, help="7 para muestra compacta, o entre 21 y 60 para paginación.")
 
     def handle(self, *args, **options):
         if not settings.DEBUG or connection.vendor != "sqlite":
             raise CommandError("setup_catalog_demo requiere DEBUG=True y SQLite local.")
         count = options["count"]
-        if not 21 <= count <= 60:
-            raise CommandError("--count debe estar entre 21 y 60.")
+        if count != 7 and not 21 <= count <= 60:
+            raise CommandError("--count debe ser 7, o estar entre 21 y 60.")
+        if count == 7:
+            if Property.objects.exclude(title__startswith='[MUESTRA-HU11]').exists():
+                raise CommandError('La muestra de siete requiere una base local separada sin otras propiedades. No se borran registros.')
+            if settings.STORAGES['default'].get('OPTIONS', {}).get('provider', 'local') != 'local':
+                raise CommandError('La muestra de siete requiere MEDIA_PROVIDER=local; no sube pruebas a Cloudinary.')
         agents = get_user_model().objects.filter(role="asesor", is_active=True)
         if options["agent_id"] is not None:
             agents = agents.filter(pk=options["agent_id"])
@@ -47,6 +52,26 @@ class Command(BaseCommand):
                     bathrooms=index % 3 + 1,
                     requirements={"image", "brokerage_contract", "appraisal"},
                 )
+                spec['operation_type'] = 'venta'
+                if count == 7:
+                    kind, operation, price, area, bedrooms, bathrooms = [
+                        ('casa', 'venta', '185000', 180, 3, 2),
+                        ('departamento', 'venta', '125000', 95, 2, 2),
+                        ('local', 'venta', '98000', 80, 0, 1),
+                        ('terreno', 'venta', '85000', 450, 0, 0),
+                        ('casa', 'arriendo', '950', 160, 3, 2),
+                        ('departamento', 'arriendo', '650', 85, 2, 1),
+                        ('local', 'arriendo', '480', 55, 0, 1),
+                    ][index - 1]
+                    label = {'casa': 'Casa', 'departamento': 'Departamento', 'local': 'Local', 'terreno': 'Terreno'}[kind]
+                    spec.update(title=f'[MUESTRA-HU11] {label} en {"venta" if operation == "venta" else "alquiler"}',
+                                description=f'{label} de ejemplo para explorar la ficha. Datos ficticios, sin oferta real.',
+                                property_type=kind, operation_type=operation, price=Decimal(price),
+                                area_m2=area, bedrooms=bedrooms, bathrooms=bathrooms,
+                                parking_spaces=0 if kind == 'terreno' else 1,
+                                location=f'Sector DEMO HU11, Quito · ejemplo {index}')
+                if spec['property_type'] == 'terreno':
+                    spec['bedrooms'] = spec['bathrooms'] = 0
                 # Los ejemplos existentes nunca se actualizan ni se vuelven a publicar.
                 if Property.objects.filter(title=spec["title"], agent=agent).exists():
                     skipped += 1
@@ -62,5 +87,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Catálogo demo: {created} creadas/publicadas por HU-53; {skipped} existentes sin cambios."
         ))
-        self.stdout.write("Busca ubicación 'DEMO HU10' para probar páginas de 20 resultados.")
+        self.stdout.write("Muestra compacta: cuatro ventas y tres alquileres mensuales." if count == 7
+                          else "Busca ubicación 'DEMO HU10' para probar páginas de 20 resultados.")
         self.stdout.write("No se crean reservas, usuarios ni se cambian contraseñas o propiedades anteriores.")
