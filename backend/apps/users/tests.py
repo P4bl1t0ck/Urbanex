@@ -18,7 +18,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import connection
+from django.db import connection, transaction
 from django.utils import timezone
 from django.core import mail
 from rest_framework.test import APIClient
@@ -35,8 +35,317 @@ from apps.users.models import (
 )
 from apps.users.serializers import PropertySerializer
 from apps.users.views import get_missing_publication_requirements
+from config.media_storage import MediaDeleteUnavailable, PublicMediaStorage, public_media_config
+from cloudinary.exceptions import Error as CloudinaryError
+from django.core.exceptions import ImproperlyConfigured
 # Create your tests here.
 User = get_user_model()
+
+class PublicMediaProviderTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.agent = User.objects.create_user(username="media.agent", role="asesor")
+        cls.property = Property.objects.create(
+            agent=cls.agent, title="Fotos de prueba", description="Ejemplo sintético",
+            property_type="casa", price="100000.00", area_m2=80,
+            location="Quito", status="disponible",
+        )
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.override = override_settings(MEDIA_ROOT=self.directory.name)
+        self.override.enable()
+        self.addCleanup(self.override.disable)
+
+    def cloud_options(self):
+        return dict(provider="cloudinary", cloud_name="demo-test",
+                    api_key="test-key", api_secret="test-secret")
+
+    def image_file(self):
+        from PIL import Image
+        content = io.BytesIO()
+        Image.new("RGB", (2, 2), "blue").save(content, format="PNG")
+        return SimpleUploadedFile("example.png", content.getvalue(), content_type="image/png")
+
+    def test_configuration_defaults_local_and_rejects_unknown_provider(self):
+        self.assertEqual(public_media_config({})["OPTIONS"]["provider"], "local")
+        with self.assertRaisesMessage(ImproperlyConfigured, "MEDIA_PROVIDER"):
+            public_media_config({"MEDIA_PROVIDER": "unknown"})
+
+    def test_cloud_configuration_requires_each_credential_without_disclosing_values(self):
+        environment = {"MEDIA_PROVIDER": "cloudinary", "CLOUDINARY_CLOUD_NAME": "demo-test",
+                       "CLOUDINARY_API_KEY": "test-key", "CLOUDINARY_API_SECRET": "test-secret"}
+        for key in ("CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"):
+            with self.subTest(key=key):
+                incomplete = {name: value for name, value in environment.items() if name != key}
+                with self.assertRaisesMessage(ImproperlyConfigured, key) as error:
+                    public_media_config(incomplete)
+                self.assertNotIn("test-secret", str(error.exception))
+        self.assertEqual(public_media_config(environment)["OPTIONS"]["provider"], "cloudinary")
+
+    @mock.patch("config.media_storage.cloudinary.uploader.upload")
+    def test_local_upload_remains_local_without_cloud_calls(self, upload):
+        storage = PublicMediaStorage()
+        name = storage.save("properties/images/example.png", self.image_file(), max_length=100)
+        self.assertTrue(storage.exists(name))
+        self.assertGreater(storage.size(name), 0)
+        with storage.open(name) as image:
+            self.assertTrue(image.read().startswith(b"\x89PNG"))
+        self.assertTrue(storage.url(name).startswith("/media/"))
+        upload.assert_not_called()
+
+    @mock.patch("config.media_storage.cloudinary.uploader.upload")
+    def test_cloud_upload_keeps_reference_and_delivers_https_without_local_file(self, upload):
+        storage = PublicMediaStorage(**self.cloud_options())
+        name = storage.save("properties/images/client-name.png", self.image_file(), max_length=100)
+        self.assertTrue(name.startswith("cloudinary/demo-test/"))
+        self.assertLessEqual(len(name), 100)
+        self.assertNotIn("client-name", name)
+        kwargs = upload.call_args.kwargs
+        self.assertEqual(kwargs["public_id"], "urbanex/" + name.rsplit("/", 1)[1])
+        self.assertEqual(kwargs["resource_type"], "image")
+        self.assertFalse(kwargs["overwrite"])
+        self.assertEqual(kwargs["timeout"], 30)
+        url = storage.url(name)
+        self.assertTrue(url.startswith("https://res.cloudinary.com/demo-test/image/upload/"))
+        self.assertIn("f_auto", url)
+        self.assertIn("q_auto", url)
+        self.assertNotIn("test-secret", url)
+        self.assertEqual(os.listdir(self.directory.name), [])
+
+    def test_provider_switch_preserves_existing_local_and_cloud_urls(self):
+        local = PublicMediaStorage()
+        cloud = PublicMediaStorage(**self.cloud_options())
+        name = local.save("properties/images/before.png", self.image_file())
+        self.assertEqual(local.url(name), cloud.url(name))
+        with cloud.open(name) as photo:
+            self.assertGreater(len(photo.read()), 0)
+        remote = "cloudinary/demo-test/" + "a" * 32
+        self.assertEqual(local.url(remote), cloud.url(remote))
+
+    @mock.patch("config.media_storage.cloudinary.uploader.upload")
+    def test_api_upload_serializes_remote_url_and_uses_same_gallery_contract(self, upload):
+        storages = {"default": {"BACKEND": "config.media_storage.PublicMediaStorage",
+                                "OPTIONS": self.cloud_options()}}
+        client = APIClient()
+        client.force_authenticate(user=self.agent)
+        with override_settings(STORAGES=storages):
+            response = client.post("/api/auth/property-images/", {
+                "property": self.property.id, "image": self.image_file(), "caption": "Fachada",
+            }, format="multipart")
+            self.assertEqual(response.status_code, 201, response.data)
+            self.assertTrue(response.data["image"].startswith("https://res.cloudinary.com/"))
+            client.force_authenticate(user=None)
+            detail = client.get(f"/api/auth/properties/{self.property.id}/")
+            self.assertEqual(detail.status_code, 200)
+            self.assertEqual(detail.data["images"][0]["image"], response.data["image"])
+            self.assertEqual(detail.data["images"][0]["caption"], "Fachada")
+        upload.assert_called_once()
+
+    @mock.patch("config.media_storage.cloudinary.uploader.upload", side_effect=CloudinaryError("provider-private-detail"))
+    def test_failed_upload_returns_generic_503_and_does_not_create_image(self, upload):
+        client = APIClient()
+        client.force_authenticate(user=self.agent)
+        storages = {"default": {"BACKEND": "config.media_storage.PublicMediaStorage",
+                                "OPTIONS": self.cloud_options()}}
+        with override_settings(STORAGES=storages), transaction.atomic():
+            response = client.post("/api/auth/property-images/", {
+                "property": self.property.id, "image": self.image_file(),
+            }, format="multipart")
+        self.assertEqual(response.status_code, 503)
+        self.assertNotIn("provider-private-detail", str(response.data))
+        self.assertFalse(PropertyImage.objects.filter(property=self.property).exists())
+        self.assertEqual(os.listdir(self.directory.name), [])
+
+    @mock.patch("config.media_storage.cloudinary.uploader.upload")
+    def test_private_document_storage_stays_outside_public_provider(self, upload):
+        from apps.documents.models import private_storage
+        with override_settings(STORAGES={"default": {
+            "BACKEND": "config.media_storage.PublicMediaStorage", "OPTIONS": self.cloud_options(),
+        }}):
+            self.assertIsInstance(private_storage(), FileSystemStorage)
+            self.assertNotEqual(private_storage().location, str(settings.MEDIA_ROOT))
+        upload.assert_not_called()
+
+    @mock.patch("config.media_storage.cloudinary.uploader.destroy")
+    def test_cloud_deletion_is_explicit_and_rejects_another_account(self, destroy):
+        destroy.return_value = {"result": "ok"}
+        storage = PublicMediaStorage(**self.cloud_options())
+        storage.delete("cloudinary/demo-test/" + "a" * 32)
+        self.assertEqual(destroy.call_args.args[0], "urbanex/" + "a" * 32)
+        with self.assertRaises(MediaDeleteUnavailable):
+            storage.delete("cloudinary/other-account/" + "b" * 32)
+        destroy.assert_called_once()
+
+
+class PropertyImageManagementTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.owner = User.objects.create_user(username="photo.owner", email="photo.owner@example.test", role="asesor")
+        cls.other = User.objects.create_user(username="photo.other", email="photo.other@example.test", role="asesor")
+        cls.admin = User.objects.create_user(username="photo.admin", email="photo.admin@example.test", role="admin")
+        cls.property = Property.objects.create(agent=cls.owner, title="Prueba fotos",
+            property_type="casa", price="100000.00", area_m2=80, location="Quito", status="captacion")
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.owner)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.storage = FileSystemStorage(location=directory.name)
+        patch = mock.patch.object(PropertyImage._meta.get_field("image"), "storage", self.storage)
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def photo(self, name="sample.png"):
+        image = PropertyImage.objects.create(property=self.property,
+            image=self.storage.save(name, SimpleUploadedFile(name, b"synthetic-test-content")))
+        return image
+
+    def url(self, image):
+        return f"/api/auth/property-images/{image.id}/"
+
+    def test_owner_deletes_photo_and_local_file(self):
+        image = self.photo()
+        name = image.image.name
+        self.assertEqual(self.client.delete(self.url(image)).status_code, 204)
+        self.assertFalse(PropertyImage.objects.filter(pk=image.pk).exists())
+        self.assertFalse(self.storage.exists(name))
+
+    def test_other_advisor_cannot_read_update_or_delete_photo(self):
+        image = self.photo()
+        self.client.force_authenticate(user=self.other)
+        self.assertEqual(self.client.get(self.url(image)).status_code, 404)
+        self.assertEqual(self.client.patch(self.url(image), {"caption": "Ajena"}, format="multipart").status_code, 404)
+        self.assertEqual(self.client.delete(self.url(image)).status_code, 404)
+        self.assertTrue(self.storage.exists(image.image.name))
+        self.assertEqual(self.client.get("/api/auth/property-images/").data, [])
+
+    def test_anonymous_cannot_delete_but_admin_can(self):
+        image = self.photo()
+        self.client.force_authenticate(user=None)
+        self.assertEqual(self.client.delete(self.url(image)).status_code, 401)
+        self.client.force_authenticate(user=self.admin)
+        self.assertEqual(self.client.delete(self.url(image)).status_code, 204)
+
+    def test_last_photo_of_available_or_reserved_property_is_protected_for_owner_and_admin(self):
+        image = self.photo()
+        for state in ("disponible", "reservador"):
+            self.property.status = state
+            self.property.save()
+            for user in (self.owner, self.admin):
+                with self.subTest(state=state, role=user.role):
+                    self.client.force_authenticate(user=user)
+                    response = self.client.delete(self.url(image))
+                    self.assertEqual(response.status_code, 400)
+                    self.assertTrue(PropertyImage.objects.filter(pk=image.pk).exists())
+                    self.assertTrue(self.storage.exists(image.image.name))
+
+    def test_published_property_keeps_replacement_photo(self):
+        image = self.photo()
+        replacement = self.photo("replacement.png")
+        self.property.status = "disponible"
+        self.property.save()
+        self.assertEqual(self.client.delete(self.url(image)).status_code, 204)
+        self.assertTrue(PropertyImage.objects.filter(pk=replacement.pk).exists())
+        self.assertEqual(self.client.delete(self.url(replacement)).status_code, 400)
+
+    def test_cannot_upload_to_or_reassign_photo_to_another_advisors_property(self):
+        other_property = Property.objects.create(agent=self.other, title="Otra",
+            property_type="casa", price="100000.00", area_m2=80, location="Quito")
+        from PIL import Image
+        content = io.BytesIO()
+        Image.new("RGB", (2, 2), "blue").save(content, format="PNG")
+        response = self.client.post("/api/auth/property-images/", {
+            "property": other_property.pk,
+            "image": SimpleUploadedFile("test.png", content.getvalue(), content_type="image/png"),
+        }, format="multipart")
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(other_property.images.exists())
+        image = self.photo()
+        response = self.client.patch(self.url(image), {"property": other_property.pk}, format="multipart")
+        self.assertEqual(response.status_code, 400)
+        image.refresh_from_db()
+        self.assertEqual(image.property_id, self.property.pk)
+
+    @mock.patch("config.media_storage.cloudinary.uploader.destroy", return_value={"result": "ok"})
+    def test_cloud_delete_removes_reference_only_after_provider_success(self, destroy):
+        storage = PublicMediaStorage(provider="cloudinary", cloud_name="demo-test", api_key="test-key", api_secret="test-secret")
+        with mock.patch.object(PropertyImage._meta.get_field("image"), "storage", storage):
+            image = PropertyImage.objects.create(property=self.property, image="cloudinary/demo-test/" + "a" * 32)
+            self.assertEqual(self.client.delete(self.url(image)).status_code, 204)
+        self.assertFalse(PropertyImage.objects.filter(pk=image.pk).exists())
+        destroy.assert_called_once()
+
+    @mock.patch("config.media_storage.cloudinary.uploader.destroy", side_effect=CloudinaryError("private-provider-detail"))
+    def test_cloud_failure_preserves_reference_and_returns_generic_503(self, destroy):
+        storage = PublicMediaStorage(provider="cloudinary", cloud_name="demo-test", api_key="test-key", api_secret="test-secret")
+        with mock.patch.object(PropertyImage._meta.get_field("image"), "storage", storage):
+            image = PropertyImage.objects.create(property=self.property, image="cloudinary/demo-test/" + "b" * 32)
+            response = self.client.delete(self.url(image))
+        self.assertEqual(response.status_code, 503)
+        self.assertNotIn("private-provider-detail", str(response.data))
+        self.assertTrue(PropertyImage.objects.filter(pk=image.pk).exists())
+
+
+class PropertyOperationTests(TestCase):
+    def setUp(self):
+        self.agent = User.objects.create_user(username='operation.agent', email='operation@example.test', role='asesor')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.agent)
+        self.payload = dict(title='Operación de prueba', description='Datos ficticios',
+                            property_type='casa', operation_type='venta', price='125000.00',
+                            area_m2=120, location='Quito', bedrooms=3, bathrooms=2)
+
+    def test_new_property_requires_explicit_valid_operation(self):
+        for operation in (None, '', 'renta_diaria'):
+            data = dict(self.payload)
+            if operation is None:
+                data.pop('operation_type')
+            else:
+                data['operation_type'] = operation
+            response = self.client.post('/api/auth/properties/', data, format='json')
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('operation_type', response.data)
+        self.assertEqual(Property.objects.count(), 0)
+
+    def test_rental_and_land_save_consistent_fields(self):
+        data = {**self.payload, 'property_type': 'terreno', 'operation_type': 'arriendo', 'price': '650.00'}
+        response = self.client.post('/api/auth/properties/', data, format='json')
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(response.data['operation_type'], 'arriendo')
+        self.assertEqual(response.data['price'], '650.00')
+        self.assertEqual(response.data['bedrooms'], 0)
+        self.assertEqual(response.data['bathrooms'], 0)
+
+    def test_operation_filter_scopes_results_and_distribution(self):
+        for operation, price in (('venta', '125000'), ('arriendo', '650')):
+            Property.objects.create(agent=self.agent, **{**self.payload, 'operation_type': operation, 'price': price, 'status': 'disponible'})
+        self.client.force_authenticate(user=None)
+        response = self.client.get('/api/auth/properties/', {'operation_type': 'arriendo'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['operation_type'], 'arriendo')
+        self.assertEqual(response.data['price_distribution']['max'], '650.00')
+        self.assertEqual(self.client.get('/api/auth/properties/', {'operation_type': 'invalid'}).status_code, 400)
+
+    def test_operation_change_does_not_reinterpret_published_price(self):
+        property_obj = Property.objects.create(agent=self.agent, **{**self.payload, 'status': 'disponible'})
+        response = self.client.patch(f'/api/auth/properties/{property_obj.pk}/', {'operation_type': 'arriendo'}, format='json')
+        self.assertEqual(response.status_code, 400)
+        property_obj.refresh_from_db()
+        self.assertEqual(property_obj.operation_type, 'venta')
+
+    def test_model_and_database_keep_land_without_rooms(self):
+        from django.db import IntegrityError
+        property_obj = Property.objects.create(agent=self.agent, **{**self.payload, 'property_type': 'terreno'})
+        self.assertEqual((property_obj.bedrooms, property_obj.bathrooms), (0, 0))
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Property.objects.filter(pk=property_obj.pk).update(bedrooms=2)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Property.objects.filter(pk=property_obj.pk).update(operation_type='invalid')
+
 
 class UrbanexCoreTests(TestCase):
     def setUp(self):
@@ -65,6 +374,7 @@ class UrbanexCoreTests(TestCase):
         self.client.force_authenticate(user=self.agent)
         data = {
             "title": "Departamento de Prueba",
+            "operation_type": "venta",
             "description": "Prueba unitaria de creación",
             "property_type": "departamento",
             "price": "100000.00",
@@ -137,6 +447,39 @@ class UrbanexCoreTests(TestCase):
         response = self.client.get(f"/api/auth/properties/{captacion.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_public_detail_hides_every_non_public_status(self):
+        for state in ("captacion", "vendido", "arrendado", "no_disponible"):
+            with self.subTest(state=state):
+                property_obj = self._create_property(state)
+                response = self.client.get(f"/api/auth/properties/{property_obj.id}/")
+                self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+                self.assertNotIn("title", response.data)
+
+    def test_public_detail_includes_gallery_and_reference_data(self):
+        for state in ("disponible", "reservador"):
+            with self.subTest(state=state):
+                property_obj = self._create_property(state)
+                property_obj.parking_spaces = 2
+                property_obj.unavailability_reason = "Nota interna"
+                property_obj.save()
+                # Solo referencias sintéticas: no se crean archivos en media/.
+                photos = [PropertyImage.objects.create(
+                    property=property_obj,
+                    image=f"properties/images/hu11-{property_obj.id}-{number}.jpg",
+                    caption=f"Vista {number}",
+                ) for number in (1, 2)]
+                response = self.client.get(f"/api/auth/properties/{property_obj.id}/")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertEqual(response.data["status"], state)
+                self.assertEqual(response.data["price"], "150000.00")
+                self.assertEqual(response.data["parking_spaces"], 2)
+                self.assertIsNone(response.data["unavailability_reason"])
+                self.assertEqual({item["id"] for item in response.data["images"]},
+                                 {photo.id for photo in photos})
+                for image in response.data["images"]:
+                    self.assertTrue(image["image"].startswith("http://testserver/media/"))
+                    self.assertIn(image["caption"], ("Vista 1", "Vista 2"))
+
     # TEST DT-09: status no se cambia por POST/PATCH genéricos (solo por HU-53)
     def test_patch_cannot_change_status(self):
         property_obj = self._create_property("captacion")
@@ -152,6 +495,7 @@ class UrbanexCoreTests(TestCase):
         self.client.force_authenticate(user=self.agent)
         data = {
             "title": "Intento de publicar al crear",
+            "operation_type": "venta",
             "description": "DT-09",
             "property_type": "casa",
             "price": "120000.00",
@@ -2032,6 +2376,20 @@ class SetupCatalogDemoCommandTests(TestCase):
             with self.subTest(count=count), self.assertRaises(CommandError):
                 self.run_command(count=count)
         self.assertEqual(Property.objects.count(), 1)
+
+    def test_compact_sample_requires_separate_base_and_is_seven_idempotent(self):
+        with self.assertRaisesMessage(CommandError, 'base local separada'):
+            self.run_command(count=7)
+        self.existing.delete()  # Solo fila sintética sin historial de esta base de test.
+        self.run_command(count=7)
+        self.assertEqual(Property.objects.count(), 7)
+        self.assertEqual(Property.objects.filter(operation_type='venta').count(), 4)
+        self.assertEqual(Property.objects.filter(operation_type='arriendo').count(), 3)
+        self.assertEqual(set(Property.objects.values_list('property_type', flat=True)), {'casa', 'departamento', 'local', 'terreno'})
+        self.assertFalse(Property.objects.filter(property_type='terreno').exclude(bedrooms=0, bathrooms=0).exists())
+        self.assertEqual(Property.objects.filter(status='disponible').count(), 7)
+        self.run_command(count=7)
+        self.assertEqual(Property.objects.count(), 7)
 
     def test_publication_failure_rolls_back_database(self):
         from rest_framework.response import Response
