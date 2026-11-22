@@ -12,7 +12,7 @@ export default function PropertyCard({ property }: { property: Property }) {
       <Link href={`/properties/${property.id}`} target={opensNewTab ? "_blank" : undefined} rel={opensNewTab ? "noopener noreferrer" : undefined}
         aria-label={`Ver ficha de ${property.title}${opensNewTab ? " (se abre en una pestaña nueva)" : ""}`}
         className="block h-full focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-blue-700">
-      <div className="relative aspect-[4/3] bg-slate-100">
+      <div className="relative aspect-[16/10] bg-slate-100">
         {mainImage ? (
           <Image
             src={mainImage}
@@ -20,7 +20,7 @@ export default function PropertyCard({ property }: { property: Property }) {
             fill
             unoptimized
             className="object-cover"
-            sizes="(max-width: 620px) 100vw, (max-width: 920px) 50vw, (max-width: 1220px) 33vw, (max-width: 1520px) 25vw, 20vw"
+            sizes="(max-width: 700px) 100vw, (max-width: 1040px) 50vw, (max-width: 1380px) 33vw, 25vw"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-slate-500">
@@ -33,8 +33,7 @@ export default function PropertyCard({ property }: { property: Property }) {
             property.status?.replaceAll("_", " ") || "Sin estado"}
         </span>
       </div>
-      <div className="p-4">
-        <p className="text-xs font-medium text-slate-500">{property.operation_type === "arriendo" ? "Alquiler mensual" : "Precio de venta"}</p>
+      <div className="p-3 sm:p-4">
         <p className="text-2xl font-extrabold tracking-tight text-slate-900">
             {Number(property.price).toLocaleString("es-EC", {
               style: "currency",
@@ -42,15 +41,13 @@ export default function PropertyCard({ property }: { property: Property }) {
             })}
             {property.operation_type === "arriendo" && <span className="ml-1 text-sm font-medium text-slate-500">/ mes</span>}
         </p>
-        <p className="mt-2 truncate text-sm text-slate-700">
+        <p className="mt-1 text-sm text-slate-700">
           {property.property_type !== "terreno" && <>{property.bedrooms} Hab <span aria-hidden="true">·</span> {property.bathrooms} Ba <span aria-hidden="true">·</span> </>}{property.area_m2} m²
         </p>
-        <h2 className="mt-3 truncate text-sm font-semibold text-slate-900" title={property.title}>
-          <span className="flex min-h-11 items-center py-1">
-            {property.title}
-          </span>
+        <h2 className="mt-2 line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900" title={property.title}>
+          {property.title}
         </h2>
-        <p className="mt-1 truncate text-sm text-slate-500" title={property.location}>{property.location}</p>
+        <p className="mt-1 line-clamp-2 break-words text-sm leading-5 text-slate-500" title={property.location}>{property.location}</p>
       </div>
       </Link>
     </article>

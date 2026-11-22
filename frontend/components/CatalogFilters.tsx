@@ -4,16 +4,17 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { PropertyCatalogFilters, PriceDistribution } from "@/types/property";
 import {
-  amountPreview, catalogHref, catalogKeys, movePriceThumb, numericDraft,
+  amountPreview, catalogHref, catalogKeys, clearedCatalogFilters, clearCatalogDraftFields, compatibleCatalogFilters, operationDraftChange, movePriceThumb, numericDraft,
   numericInitialValue, parkingFilterLabel, priceSliderBounds, toggleSelection, validateCatalogDraft, type CatalogKey,
 } from "@/lib/catalogFilters";
 
-type Panel = "price" | "rooms" | "type" | "more" | "mobile";
+type Panel = "operation" | "price" | "rooms" | "type" | "more" | "mobile";
 const panelKeys: Record<Panel, readonly CatalogKey[]> = {
+  operation: ["operation_type", "price_min", "price_max"],
   price: ["price_min", "price_max"], rooms: ["bedrooms", "bathrooms"],
   type: ["property_type"], more: ["area_min", "parking_spaces"], mobile: catalogKeys,
 };
-const titles: Record<Panel, string> = { price: "Rango de precio", rooms: "Habitaciones y baños", type: "Tipo de propiedad", more: "Más filtros", mobile: "Filtrar propiedades" };
+const titles: Record<Panel, string> = { operation: "Comprar o alquilar", price: "Rango de precio", rooms: "Habitaciones y baños", type: "Tipo de inmueble", more: "Más filtros", mobile: "Filtrar propiedades" };
 const types = { casa: "Casa", departamento: "Departamento", local: "Local comercial", terreno: "Terreno" };
 const control = "min-h-11 w-full min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600";
 const button = "min-h-11 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-blue-500 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-wait disabled:opacity-60";
@@ -25,7 +26,8 @@ function initialDraft(filters: PropertyCatalogFilters): PropertyCatalogFilters {
     parking_spaces: Number(filters.parking_spaces) > 0 ? filters.parking_spaces : "" };
 }
 function firstErrorPanel(errors: Record<string, string[]>): Panel | null {
-  if (errors.location || errors.operation_type) return "mobile";
+  if (errors.operation_type) return "operation";
+  if (errors.location) return "mobile";
   return (["price", "rooms", "type", "more"] as Panel[]).find((panel) => panelKeys[panel].some((key) => errors[key]?.length)) || null;
 }
 function SearchIcon() {
@@ -99,13 +101,20 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
   }
   function apply() {
     if (!panel) return;
-    const nextErrors = validateCatalogDraft(draft, panelKeys[panel]);
+    const applicableDraft = compatibleCatalogFilters(draft);
+    const nextErrors = validateCatalogDraft(applicableDraft, panelKeys[panel]);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
       requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());
       return;
     }
-    navigate(Object.fromEntries(panelKeys[panel].map((key) => [key, draft[key] || ""])));
+    navigate(Object.fromEntries(panelKeys[panel].map((key) => [key, applicableDraft[key] || ""])));
+  }
+  function clearPanel() {
+    if (!panel) return;
+    const keys = panelKeys[panel];
+    setDraft((previous) => clearCatalogDraftFields(previous, keys));
+    setErrors((previous) => Object.fromEntries(Object.entries(previous).filter(([key]) => !keys.includes(key as CatalogKey))));
   }
   function search() {
     const nextErrors = validateCatalogDraft({ location }, ["location"]);
@@ -200,11 +209,13 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
     </fieldset>;
   }
   function roomsFields() {
-    return <div className="space-y-6">{(["bedrooms", "bathrooms"] as const).map((key) => {
+    return <div className="space-y-6">
+      {draft.property_type === "terreno" && <p className="rounded-lg bg-blue-50 p-3 text-sm text-blue-800">Habitaciones y baños no se aplican a terrenos.</p>}
+      {(["bedrooms", "bathrooms"] as const).map((key) => {
       const current = draft[key] || "";
       const options = ["1", "2", "3", "4"];
       if (Number(current) > 0 && /^\d+$/.test(current) && !options.includes(current)) options.push(current);
-      return <fieldset key={key}>
+      return <fieldset key={key} disabled={draft.property_type === "terreno"} className={draft.property_type === "terreno" ? "opacity-50" : undefined}>
         <legend className="mb-3 font-semibold text-slate-900">{key === "bedrooms" ? "Número de habitaciones" : "Número de baños"}</legend>
         <div className="grid grid-cols-4 gap-2">{options.map((value, index) => <button key={value} type="button" aria-pressed={current === value}
           onClick={() => update(key, toggleSelection(current, value))} className={`${button} w-full min-w-0 break-all !px-2 ${index >= 4 ? "col-span-4" : ""} ${current === value ? "!border-blue-700 !bg-blue-50 !text-blue-800" : ""}`}>
@@ -216,9 +227,12 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
   function typeFields() {
     return <fieldset>
       <legend className="mb-3 font-semibold text-slate-900">Tipo de propiedad</legend>
-      <div className="grid grid-cols-2 gap-2">{[["", "Todos"], ...Object.entries(types)].map(([value, label]) => <button key={value} type="button"
-        aria-pressed={(draft.property_type || "") === value} onClick={() => update("property_type", value)}
-        className={`${button} w-full min-w-0 min-h-14 !px-2 ${value === "" ? "col-span-2" : ""} ${(draft.property_type || "") === value ? "!border-blue-700 !bg-blue-50 !text-blue-800" : ""}`}>{label}</button>)}</div>{error("property_type")}
+      <div className="grid grid-cols-2 gap-2">{Object.entries(types).map(([value, label]) => <button key={value} type="button"
+        aria-pressed={(draft.property_type || "") === value} onClick={() => update("property_type", toggleSelection(draft.property_type, value))}
+        className={`${button} w-full min-w-0 min-h-14 !px-2 ${(draft.property_type || "") === value ? "!border-blue-700 !bg-blue-50 !text-blue-800" : ""}`}>{label}</button>)}</div>{error("property_type")}
+      {draft.property_type === "terreno" && <p role="status" className="mt-3 rounded-lg bg-blue-50 p-3 text-sm text-blue-800">
+        En terrenos no se aplican habitaciones ni baños.{(draft.bedrooms || draft.bathrooms) && " Al pulsar Filtrar se quitarán esos filtros; los demás se conservan."}
+      </p>}
     </fieldset>;
   }
   function moreFields() {
@@ -239,7 +253,7 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
     </div>;
   }
   const active = [
-    ...(filters.operation_type ? [{ label: filters.operation_type === "arriendo" ? "Alquiler mensual" : "Venta", keys: ["operation_type"] as CatalogKey[] }] : []),
+    ...(filters.operation_type ? [{ label: filters.operation_type === "arriendo" ? "Alquiler" : "Venta", keys: ["operation_type"] as CatalogKey[] }] : []),
     ...(filters.location ? [{ label: filters.location, keys: ["location"] as CatalogKey[] }] : []),
     ...(filters.price_min || filters.price_max ? [{ label: `Precio: ${filters.price_min ? amountPreview(filters.price_min, "USD") : "sin mínimo"} – ${filters.price_max ? amountPreview(filters.price_max, "USD") : "sin máximo"}`, keys: ["price_min", "price_max"] as CatalogKey[] }] : []),
     ...(Number(filters.bedrooms) > 0 ? [{ label: `${filters.bedrooms}+ hab.`, keys: ["bedrooms"] as CatalogKey[] }] : []),
@@ -256,25 +270,27 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
           placeholder="Ciudad, barrio o sector..." className="min-h-11 w-full min-w-0 rounded-lg bg-transparent px-3 py-2 text-base text-slate-900 outline-none" />
         <button type="submit" disabled={pending} aria-label="Buscar ubicación" className="mr-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg text-blue-700 hover:bg-blue-50 focus-visible:outline-2"><SearchIcon /></button>
       </form>
+      <button type="button" disabled={pending} aria-haspopup="dialog" aria-expanded={panel === "operation"}
+        aria-label={`Filtrar por venta o alquiler: ${filters.operation_type === "arriendo" ? "Alquiler" : filters.operation_type === "venta" ? "Venta" : "Sin selección"}`}
+        onClick={(event) => openPanel("operation", event.currentTarget)}
+        className={`${button} inline-flex items-center gap-3 ${filters.operation_type ? "!border-blue-700 !bg-blue-50 !text-blue-800" : ""}`}>
+        <span>Comprar o alquilar</span><Chevron />
+      </button>
       <div className="hidden flex-wrap gap-2 lg:flex">
-        <select aria-label="Operación" value={filters.operation_type || ""} disabled={pending} className={button}
-          onChange={(event) => navigate({ operation_type: event.target.value, price_min: "", price_max: "" })}>
-          <option value="">Venta y alquiler</option><option value="venta">Venta</option><option value="arriendo">Alquiler mensual</option>
-        </select>
         {(["price", "rooms", "type", "more"] as Panel[]).map((item) => <button key={item} type="button" disabled={pending}
-          aria-haspopup="dialog" aria-expanded={panel === item} onClick={(event) => openPanel(item, event.currentTarget)} className={`${button} inline-flex shrink-0 items-center gap-3`}>
-          <span>{item === "price" ? "Precio" : item === "rooms" ? "Habitaciones y baños" : item === "type" ? "Tipo de propiedad" : "Más filtros"}</span><Chevron />
+          aria-haspopup="dialog" aria-expanded={panel === item} onClick={(event) => openPanel(item, event.currentTarget)} className={`${button} inline-flex shrink-0 items-center gap-3 ${panelKeys[item].some((key) => Boolean(filters[key])) ? "!border-blue-700 !bg-blue-50 !text-blue-800" : ""}`}>
+          <span>{item === "price" ? "Precio" : item === "rooms" ? "Habitaciones y baños" : item === "type" ? "Tipo de inmueble" : "Más filtros"}</span><Chevron />
         </button>)}
       </div>
-      <button type="button" disabled={pending} aria-haspopup="dialog" aria-expanded={panel === "mobile"} onClick={(event) => openPanel("mobile", event.currentTarget)} className={`${button} lg:hidden`}>Filtros{active.length ? ` (${active.length})` : ""}</button>
+      <button type="button" disabled={pending} aria-haspopup="dialog" aria-expanded={panel === "mobile"} onClick={(event) => openPanel("mobile", event.currentTarget)} className={`${button} lg:hidden ${active.length ? "!border-blue-700 !bg-blue-50 !text-blue-800" : ""}`}>Filtros{active.length ? ` (${active.length})` : ""}</button>
     </div>
     {(active.length > 0 || pending) && <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-3 py-2">
       {active.map((chip) => <button key={chip.keys.join()} type="button" disabled={pending} aria-label={`Quitar filtro: ${chip.label}`}
-        onClick={() => navigate(Object.fromEntries(chip.keys.map((key) => [key, ""])))}
+        onClick={() => navigate(chip.keys.includes("operation_type") ? { operation_type: "", price_min: "", price_max: "" } : Object.fromEntries(chip.keys.map((key) => [key, ""])))}
         className="flex min-h-9 max-w-full items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm text-blue-800 hover:bg-blue-100 focus-visible:outline-2">
         <span className="truncate">{chip.label}</span><span aria-hidden="true">×</span>
       </button>)}
-      {active.length > 0 && <button type="button" disabled={pending} onClick={() => navigate(Object.fromEntries(catalogKeys.map((key) => [key, ""])))} className="min-h-9 px-2 text-sm font-semibold text-slate-600 underline">Limpiar filtros</button>}
+      {active.length > 0 && <button type="button" disabled={pending} onClick={() => navigate(clearedCatalogFilters())} className="min-h-9 px-2 text-sm font-semibold text-slate-600 underline">Limpiar filtros</button>}
       {pending && <span role="status" className="text-sm font-medium text-blue-700">Actualizando resultados…</span>}
     </div>}
     <dialog ref={dialogRef} aria-labelledby="catalog-dialog-title"
@@ -291,21 +307,23 @@ export default function CatalogFilters({ filters, fieldErrors, distribution }: {
           {panel === "mobile" && <div><label htmlFor="dialog-location" className="mb-1 block text-sm font-medium">Ciudad, barrio o sector</label>
             <input id="dialog-location" type="search" maxLength={500} value={draft.location || ""} onChange={(event) => update("location", event.target.value)} className={control} aria-invalid={!!errors.location} aria-describedby={errors.location ? "location-error" : undefined} />{error("location")}
           </div>}
+          {(panel === "operation" || panel === "mobile") && <fieldset>
+            {panel === "mobile" && <legend className="mb-3 font-semibold text-slate-900">Comprar o alquilar</legend>}
+            <div className="grid grid-cols-2 gap-2">{[["venta", "Venta"], ["arriendo", "Alquiler"]].map(([value, label]) => <button key={value}
+              type="button" aria-pressed={draft.operation_type === value} onClick={() => {
+                setDraft((previous) => operationDraftChange(previous, toggleSelection(previous.operation_type, value)));
+                setErrors((previous) => { const next = { ...previous }; delete next.operation_type; delete next.price_min; delete next.price_max; return next; });
+              }} className={`${button} ${draft.operation_type === value ? "!border-blue-700 !bg-blue-50 !text-blue-800" : ""}`}>{label}</button>)}</div>
+            {error("operation_type")}
+          </fieldset>}
           {(panel === "price" || panel === "mobile") && priceFields()}
-          {panel === "mobile" && <label className="block text-sm font-semibold text-slate-900">Operación
-            <select value={draft.operation_type || ""} className={`${control} mt-2`}
-              aria-invalid={!!errors.operation_type} onChange={(event) => {
-                update("operation_type", event.target.value); update("price_min", ""); update("price_max", "");
-              }}>
-              <option value="">Venta y alquiler</option><option value="venta">Venta</option><option value="arriendo">Alquiler mensual</option>
-            </select>{error("operation_type")}
-          </label>}
           {(panel === "rooms" || panel === "mobile") && roomsFields()}
           {(panel === "type" || panel === "mobile") && typeFields()}
           {(panel === "more" || panel === "mobile") && moreFields()}
         </div>
-        <div className="sticky bottom-0 border-t border-slate-100 bg-white p-4">
-          <button type="submit" disabled={pending} className="min-h-11 w-full rounded-lg bg-blue-700 px-5 py-2 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Filtrar</button>
+        <div className="sticky bottom-0 flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white p-4">
+          <button type="button" disabled={pending} onClick={clearPanel} className="min-h-11 flex-1 rounded-lg px-2 py-2 text-sm font-semibold text-slate-600 underline focus-visible:outline-2 focus-visible:outline-blue-700">{panel === "mobile" ? "Limpiar todo" : "Limpiar este filtro"}</button>
+          <button type="submit" disabled={pending} className="min-h-11 flex-1 rounded-lg bg-blue-700 px-5 py-2 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Filtrar</button>
         </div>
       </form>}
     </dialog>

@@ -5,6 +5,7 @@ import PropertyCard from "@/components/PropertyCard";
 import CatalogFilters from "@/components/CatalogFilters";
 import CatalogResultsHeader from "@/components/CatalogResultsHeader";
 import { ApiError, getProperties } from "@/lib/api";
+import { withCatalogOperation } from "@/lib/catalogFilters";
 import type { PropertyCatalogFilters, PropertyCatalogPage } from "@/types/property";
 
 export const metadata: Metadata = {
@@ -17,12 +18,14 @@ export default async function PropertiesPage({ searchParams }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const query = await searchParams;
-  const filters: PropertyCatalogFilters = {};
+  let filters: PropertyCatalogFilters = {};
   for (const key of filterKeys) {
     const value = query[key];
     const first = Array.isArray(value) ? value[0] : value;
     if (first?.trim() && !(["bedrooms", "bathrooms", "parking_spaces"].includes(key) && Number(first) === 0)) filters[key] = first.trim();
   }
+  const incompatibleTerrainRooms = filters.property_type === "terreno" && Boolean(filters.bedrooms || filters.bathrooms);
+  filters = withCatalogOperation(filters);
   let data: PropertyCatalogPage | null = null;
   let errorMessage = "";
   let fieldErrors: Record<string, string[]> = {};
@@ -43,7 +46,7 @@ export default async function PropertiesPage({ searchParams }: {
     }
   }
   const page = Number(filters.page || "1");
-  const hasFilters = filterKeys.some((key) => key !== "page" && key !== "sort" && filters[key]);
+  const hasFilters = filterKeys.some((key) => !["page", "sort", "operation_type"].includes(key) && filters[key]);
   function pageHref(target: number) {
     const params = new URLSearchParams();
     for (const key of filterKeys) {
@@ -57,8 +60,9 @@ export default async function PropertiesPage({ searchParams }: {
     <PageLayout width="catalog">
       <div>
         <PageHeader eyebrow="Encuentra tu próximo hogar" title="Catálogo de propiedades"
-          description="Explora propiedades en venta o alquiler. Precios en USD; alquileres por mes." />
+          description={filters.operation_type === "arriendo" ? "Propiedades en alquiler. Precios en USD por mes." : filters.operation_type === "venta" ? "Propiedades en venta. Precios en USD." : "Propiedades en venta y alquiler. Precios en USD; alquileres por mes."} />
 
+        {incompatibleTerrainRooms && <p role="status" className="mb-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-800">En terrenos no se aplican habitaciones ni baños. Omitimos esos filtros para mostrar resultados.</p>}
         <CatalogFilters key={JSON.stringify([filters, fieldErrors])} filters={filters} fieldErrors={fieldErrors} distribution={data?.price_distribution} />
         <section aria-label="Resultados del catálogo" className="min-w-0">
             <CatalogResultsHeader count={data?.count} filters={filters} errors={fieldErrors.sort} />
@@ -74,7 +78,7 @@ export default async function PropertiesPage({ searchParams }: {
                     {hasFilters ? "No hay propiedades que coincidan con estos filtros. Prueba con otros valores o limpia los filtros." : "No hay propiedades disponibles por ahora."}
                   </p>
                 ) : (
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-5">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-5">
                     {data.results.map((property) => <PropertyCard key={property.id} property={property} />)}
                   </div>
                 )}

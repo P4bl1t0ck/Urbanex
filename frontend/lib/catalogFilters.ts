@@ -4,6 +4,32 @@ import type { PropertyCatalogFilters, PriceDistribution } from "../types/propert
 export const catalogKeys = ["location", "price_min", "price_max", "bedrooms", "bathrooms", "property_type", "area_min", "parking_spaces", "operation_type"] as const;
 export type CatalogKey = typeof catalogKeys[number];
 
+// No operation means unrestricted catalog; invalid explicit values remain visible to validation.
+export function withCatalogOperation(filters: PropertyCatalogFilters): PropertyCatalogFilters {
+  return compatibleCatalogFilters({ ...filters, operation_type: filters.operation_type?.trim() || "" });
+}
+
+export function compatibleCatalogFilters(filters: PropertyCatalogFilters): PropertyCatalogFilters {
+  return filters.property_type === "terreno"
+    ? { ...filters, bedrooms: "", bathrooms: "" }
+    : { ...filters };
+}
+
+// Changes the dialog draft only; the caller still requires explicit confirmation.
+export function clearCatalogDraftFields(draft: PropertyCatalogFilters, keys: readonly CatalogKey[]): PropertyCatalogFilters {
+  return { ...draft, ...Object.fromEntries(keys.map((key) => [key, ""])) };
+}
+
+export function clearedCatalogFilters(): PropertyCatalogFilters {
+  return Object.fromEntries(catalogKeys.map((key) => [key, ""]));
+}
+
+export function operationDraftChange(current: PropertyCatalogFilters, operation: string): PropertyCatalogFilters {
+  return operation === withCatalogOperation(current).operation_type
+    ? { ...current, operation_type: operation }
+    : { ...current, operation_type: operation, price_min: "", price_max: "" };
+}
+
 export function toggleSelection(current: string | undefined, selected: string): string {
   return current === selected ? "" : selected;
 }
@@ -32,7 +58,7 @@ export function amountPreview(raw: string, unit: "USD" | "m²"): string {
 
 // Solo se aplican los campos del panel confirmado; los demás conservan su valor.
 export function catalogHref(applied: PropertyCatalogFilters, changes: PropertyCatalogFilters = {}): string {
-  const merged = { ...applied, ...changes };
+  const merged = compatibleCatalogFilters({ ...applied, ...changes });
   const params = new URLSearchParams();
   for (const key of catalogKeys) {
     const value = merged[key]?.trim();

@@ -1,6 +1,82 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { numericDraft, numericInitialValue, amountPreview, catalogHref, validateCatalogDraft, priceSliderBounds, movePriceThumb, parkingFilterLabel, toggleSelection } from "./catalogFilters.ts";
+import { compatibleCatalogFilters, clearCatalogDraftFields, withCatalogOperation, clearedCatalogFilters, operationDraftChange, numericDraft, numericInitialValue, amountPreview, catalogHref, validateCatalogDraft, priceSliderBounds, movePriceThumb, parkingFilterLabel, toggleSelection } from "./catalogFilters.ts";
+
+test("panel clearing changes only its draft fields and preserves applied filters", () => {
+  const applied = { property_type: "casa", bedrooms: "3", bathrooms: "2", price_min: "100000", operation_type: "venta", location: "Quito" };
+  const draft = clearCatalogDraftFields(applied, ["bedrooms", "bathrooms"]);
+  assert.equal(draft.bedrooms, "");
+  assert.equal(draft.bathrooms, "");
+  assert.equal(draft.property_type, "casa");
+  assert.equal(draft.price_min, "100000");
+  assert.equal(draft.operation_type, "venta");
+  assert.equal(draft.location, "Quito");
+  assert.equal(applied.bedrooms, "3");
+  assert.equal(applied.bathrooms, "2");
+  const operation = clearCatalogDraftFields(applied, ["operation_type", "price_min", "price_max"]);
+  assert.equal(operation.operation_type, "");
+  assert.equal(operation.price_min, "");
+  assert.equal(operation.bedrooms, "3");
+});
+
+test("land removes rooms only when applied and preserves unrelated filters", () => {
+  const applied = { bedrooms: "3", bathrooms: "2", operation_type: "venta", price_min: "85000", location: "Quito" };
+  const draft = { ...applied, property_type: "terreno" };
+  const applicable = compatibleCatalogFilters(draft);
+  assert.equal(applicable.bedrooms, "");
+  assert.equal(applicable.bathrooms, "");
+  assert.equal(draft.bedrooms, "3");
+  const query = new URL(catalogHref(applied, { property_type: "terreno" }), "http://localhost").searchParams;
+  for (const key of ["bedrooms", "bathrooms"]) assert.equal(query.has(key), false);
+  assert.equal(query.get("operation_type"), "venta");
+  assert.equal(query.get("price_min"), "85000");
+  assert.equal(query.get("location"), "Quito");
+  assert.deepEqual(compatibleCatalogFilters({ ...applied, property_type: "casa" }), { ...applied, property_type: "casa" });
+});
+
+test("direct land URL and cleared type do not retain or restore incompatible rooms", () => {
+  const normalized = withCatalogOperation({ property_type: "terreno", bedrooms: "invalid", bathrooms: "2" });
+  assert.equal(normalized.bedrooms, "");
+  assert.equal(normalized.bathrooms, "");
+  const query = new URL(catalogHref(normalized, { property_type: "casa" }), "http://localhost").searchParams;
+  assert.equal(query.has("bedrooms"), false);
+  assert.equal(query.has("bathrooms"), false);
+});
+
+test("catalog entry starts without operation and does not hide invalid explicit values", () => {
+  assert.equal(withCatalogOperation({}).operation_type, "");
+  assert.equal(withCatalogOperation({ operation_type: " " }).operation_type, "");
+  assert.equal(withCatalogOperation({ operation_type: "arriendo" }).operation_type, "arriendo");
+  assert.equal(withCatalogOperation({ operation_type: "otro" }).operation_type, "otro");
+  const query = new URL(catalogHref(withCatalogOperation({ location: "Quito", page: "3" }), { property_type: "casa" }), "http://localhost").searchParams;
+  assert.equal(query.get("operation_type"), null);
+  assert.equal(query.get("property_type"), "casa");
+  assert.equal(query.has("page"), false);
+});
+
+test("clearing filters removes operation and restrictions while preserving ordering", () => {
+  const applied = { operation_type: "arriendo", property_type: "casa", location: "Quito", price_min: "500", sort: "price_desc", page: "2" };
+  const query = new URL(catalogHref(applied, clearedCatalogFilters()), "http://localhost").searchParams;
+  assert.equal(query.get("operation_type"), null);
+  assert.equal(query.get("sort"), "price_desc");
+  for (const key of ["property_type", "location", "price_min", "page"]) assert.equal(query.has(key), false);
+});
+
+test("operation draft clears prices only on a real change and does not mutate applied filters", () => {
+  const applied = { operation_type: "venta", price_min: "85000", price_max: "200000", property_type: "casa" };
+  assert.deepEqual(operationDraftChange(applied, "venta"), applied);
+  const draft = operationDraftChange(applied, "arriendo");
+  assert.equal(draft.price_min, "");
+  assert.equal(draft.price_max, "");
+  assert.equal(draft.property_type, "casa");
+  assert.equal(applied.operation_type, "venta");
+  assert.equal(applied.price_min, "85000");
+  assert.equal(operationDraftChange(applied, "").operation_type, "");
+  assert.equal(operationDraftChange(applied, "").price_min, "");
+  const query = new URL(catalogHref(applied, draft), "http://localhost").searchParams;
+  assert.equal(query.has("price_min"), false);
+  assert.equal(query.get("operation_type"), "arriendo");
+});
 
 const prices = { min: "85000.00", max: "285000.00", total: 26, bins: [] };
 
