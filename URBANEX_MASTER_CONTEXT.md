@@ -1,5 +1,8 @@
 # Contexto Maestro de Ingeniería — Urbanex (desarrollo guiado por backlog)
 
+**Última actualización aditiva HU-46:** 2026-11-09 · precisión JWT; detalle aditivo al final.
+
+
 > **Propósito:** Contexto autónomo de programación basado en ProyectoCapstoneV4, el Contexto Maestro original y el backlog definitivo acordado. Conserva los RF/RNF, pantallas y modelos originales y agrega planificación, trazabilidad y controles de implementación. **No sustituye las decisiones aún no resueltas en la tesis.**
 
 ---
@@ -10,6 +13,7 @@ Resuelve 5 ejes operativos encadenados:
 1. **Exposición del portafolio:** Catálogo público SSR con filtros dinámicos, SEO e indexabilidad.
 2. **Contacto y agendamiento autónomo:** Captación por Web, WhatsApp y Messenger Webhook (Sandbox), más reserva de visitas sobre disponibilidad real del asesor.
 3. **Trazabilidad comercial (CRM):** Gestión de contactos, conversaciones iniciales y oportunidades a través de una máquina de estados estricta, incluyendo co-intermediación.
+   > **Nota (DS-27, 2026-10-30):** en el proyecto este eje se llama **Trazabilidad comercial (seguimiento de oportunidades)**. El tribunal y el equipo lo definen como seguimiento de oportunidades, no como un CRM; el código vive en la app `apps.opportunities` (ver §7).
 4. **Control documental (Expediente Digital):** Repositorio privado con control de versiones, validación por el Administrador y alertas de vencimiento/faltantes.
 5. **Avalúo comercial asistido (Motor Paramétrico + Human-in-the-Loop):** Cálculo determinista por método comparativo de mercado + nivel de confianza + borrador de justificación redactado por IA + calibración final del asesor.
 
@@ -31,6 +35,7 @@ Resuelve 5 ejes operativos encadenados:
   - **Servicio de IA (LLM API):** Redacción de borrador de justificación técnica del avalúo en lenguaje natural a partir del cálculo numérico determinista.
 
 ### Flujo DevOps, Git y Ambientes
+- **Entorno local canónico de autenticación:** usar `http://localhost:3000` para el frontend y `http://localhost:8000` para el backend. No alternar con `127.0.0.1` durante la misma sesión: cookies, `credentials`, CORS y `CSRF_TRUSTED_ORIGINS` deben referirse al mismo host local. En `DEBUG=True` la cookie refresh no lleva `Secure`; en despliegue HTTPS sí.
 - **Estrategia de ramas (GitHub Flow / Gitflow ligero para 2 Devs):**
   - `main`: Rama de producción (protegida). Actualiza automáticamente **Vercel** (Frontend) y **Render** (Backend Docker).
   - `develop`: Rama de integración continua del sprint.
@@ -143,6 +148,9 @@ Resuelve 5 ejes operativos encadenados:
 - Solo usuarios activos inician sesión (JWT). Cierre automático de sesión tras periodo de inactividad. Contraseñas con hash irreversible (PBKDF2/Argon2 de Django).
 - **Seguridad de acceso:** Bloqueo automático de la cuenta tras **5 intentos fallidos consecutivos** (notifica in-app al Admin, y **solo el Admin puede desbloquearla**).
 - **Recuperación de contraseña:** Enlace enviado al correo con **vigencia máxima de 60 minutos y de un solo uso**.
+- **D-05 — política personalizada aprobada:** según Sebas, Pablo la aprobó el 2026-11-06 a las 15:06 (-05:00). No corresponde a la Opción A literal ni a la recomendación B del documento de Seguridad: access JWT de 24 horas; refresh de 7 días únicamente en cookie `HttpOnly`, `SameSite=Lax`, con `Secure` solo fuera de `DEBUG`, limitada a la ruta de refresh y protegida con `csrftoken` + `X-CSRFToken`. No se usa blacklist ni Redis: `password_changed_at` y `password_version` invalidan access y refresh previos. El frontend no lee el refresh.
+- **Recuperación segura:** la solicitud responde de forma neutral, sin revelar si existe el correo. El enlace combina `PasswordResetTokenGenerator` con un nonce cuyo hash se persiste, vence a los 60 minutos y se consume una sola vez. Un restablecimiento válido de una cuenta activa cambia la contraseña, invalida sesiones anteriores y limpia `is_locked`/`failed_attempts`; no reactiva una cuenta desactivada por un administrador.
+- **HU-45 implementada:** el desbloqueo administrativo es exclusivo de Administrador y reinicia el contador. El inicio de sesión usa el mismo texto neutral para credenciales incorrectas y cuenta bloqueada: «No se pudo iniciar sesión. Revisa tu correo y contraseña e inténtalo de nuevo.». La notificación in-app persistente al administrador sigue pendiente (DT-120). El procedimiento de emergencia si todos los administradores quedan bloqueados requiere una decisión operativa separada; no se ha definido ni implementado aquí.
 
 ### RF-14: Registrar la trazabilidad de eventos para auditoría
 - Captura automática e inmutable (sin edición ni borrado) de los eventos generados por `RF-01, RF-05, RF-06, RF-07, RF-08, RF-10, RF-11 y RF-12`.
@@ -227,6 +235,7 @@ Resuelve 5 ejes operativos encadenados:
 1. **`apps.users` (`RF-12`, `RF-13`):**
    - `User`: `id (UUID)`, `email (unique)`, `full_name`, `phone`, `role (ADMIN | ASESOR)`, `is_active`, `failed_login_attempts (int)`, `is_locked (bool)`, `deactivation_reason`, `created_at`.
    - `PasswordResetToken`: `id`, `user (FK)`, `token_hash`, `expires_at (60m)`, `is_used (bool)`.
+   - **Control de sesión implementado:** `password_changed_at` en `User`; todo cambio de contraseña o activación actualiza la versión que invalida JWT anteriores. El refresh no se guarda en este modelo ni se expone en la respuesta JSON.
 2. **`apps.properties` (`RF-01`, `RF-08`):**
    - `Property`: `id (UUID)`, `code (unique, ej. INM-0001)`, `slug (unique)`, `title`, `description`, `operation_type (VENTA | ARRIENDO)`, `property_type (CASA | DEPARTAMENTO | LOCAL | TERRENO)`, `status (EN_CAPTACION | DISPONIBLE | RESERVADO | VENDIDO | ARRENDADO | NO_DISPONIBLE)`, `unavailable_reason`, `reference_price (Decimal)`, `zone`, `address`, `latitude`, `longitude`, `total_area_m2`, `usable_area_m2`, `age_years`, `bedrooms`, `bathrooms`, `parking_spaces`, `storage_units`, `floor_number`, `conservation_state (EXCELENTE | BUENO | REGULAR)`, `tags (JSONField)`, `captor_agent (FK User, editable=False)`, `responsible_agent (FK User)`, `published_at`, `created_at`, `updated_at`.
    - `PropertyMedia`: `id`, `property (FK)`, `cloudinary_public_id`, `url`, `media_type (IMAGE | VIDEO)`, `is_cover (bool)`, `order (int)`.
@@ -234,7 +243,7 @@ Resuelve 5 ejes operativos encadenados:
    - `Appraisal`: `id (UUID)`, `folio`, `property (FK)`, `agent (FK User)`, `suggested_value (Decimal, nullable)`, `calibrated_value (Decimal)`, `difference_amount (Decimal)`, `difference_percentage (Decimal)`, `confidence_level (ALTO | MEDIO | BAJO)`, `is_manual_fallback (bool)`, `ai_draft_justification (Text)`, `final_justification (Text)`, `comparables_snapshot (JSONField)`, `created_at`. *(Sin update ni delete)*.
 4. **`apps.documents` (`RF-10`):**
    - `Document`: `id (UUID)`, `property (FK nullable)`, `opportunity (FK nullable)`, `doc_type (CORRETAJE | CEDULA_CATASTRAL | ESCRITURA | GRAVAMENES | PREDIAL | CERT_LABORAL | CERT_BANCARIO | OTRO)`, `is_critical (bool)`, `storage_path`, `file_size_bytes (<= 20MB)`, `mime_type`, `version (int)`, `is_current_version (bool)`, `issue_date`, `expiration_date`, `validation_status (PENDIENTE | APROBADO | RECHAZADO)`, `rejection_reason`, `uploaded_by (FK User)`, `validated_by (FK User nullable)`, `validated_at (datetime nullable)`, `created_at.`. *(Regla de inmutabilidad documental: el archivo físico, storage_path y version jamás se sobrescriben ni eliminan; toda nueva carga genera una fila con version = n + 1 pasando la anterior a is_current_version = False en la misma transacción. La validación administrativa actualiza únicamente validation_status, validated_by, validated_at y rejection_reason).*
-5. **`apps.crm` (`RF-02`, `RF-03`, `RF-05`, `RF-06`, `RF-07`):**
+5. **`apps.opportunities` (`RF-02`, `RF-03`, `RF-05`, `RF-06`, `RF-07`):** *(DS-27, 2026-10-30: antes se llamaba `apps.crm`; el tribunal y el equipo definen este módulo como seguimiento de oportunidades, no como CRM. Los modelos no cambian)*
    - `InitialConversation`: `id`, `external_sender_id`, `channel (MESSENGER)`, `property (FK nullable)`, `messages_log (JSONField)`, `bot_attempts (int)`, `status (ACTIVA | PENDIENTE_ATENCION | ATENDIDA | CONVERTIDA)`, `attended_by (FK User nullable)`, `created_at`.
    - `Contact`: `id`, `full_name`, `phone (unique)`, `email`, `origin_channel`, `privacy_accepted_at`, `email_opt_in (bool)`, `created_at`.
    - `Opportunity`: `id`, `contact (FK)`, `property (FK)`, `assigned_agent (FK User)`, `origin_channel (CATALOGO_WEB | WHATSAPP | MESSENGER | CAMPANA | INTERES_RESERVADA | MANUAL)`, `status (CONTACTO_INICIAL | LISTA_INTERESADOS | VISITA_PROGRAMADA | EN_NEGOCIACION | RESERVADA | EVALUACION_DOCUMENTAL | PENDIENTE_CIERRE | PENDIENTE_COMISION | CIERRE | PERDIDA)`, `reservation_amount (Decimal nullable)`, `agreed_final_price (Decimal nullable)`, `admin_confirmed_price (Decimal nullable)`, `price_adjustment_reason`, `loss_or_reversion_reason`, `last_activity_at`, `closed_at`, `created_at`.
@@ -386,10 +395,13 @@ Esta tabla es simultáneamente **backlog**, **matriz HU→URB→RF→pantalla→
 | DISPONIBLE | Abono de reserva aceptado | RESERVADO | Oportunidad RESERVADA en misma transacción |
 | RESERVADO | Reserva revertida por Admin y motivo | DISPONIBLE | Registros de motivos, desbloqueos y notificación al incorporar HU-14 |
 | DISPONIBLE o RESERVADO | Retirada justificada por proceso autorizado | NO_DISPONIBLE | Motivo obligatorio; revisar alcance exacto |
+| NO_DISPONIBLE | Reactivar por propietario o Administrador | EN_CAPTACION | Nunca retorna directo a DISPONIBLE; debe volver a Publicar y revalidar foto, avalúo aprobado y corretaje |
 | RESERVADO | Cierre definitivo | VENDIDO o ARRENDADO | Según operación, solo por RF-07 |
 | VENDIDO o ARRENDADO | Reabrir cierre (Sprint 8) | RESERVADO | Oportunidad vuelve a RESERVADA en la misma transacción; solo pasa a DISPONIBLE si luego se ejecuta Reversión de reserva |
 
 No permitir el cierre transaccional ni la reserva por solo modificar un campo `status` genérico. Ejecutar servicios de dominio y comprobar condiciones en transacción. Evitar dos reservas simultáneas de la misma propiedad y horarios de visita solapados.
+
+**Aclaración aplicada por HU-09:** la retirada solo procede desde `DISPONIBLE` o `RESERVADO` y exige motivo guardado. La reactivación no publica: devuelve siempre a `EN_CAPTACION`, desde donde la acción explícita Publicar repite los requisitos de RF-01.
 
 ### 11.2 Oportunidad
 
@@ -433,6 +445,7 @@ Secuencia ordinaria: `CONTACTO_INICIAL → VISITA_PROGRAMADA → EN_NEGOCIACION 
 - Rate limiting para login, recuperación de contraseña, formularios públicos, creación de visitas y webhooks; mensajes de error que no filtren existencia de cuentas.
 - Proteger archivos por MIME/tamaño, nombres no confiables, rutas privadas, URLs firmadas de duración limitada; no almacenar datos personales sensibles en logs generales.
 - Política LOPDP: registrar consentimiento cuando aplique, distinguir aceptación de privacidad y consentimiento para novedades; definir minimización, retención y eliminación conforme a la tesis y decisiones aprobadas.
+- **D-05 resuelta (HU-46):** política personalizada aprobada por Pablo el 2026-11-06 a las 15:06 (-05:00), según Sebas. El access viaja en la respuesta y el refresh solo en cookie `HttpOnly`; refresh y logout exigen CSRF. La revocación es stateless por `password_changed_at`/`password_version`, no una blacklist. El logout elimina la cookie del navegador, pero no puede revocar una copia externa del refresh antes de su vencimiento; esa limitación y la configuración HTTPS/CORS de despliegue permanecen como riesgos a revisar.
 
 ### 12.3 Asincronía e integraciones
 
@@ -479,6 +492,8 @@ Secuencia ordinaria: `CONTACTO_INICIAL → VISITA_PROGRAMADA → EN_NEGOCIACION 
 
 ### 13.3 Instrucción para cualquier asistente de programación
 
+> Resumen; la fuente de reglas es [`AGENTS.md`](../../AGENTS.md) (DS-25, 2026-10-31).
+
 Al recibir `Implementar URB-XX`:
 1. Leer primero sección 10 y extraer HU/RF/pantalla/modelos/sprint; consultar las secciones 4, 6 y 7 relevantes.
 2. Confirmar el alcance específico y las precondiciones de la historia; no implementar RF completos no planificados.
@@ -503,15 +518,21 @@ Al recibir `Implementar URB-XX`:
 - Próxima tarea:
 ```
 
-## 14. Decisiones técnicas pendientes
+## 14. Decisiones técnicas: pendientes y resueltas
 
 Las siguientes decisiones se resolverán antes de implementar las funcionalidades que dependen de ellas. El asistente de programación no debe inventar valores ni dar por aprobadas decisiones todavía abiertas.
 
-| ID | Decisión | Momento de resolución |
+| ID | Decisión / estado | Momento de resolución |
 |---|---|---|
-| D-04 | Definir fórmula matemática del motor de avalúo, factores ponderados, umbrales de confianza y datos iniciales de comparables. | Sprint 2, antes de URB-11 |
-| D-05 | Definir almacenamiento, expiración, renovación y revocación de JWT, incluyendo mecanismos de protección de sesión. | Sprint 1, antes de URB-04 |
+| D-04 | Definir fórmula matemática del motor de avalúo, factores ponderados, umbrales de confianza y datos iniciales de comparables. **(2026-10-28) Resuelta provisionalmente con DS-21** (`URBANEX_DS-21_MOTOR_AVALUOS.md`). C-02 sigue pendiente de confirmar con el tutor | Sprint 2, antes de URB-11 |
+| D-05 | **Resuelta — política personalizada de JWT/sesión**, aprobada por Pablo el 2026-11-06 15:06 (-05:00), según Sebas; ver RF-13 y §12.2. | Implementada en HU-46 |
 | D-06 | Elegir mecanismo de ejecución de procesos programados, webhooks y reintentos, considerando los servicios disponibles en la arquitectura. | Antes del Sprint 4 |
 
+**Actualización aditiva D-05 (2026-11-06):** según Sebas, Pablo confirmó a las 15:06 (-05:00) para HU-46 una política personalizada, distinta de la Opción A literal de `URBANEX_SEGURIDAD_Y_DEUDA.md`: access JWT de 24 horas; refresh JWT de 7 días en cookie `HttpOnly; SameSite=Lax`, `Secure` cuando `DEBUG=False`; sin blacklist ni Redis; ambos tipos se rechazan si `iat` precede `User.password_changed_at`, que se actualiza al cambiar la contraseña. El refresh usa `POST /api/token/refresh/` y exige la cookie CSRF estándar `csrftoken` más `X-CSRFToken`. La solicitud de recuperación responde igual exista o no una cuenta activa; el enlace usa `PasswordResetTokenGenerator`, vence en 60 minutos y es de un solo uso. En desarrollo, frontend y backend usan `localhost`; en producción, `CORS_ALLOWED_ORIGINS` y `FRONTEND_BASE_URL` se configuran mediante el entorno. La implementación y sus límites se documentan en Seguridad y Deuda técnica; la validación visual sigue Pendiente.
+
 Una decisión aprobada debe trasladarse a la sección funcional o técnica correspondiente y registrarse en PROJECT_PROGRESS.md.
+
+### Corrección posterior a auditoría PR #20 — precisión de JWT (2026-11-09)
+
+**D-05, precisión de la versión:** los JWT nuevos incorporan `password_version`, la representación ISO completa de `User.password_changed_at`. Access y refresh exigen coincidencia exacta de esa versión y un `iat` coherente. Esto permite iniciar sesión inmediatamente después del cambio y rechaza tokens anteriores aunque compartan el mismo segundo de emisión. Para JWT heredados sin esa versión se compara `iat` con la marca de cambio sin truncarla: el segundo ambiguo se rechaza y requiere iniciar sesión nuevamente. Los emitidos en segundos posteriores al último cambio siguen siendo compatibles. Se conservan las duraciones, cookies y CSRF acordados; no se cambian modelos ni migraciones.
 
