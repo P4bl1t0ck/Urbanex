@@ -2,6 +2,13 @@ import type { Property } from "../types/property";
 
 export type ContactDraft = { full_name: string; phone: string; email: string };
 
+export function contactPhoneError(raw: string): string | undefined {
+  const value = raw.replace(/[\s\-.()]/g, "");
+  if (!value) return "Indica tu celular.";
+  if (/^(?:09\d{8}|\+5939\d{8})$/.test(value)) return undefined;
+  return "Celular de Ecuador: 10 dígitos, empieza por 09. También aceptamos +5939XXXXXXXX.";
+}
+
 // No compartir consentimientos: interés y confirmación de visita tienen fines distintos.
 export function contactFields(value: Partial<ContactDraft>): ContactDraft {
   return { full_name: value.full_name || "", phone: value.phone || "", email: value.email || "" };

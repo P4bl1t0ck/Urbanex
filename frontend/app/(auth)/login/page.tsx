@@ -56,7 +56,7 @@ export default function LoginPage(){
       console.error("Error al iniciar sesión:", err); //Mas detalle en caso de error de login.
       if (err instanceof ApiError && err.status === 401) {
         setPassword("");
-        setError("No se pudo iniciar sesión. Revisa tus credenciales.");
+        setError("No se pudo iniciar sesión. Revisa tu correo y contraseña e inténtalo de nuevo.");
       } else {
         setError(err instanceof Error ? err.message : "No se pudo iniciar sesión. Intenta de nuevo.");
       }

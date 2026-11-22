@@ -1,6 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { propertyCoordinates, visitConfirmation, contactFields, principalFeatures, similarProperties } from "./propertyDetail.ts";
+import { contactPhoneError, propertyCoordinates, visitConfirmation, contactFields, principalFeatures, similarProperties } from "./propertyDetail.ts";
+
+test("contact phone accepts Ecuador local/international formats and separates missing from invalid", () => {
+  for (const phone of ["0991234567", "+593991234567", "099 123-4567", "(+593) 99 123.4567"]) {
+    assert.equal(contactPhoneError(phone), undefined);
+  }
+  assert.equal(contactPhoneError(" "), "Indica tu celular.");
+  for (const phone of ["123", "099123456", "09912345678", "+34991234567", "09XXXXXXXX", "593991234567"]) {
+    assert.match(contactPhoneError(phone), /10 dígitos/);
+  }
+});
 
 const property = { id: 1, property_type: "casa", operation_type: "venta", status: "disponible",
   area_m2: 120, bedrooms: 3, bathrooms: 0, parking_spaces: 0 };

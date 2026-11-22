@@ -18,22 +18,33 @@ export default function WhatsAppContactButton({
   title: string;
 }) {
   const [phone, setPhone] = useState<string | null>(null);
+  const [state, setState] = useState<"loading" | "ready" | "unavailable" | "error">("loading");
+  const [revision, setRevision] = useState(0);
 
   useEffect(() => {
     let isActive = true;
     getWhatsAppContact(propertyId)
       .then((data) => {
-        if (isActive) setPhone(data.whatsapp_phone);
+        if (isActive) {
+          setPhone(data.whatsapp_phone);
+          setState(data.whatsapp_phone ? "ready" : "unavailable");
+        }
       })
       .catch(() => {
-        if (isActive) setPhone(null); // Ante cualquier error el botón queda oculto
+        if (isActive) { setPhone(null); setState("error"); }
       });
     return () => {
       isActive = false;
     };
-  }, [propertyId]);
+  }, [propertyId, revision]);
 
-  if (!phone) return null;
+  if (!phone) return <div className="mt-5 rounded-lg bg-slate-50 p-3 text-sm text-slate-600" role="status">
+    {state === "loading" ? "Comprobando disponibilidad de WhatsApp…"
+      : state === "error" ? "No se pudo consultar WhatsApp. Puedes reintentar o usar el formulario."
+        : "WhatsApp no está disponible para esta propiedad. Puedes dejarnos tus datos en el formulario."}
+    {state === "error" && <button type="button" onClick={() => { setState("loading"); setRevision((value) => value + 1); }}
+      className="ml-2 min-h-11 rounded-lg px-2 font-semibold text-blue-700 underline focus-visible:outline-2 focus-visible:outline-blue-700">Reintentar</button>}
+  </div>;
 
   return (
     <a

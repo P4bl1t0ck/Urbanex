@@ -1,7 +1,7 @@
 "use client";
 
 // P-07 (HU-16, RF-03, DS-50): formulario público de interés. Pide nombre, celular de Ecuador
-// (DS-28), correo opcional con casilla para recibir novedades, mensaje opcional (máximo 1000
+// (DS-28), correo opcional para esta consulta, mensaje opcional (máximo 1000
 // caracteres, campo que crece con el texto) y la aceptación obligatoria de la política de
 // privacidad (LOPDP). La respuesta del servidor es siempre la misma: no revela si el contacto
 // ya existía. Si la propiedad deja de estar Disponible o no tiene asesor activo, responde 404.
@@ -12,7 +12,7 @@ import { ApiError } from "@/lib/api";
 import { registerInterest } from "@/lib/opportunities";
 import { MAX_INTEREST_MESSAGE } from "@/lib/opportunityPipeline";
 import type { WebInterestPayload } from "@/types/opportunity";
-import { contactFields, type ContactDraft } from "@/lib/propertyDetail";
+import { contactPhoneError, contactFields, type ContactDraft } from "@/lib/propertyDetail";
 
 type FieldErrors = Partial<Record<keyof WebInterestPayload | "general", string>>;
 
@@ -68,10 +68,8 @@ export default function InterestForm({ propertyId, initialContact, onContactChan
     event.preventDefault();
     const missing: FieldErrors = {};
     if (!form.full_name.trim()) missing.full_name = "Indica tu nombre.";
-    if (!form.phone.trim()) missing.phone = "Indica tu celular.";
-    if (form.email_opt_in && !form.email.trim()) {
-      missing.email = "Para recibir novedades por correo, indica tu correo.";
-    }
+    const phoneError = contactPhoneError(form.phone);
+    if (phoneError) missing.phone = phoneError;
     if (!form.privacy_accepted) missing.privacy_accepted = "Debes aceptar la política de privacidad (LOPDP).";
     setErrors(missing);
     if (Object.keys(missing).length > 0) return;
@@ -79,7 +77,7 @@ export default function InterestForm({ propertyId, initialContact, onContactChan
     setSending(true);
     onBusyChange?.(true);
     try {
-      const result = await registerInterest(propertyId, form);
+      const result = await registerInterest(propertyId, { ...form, email_opt_in: false });
       setDone(result.detail);
       setForm({ ...EMPTY, ...contactFields(form) });
     } catch (err) {
@@ -149,11 +147,12 @@ export default function InterestForm({ propertyId, initialContact, onContactChan
             placeholder="09XXXXXXXX"
             value={form.phone}
             onChange={(e) => update("phone", e.target.value)}
+            onBlur={() => setErrors((previous) => ({ ...previous, phone: contactPhoneError(form.phone) }))}
             aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? "interest-phone-error" : undefined}
             className={fieldClass}
           />
-          <span className="mt-1 block text-xs text-slate-500">Celular de Ecuador: 10 dígitos, empieza por 09. También aceptamos +5939XXXXXXXX.</span>
-          {errors.phone && <span className="mt-1 block text-xs text-red-700">{errors.phone}</span>}
+          {errors.phone && <span id="interest-phone-error" role="alert" className="mt-1 block text-xs text-red-700">{errors.phone}</span>}
         </label>
         <label className="block text-sm font-medium text-slate-800 sm:col-span-2">
           Correo (opcional)
@@ -180,15 +179,6 @@ export default function InterestForm({ propertyId, initialContact, onContactChan
         </label>
       </div>
 
-      <label className="mt-2 flex items-start gap-2 text-sm text-slate-800">
-        <input
-          type="checkbox"
-          checked={form.email_opt_in}
-          onChange={(e) => update("email_opt_in", e.target.checked)}
-          className="mt-0.5"
-        />
-        <span>Quiero recibir novedades de propiedades en mi correo.</span>
-      </label>
       <label className="mt-3 flex items-start gap-2 text-sm text-slate-800">
         <input
           type="checkbox"

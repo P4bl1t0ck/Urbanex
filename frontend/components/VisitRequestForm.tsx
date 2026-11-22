@@ -11,7 +11,7 @@ import { ApiError } from "@/lib/api";
 import { requestVisit } from "@/lib/visits";
 import { ecuadorDateOf, formatDayLabel, formatTime } from "@/lib/visitsCalendar";
 import type { FreeSlot, VisitRequestPayload, VisitRequestResponse } from "@/types/visit";
-import { visitConfirmation, contactFields, type ContactDraft } from "@/lib/propertyDetail";
+import { contactPhoneError, visitConfirmation, contactFields, type ContactDraft } from "@/lib/propertyDetail";
 
 type FieldErrors = Partial<Record<keyof VisitRequestPayload | "general", string>>;
 
@@ -70,7 +70,8 @@ export default function VisitRequestForm({
     event.preventDefault();
     const missing: FieldErrors = {};
     if (!form.full_name.trim()) missing.full_name = "Indica tu nombre.";
-    if (!form.phone.trim()) missing.phone = "Indica tu celular.";
+    const phoneError = contactPhoneError(form.phone);
+    if (phoneError) missing.phone = phoneError;
     if (!form.privacy_accepted) missing.privacy_accepted = "Debes aceptar la política de privacidad (LOPDP).";
     setErrors(missing);
     if (Object.keys(missing).length > 0) return;
@@ -134,11 +135,12 @@ export default function VisitRequestForm({
             placeholder="09XXXXXXXX"
             value={form.phone}
             onChange={(e) => update("phone", e.target.value)}
+            onBlur={() => setErrors((previous) => ({ ...previous, phone: contactPhoneError(form.phone) }))}
             aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? "visit-phone-error" : undefined}
             className={fieldClass}
           />
-          <span className="mt-1 block text-xs text-slate-500">Celular de Ecuador: 10 dígitos, empieza por 09. También aceptamos +5939XXXXXXXX.</span>
-          {errors.phone && <span className="mt-1 block text-xs text-red-700">{errors.phone}</span>}
+          {errors.phone && <span id="visit-phone-error" role="alert" className="mt-1 block text-xs text-red-700">{errors.phone}</span>}
         </label>
         <label className="block text-sm font-medium text-slate-800 sm:col-span-2">
           Correo para recibir la confirmación (opcional)
