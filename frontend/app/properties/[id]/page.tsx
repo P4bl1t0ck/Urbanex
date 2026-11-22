@@ -110,11 +110,11 @@ export default async function PropertyDetailPage({
                 {property.operation_type === "arriendo" && <span className="ml-1 text-base font-medium text-slate-500">/ mes</span>}
               </p>
 
-              {features.length > 0 && <section aria-labelledby="principal-features" className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              {features.length > 0 && <section aria-labelledby="principal-features" className="mt-4 rounded-xl border border-slate-200 bg-slate-100 p-4">
                 <h2 id="principal-features" className="text-center text-sm font-bold text-slate-900">Características principales</h2>
               <dl className={`mt-3 grid gap-2 ${features.length === 1 ? "grid-cols-1" : features.length === 3 ? "grid-cols-3" : features.length === 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2"}`}>
                 {features.map((feature) => (
-                  <div key={feature.label} className="flex min-w-0 flex-col items-center justify-center rounded-lg bg-white px-2 py-3 text-center">
+                  <div key={feature.label} className="flex min-w-0 flex-col items-center justify-center rounded-lg border border-slate-200/70 bg-white px-2 py-3 text-center shadow-sm">
                     <dt className="order-2 mt-1 text-xs text-slate-500">{feature.label}</dt>
                     <dd className="order-1 text-lg font-bold text-slate-900">{feature.value}</dd>
                   </div>
