@@ -2313,3 +2313,14 @@ La respuesta documental a los hallazgos de horas y referencia de aceptación que
 **Decisión de Pablo, 2026-11-13, auditoría §11 del PR #27:** para HU-10 se acepta como referencia de criterios el backlog del contexto maestro (filtros combinados, paginación, estados visibles y SEO), DS-16 y las ampliaciones aprobadas; el cotejo con el Anexo 2 queda **POR CONFIRMAR**, como en el lote 2. Esta decisión prevalece sobre las aclaraciones anteriores que lo descartaban como pendiente; no se crea un DS aquí, pues Pablo lo registra en su PR.
 
 Se registran DT-121 (renderizado Reservado), DT-122 (SEO/canonical del catálogo) y DT-123 (tamaño de página duplicado). HU-10 permanece Pruebas, sin sumar puntos; el cierre de la primera parte no equivale a pasar la HU a Listo. Reservado humano se comprueba con HU-35. El PR continúa con sus cambios de código originales; esta preparación no los modifica. Borrador de descripción en evidence/HU-10/pr-27.md, sin publicar.
+### V-47 · HU-11 — Ficha de detalle de propiedad pública y catálogo compatible
+
+**Aprobado por Sebas el 2026-11-22 a las 13:48.** ID en rango asignado a Sebas (V-33..59). Sebas completó la tabla personalmente con fecha, hora, observación y evidencia local; el agente no aprueba esta validación.
+
+| Quién | Fecha | Hora | Qué vio exactamente | Evidencia local | Resultado |
+|---|---|---|---|---|---|
+| Sebas | 2026-11-22 | 13:40 | Ficha pública con fondo slate-100, tarjetas de características principales en blanco con bordes definidos, galería y mapa cargados correctamente sin desbordamientos. | evidence/HU-11/01-ficha-desktop.png | Aprobado |
+| Sebas | 2026-11-22 | 13:42 | En vista móvil (375 px) la barra contextual inferior aparece al hacer scroll sin tapar contenido ni causar overflow lateral. | evidence/HU-11/02-barra-inferior-mobile.png | Aprobado |
+| Sebas | 2026-11-22 | 13:44 | Portada con buscador inicial HomeSearch funcional con selección opcional de comprar/alquilar; botón duplicado de portal asesores retirado de portada. | evidence/HU-11/03-portada-buscador.png | Aprobado |
+| Sebas | 2026-11-22 | 13:46 | Catálogo con grupos de filtros aplicados resaltados en azul, chips eliminables operativos sobre resultados y tarjetas compactas en proporción 16:10. | evidence/HU-11/04-catalogo-filtros-activos.png | Aprobado |
+| Sebas | 2026-11-22 | 13:48 | Formulario de contacto con checkbox de novedades retirado, mensaje de error de formato de celular tras blur/envío inválido y estado claro de WhatsApp. | evidence/HU-11/05-formulario-validacion-celular.png | Aprobado |
