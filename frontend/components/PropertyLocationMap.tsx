@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import "leaflet/dist/leaflet.css";
 import { propertyCoordinates } from "@/lib/propertyDetail";
 
 type MapProps = { position: [number, number]; title: string; onReady: () => void };
