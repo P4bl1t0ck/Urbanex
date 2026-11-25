@@ -41,3 +41,23 @@ export type Property = {
   created_at: string;
   updated_at: string;
 };
+
+export type PropertyCatalogFilters = Partial<Record<
+  "property_type" | "price_min" | "price_max" | "bedrooms" | "bathrooms" |
+  "area_min" | "parking_spaces" | "location" | "page" | "sort", string
+>>;
+
+export type PriceDistribution = {
+  min: string | null;
+  max: string | null;
+  total: number;
+  bins: { min: string; max: string; count: number }[];
+};
+
+export type PropertyCatalogPage = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Property[];
+  price_distribution: PriceDistribution;
+};
