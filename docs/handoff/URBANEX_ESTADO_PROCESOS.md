@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 · Ronda 9 | 2026-11-25 · Pablo (transcrito por Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: validación visual de HU-33, HU-31, HU-21 y HU-23 **Aprobado** por Pablo (V-96 a V-103); las cuatro siguen en **Pruebas** hasta la auditoría §11 y el merge del PR #26 (notas añadidas, sin borrar filas) |
 | Última actualización · HU-09 Listo | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: HU-09 pasa a **Listo** (nota aditiva en la sección HU-09; la fila resumen de Sebas no se reescribe) |
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: nuevas secciones **HU-33** y **HU-31** (EP-5), **HU-21** y **HU-23** (EP-4) en **Pruebas** (DS-52); validación visual Pendiente (V-96 a V-103); nota en HU-30 (Perdida tampoco admite interacciones) |
 | Última actualización · HU-09 integración de develop | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24): nota aditiva en la sección HU-09 (V-45 aprobada por Sebas el 2026-11-10; HU-09 en Pruebas). La fila resumen de HU-09 ("En Curso") es de Sebas y queda sin reescribir, como en DT-157 (1) |
@@ -93,10 +94,10 @@ Validación por dimensión: **Aprobado** · **Fallido** · **Pendiente** · **No
 | [HU-16](#hu-16) | Registrar interés desde el formulario | EP-4 | 3 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-88 a V-90, Pablo, 2026-11-11) | Aprobado (V-88 a V-90) |
 | [HU-29](#hu-29) | Avanzar el estado de la oportunidad | EP-5 | 6 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-91 a V-93, Pablo, 2026-11-11/12) | Aprobado (V-91 a V-93) |
 | [HU-30](#hu-30) | Registrar interacciones y negociación de precio | EP-5 | 6 | **Listo** (ídem) | Aprobado (ídem) | Aprobado (V-94, V-95, Pablo, 2026-11-12) | Aprobado (V-94, V-95) |
-| [HU-33](#hu-33) | Consultar una oportunidad y su seguimiento | EP-5 | 5 | **Pruebas** (lotes 5 y 6, 2026-11-13: documentos de la propiedad en la línea de tiempo de I-06A; DS-52) | Aprobado (suite SQLite de Estándares §4, 2026-11-13; PostgreSQL No ejecutado, DT-68) | Pendiente (V-96, V-97) | Pendiente (V-96, V-97) |
-| [HU-31](#hu-31) | Marcar una oportunidad como perdida | EP-5 | 5 | **Pruebas** (lotes 5 y 6, 2026-11-13: `mark_lost()` + diálogo en I-06A; DS-52, DT-154) | Aprobado (ídem) | Pendiente (V-98, V-99) | Pendiente (V-98, V-99) |
-| [HU-21](#hu-21) | Cancelar una visita | EP-4 | 4 | **Pruebas** (lotes 5 y 6, 2026-11-13: `cancel_visit()`, P-08 y agenda I-08; DS-52) | Aprobado (ídem) | Pendiente (V-100, V-101) | Pendiente (V-100, V-101) |
-| [HU-23](#hu-23) | Registrar o reprogramar una visita coordinada | EP-4 | 4 | **Pruebas** (lotes 5 y 6, 2026-11-13: visita coordinada y reprogramación en I-08; DS-52) | Aprobado (ídem) | Pendiente (V-102, V-103) | Pendiente (V-102, V-103) |
+| [HU-33](#hu-33) | Consultar una oportunidad y su seguimiento | EP-5 | 5 | **Pruebas** (lotes 5 y 6, 2026-11-13: documentos de la propiedad en la línea de tiempo de I-06A; DS-52) | Aprobado (suite SQLite de Estándares §4, 2026-11-13; PostgreSQL No ejecutado, DT-68) | ~~Pendiente (V-96, V-97)~~ Aprobado (V-96, V-97, Pablo, 2026-11-25; sigue en Pruebas hasta la auditoría §11 y el merge del PR #26) | ~~Pendiente (V-96, V-97)~~ Aprobado (V-96, V-97, Pablo, 2026-11-25) |
+| [HU-31](#hu-31) | Marcar una oportunidad como perdida | EP-5 | 5 | **Pruebas** (lotes 5 y 6, 2026-11-13: `mark_lost()` + diálogo en I-06A; DS-52, DT-154) | Aprobado (ídem) | ~~Pendiente (V-98, V-99)~~ Aprobado (V-98, V-99, Pablo, 2026-11-25; sigue en Pruebas hasta la auditoría §11 y el merge del PR #26) | ~~Pendiente (V-98, V-99)~~ Aprobado (V-98, V-99, Pablo, 2026-11-25) |
+| [HU-21](#hu-21) | Cancelar una visita | EP-4 | 4 | **Pruebas** (lotes 5 y 6, 2026-11-13: `cancel_visit()`, P-08 y agenda I-08; DS-52) | Aprobado (ídem) | ~~Pendiente (V-100, V-101)~~ Aprobado (V-100, V-101, Pablo, 2026-11-25; sigue en Pruebas hasta la auditoría §11 y el merge del PR #26) | ~~Pendiente (V-100, V-101)~~ Aprobado (V-100, V-101, Pablo, 2026-11-25) |
+| [HU-23](#hu-23) | Registrar o reprogramar una visita coordinada | EP-4 | 4 | **Pruebas** (lotes 5 y 6, 2026-11-13: visita coordinada y reprogramación en I-08; DS-52) | Aprobado (ídem) | ~~Pendiente (V-102, V-103)~~ Aprobado (V-102, V-103, Pablo, 2026-11-25; sigue en Pruebas hasta la auditoría §11 y el merge del PR #26) | ~~Pendiente (V-102, V-103)~~ Aprobado (V-102, V-103, Pablo, 2026-11-25) |
 | [HU-37](#hu-37) | Validar un documento | EP-6 | 7 | En Curso (regla de modelo adelantada) | Aprobado (solo modelo) | Pendiente | No aplicable aún |
 | [HU-44](#hu-44) | Gestionar usuarios internos | EP-1 | 1 | **Pruebas** | Pendiente de cierre técnico (suite 116/116 ejecutada en SQLite; suite PostgreSQL local no ejecutada) | V-33..V-39 Pendiente | V-33..V-42 Pendiente; no marcar como validada |
 | [HU-45](#hu-45) | Desbloquear una cuenta | EP-1 | 1 | Pruebas | Aprobado (120 pruebas backend en SQLite en memoria) | Aprobado (V-43; Sebas confirmó el flujo de desbloqueo y login el 2026-11-04) | Aprobado (V-43; Sebas, 2026-11-04, después del último ajuste) |
@@ -590,6 +591,8 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | El historial se presenta en orden cronológico | Orden por `created_at` en el backend (modelos e `id`) y en `buildTimeline` (con la misma hora: estado, interacción, documento) | `test_history_and_interactions_are_chronological`, `test_list_is_chronological_and_includes_system_entries`, `npm test` "buildTimeline suma los documentos de la propiedad en orden cronológico (HU-33)" | Implementado y verificado; visual Pendiente (V-97) |
 | El asesor ve las suyas y el admin todas (DS-52 b) | `get_queryset()` sin cambios (HU-34) | `test_other_agent_gets_404_and_admin_sees_it` | Implementado y verificado (ya validado en V-95 para el detalle) |
 
+- **(2026-11-25, nota añadida)** Validación visual **Aprobado** por Pablo: V-96 (documentos en la línea de tiempo, sin enlace de descarga) y V-97 (orden de la más reciente a la más antigua), en `Project_Progress.md`, Ronda 9. Los dos primeros criterios pasan a Validado. HU-33 sigue en **Pruebas** hasta la auditoría §11 y el merge del PR #26.
+
 ## HU-31
 
 **Marcar una oportunidad como perdida** · EP-5 · RF-06 · Pantalla I-06A · URB-32, lotes 5 y 6 · Estado: **Pruebas** (2026-11-13; validación visual Pendiente, V-98 y V-99) · DT-154 resuelto en código
@@ -603,6 +606,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | Solo el asesor asignado o el admin | `can_manage_opportunity()` y la cartera (otro asesor: 404) | `test_admin_can_mark_and_other_agent_gets_404`, `test_anonymous_is_rejected` | Implementado y verificado |
 
 - **Pendiente:** Perdida desde un estado con reserva cuando llegue HU-35 (DT-158).
+- **(2026-11-25, nota añadida)** Validación visual **Aprobado** por Pablo: V-98 (motivo obligatorio) y V-99 (desde Visita programada y En negociación, definitiva, visita cancelada y franja libre; Contacto inicial y Pendiente de cierre los cubre `test_can_be_marked_from_every_active_status`), en `Project_Progress.md`, Ronda 9. HU-31 sigue en **Pruebas** hasta la auditoría §11 y el merge del PR #26.
 
 ## HU-21
 
@@ -614,6 +618,8 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 |---|---|---|---|
 | Enlace válido y solo antes de la hora (cliente: hasta 1 h antes; asesor o admin: hasta el inicio, con motivo) | `cancel_visit()` en `backend/apps/visits/services.py`; `POST /api/visits/public/<token>/cancel/` (público, 30/min por IP, 404 igual que P-08) y `POST /api/visits/<id>/cancel/`; `can_cancel` y `cancel_until` en P-08; botón y diálogo en P-08 y en I-08 | `ClientVisitCancelTests` (5), `AgentVisitCancelTests` (6) | Implementado y verificado; visual Pendiente (V-100) |
 | Libera la franja en la agenda del asesor y retrocede la oportunidad si aplica; queda en el historial | Visita Cancelada (`free_slots()` solo resta Programadas); Visita programada → Contacto inicial si no quedan visitas activas (DS-39); entrada SISTEMA; correo al asesor (cancela el cliente) o al cliente si dio correo (cancela el asesor); 409 si ya no estaba Programada | `test_client_cancels_frees_the_slot_and_opportunity_goes_back`, `test_other_active_visit_keeps_visita_programada`, `test_agent_cancels_with_reason_and_client_is_notified`, `test_already_cancelled_is_409_and_started_or_unknown_is_404` | Implementado y verificado; visual Pendiente (V-101) |
+
+- **(2026-11-25, nota añadida)** Validación visual **Aprobado** por Pablo: V-100 (cliente por enlace, aviso de menos de 1 hora y asesor con motivo) y V-101 (franja libre y retroceso a Contacto inicial; la doble cancelación la cubre `test_already_cancelled_is_409_and_started_or_unknown_is_404`), en `Project_Progress.md`, Ronda 9. HU-21 sigue en **Pruebas** hasta la auditoría §11 y el merge del PR #26.
 
 ## HU-23
 
@@ -627,6 +633,7 @@ Tampoco existe la notificación in-app al admin que pide RF-13.
 | Reprogramar sin solapes y notificar | `reschedule_visit()` (mismo registro y enlace; franja exacta de `agent_free_slots()` con el asesor bloqueado); `POST /api/visits/<id>/reschedule/`, `GET /api/visits/<id>/reschedule-slots/`; correo al cliente (y al otro asesor) en consola; sin correo: historial "le avisa por WhatsApp"; `RescheduleVisitDialog` en I-08 | `RescheduleVisitTests` (7) | Implementado y verificado; visual Pendiente (V-103) |
 
 - **Regresión del lote 3:** `request_visit()` llamado como antes (cliente) se comporta igual; lo cubren `VisitRequestTests` y `VisitNotificationTests` sin cambios.
+- **(2026-11-25, nota añadida)** Validación visual **Aprobado** por Pablo: V-102 (visita coordinada, contacto existente por celular, sin correo y con correo) y V-103 (reprogramar sin solapes, con aviso y P-08 con la hora nueva), en `Project_Progress.md`, Ronda 9. HU-23 sigue en **Pruebas** hasta la auditoría §11 y el merge del PR #26.
 
 ## Plan de reparto (2026-11-08) **[PLAN]**
 

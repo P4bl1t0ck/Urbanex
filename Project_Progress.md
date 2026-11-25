@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 · Ronda 9 | 2026-11-25 · Pablo (transcrito por Claude Code) · Ronda 9 cerrada: V-96 a V-103 **Aprobado** por Pablo; observaciones e ideas de la ronda (sin IDs); HU-33, HU-31, HU-21 y HU-23 siguen en Pruebas hasta la auditoría §11 y el merge del PR #26 |
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: HU-33, HU-31, HU-21 y HU-23 implementadas (DS-52); **Ronda 9** (V-96 a V-103) redactada en Pendiente; DT-158; suite 374 OK en SQLite; nota de cierre. Commits por HU con orden de Pablo: `744f062` (HU-33), `8cc4bd4` (HU-31), `eafc49d` (HU-21), `5b6a451` (HU-23) |
 | Última actualización · HU-09 integración de develop | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-09-HU-09-actualizar-propiedad` (PR #24): `origin/develop` `78b5187` integrado en `d7318db` (conflictos solo documentales, ambas partes conservadas); 342 pruebas OK en SQLite; DT-159 (`.pyc` versionados); nota aditiva de HU-09 en Estado de procesos; nota de cierre |
 | Última actualización · ajustes tras la auditoría del PR #25 | 2026-11-13 · Pablo (con Claude Code) · rama `docs/DT-157-estados-hu-listo`: HU-46 con DS-35 (EP-1 2/3 HU · 5/8 pts), precisión de DT-157 (1) y fechas de V-86 a V-90 en las filas resumen; nota de cierre |
@@ -1399,6 +1400,8 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 ### Ronda 9 — Lotes 5 y 6: HU-33, HU-31 (I-06A), HU-21 (P-08, I-08) y HU-23 (I-08) (rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`)
 
+> **Actualización (2026-11-25): Ronda 9 cerrada, las 8 Aprobado por Pablo** (V-96 a V-103, ~12:50–13:59; capturas en `evidencias\Lote5\`, fuera del repo). HU-33, HU-31, HU-21 y HU-23 siguen en Pruebas hasta la auditoría §11 y el merge del PR #26.
+>
 > **Estado (2026-11-13): las 8 pruebas Pendiente.** Una por criterio (DS-35). Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura en `evidence/` o en su carpeta de evidencias, fuera del repo).
 >
 > **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote5`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; nunca Supabase ni Resend). La base del worktree tiene `migrate` aplicado y **aún no tiene datos de demo**: falta `setup_demo_data` y una propiedad Disponible con disponibilidad del asesor y oportunidades de ejemplo (como el script del lote 4, **No verificado** en este worktree). Los correos salen en la consola del backend. Para HU-33 hace falta al menos un documento subido en el expediente de la propiedad.
@@ -1409,7 +1412,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~12:50 | En I-06A de la oportunidad 6 (Hugo Negocia), el historial muestra 4 entradas "Documento": Contrato de corretaje v1, Escrituras v1 "(reemplazada)", Escrituras v2 y Comprobante predial tributario v1; todas con "Validación pendiente" y "subido por Laura Ríos (asesor A)", sin enlace de descarga (el único enlace es a la ficha `/properties/1`). También aparecen estados, notas y la contraoferta de 235.000. Observación: iniciar sesión y abrir la oportunidad tarda unos 2-3 s. Captura: `evidencias\Lote5\V-96.png`. | **Aprobado** |
 
 ### V-97 · HU-33 — El historial va en orden cronológico
 
@@ -1417,7 +1420,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, 12:58 | En la oportunidad 6, registré una Nota ("Se realizó la nueva nota", sin visita relacionada): quedó primera en el historial (25-nov 12:58, Laura Ríos), encima de la contraoferta, el cambio de estado y la nota anterior; los documentos quedan más abajo. Orden de la más reciente a la más antigua. Observación: guardar la nota tardó unos 2-3 s. Captura: `evidencias\Lote5\V-97.png`. | **Aprobado** |
 
 ### V-98 · HU-31 — Marcar como perdida exige un motivo (I-06A)
 
@@ -1425,7 +1428,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, 13:50 | En I-06A de Gina Perdida (Visita programada), "Marcar como perdida" abre un modal con advertencia (definitiva, queda en el historial y cancela sus visitas programadas) y la lista de motivos; sin motivo pide "Elige el motivo de la pérdida" y no cambia nada. Con el motivo "No responde" pasa a Perdida, aparece en rojo "Oportunidad perdida (definitiva). Motivo: No responde" y el historial registra "Visita programada → Perdida, Laura Ríos (asesor A), motivo No responde, 25-nov-2026 13:50". En I-06 la oportunidad sale con estado Perdida. Captura: `evidencias\Lote5\V-98.png`. | **Aprobado** |
 
 ### V-99 · HU-31 — Se puede marcar desde cualquier estado activo y es definitiva
 
@@ -1433,7 +1436,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:55 y 13:59 | Una vez Perdida (Gina), los estados salen en gris y ya no hay botón de avance ni de "Marcar como perdida". En I-08 con el filtro "Todas", la visita de Gina de las 16:00 aparece Cancelada ("cancelada automáticamente: la oportunidad se marcó como perdida"), sin botones de reprogramar ni cancelar; en la ficha `/properties/1` las 16:00 vuelven a ofrecerse. Probado desde Visita programada (Gina) y, a las 13:59, desde En negociación: marqué como perdida la oportunidad 6 (Hugo Negocia) con el motivo "Precio"; todos los estados salieron en gris, apareció "Oportunidad perdida (definitiva). Motivo: Precio", el historial registró "En negociación → Perdida" y el formulario dice "La oportunidad está perdida: no se registran interacciones nuevas". Contacto inicial y Pendiente de cierre los cubre la prueba automática (`test_can_be_marked_from_every_active_status`). Captura: `evidencias\Lote5\V-99.png`. | **Aprobado** |
 
 ### V-100 · HU-21 — Cancelar antes de la hora (cliente por enlace y asesor desde la agenda)
 
@@ -1441,7 +1444,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:45 | (a) Cliente: el enlace P-08 de Fabián (visita reprogramada a las 17:00), abierto sin sesión, mostró "Cancelar visita" con límite a las 16:00; al confirmar se vio "Tu visita quedó cancelada, tu asesor ya fue avisado" y el estado Cancelada. (a') En una visita coordinada a las 14:00 ("Nombre de pila"), abierta a las ~13:35, en vez del botón salió "Falta menos de una hora para cancelar o cambiar tu visita, comunícate con tu asesor". (b) Asesor: en I-08, "Cancelar" sin motivo dio el error "Escribe el motivo de la cancelación"; con el motivo "No se podrá presentar a la visita" la visita quedó Cancelada, sin más botones, y la consola del backend mostró el aviso al cliente (otro correo de prueba) indicando que su asesor la canceló. Nota: las visitas R9 de las 10:00 y 11:00 ya habían pasado, por eso se usaron visitas nuevas. Capturas: `evidencias\Lote5\V-100a.png` y `evidencias\Lote5\V-100b.png`. | **Aprobado** |
 
 ### V-101 · HU-21 — La franja queda libre y la oportunidad retrocede si aplica
 
@@ -1449,7 +1452,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:50 | Tras cancelar, la ficha `/properties/1` vuelve a ofrecer las 17:00 (las 10:00, 11:00 y 14:00 ya no se ofrecen por ser pasadas o demasiado próximas). En I-08 con "Programadas" ya no aparecen las dos canceladas. La oportunidad de "Nombre de pila" pasó de Visita programada a Contacto inicial y su historial muestra "Sistema: Laura Ríos canceló la visita del 25-nov a las 14:00, motivo: No se podrá presentar" y el cambio de estado "visita 8 cancelada, no quedan visitas activas". La doble cancelación ("Esta visita ya no está programada.") no se probó en pantalla (el botón ya no aparece); la cubren las pruebas automáticas. Observación: el historial muestra textos técnicos (p. ej. "RF04", "HU31"). Captura: `evidencias\Lote5\V-101.png`. | **Aprobado** |
 
 ### V-102 · HU-23 — Registrar una visita coordinada por WhatsApp (I-08)
 
@@ -1457,7 +1460,7 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:28 | "Registrar visita coordinada" (mín. 30 min de antelación) solo lista las propiedades Disponibles del asesor A (Casa en Cumbayá y Depto. La Carolina; no la del asesor B); ofrece franjas libres y no las ocupadas (las 15:00 aparecen libres tras reprogramar a Fabián). Pide nombre, celular y la casilla LOPDP. Con el celular 0981000108 y el nombre "Rosa Cambiada", sin correo, usó el contacto existente "Rosa Existente" sin cambiarle el nombre; la visita quedó en la agenda y la oportunidad nueva en Visita programada (canal WhatsApp); el historial dice "Laura Ríos registró la visita coordinada por WhatsApp para el 25-nov a las 15:00. El cliente no dio correo: el asesor le avisa por WhatsApp." Con un celular nuevo (0981000120), correo y la casilla de confirmación, la consola mostró "Tu visita queda programada" con el enlace P-08. Captura: `evidencias\Lote5\V-102.png`. | **Aprobado** |
 
 ### V-103 · HU-23 — Reprogramar sin solapes y con aviso
 
@@ -1465,7 +1468,20 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
-| | | | Pendiente |
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:10 | En I-08, "Reprogramar" en la visita de Fabián (15:00) solo ofreció franjas libres del asesor A, sin la hora actual ni las 16:00 ocupada. Elegí las 17:00: la visita se movió, la consola mostró "Tu visita fue reprogramada" (de las 15:00 a las 17:00, hora de Ecuador) con el enlace, y el P-08 abierto sin sesión muestra la hora nueva, el asesor, estado Programada y "Cancelar visita" hasta las 16:00. El caso sin correo (aviso por WhatsApp) se comprobó en V-102 con Rosa. Captura: `evidencias\Lote5\V-103.png`. | **Aprobado** |
+
+### Observaciones e ideas de la Ronda 9 (Pablo, 2026-11-25)
+
+> Son ideas y observaciones de Pablo durante la Ronda 9, **no** hallazgos DT: no tienen ID ni cambian el resultado de ninguna V.
+
+1. **Lentitud de 2-3 s** al iniciar sesión, abrir I-06A y guardar una nota. Revisar en un fix aparte (posible caché).
+2. En el formulario de **visita coordinada** y en el de **reprogramar**, mostrar las franjas como un calendario o agenda del asesor (tipo Teams) en vez de una lista pequeña.
+3. Al elegir la propiedad en ese formulario, mostrar una **vista previa** con fotos en carrusel, características y precio.
+4. En **P-08**, mostrar la hora en una línea de tiempo y añadir un pie de página (contacto, cómo trabajamos).
+5. En **P-08 sin sesión**, revisar que el navbar no muestre "Panel del agente" sino "Iniciar sesión" (pendiente de comprobar en incógnito).
+6. En el **correo de cancelación por el asesor**, añadir el enlace a la ficha para reagendar.
+7. El **historial muestra códigos internos** (RF04, HU31) al usuario.
+8. Los **asuntos con tildes salen codificados** en la consola (normal en modo `console`; no es fallo).
 
 ## Estado actual (2026-11-02)
 
