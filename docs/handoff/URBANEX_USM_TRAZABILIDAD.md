@@ -2,6 +2,7 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 · Ronda 9 | 2026-11-25 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: notas aditivas en PROC-04 (pasos 5 y 6) y PROC-05 (pasos 2 y 5) con la validación visual aprobada (V-96 a V-103); corrección C-4 de la auditoría §11 del PR #26 |
 | Última actualización · HU-09 Listo | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: PROC-01 paso 10 (HU-09) en **Listo** (nota aditiva) |
 | Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: PROC-04 pasos 5 y 6 (HU-21, HU-23) y PROC-05 pasos 2 y 5 (HU-33, HU-31) con su código; en Pruebas (DS-52) |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
@@ -213,6 +214,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 
 **Nota (2026-11-13, lotes 5 y 6):** pasos 5 y 6 (HU-21 y HU-23) implementados y verificados en la rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`; en **Pruebas**, validación visual Pendiente (V-100 a V-103).
 
+**Nota (2026-11-25, Ronda 9):** pasos 5 y 6 (HU-21 y HU-23) con validación visual aprobada por Pablo (V-100 a V-103, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta el merge del PR #26 (auditoría §11 apta con correcciones de documentación).
+
 ### PROC-05 · Seguimiento de la oportunidad
 
 | # | Paso | HU | Pantalla | Código | Estado |
@@ -230,6 +233,8 @@ La columna **Código** la completa Claude Code leyendo el repositorio (archivos 
 **Nota (2026-11-12, merge del PR #22, DT-157):** los pasos 3 y 4 (HU-29 y HU-30) pasan a **Listo**: PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop` (`c64b41a`). Donde las celdas dicen "rama sin fusionar, lote 4", ese código ya está en `develop`.
 
 **Nota (2026-11-13, lotes 5 y 6):** pasos 2 y 5 (HU-33 y HU-31) implementados y verificados en la rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`; en **Pruebas**, validación visual Pendiente (V-96 a V-99).
+
+**Nota (2026-11-25, Ronda 9):** pasos 2 y 5 (HU-33 y HU-31) con validación visual aprobada por Pablo (V-96 a V-99, `Project_Progress.md`). Siguen en **Pruebas** y en la rama sin fusionar hasta el merge del PR #26 (auditoría §11 apta con correcciones de documentación).
 
 ### PROC-06 · Reserva y documentación
 
