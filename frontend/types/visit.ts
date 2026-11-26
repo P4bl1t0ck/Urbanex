@@ -92,7 +92,14 @@ export type AgendaVisit = {
   outcome_notes: string;
   outcome_recorded_at: string | null;
   outcome_recorded_by_name: string | null;
+  can_cancel: boolean; // HU-21 y HU-23 (DS-52): Programada y antes de su inicio
 };
+
+// HU-21 (I-08): el asesor o el admin cancelan con motivo obligatorio.
+export type VisitCancelPayload = { reason: string };
+
+// HU-23 (I-08, DS-52): visita coordinada por WhatsApp que registra el asesor.
+export type CoordinatedVisitPayload = VisitRequestPayload & { property: number };
 
 // HU-25: resultados que registra el asesor.
 export type VisitOutcome = "REALIZADA" | "NO_ASISTIDA" | "CANCELADA";
@@ -127,6 +134,8 @@ export type PublicVisit = {
   property: { id: number; title: string; location: string };
   visit_agent: PublicAgent;
   followup_agent: PublicAgent | null;
+  can_cancel: boolean; // HU-21 (DS-52): hasta 1 hora antes del inicio
+  cancel_until: string; // ISO con -05:00
 };
 
 export type AgendaResponse = {

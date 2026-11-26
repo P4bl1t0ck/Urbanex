@@ -52,3 +52,15 @@ test("buildTimeline mezcla estados e interacciones, de la más reciente a la má
   const keys = buildTimeline(history, interactions).map((item) => item.key);
   assert.deepEqual(keys, ["s-2", "i-8", "i-7", "s-1"]);
 });
+
+test("buildTimeline suma los documentos de la propiedad en orden cronológico (HU-33)", () => {
+  const history = [{ id: 1, created_at: "2026-11-09T10:00:00Z" }];
+  const interactions = [{ id: 7, created_at: "2026-11-09T12:00:00Z" }];
+  const documents = [
+    { id: "a", created_at: "2026-11-09T09:00:00Z" },
+    { id: "b", created_at: "2026-11-09T12:00:00Z" },
+  ];
+  const keys = buildTimeline(history, interactions, documents).map((item) => item.key);
+  // Con la misma hora, la interacción va antes que el documento.
+  assert.deepEqual(keys, ["i-7", "d-b", "s-1", "d-a"]);
+});

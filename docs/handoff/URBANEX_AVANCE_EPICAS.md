@@ -2,6 +2,9 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 · Ronda 9 y auditoría del PR #26 | 2026-11-25 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: correcciones C-1 a C-3 de la auditoría §11 del PR #26; EP-5 validado (lotes 5 y 6) **14/20 = 70 %** (V-96 a V-99) y EP-4 §5D 2/2 validados (V-100 a V-103); HU-21, HU-23, HU-31 y HU-33 siguen en Pruebas hasta el merge |
+| Última actualización · HU-09 Listo | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: EP-2, HU-09 en **Listo** tras el merge del PR #24: **1/10 HU · 2/33 pts (6,1 %)** completas en `develop` (nota aditiva bajo la actualización EP-2/HU-09) |
+| Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: §5 (EP-5), HU-31 y HU-33 implementadas y verificadas: **14/20 implementado y verificado**, validado sin cambio (10/20; V-96 a V-99 Pendiente); nueva §5D (HU-21 y HU-23 de EP-4, V-100 a V-103 Pendiente). HU completas y puntos sin cambio: las cuatro en **Pruebas** (DS-52) |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · integración comprobada | 2026-11-13 · develop c420e56 integrado; SQLite 372 OK, frontend 41/41 y check sin cambios; DT-92 Resuelto; sin push |
 | Última actualización HU-10 · integración de develop | 2026-11-13 · Integración de c420e56, conflictos documentales conservados y pruebas de HU-09 adaptadas a results; suite integrada en ejecución |
@@ -256,19 +259,21 @@ Composición: contexto maestro §9.1 y §10 (9 HU, 32 pts, sprints 5 y 6). Crite
 | HU-29 | Registra el precio final acordado al pasar a Pendiente de Cierre | ✔ | ✔ | ~~✗~~ ✔ | El campo `agreed_final_price` existe (DS-28), sin uso. **(2026-11-09, lote 4, nota añadida)** obligatorio y > 0 solo en ese paso; `test_price_only_on_the_step_to_pendiente_cierre_and_positive`. V-93 Pendiente · **(2026-11-12)** V-93 aprobada (Pablo) |
 | HU-30 | La negociación no modifica el precio público | ✔ | ✔ | ~~✗~~ ✔ | No iniciado (`OpportunityInteraction`). **(2026-11-09, lote 4, nota añadida)** `OpportunityInteraction` (`opportunities.0003`), CONTRAOFERTA con `offered_price`; `test_counteroffer_does_not_change_the_public_price`. V-94 Pendiente · **(2026-11-12)** V-94 aprobada (Pablo) |
 | HU-30 | El historial no es editable retroactivamente | ✔ | ✔ | ~~✗~~ ✔ | No iniciado. **(2026-11-09, lote 4, nota añadida)** sin edición ni borrado (modelo, QuerySet y admin); `OpportunityInteractionModelTests`. V-95 Pendiente · **(2026-11-12)** V-95 aprobada (Pablo) |
-| HU-31 | Exige un motivo | ✗ | ✗ | ✗ | El campo `loss_or_reversion_reason` existe, sin uso |
-| HU-31 | Puede hacerse desde cualquier estado | ✗ | ✗ | ✗ | No iniciado |
+| HU-31 | Exige un motivo | ~~✗~~ ✔ | ~~✗~~ ✔ | ~~✗~~ ✔ | El campo `loss_or_reversion_reason` existe, sin uso. **(2026-11-13, lotes 5 y 6, nota añadida)** `mark_lost()` con motivo de lista cerrada y observación opcional (DS-52); `MarkLostApiTests`. V-98 Pendiente · **(2026-11-25)** V-98 aprobada (Pablo) |
+| HU-31 | Puede hacerse desde cualquier estado | ~~✗~~ ✔ | ~~✗~~ ✔ | ~~✗~~ ✔ | No iniciado. **(2026-11-13, lotes 5 y 6, nota añadida)** Cualquier estado activo (DS-28, DS-52); `test_can_be_marked_from_every_active_status`. V-99 Pendiente; con reserva: DT-158 · **(2026-11-25)** V-99 aprobada (Pablo; Contacto inicial y Pendiente de cierre por la prueba automática) |
 | HU-32 | Recordatorios por inactividad, visita, documento o asignación | ✗ | ✗ | ✗ | No iniciado (`Reminder`, D-06) |
 | HU-32 | No se duplican para la misma oportunidad | ✗ | ✗ | ✗ | No iniciado |
-| HU-33 | Muestra estado, interacciones y documentos vinculados | ✗ | ✗ | ✗ | Sin I-06A; los documentos dependen de DT-31 |
-| HU-33 | El historial se presenta en orden cronológico | ✗ | ✗ | ✗ | El modelo ya ordena por fecha, pero no hay pantalla que lo muestre |
+| HU-33 | Muestra estado, interacciones y documentos vinculados | ~~✗~~ ✔ | ~~✗~~ ✔ | ~~✗~~ ✔ | Sin I-06A; los documentos dependen de DT-31. **(2026-11-13, lotes 5 y 6, nota añadida)** I-06A (lote 4) + documentos **de la propiedad** en la línea de tiempo, sin enlace (DS-52; DT-31 sigue abierta para HU-36); `OpportunityFollowUpApiTests`. V-96 Pendiente · **(2026-11-25)** V-96 aprobada (Pablo) |
+| HU-33 | El historial se presenta en orden cronológico | ~~✗~~ ✔ | ~~✗~~ ✔ | ~~✗~~ ✔ | El modelo ya ordena por fecha, pero no hay pantalla que lo muestre. **(2026-11-13, lotes 5 y 6, nota añadida)** `buildTimeline` con estados, interacciones y documentos; `test_history_and_interactions_are_chronological` y `npm test`. V-97 Pendiente · **(2026-11-25)** V-97 aprobada (Pablo) |
 | HU-34 | Los filtros se combinan | ✔ | ✔ | ✔ | (2026-10-30) Asesor, propiedad, estado y fechas en hora de Ecuador. `test_filters_combine`, `test_date_range_is_read_in_ecuador_time`. Validación visual aprobada 2026-11-01 (V-30, Pablo); **(2026-11-04)** repetida con hora y captura el 2026-11-03 |
 | HU-34 | El asesor ve su cartera; el administrador ve todas | ✔ | ✔ | ✔ | (2026-10-30) `test_agent_sees_only_his_portfolio_and_admin_sees_all`, `test_agent_filter_does_not_leak_other_portfolios`. Validación visual aprobada 2026-11-01 (V-31, Pablo); **(2026-11-04)** repetida con hora y captura el 2026-11-03 |
 
 | Métrica | Valor |
 |---|---|
 | Total de criterios | 20 |
-| Implementado | 4/20 = **20 %** (2026-10-30). **(2026-11-09, lote 4, nota añadida) 10/20 = 50 %** (+4 de HU-29 y +2 de HU-30) |
+| Implementado | 4/20 = **20 %** (2026-10-30). **(2026-11-09, lote 4, nota añadida) 10/20 = 50 %** (+4 de HU-29 y +2 de HU-30). **(2026-11-13, lotes 5 y 6, nota añadida) 14/20 = 70 %** (+2 de HU-31 y +2 de HU-33) |
+| Verificado (lotes 5 y 6) | **(2026-11-13, nota añadida) 14/20 = 70 %** (HU-31 y HU-33 con pruebas en `apps.opportunities.tests` y `npm test`; suite en Estándares §4) |
+| Validado (lotes 5 y 6) | ~~**(2026-11-13, nota añadida)** sin cambio, **10/20 = 50 %**: V-96 a V-99 Pendiente~~ **(2026-11-25, nota añadida) 14/20 = 70 %** (+2 de HU-31 y +2 de HU-33: V-96 a V-99 aprobadas por Pablo, Ronda 9). HU-31 y HU-33 siguen en **Pruebas** hasta el merge del PR #26 |
 | Verificado | **(2026-11-09, lote 4, nota añadida) 10/20 = 50 %** (HU-29 y HU-30 con pruebas en `apps.opportunities.tests`, suite 318 OK). Antes: 4/20 = **20 %** (backend: ~~35~~ 37 pruebas de `apps.opportunities.tests`, FX-25 (corregido por Pablo, 2026-11-03); las pantallas I-06 e I-07 compilan con `tsc`, `eslint` y `next build`, sin pruebas automáticas, DT-37) |
 | Validado | ~~4/20 = **20 %**, sin cambio el 2026-11-09 (V-91 a V-95 Pendiente)~~ **(2026-11-12) 10/20 = 50 %** (+4 de HU-29 y +2 de HU-30, V-91 a V-95, Pablo). Antes: 4/20 = 20 % (validación visual aprobada 2026-11-01, V-26 a V-32, Pablo; **(2026-11-04)** repetida con hora y captura el 2026-11-03, 22:50 a 23:49) |
 | HU completas / puntos | **(2026-11-09, lote 4, nota añadida)** sin cambio: HU-29 y HU-30 quedan en **Pruebas** (0 pts más) hasta la validación de Pablo (V-91 a V-95), la auditoría y el merge. 0/9 HU · 0/32 pts = **0 %** (2026-11-01: los 4 criterios de HU-27 y HU-34 están validados, pero las dos siguen en **Pruebas** por decisión de Pablo: ~~falta comprobar DT-105 con HU-44 fusionada,~~ faltan la auditoría y el merge; DT-105 se comprobó el 2026-11-03, FX-25) (corregido por Pablo, 2026-11-03). **(2026-11-04, nota añadida) 2/9 HU · 6/32 pts = 18,8 %**: HU-27 (3 pts) y HU-34 (3 pts) completas tras el merge del PR #15 en `develop` (`043cfb5`, DS-32). **(2026-11-12, nota añadida)** HU-29 y HU-30 validadas (V-91 a V-95), pero siguen en **Pruebas** hasta la auditoría y el merge del PR #22: sin cambio, 2/9 HU · 6/32 pts. **(2026-11-12, nota añadida, DT-157) 4/9 HU · 16/32 pts = 50 %**: HU-29 (5 pts) y HU-30 (5 pts) completas tras la auditoría y el merge del PR #22 en `develop` (`c64b41a`) |
@@ -318,6 +323,20 @@ Composición: HU-15 (3 pts) y HU-16 (2 pts) de EP-4, más HU-29 (5 pts) y HU-30 
 |---|---|
 | Criterios del lote 4 (EP-4) | 2/2 implementados y verificados (HU-15 con la desviación de DS-50); ~~0/2 validados~~ **(2026-11-12)** 2/2 validados (Ronda 8, Pablo) |
 | HU completas / puntos del lote | **0/4 HU · 0/15 pts**: en **Pruebas** hasta la validación de Pablo (V-86 a V-95), la auditoría (§11) y el merge (después del PR #21 del lote 3). **(2026-11-12)** Validación hecha (V-86 a V-95, Pablo); faltan la auditoría y el merge del PR #22. **(2026-11-12, nota añadida, DT-157)** **4/4 HU · 15/15 pts** del lote: **Listo** (PR #22 auditado (§11: apta según el comentario de Pablo en el PR #22, "Auditoría §11: apta, 12-nov", publicado el 2026-11-13) y fusionado en `develop`, `c64b41a`) |
+
+## 5D. EP-4 y EP-5 — Seguimiento y visitas: lotes 5 y 6 (2026-11-13)
+
+Composición: HU-33 (3 pts) y HU-31 (2 pts) de EP-5, más HU-21 (3 pts) y HU-23 (3 pts) de EP-4 (contexto maestro §10); decisiones en DS-52. Los criterios de HU-33 y HU-31 se cuentan en la tabla de EP-5 (§5); aquí, los de EP-4 (backlog §10, Anexo 2 **POR CONFIRMAR**).
+
+| HU | Criterio (backlog §10) | Impl. | Verif. | Valid. | Evidencia |
+|---|---|:-:|:-:|:-:|---|
+| HU-21 | Enlace válido; liberar horario y retroceso si aplica (cliente hasta 1 h antes; asesor o admin con motivo hasta el inicio) | ✔ | ✔ (SQLite) | ~~Pendiente~~ ✔ | `ClientVisitCancelTests`, `AgentVisitCancelTests` (suite de Estándares §4, 2026-11-13); V-100 y V-101 Pendiente · **(2026-11-25)** V-100 y V-101 aprobadas (Pablo) |
+| HU-23 | Registrar la visita coordinada y reprogramar sin solapes, con aviso | ✔ | ✔ (SQLite) | ~~Pendiente~~ ✔ | `CoordinatedVisitTests`, `RescheduleVisitTests`; V-102 y V-103 Pendiente · **(2026-11-25)** V-102 y V-103 aprobadas (Pablo); PostgreSQL **No ejecutado** (DT-143) |
+
+| Métrica | Valor |
+|---|---|
+| Criterios de los lotes 5 y 6 (EP-4) | 2/2 implementados y verificados; ~~0/2 validados~~ **(2026-11-25, nota añadida) 2/2 validados** (V-100 a V-103, Pablo) |
+| HU completas / puntos del lote | **0/4 HU · 0/11 pts**: en **Pruebas** hasta la validación de Pablo (V-96 a V-103), la auditoría (§11) y el merge. **(2026-11-25, nota añadida)** Validación hecha (V-96 a V-103 aprobadas por Pablo) y auditoría §11 apta con correcciones de documentación (aplicadas); sigue 0/4 HU · 0/11 pts hasta el merge del PR #26 |
 
 ## 6. Bloqueos y dependencias que afectan al avance
 
@@ -429,6 +448,8 @@ pie showData title EP-2 — actualización HU-09 en rama (2026-11-11)
 ```
 
 La corrección de privacidad del motivo de retiro se verifica por pruebas automáticas; no cambia las marcas de aceptación ni el registro humano V-45. HU-09 permanece en **Pruebas**. Resultados de ejecución en Estándares §4.
+
+**(2026-11-13, nota añadida, merge del PR #24)** HU-09 pasa a **Listo**: PR #24 auditado (§11: apta, según Pablo, 2026-11-13) y fusionado en `develop` (`c420e56`, 2026-11-13); sus 2 criterios están validados (V-45, Sebas). **HU completas / puntos en `develop`: 1/10 HU · 2/33 pts = 6,1 %** (antes 0/10 · 0/33). Implementado, verificado y validado sin cambio (17/24, 15/24 y 12/24). HU-04, HU-06 y HU-08 siguen **POR CONFIRMAR** como completas.
 
 
 ### HU-10 — integración de develop c420e56 (2026-11-13)

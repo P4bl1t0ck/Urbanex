@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from apps.appraisals.serializers import to_drf_error
 from .models import ECUADOR_TZ, AgentAvailability, AvailabilityException, Visit
+from .services import MAX_CANCEL_REASON_LENGTH, client_can_cancel, client_cancel_deadline
 
 
 def agent_display_name(user):
@@ -69,14 +70,20 @@ class AgendaVisitSerializer(serializers.ModelSerializer):
     can_record_outcome = serializers.SerializerMethodField()
     outcome_recorded_at = serializers.SerializerMethodField()
     outcome_recorded_by_name = serializers.SerializerMethodField()
+    # HU-21 y HU-23 (DS-52): Programada y antes de su inicio; el permiso lo revisa el endpoint.
+    can_cancel = serializers.SerializerMethodField()
 
     class Meta:
         model = Visit
         fields = ['id', 'scheduled_start', 'scheduled_end', 'status', 'status_display',
                   'property', 'client', 'opportunity', 'needs_whatsapp_confirmation',
                   'followup_agent_name', 'can_record_outcome', 'outcome_notes',
-                  'outcome_recorded_at', 'outcome_recorded_by_name']
+                  'outcome_recorded_at', 'outcome_recorded_by_name', 'can_cancel']
         read_only_fields = fields
+
+    def get_can_cancel(self, obj):
+        now = self.context.get('now') or timezone.now()
+        return obj.status == Visit.Status.PROGRAMADA and now < obj.scheduled_start
 
     def get_needs_whatsapp_confirmation(self, obj):
         return obj.status == Visit.Status.PROGRAMADA and not obj.confirmation_email
@@ -129,10 +136,26 @@ class VisitRequestSerializer(serializers.Serializer):  # pylint: disable=abstrac
     privacy_accepted = serializers.BooleanField(required=False, default=False)
 
 
+class CoordinatedVisitSerializer(VisitRequestSerializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-23 (I-08): la de HU-19 mas la propiedad. LOPDP la confirma el asesor.'''
+    property = serializers.IntegerField()
+
+
+class RescheduleSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de la reprogramacion (HU-23). Una hora sin zona se toma como hora de Ecuador.'''
+    start = serializers.DateTimeField(default_timezone=ECUADOR_TZ)
+
+
 class OutcomeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     '''Entrada de HU-25; las reglas las aplica services.record_outcome().'''
     status = serializers.CharField()
     outcome_notes = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+
+class CancelVisitSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-21 desde la agenda; las reglas las aplica services.cancel_visit().'''
+    reason = serializers.CharField(required=False, allow_blank=True, default='',
+                                   max_length=MAX_CANCEL_REASON_LENGTH)
 
 
 def public_agent(user):
@@ -151,12 +174,21 @@ class PublicVisitSerializer(serializers.ModelSerializer):
     property = serializers.SerializerMethodField()
     visit_agent = serializers.SerializerMethodField()
     followup_agent = serializers.SerializerMethodField()
+    # HU-21 (DS-52): el cliente cancela hasta 1 hora antes del inicio.
+    can_cancel = serializers.SerializerMethodField()
+    cancel_until = serializers.SerializerMethodField()
 
     class Meta:
         model = Visit
         fields = ['scheduled_start', 'scheduled_end', 'status', 'status_display', 'property',
-                  'visit_agent', 'followup_agent']
+                  'visit_agent', 'followup_agent', 'can_cancel', 'cancel_until']
         read_only_fields = fields
+
+    def get_can_cancel(self, obj):
+        return client_can_cancel(obj, now=self.context.get('now'))
+
+    def get_cancel_until(self, obj):
+        return client_cancel_deadline(obj).astimezone(ECUADOR_TZ).isoformat()
 
     def get_scheduled_start(self, obj):
         return obj.scheduled_start.astimezone(ECUADOR_TZ).isoformat()

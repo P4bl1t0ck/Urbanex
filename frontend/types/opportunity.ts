@@ -165,6 +165,20 @@ export type OpportunityVisit = {
   status_display: string;
 };
 
+// HU-33 (DS-52): documento del expediente de la propiedad, solo datos (sin archivo ni enlace).
+// Son los de la propiedad: Document.opportunity llega con HU-36 (DT-31).
+export type OpportunityDocument = {
+  id: string; // UUID
+  doc_type: string;
+  doc_type_display: string;
+  version: number;
+  is_current_version: boolean;
+  validation_status: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  validation_status_display: string;
+  uploaded_by: UserSummary | null;
+  created_at: string;
+};
+
 // I-06A: GET /api/opportunities/<id>/
 export type OpportunityDetail = Opportunity & {
   agreed_final_price: string | null;
@@ -175,6 +189,27 @@ export type OpportunityDetail = Opportunity & {
   status_history: StatusHistoryEntry[];
   interactions: Interaction[];
   visits: OpportunityVisit[];
+  documents: OpportunityDocument[]; // HU-33, en orden de carga
+  can_mark_lost: boolean; // HU-31: true en cualquier estado activo
+  loss_or_reversion_reason: string; // HU-31: "Motivo. Observación: ..." o ""
+};
+
+// HU-31 (DS-52): lista cerrada; debe coincidir con LOSS_REASONS de services.py.
+export const LOSS_REASONS = [
+  { value: "PRECIO", label: "Precio" },
+  { value: "OTRA_PROPIEDAD", label: "Eligió otra propiedad" },
+  { value: "NO_RESPONDE", label: "No responde" },
+  { value: "SIN_FINANCIAMIENTO", label: "Sin financiamiento" },
+  { value: "DESISTIO", label: "Desistió" },
+  { value: "OTRO", label: "Otro" },
+] as const;
+
+export type LossReason = (typeof LOSS_REASONS)[number]["value"];
+
+// HU-31: POST /api/opportunities/<id>/lose/
+export type MarkLostPayload = {
+  loss_reason: LossReason;
+  notes?: string; // Opcional, hasta 1000 caracteres
 };
 
 // HU-29: POST /api/opportunities/<id>/status/

@@ -1,7 +1,15 @@
 from rest_framework import serializers
 
 from .models import Contact, Opportunity, OpportunityInteraction, OpportunityStatusHistory
-from .services import advance_blocker, assignable_agents, eligible_properties, next_status
+from .services import (
+    LOSS_REASONS,
+    MAX_LOSS_NOTES_LENGTH,
+    accepts_interactions,
+    advance_blocker,
+    assignable_agents,
+    eligible_properties,
+    next_status,
+)
 
 
 def user_display_name(user):
@@ -134,10 +142,31 @@ class InteractionSerializer(serializers.ModelSerializer):
         return user_summary(obj.author)
 
 
+def document_summary(document):
+    '''
+    HU-33 (DS-52): un documento del expediente de la propiedad, solo datos. Sin archivo, sin
+    nombre original y sin enlace: la descarga sigue en el expediente (URL firmada, RF-10).
+    '''
+    return {
+        'id': str(document.pk),
+        'doc_type': document.doc_type,
+        'doc_type_display': document.get_doc_type_display(),
+        'version': document.version,
+        'is_current_version': document.is_current_version,
+        'validation_status': document.validation_status,
+        'validation_status_display': document.get_validation_status_display(),
+        'uploaded_by': user_summary(document.uploaded_by),
+        'created_at': serializers.DateTimeField().to_representation(document.created_at),
+    }
+
+
 class OpportunityDetailSerializer(OpportunitySerializer):
     '''
     Detalle de la oportunidad (I-06A, HU-29 y HU-30): datos de la cartera mas el precio final
     acordado, el siguiente estado permitido, el historial, las interacciones y las visitas.
+    HU-33 (DS-52): tambien los documentos de la propiedad (todas las versiones, en orden de
+    carga). Son los de la propiedad, no de la oportunidad: Document.opportunity llega con
+    HU-36 (DT-31).
     '''
     next_status = serializers.SerializerMethodField()
     next_status_display = serializers.SerializerMethodField()
@@ -146,13 +175,21 @@ class OpportunityDetailSerializer(OpportunitySerializer):
     status_history = StatusHistorySerializer(many=True, read_only=True)
     interactions = InteractionSerializer(many=True, read_only=True)
     visits = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField()
+    can_mark_lost = serializers.SerializerMethodField()
 
     class Meta(OpportunitySerializer.Meta):
         fields = OpportunitySerializer.Meta.fields + [
             'agreed_final_price', 'next_status', 'next_status_display', 'advance_blocked_reason',
-            'accepts_interactions', 'status_history', 'interactions', 'visits',
+            'accepts_interactions', 'status_history', 'interactions', 'visits', 'documents',
+            'can_mark_lost', 'loss_or_reversion_reason',
         ]
         read_only_fields = fields
+
+    def get_documents(self, obj):
+        documents = sorted(obj.property.documents.all(),
+                           key=lambda doc: (doc.created_at, doc.version))
+        return [document_summary(document) for document in documents]
 
     def get_next_status(self, obj):
         return next_status(obj)
@@ -162,7 +199,11 @@ class OpportunityDetailSerializer(OpportunitySerializer):
         return advance_blocker(obj) if next_status(obj) else ''
 
     def get_accepts_interactions(self, obj):
-        return obj.status != Opportunity.Status.CIERRE
+        return accepts_interactions(obj)
+
+    def get_can_mark_lost(self, obj):
+        # HU-31 (DS-52): desde cualquier estado activo.
+        return obj.is_active
 
     def get_next_status_display(self, obj):
         target = next_status(obj)
@@ -183,6 +224,16 @@ class StatusChangeSerializer(serializers.Serializer):  # pylint: disable=abstrac
     agreed_final_price = serializers.DecimalField(
         max_digits=12, decimal_places=2, required=False, allow_null=True, default=None,
     )
+
+
+class MarkLostSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    '''Entrada de HU-31. Las reglas las aplica services.mark_lost().'''
+    loss_reason = serializers.ChoiceField(
+        choices=list(LOSS_REASONS.items()),
+        error_messages={'invalid_choice': 'Elige el motivo de la pérdida.'},
+    )
+    notes = serializers.CharField(required=False, allow_blank=True, default='',
+                                  max_length=MAX_LOSS_NOTES_LENGTH, trim_whitespace=True)
 
 
 class InteractionCreateSerializer(serializers.Serializer):  # pylint: disable=abstract-method

@@ -334,8 +334,13 @@ def advance_blocker(opportunity):
 
 
 def can_manage_opportunity(user, opportunity):
-    '''HU-29 y HU-30: el asesor asignado o el admin (RF-06).'''
+    '''HU-29, HU-30 y HU-31: el asesor asignado o el admin (RF-06).'''
     return getattr(user, 'role', None) == 'admin' or opportunity.assigned_agent_id == user.pk
+
+
+def accepts_interactions(opportunity):
+    '''CIERRE (decision de Pablo, 2026-11-09) y PERDIDA (definitiva, DS-52) no admiten mas.'''
+    return opportunity.is_active
 
 
 def advance_status(*, opportunity_id, user, target_status, agreed_final_price=None):
@@ -404,9 +409,10 @@ def add_interaction(*, opportunity_id, user, interaction_type, notes, offered_pr
         if not can_manage_opportunity(user, opportunity):
             raise PermissionDenied('Solo el asesor asignado o el administrador registran '
                                    'interacciones.')
-        if opportunity.status == Opportunity.Status.CIERRE:
+        if not accepts_interactions(opportunity):
             raise ValidationError({'detail': (
-                'La oportunidad está cerrada: no se registran interacciones nuevas.'
+                f'La oportunidad está en "{opportunity.get_status_display()}": '
+                'no se registran interacciones nuevas.'
             )})
         visit = None
         if visit_id is not None:
@@ -422,3 +428,76 @@ def add_interaction(*, opportunity_id, user, interaction_type, notes, offered_pr
         opportunity.last_activity_at = interaction.created_at
         opportunity.save(update_fields=['last_activity_at'])
     return interaction
+
+
+# ---------------------------------------------------------------------------------------------
+# Lotes 5 y 6 (DS-52): HU-31 marcar la oportunidad como Perdida (I-06A)
+# ---------------------------------------------------------------------------------------------
+
+# Lista cerrada de motivos (decision de Pablo, 2026-11-13). Sin migracion: el codigo se valida
+# aqui y se guarda el texto en loss_or_reversion_reason y en el historial inmutable.
+LOSS_REASONS = {
+    'PRECIO': 'Precio',
+    'OTRA_PROPIEDAD': 'Eligió otra propiedad',
+    'NO_RESPONDE': 'No responde',
+    'SIN_FINANCIAMIENTO': 'Sin financiamiento',
+    'DESISTIO': 'Desistió',
+    'OTRO': 'Otro',
+}
+MAX_LOSS_NOTES_LENGTH = 1000
+LOST_VISIT_NOTE = 'Cancelada automáticamente: la oportunidad se marcó como perdida (HU-31).'
+
+
+def loss_reason_text(label, notes):
+    return f'{label}. Observación: {notes}' if notes else label
+
+
+def mark_lost(*, opportunity_id, user, loss_reason, notes='', now=None):
+    '''
+    HU-31 (RF-06, DS-52). Pasa la oportunidad a PERDIDA y la devuelve.
+    - Desde cualquier estado activo (todos salvo CIERRE y PERDIDA, DS-28). En este corte no hay
+      reservas (C-09); cuando llegue HU-35, Perdida desde Reservada en adelante debe pasar por la
+      reversion de la reserva (DT-158).
+    - El asesor asignado o el admin.
+    - Motivo obligatorio de LOSS_REASONS y observacion opcional (hasta 1000 caracteres).
+    - Es definitiva: sin reapertura ni interacciones nuevas. La regla de una oportunidad activa
+      por contacto e inmueble se libera (el contacto puede abrir otra).
+    - Las visitas PROGRAMADAS se cancelan en el mismo paso y liberan su franja, sin correo al
+      cliente (el asesor ya habla con el).
+    '''
+    from apps.visits.models import Visit  # apps.visits importa este modulo: evitar el ciclo
+
+    errors = {}
+    label = LOSS_REASONS.get(loss_reason)
+    if label is None:
+        errors['loss_reason'] = 'Elige el motivo de la pérdida.'
+    notes = (notes or '').strip()
+    if len(notes) > MAX_LOSS_NOTES_LENGTH:
+        errors['notes'] = f'La observación no puede superar {MAX_LOSS_NOTES_LENGTH} caracteres.'
+    if errors:
+        raise ValidationError(errors)
+
+    now = now or timezone.now()
+    with transaction.atomic():
+        opportunity = Opportunity.objects.select_for_update().get(pk=opportunity_id)
+        if not can_manage_opportunity(user, opportunity):
+            raise PermissionDenied('Solo el asesor asignado o el administrador la marcan como '
+                                   'perdida.')
+        if not opportunity.is_active:
+            raise ValidationError({'status': (
+                f'La oportunidad ya está en "{opportunity.get_status_display()}".'
+            )})
+        text = loss_reason_text(label, notes)
+        opportunity.loss_or_reversion_reason = text
+        opportunity.save(update_fields=['loss_or_reversion_reason'])
+        change_status(opportunity, Opportunity.Status.PERDIDA, changed_by=user,
+                      reason=f'Marcada como perdida (HU-31). Motivo: {text}')
+        for visit in (Visit.objects.select_for_update()
+                      .filter(opportunity=opportunity, status=Visit.Status.PROGRAMADA)):
+            visit.status = Visit.Status.CANCELADA
+            visit.outcome_notes = LOST_VISIT_NOTE
+            visit.outcome_recorded_at = now
+            visit.outcome_recorded_by = user
+            visit.save(update_fields=['status', 'outcome_notes', 'outcome_recorded_at',
+                                      'outcome_recorded_by'])
+    return opportunity

@@ -2,6 +2,8 @@
 
 | Campo | Valor |
 |---|---|
+| Última actualización lotes 5 y 6 · Ronda 9 | 2026-11-25 · Pablo (transcrito por Claude Code) · Ronda 9 cerrada: V-96 a V-103 **Aprobado** por Pablo; observaciones e ideas de la ronda (sin IDs); HU-33, HU-31, HU-21 y HU-23 siguen en Pruebas hasta la auditoría §11 y el merge del PR #26 |
+| Última actualización lotes 5 y 6 | 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`: HU-33, HU-31, HU-21 y HU-23 implementadas (DS-52); **Ronda 9** (V-96 a V-103) redactada en Pendiente; DT-158; suite 374 OK en SQLite; nota de cierre. Commits por HU con orden de Pablo: `744f062` (HU-33), `8cc4bd4` (HU-31), `eafc49d` (HU-21), `5b6a451` (HU-23) |
 | Última actualización HU-10 · correcciones PR #27 | 2026-11-13 · Decisión de Pablo: Anexo 2 POR CONFIRMAR; DT-121..123; HU-10 en Pruebas sin sumar puntos; correcciones solo documentales sobre 43b1e18 |
 | Última actualización HU-10 · cierre documental para push | 2026-11-13 · Nueve horas humanas y evidencia comprobadas; aclaración idéntica en ambos documentos; push autorizado por Sebas, sin apertura de PR |
 | Última actualización HU-10 · aclaraciones de auditoría | 2026-11-13 · Horas corregidas por Sebas, referencia de aceptación unificada y prueba Reservado diferida a HU-35 por decisión de Sebas |
@@ -75,6 +77,24 @@ Urbanex debe reflejar los **procesos de la inmobiliaria** (captación → expedi
 
 ## 📝 Notas de cierre de sesión (la más reciente arriba; regla de `AGENTS.md` §10)
 
+### 2026-11-25 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6` (PR #26) · Ronda 9 e integración de develop
+- **Hecho:** Fase 0 aprobada por Pablo. Ronda 9 transcrita: V-96 a V-103 **Aprobado** por Pablo (2026-11-25, ~12:50–13:59), con la subsección de observaciones e ideas (sin IDs); notas aditivas en Estado de procesos (commit `acbd2f4`). Fusión de `origin/develop` `6e0caca` (PR #27, HU-10 de Sebas, DT-92): conflictos solo en 6 documentos (10 bloques, todos inserciones de ambos lados con base vacía); se conservaron ambas partes, sin reescribir filas de Sebas; el código se fusionó sin conflictos; sin IDs repetidos.
+- **Evidencia:** línea base 384 OK; tras integrar, `Ran 414 tests`, **OK**; `makemigrations --check` sin cambios; frontend 42/42, build, tsc y eslint (0 errores, 1 aviso DT-24) en verde (Estándares §4). PostgreSQL: **No ejecutado** (DT-68).
+- **Base de la demo (orden de Pablo):** respaldo `C:\Users\Pablo\Desktop\RONDA9_2026-11-23\db_respaldo_despues_ronda9.sqlite3` (fuera del repo); `migrate` de `documents.0002` (no-op en SQL) solo en la SQLite local; comprobación por la API en verde (4 documentos de PA1 presentes).
+- **Falta:** auditoría §11 del PR #26 en un chat nuevo de solo lectura; revisión y merge del PR #26 (lo hace Pablo). HU-33, HU-31, HU-21 y HU-23 siguen en Pruebas hasta entonces.
+- **Siguiente paso:** demo de Pablo (2026-11-25, 18:00) con este worktree; luego la auditoría §11.
+- **(2026-11-25, después de la auditoría)** Auditoría §11 del PR #26 (`c63922d`): **apta con correcciones**, solo de documentación (informe de Pablo, `AUDITORIA_PR26_2026-11-25.txt`, fuera del repo). Correcciones C-1 a C-6 aplicadas en Avance de épicas, USM y Deuda técnica (DT-154 **Resuelto** con V-98, V-99 y `MarkLostApiTests`). Decisión de Pablo sobre O-1 registrada como **DT-163** (P2, aviso al asesor de la visita al marcar Perdida; en una rama posterior). Sin cambios de código; la suite no se repitió (orden de Pablo: código ya probado en `c63922d`, 414 OK).
+- **Pendiente con Sebas (conflicto previsto, auditoría §11 sección 7):** al integrar `develop` después del merge del PR #26, la rama de HU-11 (`feat/URB-14-HU-11-ficha-detalle`, Sebas) tendrá un conflicto en `frontend/app/dashboard/agenda/page.tsx`. Hay que usar `PageLayout`/`PageHeader` y conservar el botón "Registrar visita coordinada" de este PR. Además, `PublicVisitView.tsx` lo tocan los dos sin conflicto: revisar P-08 en pantalla tras ese merge. Queda pendiente hasta que Sebas haga sus correcciones.
+- **Siguiente paso (actualizado):** revisión y merge del PR #26 por Pablo; avisar a Sebas del conflicto de la agenda.
+
+### 2026-11-13 · Pablo (con Claude Code) · rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6` (lotes 5 y 6, desde `develop` `78b5187`)
+- **Entorno:** worktree `C:\Users\Pablo\Desktop\Urbanex-lote5`; `backend/.env` copiado del lote 3 (`DB_ENGINE=sqlite`, `EMAIL_PROVIDER=console`), `pipenv sync --dev`, `migrate` en base nueva, `npm ci`. Sin datos de demo todavía.
+- **Hecho:** Fase 0 aprobada por Pablo con cambios (DS-52). HU-33 (documentos de la propiedad en la línea de tiempo de I-06A), HU-31 (Perdida con motivo de lista cerrada, definitiva, cancela visitas programadas), HU-21 (cancelar: cliente por enlace hasta 1 h antes; asesor o admin desde la agenda con motivo) y HU-23 (visita coordinada con 30 min de antelación y reprogramación). Sin migraciones ni archivos compartidos. Una prueba del lote 4 cambia por DS-52 (Perdida ya no admite interacciones).
+- **Evidencia:** suite → `Ran 374 tests`, **OK** (332 + 42); `makemigrations --check` → solo DT-92; `npm test` 23/23, build, tsc y eslint (0 errores, 2 avisos DT-24) en verde (Estándares §4). PostgreSQL: **No ejecutado** (DT-68, DT-143).
+- **IDs:** DS-52, DT-158 (Perdida con reserva, HU-35), nota en DT-154 (resuelto en código; validación Pendiente). Ronda 9: V-96 a V-103 Pendiente.
+- **Commits (orden de Pablo, 2026-11-13, uno por HU):** `744f062` HU-33 · `8cc4bd4` HU-31 · `eafc49d` HU-21 · `5b6a451` HU-23 · luego la documentación del lote, la fusión de `origin/develop` (PR #24) y un commit `docs` con DT-160, C-11 y HU-09 en Listo.
+- **Falta:** datos de demo y Ronda 9 (V-96 a V-103); auditoría §11 del PR.
+- **Siguiente paso:** Ronda 9 de Pablo; luego la auditoría §11.
 
 
 ### 2026-11-13 · Codex con Sebas · HU-10: publicación de correcciones documentales PR #27 · rama `feat/URB-16-HU-10-catalogo-filtros`
@@ -1498,6 +1518,91 @@ Para tener una visita pasada sin esperar: en el worktree, `pipenv run python man
 | Quién | Cuándo | Qué vi | Resultado |
 |---|---|---|---|
 | Pablo (navegador; worktree `Urbanex-lote4`, SQLite) | 2026-11-12, ~00:30–00:42 | (a) Demo B: Nota con visita relacionada → en el historial "Visita del …"; el historial no tiene botones de editar ni borrar. (b) Demo D: "La oportunidad está cerrada: no se registran interacciones nuevas." y la barra avisa que el estado está fuera de la secuencia. (c) Con un asesor B creado en A-01, `/dashboard/opportunities/<id de Demo A>` → pantalla de carga y "no encontrada" (404) sin mostrar ningún dato de Demo A; a los segundos redirige a `/dashboard`. Observación: I-06A debería quedarse en el mensaje de no encontrada (DT-156). Capturas: `evidencias\Lote4\Captura de pantalla (100)` a `(104).png`. | **Aprobado** (con observación) |
+
+### Ronda 9 — Lotes 5 y 6: HU-33, HU-31 (I-06A), HU-21 (P-08, I-08) y HU-23 (I-08) (rama `feat/URB-33-32-25-26-HU-33-HU-31-HU-21-HU-23-lote5-6`)
+
+> **Actualización (2026-11-25): Ronda 9 cerrada, las 8 Aprobado por Pablo** (V-96 a V-103, ~12:50–13:59; capturas en `evidencias\Lote5\`, fuera del repo). HU-33, HU-31, HU-21 y HU-23 siguen en Pruebas hasta la auditoría §11 y el merge del PR #26.
+>
+> **Estado (2026-11-13): las 8 pruebas Pendiente.** Una por criterio (DS-35). Las llena solo Pablo (quién, fecha, hora, qué vio y ruta de la captura en `evidence/` o en su carpeta de evidencias, fuera del repo).
+>
+> **Preparación** (worktree `C:\Users\Pablo\Desktop\Urbanex-lote5`, `backend/.env` con `DB_ENGINE=sqlite` y `EMAIL_PROVIDER=console`; nunca Supabase ni Resend). La base del worktree tiene `migrate` aplicado y **aún no tiene datos de demo**: falta `setup_demo_data` y una propiedad Disponible con disponibilidad del asesor y oportunidades de ejemplo (como el script del lote 4, **No verificado** en este worktree). Los correos salen en la consola del backend. Para HU-33 hace falta al menos un documento subido en el expediente de la propiedad.
+
+### V-96 · HU-33 — La línea de tiempo muestra estado, interacciones y documentos (I-06A)
+
+**Resultado esperado:** ¿En I-06A de una oportunidad cuya propiedad tiene documentos en el expediente, el historial muestra, además de los cambios de estado y las interacciones (notas, contraofertas, entradas "Sistema"), una entrada **"Documento"** por cada versión subida (tipo, "versión n", "(reemplazada)" si no es la vigente, estado de validación y quién la subió), **sin enlace** de descarga?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~12:50 | En I-06A de la oportunidad 6 (Hugo Negocia), el historial muestra 4 entradas "Documento": Contrato de corretaje v1, Escrituras v1 "(reemplazada)", Escrituras v2 y Comprobante predial tributario v1; todas con "Validación pendiente" y "subido por Laura Ríos (asesor A)", sin enlace de descarga (el único enlace es a la ficha `/properties/1`). También aparecen estados, notas y la contraoferta de 235.000. Observación: iniciar sesión y abrir la oportunidad tarda unos 2-3 s. Captura: `evidencias\Lote5\V-96.png`. | **Aprobado** |
+
+### V-97 · HU-33 — El historial va en orden cronológico
+
+**Resultado esperado:** ¿Las entradas van de la más reciente (arriba) a la más antigua (abajo), mezclando estados, interacciones y documentos según su fecha y hora? (Por ejemplo: registrar una nota después de subir un documento; la nota queda encima.)
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, 12:58 | En la oportunidad 6, registré una Nota ("Se realizó la nueva nota", sin visita relacionada): quedó primera en el historial (25-nov 12:58, Laura Ríos), encima de la contraoferta, el cambio de estado y la nota anterior; los documentos quedan más abajo. Orden de la más reciente a la más antigua. Observación: guardar la nota tardó unos 2-3 s. Captura: `evidencias\Lote5\V-97.png`. | **Aprobado** |
+
+### V-98 · HU-31 — Marcar como perdida exige un motivo (I-06A)
+
+**Resultado esperado:** ¿"Marcar como perdida" abre un modal con la lista de motivos (Precio, Eligió otra propiedad, No responde, Sin financiamiento, Desistió, Otro) y una observación opcional; sin elegir motivo muestra "Elige el motivo de la pérdida." y no cambia nada; con motivo (y observación) la oportunidad pasa a **Perdida**, se ve "Oportunidad perdida (definitiva). Motivo: …" y el historial registra el cambio con tu usuario, fecha, hora y el motivo?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, 13:50 | En I-06A de Gina Perdida (Visita programada), "Marcar como perdida" abre un modal con advertencia (definitiva, queda en el historial y cancela sus visitas programadas) y la lista de motivos; sin motivo pide "Elige el motivo de la pérdida" y no cambia nada. Con el motivo "No responde" pasa a Perdida, aparece en rojo "Oportunidad perdida (definitiva). Motivo: No responde" y el historial registra "Visita programada → Perdida, Laura Ríos (asesor A), motivo No responde, 25-nov-2026 13:50". En I-06 la oportunidad sale con estado Perdida. Captura: `evidencias\Lote5\V-98.png`. | **Aprobado** |
+
+### V-99 · HU-31 — Se puede marcar desde cualquier estado activo y es definitiva
+
+**Resultado esperado:** ¿Se puede marcar como perdida desde Contacto inicial, Visita programada, En negociación y Pendiente de cierre? ¿Una vez Perdida, ya no aparece el botón, el formulario de interacciones dice que no se registran nuevas y no hay botón de avance? ¿Si tenía una visita Programada, en la agenda (filtro "Todas") aparece Cancelada y su hora vuelve a estar libre en la ficha?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:55 y 13:59 | Una vez Perdida (Gina), los estados salen en gris y ya no hay botón de avance ni de "Marcar como perdida". En I-08 con el filtro "Todas", la visita de Gina de las 16:00 aparece Cancelada ("cancelada automáticamente: la oportunidad se marcó como perdida"), sin botones de reprogramar ni cancelar; en la ficha `/properties/1` las 16:00 vuelven a ofrecerse. Probado desde Visita programada (Gina) y, a las 13:59, desde En negociación: marqué como perdida la oportunidad 6 (Hugo Negocia) con el motivo "Precio"; todos los estados salieron en gris, apareció "Oportunidad perdida (definitiva). Motivo: Precio", el historial registró "En negociación → Perdida" y el formulario dice "La oportunidad está perdida: no se registran interacciones nuevas". Contacto inicial y Pendiente de cierre los cubre la prueba automática (`test_can_be_marked_from_every_active_status`). Captura: `evidencias\Lote5\V-99.png`. | **Aprobado** |
+
+### V-100 · HU-21 — Cancelar antes de la hora (cliente por enlace y asesor desde la agenda)
+
+**Resultado esperado:** (a) Cliente: ¿en P-08 (enlace del correo de consola) aparece "Cancelar visita" con la hora límite (1 hora antes); al confirmar se ve "Tu visita quedó cancelada" y el estado Cancelada; si faltan menos de 60 minutos, en lugar del botón aparece "Falta menos de 1 hora: … comunícate con tu asesor"? (b) Asesor: ¿en I-08, "Cancelar" pide confirmación y un motivo obligatorio (sin motivo, error); al confirmar la visita queda Cancelada y, si el cliente dio correo, la consola muestra el aviso al cliente?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:45 | (a) Cliente: el enlace P-08 de Fabián (visita reprogramada a las 17:00), abierto sin sesión, mostró "Cancelar visita" con límite a las 16:00; al confirmar se vio "Tu visita quedó cancelada, tu asesor ya fue avisado" y el estado Cancelada. (a') En una visita coordinada a las 14:00 ("Nombre de pila"), abierta a las ~13:35, en vez del botón salió "Falta menos de una hora para cancelar o cambiar tu visita, comunícate con tu asesor". (b) Asesor: en I-08, "Cancelar" sin motivo dio el error "Escribe el motivo de la cancelación"; con el motivo "No se podrá presentar a la visita" la visita quedó Cancelada, sin más botones, y la consola del backend mostró el aviso al cliente (otro correo de prueba) indicando que su asesor la canceló. Nota: las visitas R9 de las 10:00 y 11:00 ya habían pasado, por eso se usaron visitas nuevas. Capturas: `evidencias\Lote5\V-100a.png` y `evidencias\Lote5\V-100b.png`. | **Aprobado** |
+
+### V-101 · HU-21 — La franja queda libre y la oportunidad retrocede si aplica
+
+**Resultado esperado:** ¿Después de cancelar, la hora vuelve a ofrecerse en la ficha (P-07) y en la agenda ya no aparece la visita (salvo con el filtro "Canceladas" o "Todas")? ¿Si era la única visita activa, la oportunidad pasa de Visita programada a Contacto inicial y su historial (I-06A) muestra la entrada "Sistema" de la cancelación? ¿Cancelar dos veces la misma visita da "Esta visita ya no está programada."?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:50 | Tras cancelar, la ficha `/properties/1` vuelve a ofrecer las 17:00 (las 10:00, 11:00 y 14:00 ya no se ofrecen por ser pasadas o demasiado próximas). En I-08 con "Programadas" ya no aparecen las dos canceladas. La oportunidad de "Nombre de pila" pasó de Visita programada a Contacto inicial y su historial muestra "Sistema: Laura Ríos canceló la visita del 25-nov a las 14:00, motivo: No se podrá presentar" y el cambio de estado "visita 8 cancelada, no quedan visitas activas". La doble cancelación ("Esta visita ya no está programada.") no se probó en pantalla (el botón ya no aparece); la cubren las pruebas automáticas. Observación: el historial muestra textos técnicos (p. ej. "RF04", "HU31"). Captura: `evidencias\Lote5\V-101.png`. | **Aprobado** |
+
+### V-102 · HU-23 — Registrar una visita coordinada por WhatsApp (I-08)
+
+**Resultado esperado:** ¿"Registrar visita coordinada" abre un formulario que, para el asesor, solo lista sus propiedades Disponibles y ofrece franjas libres con 30 minutos de antelación; pide nombre, celular y la casilla LOPDP; con un celular ya registrado usa ese contacto sin cambiar su nombre; la visita aparece en la agenda y la oportunidad queda en Visita programada? ¿Una hora ya ocupada no se ofrece (o da error si se ocupó mientras tanto)? ¿Sin correo, el historial de la oportunidad dice que el asesor le avisa por WhatsApp; con correo y casilla, la consola muestra la confirmación con el enlace?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:28 | "Registrar visita coordinada" (mín. 30 min de antelación) solo lista las propiedades Disponibles del asesor A (Casa en Cumbayá y Depto. La Carolina; no la del asesor B); ofrece franjas libres y no las ocupadas (las 15:00 aparecen libres tras reprogramar a Fabián). Pide nombre, celular y la casilla LOPDP. Con el celular 0981000108 y el nombre "Rosa Cambiada", sin correo, usó el contacto existente "Rosa Existente" sin cambiarle el nombre; la visita quedó en la agenda y la oportunidad nueva en Visita programada (canal WhatsApp); el historial dice "Laura Ríos registró la visita coordinada por WhatsApp para el 25-nov a las 15:00. El cliente no dio correo: el asesor le avisa por WhatsApp." Con un celular nuevo (0981000120), correo y la casilla de confirmación, la consola mostró "Tu visita queda programada" con el enlace P-08. Captura: `evidencias\Lote5\V-102.png`. | **Aprobado** |
+
+### V-103 · HU-23 — Reprogramar sin solapes y con aviso
+
+**Resultado esperado:** ¿"Reprogramar" en una visita futura muestra solo franjas libres del mismo asesor (sin la hora actual ni horas ocupadas); al elegir otra la visita se mueve, la hora anterior queda libre, el enlace P-08 del cliente sigue sirviendo con la hora nueva y la consola muestra el aviso al cliente (si dio correo); sin correo, el historial dice que el asesor le avisa por WhatsApp?
+
+| Quién | Cuándo | Qué vi | Resultado |
+|---|---|---|---|
+| Pablo (navegador Opera GX; worktree `Urbanex-lote5`, SQLite, datos R9 de la guía del 23-nov) | 2026-11-25, ~13:10 | En I-08, "Reprogramar" en la visita de Fabián (15:00) solo ofreció franjas libres del asesor A, sin la hora actual ni las 16:00 ocupada. Elegí las 17:00: la visita se movió, la consola mostró "Tu visita fue reprogramada" (de las 15:00 a las 17:00, hora de Ecuador) con el enlace, y el P-08 abierto sin sesión muestra la hora nueva, el asesor, estado Programada y "Cancelar visita" hasta las 16:00. El caso sin correo (aviso por WhatsApp) se comprobó en V-102 con Rosa. Captura: `evidencias\Lote5\V-103.png`. | **Aprobado** |
+
+### Observaciones e ideas de la Ronda 9 (Pablo, 2026-11-25)
+
+> Son ideas y observaciones de Pablo durante la Ronda 9, **no** hallazgos DT: no tienen ID ni cambian el resultado de ninguna V.
+
+1. **Lentitud de 2-3 s** al iniciar sesión, abrir I-06A y guardar una nota. Revisar en un fix aparte (posible caché).
+2. En el formulario de **visita coordinada** y en el de **reprogramar**, mostrar las franjas como un calendario o agenda del asesor (tipo Teams) en vez de una lista pequeña.
+3. Al elegir la propiedad en ese formulario, mostrar una **vista previa** con fotos en carrusel, características y precio.
+4. En **P-08**, mostrar la hora en una línea de tiempo y añadir un pie de página (contacto, cómo trabajamos).
+5. En **P-08 sin sesión**, revisar que el navbar no muestre "Panel del agente" sino "Iniciar sesión" (pendiente de comprobar en incógnito).
+6. En el **correo de cancelación por el asesor**, añadir el enlace a la ficha para reagendar.
+7. El **historial muestra códigos internos** (RF04, HU31) al usuario.
+8. Los **asuntos con tildes salen codificados** en la consola (normal en modo `console`; no es fallo).
 
 ## Estado actual (2026-11-02)
 

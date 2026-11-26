@@ -19,8 +19,11 @@ from .serializers import (
     AgendaVisitSerializer,
     AvailabilityExceptionSerializer,
     AvailabilitySerializer,
+    CancelVisitSerializer,
+    CoordinatedVisitSerializer,
     OutcomeSerializer,
     PublicVisitSerializer,
+    RescheduleSerializer,
     VisitRequestSerializer,
 )
 from .services import (
@@ -28,11 +31,17 @@ from .services import (
     OutcomeAlreadyRecorded,
     SlotUnavailable,
     VisitAlreadyScheduled,
+    VisitNotCancellable,
+    agent_free_slots,
+    can_schedule_for_property,
+    cancel_visit,
     free_slots,
     local_datetime,
     public_visit_by_token,
     record_outcome,
+    register_coordinated_visit,
     request_visit,
+    reschedule_visit,
     resolve_target_agent,
 )
 
@@ -376,7 +385,7 @@ class PublicVisitView(APIView):
     '''
     HU-20 (P-08): datos de la visita por su enlace unico, solo lectura y solo hasta la hora de
     inicio. GET /api/visits/public/<token>/ ; token inexistente o vencido: el mismo 404.
-    Sin boton de cancelar: llega con HU-21 (DS-39).
+    HU-21 (DS-52): incluye can_cancel y cancel_until; la cancelacion es PublicVisitCancelView.
     '''
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
@@ -387,6 +396,193 @@ class PublicVisitView(APIView):
         if visit is None:
             raise Http404
         return Response(PublicVisitSerializer(visit).data)
+
+
+class PublicVisitCancelView(APIView):
+    '''
+    HU-21 (P-08, DS-52): el cliente cancela su visita con el enlace unico.
+    POST /api/visits/public/<token>/cancel/   (publico; mismo limite que P-08, 30/min por IP)
+    -> 200 con los datos de P-08 (estado Cancelada)
+    -> 400 si falta menos de 1 hora para el inicio
+    -> 404 token inexistente o visita ya empezada (mismo 404 que P-08)
+    -> 409 si ya no esta Programada
+    '''
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [PublicVisitThrottle]
+
+    def post(self, request, token):
+        visit = public_visit_by_token(token)
+        if visit is None:
+            raise Http404
+        try:
+            cancel_visit(visit_id=visit.pk)
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except VisitNotCancellable:
+            return Response({'detail': 'Esta visita ya no está programada.'},
+                            status=status.HTTP_409_CONFLICT)
+        visit = public_visit_by_token(token)
+        return Response(PublicVisitSerializer(visit).data)
+
+
+def internal_visit_or_404(request, visit_id):
+    '''Visita para el asesor (solo las suyas) o el admin (todas); lo ajeno responde 404.'''
+    visits = Visit.objects.select_related(
+        'property', 'opportunity__contact', 'opportunity__assigned_agent', 'outcome_recorded_by',
+    )
+    if request.user.role != 'admin':
+        visits = visits.filter(agent=request.user)
+    visit = visits.filter(pk=visit_id).first()
+    if visit is None:
+        raise Http404
+    return visit
+
+
+class VisitCancelView(APIView):
+    '''
+    HU-21 (I-08, DS-52): el asesor de la visita o el admin la cancelan desde la agenda.
+    POST /api/visits/<id>/cancel/  {"reason": "..."}  (motivo obligatorio)
+    -> 200 con la visita de la agenda; 400 sin motivo o si ya empezo; 404 visita ajena;
+       409 si ya no esta Programada. Aviso al cliente por correo si lo dio.
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def post(self, request, visit_id):
+        visit = internal_visit_or_404(request, visit_id)
+        serializer = CancelVisitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            cancel_visit(visit_id=visit.pk, user=request.user,
+                         reason=serializer.validated_data['reason'])
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except VisitNotCancellable:
+            return Response({'detail': 'Esta visita ya no está programada.'},
+                            status=status.HTTP_409_CONFLICT)
+        return Response(AgendaVisitSerializer(internal_visit_or_404(request, visit_id)).data)
+
+
+def slots_payload(slots):
+    return [{'start': slot.start.isoformat(), 'end': slot.end.isoformat()} for slot in slots]
+
+
+class CoordinatedFreeSlotsView(APIView):
+    '''
+    HU-23 (I-08, DS-52): franjas libres del asesor de una propiedad, con la antelacion del
+    asesor (30 min). GET /api/visits/coordinated/free-slots/?property=<id>&from=&to=
+    El asesor solo en las propiedades que atiende (403); propiedad no Disponible: 404.
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def get(self, request):
+        property_id = request.query_params.get('property', '')
+        if not property_id.isdigit():
+            raise serializers.ValidationError({'property': 'Elige la propiedad.'})
+        property_obj = (Property.objects.select_related('agent')
+                        .filter(pk=property_id, status__in=SCHEDULABLE_PROPERTY_STATUSES).first())
+        if property_obj is None:
+            raise Http404
+        if not can_schedule_for_property(request.user, property_obj):
+            raise PermissionDenied('Solo registras visitas en las propiedades que atiendes.')
+        date_from, date_to = parse_range(request.query_params)
+        agent = property_obj.agent
+        slots = (agent_free_slots(agent, date_from, date_to)
+                 if agent is not None and agent.is_active and agent.role == 'asesor' else [])
+        return Response({'property': property_obj.pk, 'timezone': str(ECUADOR_TZ),
+                         'slots': slots_payload(slots)})
+
+
+class CoordinatedVisitView(APIView):
+    '''
+    HU-23 (I-08, DS-52): el asesor registra la visita coordinada por WhatsApp.
+    POST /api/visits/coordinated/
+    {"property", "start", "full_name", "phone", "email", "email_opt_in", "privacy_accepted"}
+    -> 201 con la visita de la agenda
+    -> 400 datos invalidos, propiedad no Disponible o franja que no esta libre
+    -> 403 el asesor no atiende la propiedad
+    -> 409 la oportunidad ya tiene una visita Programada (usar Reprogramar)
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def post(self, request):
+        serializer = CoordinatedVisitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        property_obj = (Property.objects.select_related('agent')
+                        .filter(pk=data['property']).first())
+        if property_obj is None or property_obj.status not in SCHEDULABLE_PROPERTY_STATUSES:
+            raise serializers.ValidationError({'property': 'Elige una propiedad disponible.'})
+        try:
+            visit = register_coordinated_visit(
+                user=request.user, property_obj=property_obj, start=data['start'],
+                full_name=data.get('full_name'), phone=data.get('phone'),
+                email=data.get('email'), email_opt_in=data['email_opt_in'],
+                privacy_accepted=data['privacy_accepted'],
+            )
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except SlotUnavailable:
+            raise serializers.ValidationError({
+                'start': 'Ese horario ya no está disponible. Actualiza y elige otro.',
+            })
+        except VisitAlreadyScheduled:
+            return Response(
+                {'detail': 'Este cliente ya tiene una visita programada para esta propiedad. '
+                           'Usa "Reprogramar" en la agenda.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+        # Quien registra es el admin o el asesor de la propiedad, que atiende la visita.
+        return Response(AgendaVisitSerializer(internal_visit_or_404(request, visit.pk)).data,
+                        status=status.HTTP_201_CREATED)
+
+
+class VisitRescheduleSlotsView(APIView):
+    '''
+    HU-23 (I-08, DS-52): franjas libres del asesor de la visita para reprogramarla.
+    GET /api/visits/<id>/reschedule-slots/?from=&to=   (visita ajena: 404)
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def get(self, request, visit_id):
+        visit = internal_visit_or_404(request, visit_id)
+        date_from, date_to = parse_range(request.query_params)
+        return Response({'visit': visit.pk, 'timezone': str(ECUADOR_TZ),
+                         'slots': slots_payload(agent_free_slots(visit, date_from, date_to))})
+
+
+class VisitRescheduleView(APIView):
+    '''
+    HU-23 (I-08, DS-52): reprogramar una visita Programada antes de su inicio.
+    POST /api/visits/<id>/reschedule/  {"start"}
+    -> 200 con la visita de la agenda; 400 franja no libre o visita ya empezada; 404 ajena;
+       409 si ya no esta Programada.
+    '''
+    permission_classes = [permissions.IsAuthenticated, IsInternalUser]
+
+    def post(self, request, visit_id):
+        visit = internal_visit_or_404(request, visit_id)
+        serializer = RescheduleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            reschedule_visit(visit_id=visit.pk, user=request.user,
+                             start=serializer.validated_data['start'])
+        except DjangoPermissionDenied as error:
+            raise PermissionDenied(str(error))
+        except DjangoValidationError as error:
+            raise to_drf_error(error)
+        except SlotUnavailable:
+            raise serializers.ValidationError({
+                'start': 'Ese horario ya no está disponible. Actualiza y elige otro.',
+            })
+        except VisitNotCancellable:
+            return Response({'detail': 'Esta visita ya no está programada.'},
+                            status=status.HTTP_409_CONFLICT)
+        return Response(AgendaVisitSerializer(internal_visit_or_404(request, visit_id)).data)
 
 
 class VisitOutcomeView(APIView):
